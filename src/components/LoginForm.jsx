@@ -26,9 +26,9 @@ const LoginForm = ({ version }) => {
                 <h2 className="text-lg font-semibold mb-4 text-center">Sign in With Defcomm account</h2>
                 <div>
                     <input {...register("email")} type="text" placeholder="Email or Phone Number" className="w-full p-3 mb-4 border border-gray-600 rounded-md" required />
-                    <div className="relative w-full">
+                    <div className="relative w-full flex items-center">
                         <input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Enter your Password" className="w-full p-3 mb-4 border border-gray-600 rounded-md" required />
-                        <button type="button" onClick={togglePasswordVisibility} className="absolute right-3 top-0 bottom-0 my-auto transform text-gray-600">
+                        <button type="button" onClick={togglePasswordVisibility} className="absolute right-3 top-0 bottom-0 my-auto transform text-gray-600 flex items-center">
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
