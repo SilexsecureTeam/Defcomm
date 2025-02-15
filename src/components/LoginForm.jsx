@@ -28,7 +28,7 @@ const LoginForm = ({ version }) => {
                     <input {...register("email")} type="text" placeholder="Email or Phone Number" className="w-full p-3 mb-4 border border-gray-600 rounded-md" required />
                     <div className="relative w-full">
                         <input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Enter your Password" className="w-full p-3 mb-4 border border-gray-600 rounded-md" required />
-                        <button type="button" onClick={togglePasswordVisibility} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600">
+                        <button type="button" onClick={togglePasswordVisibility} className="absolute right-3 top-0 bottom-0 my-auto transform text-gray-600">
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
