@@ -5,7 +5,7 @@ export default {
     extend: {
       colors:{
         oliveLight:"#3A4A1F",
-        oliveDight:"#101500"
+        oliveDark:"#101500"
       },
       maxWidth:{
         "peak":"1400px"
