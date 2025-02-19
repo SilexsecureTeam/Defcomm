@@ -72,7 +72,12 @@ useEffect(() => {
     return (
     <>
       {true ? (
-        <main className="h-screen w-screen relative flex overflow-hidden">
+        <main className="h-screen w-screen relative flex overflow-hidden"
+        style={{
+        background: `linear-gradient(to bottom, #36460A 10%, #000000 40%)`,
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}>
            <
               SideBar
               authDetails={authDetails}
@@ -106,15 +111,17 @@ useEffect(() => {
             </SideBar>
 
             {/* Routes and dashboard take up 80% of total width and 100% of height*/}
-            <div className="flex-1 w-2/3 relative flex divide-y-2 divide-secondaryColor bg-white flex-col h-full">
+            <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
               <NavBar
                 state={state}
                 toogleIsOpen={toogleIsOpen}
                 isMenuOpen={isOpen}
+                user={authDetails?.user}
               />
-              <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4">
+              <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
                 <Routes>
-                  <Route index element={<Home />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/*" element={<div className="flex items-center justify-center text-3xl text-white">Page</div>} />
     
                 </Routes>
               </div>

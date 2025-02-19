@@ -24,6 +24,7 @@ const useAuth = () => {
       navigate('/dashboard/home');
     } catch (err) {
       //setError(err.response?.data?.message || "Login failed");
+      console.log(err)
       FormatError(err, setError, "Login Error");
       throw err;
     } finally {

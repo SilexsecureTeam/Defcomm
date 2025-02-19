@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import logo from "../assets/logo.png";
 import logoIcon from "../assets/logo-icon.png";
-import intro1 from "../assets/intro1.png";
-import intro3 from "../assets/intro3.png";
+import intro1 from "../assets/intro4.png";
+import intro2 from "../assets/intro6.png";
+import intro3 from "../assets/intro5.png";
 import grid from "../assets/bg-grid.png";
 import call from "../assets/call.png";
 import scroll from "../assets/scroll.png";
@@ -61,6 +62,9 @@ const DefcommLogin = () => {
         />
         <motion.img src={intro1} alt="" className="hidden min-[1200px]:block w-48 absolute translate-y-[0%] translate-x-[10%]"
           style={{ y: moveDown, x: "-40%" }}
+        />
+        <motion.img src={intro2} alt="" className="hidden min-[1200px]:block w-48 absolute bottom-[20%] translate-y-[20%] translate-x-[10%]"
+          style={{ y: moveUp, x: "-40%" }}
         />
         <motion.img src={intro3} alt="" className="hidden min-[1200px]:block w-48 absolute right-0 bottom-0 translate-y-[-60%] translate-x-[-5%]"
           initial={{ scale: 0.8, opacity: 0 }}

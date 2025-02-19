@@ -1,41 +1,43 @@
 //Applicant icons import
 
-
+import { FaHome, FaRegUserCircle, FaCog } from "react-icons/fa";
+import { MdOutlineCall, MdOutlineFolderShared  } from "react-icons/md";
+import { IoIosChatboxes, IoMdWifi } from "react-icons/io";
 //import logout from "../assets/pngs/logout.png";
 export const dashboardOptions = [
   {
     type: "HOME",
     title: "Home",
-    route: "/applicant",
-    icon: null,
+    route: "/dashboard/home",
+    icon: FaHome,
     iconActive: null,
   },
   {
     type: "CHAT",
     title: "Secure Chat",
-    route: "/applicant/chat",
-    icon: null,
+    route: "/dashboard/chat",
+    icon: IoIosChatboxes,
     iconActive: null,
   },
   {
     type: "CALLS",
     title: "Secure Calls",
-    route: "/applicant/calls",
-    icon: null,
+    route: "/dashboard/calls",
+    icon: MdOutlineCall,
     iconActive: null,
   },
   {
     type: "COMM",
     title: "Walkie talkie",
-    route: "/applicant/comm",
-    icon: null,
+    route: "/dashboard/comm",
+    icon: IoMdWifi ,
     iconActive: null,
   },
   {
     type: "FILE-SHARING",
     title: "File Sharing",
-    route: "/applicant/file-sharing",
-    icon: null,
+    route: "/dashboard/file-sharing",
+    icon: MdOutlineFolderShared,
     iconActive: null,
   },
 ];
@@ -44,15 +46,15 @@ export const utilOptions = [
   {
     type: "PROFILE",
     title: "Profile",
-    route: "/applicant/profile",
-    icon: null,
+    route: "/dashboard/profile",
+    icon: FaRegUserCircle,
     iconActive: null,
   },
   {
     type: "SETTINGS",
     title: "Settings",
-    route: "/applicant/settings",
-    icon: null,
+    route: "/dashboard/settings",
+    icon: FaCog,
     iconActive: null,
   }
 ];
