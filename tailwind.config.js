@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors:{
-        oliveLight:"#3A4A1F",
+        oliveLight:"#36460A",
         oliveDark:"#101500"
       },
       maxWidth:{

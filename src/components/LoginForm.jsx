@@ -13,6 +13,7 @@ const LoginForm = ({ version }) => {
     };
 
     const onSubmit = async (data) => {
+        console.log(data)
         await login(data);
     };
 
@@ -35,11 +36,11 @@ const LoginForm = ({ version }) => {
                 </div>
                 <div className="flex justify-between items-center text-sm">
                     <label className="flex items-center gap-2">
-                        <input type="checkbox" {...register("rememberMe")} /> Remember me
+                        <input type="checkbox" /> Remember me
                     </label>
                     <a href="#" className="text-green-700">Forgot Password?</a>
                 </div>
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {error && <p className="text-red-500 text-sm mt-2">{error?.error}</p>}
                 <button type="submit" className="mt-4 w-full bg-oliveLight hover:bg-oliveDark text-white p-3 rounded-md flex justify-center items-center" disabled={isLoading}>
                     {isLoading ? <><FaSpinner className="animate-spin mr-2" /> Logging in...</> : "Login"}
                 </button>

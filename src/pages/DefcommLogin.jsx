@@ -19,8 +19,8 @@ import { FaSearch } from "react-icons/fa";
 const DefcommLogin = () => {
   const { scrollYProgress } = useScroll();
   const [view, setView] = useState("call");
-  const moveDown = useTransform(scrollYProgress, [0, 1], [-40, 200]); // Moves intro1 up and down
-  const moveUp = useTransform(scrollYProgress, [0, 1], [60, -60]); // Moves intro1 up and down
+  const moveDown = useTransform(scrollYProgress, [0, 1], [0, 250]); // Moves intro1 up and down
+  const moveUp = useTransform(scrollYProgress, [0, 1], [0, -60]); // Moves intro1 up and down
   const rotateScroll = useTransform(scrollYProgress, [0, 1], [0, 360]); // Rotates scroll image
 
   return (
@@ -28,9 +28,9 @@ const DefcommLogin = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="relative max-w-peak min-h-screen bg-gradient-to-b from-black to-green-900 flex flex-col items-center justify-center text-white p-6"
+      className="relative max-w-peak min-h-screen flex flex-col items-center justify-center text-white p-6"
       style={{
-        background: `linear-gradient(to bottom, #101500 10%, #000000 40%, #1E270D 90%)`,
+        background: `linear-gradient(to bottom, #36460A 10%, #000000 40%, #36460A 90%)`,
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
@@ -40,7 +40,7 @@ const DefcommLogin = () => {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="w-full sticky top-0 z-50 flex justify-between items-center bg-[#101500]/50 backdrop:blur-lg"
+        className="w-full sticky top-0 z-50 flex justify-between items-center bg-[#36460A]/50 backdrop:blur-lg"
       >
         <img src={logoIcon} alt="Defcomm Icon" className="w-20" />
         <div className="flex gap-2">

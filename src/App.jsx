@@ -1,23 +1,27 @@
 import { Suspense, lazy, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
-
+import { ToastContainer } from "react-toastify";
+import FallBack from "./components/Fallback";
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
-const Dashboard = lazy(() => import("./pages/Dashboard")); // Ensure this component exists
+const Dashboard = lazy(() => import("./routes/useDashboardRoute")); // Ensure this component exists
 
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <Suspense fallback={<div className="text-white text-center mt-10">Loading...</div>}>
+      <Suspense fallback={<FallBack />}>
+        <Router>
           <Routes>
             <Route path="/" element={<DefcommLogin />} />
-            <Route path="/dashboard" element={<ProtectedRoute Component={Dashboard} />} />
+            <Route path="/dashboard/*" element={<Dashboard />} />
+            {/* <ProtectedRoute Component={Dashboard} /> */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
-        </Suspense>
-      </Router>
+        </Router>
+      </Suspense>
+      <ToastContainer autoClose={2000} draggable />
+
     </AuthProvider>
   );
 };

@@ -1,35 +1,35 @@
 import { createContext, useState, useEffect } from "react";
-import axiosClient from "../services/axiosClient";
+import {axiosClient} from "../services/axios-client";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [authDetails, setAuthDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
-  // Fetch user only once when app loads
+  // Fetch authDetails only once when app loads
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchauthDetails = async () => {
       try {
         const { data } = await axiosClient.get("/auth/me", {
           withCredentials: true, // Secure session handling
         });
-        setUser(data.user);
+        setAuthDetails(data.authDetails);
         setAuthenticated(true);
       } catch (error) {
-        setUser(null);
+        setAuthDetails(null);
         setAuthenticated(false);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchauthDetails();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, authenticated, loading }}>
+    <AuthContext.Provider value={{ authDetails, setAuthDetails, authenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,75 +1,84 @@
-import { useState, useContext } from "react";
-import axiosClient from "../services/axiosClient";
+import { useContext, useEffect, useState } from "react";
+import {axiosClient} from "../services/axios-client";
 import {AuthContext} from "../context/AuthContext";
-
+import { FormatError } from "../utils/formmaters";
+import { onFailure } from "../utils/notifications/OnFailure";
+import { onSuccess } from "../utils/notifications/OnSuccess";
+import { useNavigate } from "react-router-dom";
 const useAuth = () => {
-  const { setUser } = useContext(AuthContext);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const navigate=useNavigate();
+  const { setAuthDetails, authDetails } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState({
+    message: "",
+    error: "",
+  });
+  const client=axiosClient(authDetails?.token)
 
   const login = async (credentials) => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     try {
-      const { data } = await axiosClient.post("/auth/login", credentials, {
-        withCredentials: true, // Ensures the token is sent via secure HTTP-only cookies
-      });
-      setUser(data.user); // Store user data in memory only
-      return data;
+      const { data } = await client.post("/login", credentials);
+      setAuthDetails(data.user); // Store user data in memory only
+      navigate('/dashboard/home');
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      //setError(err.response?.data?.message || "Login failed");
+      FormatError(err, setError, "Login Error");
       throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const register = async (userData) => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     try {
-      const { data } = await axiosClient.post("/auth/register", userData, {
-        withCredentials: true,
-      });
-      setUser(data.user);
+      const { data } = await client.post("/register", userData);
+      setAuthDetails(data.user);
       return data;
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
       throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const verifyOtp = async (otpData) => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     try {
-      const { data } = await axiosClient.post("/auth/verify-otp", otpData, {
-        withCredentials: true,
-      });
+      const { data } = await client.post("/verify-otp", otpData);
       return data;
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed");
       throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const logout = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
-      await axiosClient.post("/auth/logout", {}, { withCredentials: true });
-      setUser(null); // Clear user from memory
+      await client.post("/logout", {}, { withCredentials: true });
+      setAuthDetails(null); // Clear user from memory
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
+  useEffect(() => {
+    //console.log(error)
+    if (error?.message && error?.error) {
+      onFailure(error);
+    }
+  }, [error]);
 
-  return { login, register, verifyOtp, logout, loading, error };
+  return { login, register, verifyOtp, logout, isLoading, error };
 };
 
 export default useAuth;
