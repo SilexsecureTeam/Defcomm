@@ -28,7 +28,7 @@ const Dashboard = () => {
         </div>
 
         {/* Content Area */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 md:p-6">
           <div className="bg-[#121a0f] min-h-screen text-white p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
