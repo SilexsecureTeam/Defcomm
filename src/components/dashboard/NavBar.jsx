@@ -51,7 +51,7 @@ function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
 
         {/* profile */}
         <div className="flex items-center gap-2 ml-2 font-medium">
-          <p>Hello, {user?.name || "DefComm"}</p>
+          <p className="text-sm">Hello, {user?.name || "DefComm"}</p>
           <div className="flex items-center rounded-full bg-gray-100/50 w-max p-1">
             <span className="w-8 h-8 rounded-full bg-gray-300"></span>
             <span className="w-8 h-8 rounded-full flex items-center justify-center"><IoIosArrowDown size={20}/> </span>
