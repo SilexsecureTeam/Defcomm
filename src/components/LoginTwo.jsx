@@ -33,7 +33,7 @@ const LoginForm = ({ version }) => {
                     </label>
                     <a href="#" className="">Forgot Password?</a>
                 </div>
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {error && <p className="text-red-500 text-sm mt-2">{error?.error}</p>}
                 <button type="submit" className="mt-4 w-full bg-black text-white p-3 rounded-md flex justify-center items-center" disabled={isLoading}>
                     {isLoading ? <><FaSpinner className="animate-spin mr-2" /> Logging in...</> : "Login"}
                 </button>
