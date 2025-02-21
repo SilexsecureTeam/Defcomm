@@ -14,10 +14,8 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
         initial={{ x: "-100%" }}
         animate={{ x: isMenuOpen ? 0 : "-100%" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        
-        className={`${
-          isMenuOpen ? "fixed left-0 top-0 bottom-0 h-full z-[100000]" : "hidden"
-        } md:!flex flex-col md:!translate-x-0 bg-transparent w-64 text-white`}
+        className={`${isMenuOpen ? "fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
+          } md:!flex flex-col md:!translate-x-0 md:relative bg-transparent w-64 text-white h-full overflow-y-auto`} // ✅ Ensure sidebar scrolls
       >
         <div className="relative p-4 text-xl font-bold flex flex-col items-center min-h-28 bg-[#2c3b03]">
           <div
@@ -28,7 +26,9 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
           </div>
           <img src={mainLogo} alt="logo" className="w-14" />
         </div>
-        <nav className="bg-oliveLight flex-1 p-4 overflow-y-auto">
+
+        {/* ✅ Make sure this section also allows scrolling if needed */}
+        <nav className="bg-oliveLight flex-1 p-4">
           <div className="min-h-28">
             <h3 className="font-semibold text-xl flex gap-[10px] items-center p-3">
               <MdKey size={24} className="text-[#c0c00e] rotate-90" />
@@ -45,6 +45,7 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
           </p>
         </nav>
       </motion.aside>
+
     </>
   );
 }

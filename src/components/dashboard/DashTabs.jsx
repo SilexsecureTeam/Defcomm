@@ -18,7 +18,7 @@ function DashTabs() {
     const [view, setView] = useState("call");
   
     return (
-      <motion.ul className="flex gap-2 item-center w-full md:w-[80%] mt-10 ml-auto bg-gray-500/50 p-2 border-l-8 border-l-olive overflow-x-auto" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+      <motion.ul className="flex gap-2 item-center w-full md:w-[80%] mt-10 ml-auto bg-gray-400/50 p-2 border-l-8 border-l-olive overflow-x-auto" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
       {[{ img: call, view: "call" },
       { img: connect, view: "connect" },
       { img: secure, view: "secure" },

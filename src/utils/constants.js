@@ -3,13 +3,14 @@
 import { FaHome, FaRegUserCircle, FaCog } from "react-icons/fa";
 import { MdOutlineCall, MdOutlineFolderShared  } from "react-icons/md";
 import { IoIosChatboxes, IoMdWifi } from "react-icons/io";
-//import logout from "../assets/pngs/logout.png";
+import { BiCategoryAlt } from "react-icons/bi";
+
 export const dashboardOptions = [
   {
     type: "HOME",
     title: "Home",
     route: "/dashboard/home",
-    icon: FaHome,
+    icon: BiCategoryAlt,
     iconActive: null,
   },
   {
