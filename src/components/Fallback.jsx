@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import searcherAnim from "../assets/anim/searcher-anim.json";
+import searcherAnim from "../assets/anim/defcommLoader.json";
 import Lottie from "lottie-react";
 import mainLogoTwo from '../assets/logo.png'
 
