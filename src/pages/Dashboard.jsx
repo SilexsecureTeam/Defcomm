@@ -28,17 +28,19 @@ const Dashboard = () => {
         </div>
 
         {/* Content Area */}
-        <main className="flex-1 md:p-6">
-          <div className="bg-[#121a0f] min-h-screen text-white p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
+        <main className="flex-1 p-0 md:p-6">
+          <div className="text-white">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="">
                 <Broadcast />
                 <RecentCalls />
               </div>
+              <div>
               <EmergencyBanner />
+              <Categories />
+              <SecureGroup />
+              </div>
             </div>
-            <Categories />
-            <SecureGroup />
           </div>
 
         </main>
