@@ -35,7 +35,7 @@ const FileManager = () => {
     };
 
     return (
-        <div className="min-h-screen p-6 text-white">
+        <div className="min-h-screen text-white">
             <div className="mx-auto">
                 {/* Search and Header Section */}
                 <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
