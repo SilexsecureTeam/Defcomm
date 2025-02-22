@@ -121,7 +121,7 @@ function useDashBoardRoute() {
               user={authDetails?.user}
             />
             <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              <Suspense fallback={<Fallback />}>
+              {/*<Suspense fallback={<Fallback />}>*/}
                 <Routes>
                   <Route path="/" element={<DashboardLayout />} >
                     <Route path="/home" element={<Home />} />
@@ -129,7 +129,7 @@ function useDashBoardRoute() {
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
-              </Suspense>
+              {/*</Suspense>*/}
             </div>
           </div>
         </main>
