@@ -6,7 +6,6 @@ interface AudioVisualizerProps {
   fillColor?: string;
   strokeColor?: string;
   width?: number;
-  height?: number;
   barCount?: number;
 }
 
@@ -15,11 +14,10 @@ const AudioVisualizer = ({
   fillColor = "#00FF00",
   strokeColor = "transparent",
   width = 150,
-  height = 30,
   barCount = 40,
 }: AudioVisualizerProps) => {
   const progressWidth = (progress / 100) * width;
-
+  const height = 30;
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg">
       {Array.from({ length: barCount }).map((_, index) => {

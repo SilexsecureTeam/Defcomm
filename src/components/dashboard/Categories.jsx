@@ -11,7 +11,7 @@ const categories = [
   { title: "File Sharing", count: 96, icon: <FaFileAlt />, bg: "bg-gray-700" },
 ];
 
-function Categories() {
+function Categories(display=4) {
   return (
     <div className="p-4 rounded-lg mt-4">
       <div className="flex justify-between items-center mb-4">
@@ -22,7 +22,7 @@ function Categories() {
         <span className="text-gray-400 cursor-pointer ml-auto underline text-sm" >Show All</span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+      <div className={`grid ${display === 4 ? "grid-cols-2 lg:grid-cols-4":"grid-cols-2"} gap-4 mt-4`}>
         {categories.map((cat, index) => (
           <div key={index} className={`${index > 0 ? "bg-[#1a2b12]":"bg-green-600"} hover:bg-green-600/60 cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center`}>
             <span className="text-white text-xl rounded-full">{cat.icon}</span>

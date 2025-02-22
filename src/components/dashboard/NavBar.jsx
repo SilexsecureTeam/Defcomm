@@ -23,12 +23,12 @@ function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
       >
         {!isMenuOpen ? <FaBars size={24} /> : <FaTimes size={24} />}
       </div>
-      <h1 className="font-bold text-white text-sm md:text-[25px] truncate mr-auto md:mr-0">
-        Discover
+      <h1 className="font-bold text-white text-sm md:text-[18px] lg:text-[25px] truncate mr-auto md:mr-0">
+        {title || "Discover"}
       </h1>
 
       {/* Search Bar (Hidden on Small Screens) */}
-      <div className="flex-1 max-w-[400px] mx-1 hidden md:flex h-10 items-center gap-2 bg-gray-500/50 p-2 text-white">
+      <div className="flex-1 max-w-[400px] min-w-18 mx-1 hidden md:flex h-10 items-center gap-2 bg-gray-500/50 p-2 text-white">
         <FaSearch size={20} />
         <input
           type="text"

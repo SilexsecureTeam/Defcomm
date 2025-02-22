@@ -1,9 +1,19 @@
-//Applicant icons import
-
+//Dashboard icons import
 import { FaHome, FaRegUserCircle, FaCog } from "react-icons/fa";
-import { MdOutlineCall, MdOutlineFolderShared  } from "react-icons/md";
+import { MdOutlineCall, MdOutlineFolderShared } from "react-icons/md";
 import { IoIosChatboxes, IoMdWifi } from "react-icons/io";
 import { BiCategoryAlt } from "react-icons/bi";
+
+//Dasboard tabs icons
+import call from "../assets/call.png";
+import connect from "../assets/connect.png";
+import mail from "../assets/mail-secure.png";
+import secure from "../assets/secure.png";
+import contact from "../assets/contact.png";
+import sharing from "../assets/device.png";
+import drive from "../assets/drive.png";
+import military from "../assets/military.png";
+import talkie from "../assets/walkie-talkie.png";
 
 export const dashboardOptions = [
   {
@@ -31,7 +41,7 @@ export const dashboardOptions = [
     type: "COMM",
     title: "Walkie talkie",
     route: "/dashboard/comm",
-    icon: IoMdWifi ,
+    icon: IoMdWifi,
     iconActive: null,
   },
   {
@@ -59,3 +69,51 @@ export const utilOptions = [
     iconActive: null,
   }
 ];
+
+export const dashboardTabs = [
+  { 
+    img: call, 
+    view: "call",
+    type: "CHAT", 
+  },
+  { 
+    img: connect, 
+    view: "connect",
+    type: "CONNECT", 
+  },
+  { 
+    img: secure, 
+    view: "secure",
+     type: "CONNECT",
+  },
+  { 
+    img: talkie, 
+    view: "comm",
+     type: "CONNECT",
+  },
+  { 
+    img: drive, 
+    view: "drive",
+     type: "CONNECT",
+  },
+  { 
+    img: mail, 
+    view: "email",
+     type: "CONNECT",
+  },
+  { 
+    img: contact, 
+    view: "contact",
+     type: "CONNECT",
+  },
+  { 
+    img: sharing, 
+    view: "sharing",
+     type: "CONNECT",
+  },
+  { 
+    img: military, 
+    view: "military",
+     type: "CONNECT", 
+  }
+]

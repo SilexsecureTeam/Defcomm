@@ -28,7 +28,7 @@ function SideBarItem({ data, dispatch, state, setIsOpen }) {
         state?.type === data?.type ? "bg-black text-olive" : "bg-none"
       }`}
     >
-      <Link to={data.route} className="flex items-center gap-3">
+      <Link className="flex items-center gap-3">
         {Component && <Component className="text-xl" />} {/* Render icon here */}
         {data?.title}
       </Link>

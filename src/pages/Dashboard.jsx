@@ -18,34 +18,21 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-transparent">
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Tabs */}
-        <div className="mt-10">
-          <DashTabs />
-        </div>
-
-        {/* Content Area */}
-        <main className="flex-1 p-0 md:p-6">
-          <div className="text-white">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="">
-                <Broadcast />
-                <RecentCalls />
-              </div>
-              <div>
-              <EmergencyBanner />
-              <Categories />
-              <SecureGroup />
-              </div>
+    <>
+       <div className="text-white">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="">
+              <Broadcast />
+              <RecentCalls />
+            </div>
+            <div>
+            <EmergencyBanner />
+            <Categories />
+            <SecureGroup />
             </div>
           </div>
-
-        </main>
-      </div>
-    </div>
+        </div>
+    </>
   );
 };
 
