@@ -14,7 +14,7 @@ const DashboardLayout = () => {
       </div>
 
       {/* Content Area */}
-      <main className="flex-1 p-0 md:p-6">
+      <main className="flex-1 p-0 py-3 md:p-6">
         <Outlet />
       </main>
     </div>
