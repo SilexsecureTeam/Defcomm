@@ -16,7 +16,7 @@ const ChatInterface = () => {
     return (
         <div className="relative flex flex-col lg:flex-row gap-4 h-full p-4">
             {/* Header for Small Screens */}
-            <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4 rounded-t-lg">
+            <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
                 <h2 className="text-lg font-semibold">Chat</h2>
                 <button onClick={() => setShowCall(true)}>
                     <MdCall size={24} />

@@ -72,48 +72,118 @@ export const utilOptions = [
 
 export const dashboardTabs = [
   { 
+    type:"CALL",
+    title: "Call",
     img: call, 
-    view: "call",
-    type: "CHAT", 
+    view: "chat",
+    type: "CHAT",
+    route:"/dashboard/chat"
   },
   { 
+    type:"CONNECT",
+    title: "Discover",
     img: connect, 
     view: "connect",
     type: "CONNECT", 
+    route:"/dashboard/home"
   },
   { 
+    type:"SECURE",
+    title: "Secure",
     img: secure, 
     view: "secure",
-     type: "CONNECT",
+     route:"/dashboard/secure"
   },
   { 
+    type:"COMM",
+    title: "Walkie talkie",
     img: talkie, 
     view: "comm",
-     type: "CONNECT",
+    route:"/dashboard/comm", 
   },
   { 
+    type:"DRIVE",
+    title: "Drive",
     img: drive, 
     view: "drive",
-     type: "CONNECT",
+    route:"/dashboard/drive", 
   },
   { 
+    type:"MAIL",
+    title: "Mail",
     img: mail, 
     view: "email",
-     type: "CONNECT",
+    route:"/dashboard/mail", 
   },
   { 
+    type:"CONTACT",
+    title: "Contact",
     img: contact, 
     view: "contact",
-     type: "CONNECT",
+    route:"/dashboard/calls", 
   },
   { 
+    type:"FILE-SHARING",
+    title: "File Sharing",
     img: sharing, 
     view: "sharing",
-     type: "CONNECT",
+    route:"/dashboard/file-sharing", 
   },
   { 
+    type:"MILITARY",
+    title: "Military",
     img: military, 
     view: "military",
-     type: "CONNECT", 
+    route:"/dashboard/military",  
+  }
+]
+
+export const contactList=[
+  {
+    "id": 1,
+    "name": "Michael Johnson",
+    "image": "/images/users/michael-johnson.png",
+    "status": "Online",
+  },
+  {
+    "id": 2,
+    "name": "Emma Williams",
+    "image": "/images/users/emma-williams.png",
+    "status": "Offline",
+  },
+  {
+    "id": 3,
+    "name": "James Anderson",
+    "image": "/images/users/james-anderson.png",
+    "status": "Active Now",
+  },
+  {
+    "id": 4,
+    "name": "Olivia Brown",
+    "image": "/images/users/olivia-brown.png",
+    "status": "Busy",
+  },
+  {
+    "id": 5,
+    "name": "William Martinez",
+    "image": "/images/users/william-martinez.png",
+    "status": "Away",
+  }
+]
+
+export const chatUtilOptions=[
+  {
+    "id": 6,
+    "name": "William Martinez",
+    "message":"GG Bro, 2nd place is great thanks",
+    "image": "/images/users/william-martinez.png",
+    "status": "Away",
+  },
+  {
+    "id": 7,
+    "name": "William Martinez",
+    "message":"Well played, bro!",
+    "image": "/images/users/william-martinez.png",
+    "status": "Away",
   }
 ]

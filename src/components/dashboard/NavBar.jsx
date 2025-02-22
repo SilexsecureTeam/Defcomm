@@ -1,6 +1,4 @@
-
 import React, { useState, memo } from "react";
-
 import { FaCartShopping, FaBell } from "react-icons/fa6";
 import { FaBars, FaSearch, FaTimes } from "react-icons/fa";
 import { IoBarbellOutline, IoChatbubbleEllipsesSharp, IoSettings } from "react-icons/io5";

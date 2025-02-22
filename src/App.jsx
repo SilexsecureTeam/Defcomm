@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
 import FallBack from "./components/Fallback";
+import { DashboardContextProvider } from "./context/DashboardContext";  // Import DashboardContext
+
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
 const Dashboard = lazy(() => import("./routes/useDashboardRoute")); // Ensure this component exists
@@ -10,19 +12,22 @@ const Dashboard = lazy(() => import("./routes/useDashboardRoute")); // Ensure th
 const App = () => {
   return (
     <AuthProvider>
+      <DashboardContextProvider >
       <Suspense fallback={<FallBack />}>
         <Router>
           <Routes>
             <Route path="/" element={<DefcommLogin />} />
+
             <Route path="/dashboard/*" element={<Dashboard />} />
+
             {/* <ProtectedRoute Component={Dashboard} /> */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Router>
       </Suspense>
       <ToastContainer autoClose={2000} draggable />
-
-    </AuthProvider>
+    </DashboardContextProvider>
+    </AuthProvider >
   );
 };
 
