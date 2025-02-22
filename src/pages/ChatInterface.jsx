@@ -14,7 +14,7 @@ const ChatInterface = () => {
         }
     },[])
     return (
-        <div className="relative flex flex-col lg:flex-row gap-4 h-full p-4">
+        <div className="relative flex flex-col lg:flex-row gap-4 h-full">
             {/* Header for Small Screens */}
             <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
                 <h2 className="text-lg font-semibold">Chat</h2>

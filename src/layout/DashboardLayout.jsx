@@ -9,7 +9,7 @@ const DashboardLayout = () => {
     {/* Main Content */}
     <div className="flex-1 flex flex-col">
       {/* Tabs */}
-      <div className="mt-10">
+      <div className="mt-10 p-0 md:p-6">
         <DashTabs />
       </div>
 

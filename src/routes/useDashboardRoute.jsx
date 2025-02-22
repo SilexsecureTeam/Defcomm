@@ -37,7 +37,9 @@ const ChatInterface = lazy(() =>
 const ComingSoon = lazy(() =>
   import("../pages/ComingSoon").catch(() => ({ default: () => <div>Error loading ComingSoon</div> }))
 );
-
+const FileManager = lazy(() =>
+  import("../pages/FileManager").catch(() => ({ default: () => <div>Error loading ComingSoon</div> }))
+);
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
@@ -126,6 +128,7 @@ function useDashBoardRoute() {
                   <Route path="/" element={<DashboardLayout />} >
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
+                    <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
