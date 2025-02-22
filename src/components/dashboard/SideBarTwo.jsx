@@ -22,7 +22,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                 initial={{ x: "-100%" }}
                 animate={{ x: isMenuOpen ? 0 : "-100%" }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className={`${isMenuOpen ? "fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
+                className={`${isMenuOpen ? "!bg-[#2c3b03] fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
                     } md:!flex flex-col md:!translate-x-0 md:relative bg-transparent w-64 text-white h-full overflow-y-auto`} // ✅ Ensure sidebarTwo scrolls
             >
                 <div className="relative p-4 text-xl font-bold flex flex-col items-center min-h-28 bg-transparent">
