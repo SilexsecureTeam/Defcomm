@@ -39,7 +39,7 @@ const FileManager = () => {
             <div className="mx-auto">
                 {/* Search and Header Section */}
                 <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                    <h2 className="text-2xl font-semibold w-full md:w-max">File Manager</h2>
+                    <h2 className="text-2xl font-semibold w-full md:w-max text-[#DDF2AB]">File Manager</h2>
                     <section className="flex items-center gap-2">
                         <div className="relative w-60 text-gray-800">
                             <input
@@ -60,7 +60,7 @@ const FileManager = () => {
                         <motion.p
                             key={index}
                             whileHover={{ scale: 1.1 }}
-                            className="w-12 h-12 border border-white/40 rounded bg-transparent text-oliveHover last:text-white last:ml-auto last:bg-olive flex items-center justify-center cursor-pointer"
+                            className="w-12 h-12 border border-[#DDDFE1] rounded bg-transparent text-[#DDF2AB] last:text-white last:ml-auto last:bg-olive flex items-center justify-center cursor-pointer"
                         >
                             <Icon />
                         </motion.p>
@@ -68,7 +68,7 @@ const FileManager = () => {
                 </div>
 
                 {/* Tab Section */}
-                <div className="bg-oliveHover rounded-md p-4 text-[#233015] my-2">
+                <div className="bg-[#DDF2AB] rounded-md p-4 text-[#233015] my-2">
                     <div className="flex gap-4 font-medium text-sm border-b border-white/50 pb-3">
                         {tabs.map((tab) => (
                             <button
