@@ -20,6 +20,7 @@ const useAuth = () => {
     setError(null);
     try {
       const { data } = await client.post("/login", credentials);
+      console.log(data)
       setAuthDetails(data.user); // Store user data in memory only
       navigate('/dashboard/home');
     } catch (err) {

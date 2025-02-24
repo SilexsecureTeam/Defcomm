@@ -14,7 +14,7 @@ const LoginForm = ({ version }) => {
 
     const onSubmit = async (data) => {
         console.log(data)
-        await login(data);
+        await login({...data, device_type:"new", device_token:"123"});
     };
 
     return (
