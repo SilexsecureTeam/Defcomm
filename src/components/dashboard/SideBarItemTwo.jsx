@@ -14,6 +14,7 @@ function SideBarItemTwo({ data, dispatch, state, setIsOpen }) {
 
   return (
     <li
+    key={data?.id}
       onClick={navigateToPage}
       className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium ${
         state?.type === data?.type ? "bg-black text-olive" : "bg-none"

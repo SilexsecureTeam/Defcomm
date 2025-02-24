@@ -8,6 +8,8 @@ import RecentCalls from "../components/dashboard/RecentCalls";
 import EmergencyBanner from "../components/dashboard/EmergencyBanner";
 import Categories from "../components/dashboard/Categories";
 import SecureGroup from "../components/dashboard/SecureGroup";
+import SEOHelmet from "../engine/SEOHelmet";
+
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ const Dashboard = () => {
 
   return (
     <>
+    {/* SEO Content */}
+    <SEOHelmet title="Dashboard" />
        <div className="text-white">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="">

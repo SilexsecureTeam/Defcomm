@@ -1,37 +1,30 @@
-import { createContext, useState, useEffect } from "react";
-import {axiosClient} from "../services/axios-client";
+import { createContext, useLayoutEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [authDetails, setAuthDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  // Read from sessionStorage on mount
+  const [authDetails, setAuthDetails] = useState(() => {
+    const storedUser = sessionStorage.getItem("authUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  // Fetch authDetails only once when app loads
-  useEffect(() => {
-    const fetchauthDetails = async () => {
-      try {
-        const { data } = await axiosClient.get("/auth/me", {
-          withCredentials: true, // Secure session handling
-        });
-        setAuthDetails(data.authDetails);
-        setAuthenticated(true);
-      } catch (error) {
-        setAuthDetails(null);
-        setAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Query for refetching auth details (optional)
+  const { data, isLoading } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: () => Promise.resolve(authDetails),
+    initialData: authDetails,
+  });
 
-    fetchauthDetails();
-  }, []);
+  // Sync React Query updates to state
+  useLayoutEffect(() => {
+    if (data) setAuthDetails(data);
+  }, [data]);
 
   return (
-    <AuthContext.Provider value={{ authDetails, setAuthDetails, authenticated, loading }}>
+    <AuthContext.Provider value={{ authDetails, setAuthDetails, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
 };
-

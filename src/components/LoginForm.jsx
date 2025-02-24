@@ -5,7 +5,7 @@ import useAuth from "../hooks/useAuth";
 
 const LoginForm = ({ version }) => {
     const { register, handleSubmit } = useForm();
-    const { login, isLoading, error } = useAuth();
+    const { login, isLoading } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -13,8 +13,7 @@ const LoginForm = ({ version }) => {
     };
 
     const onSubmit = async (data) => {
-        console.log(data)
-        await login({...data, device_type:"new", device_token:"123"});
+        await login(data);
     };
 
     return (
@@ -40,7 +39,7 @@ const LoginForm = ({ version }) => {
                     </label>
                     <a href="#" className="text-green-700">Forgot Password?</a>
                 </div>
-                {error && <p className="text-red-500 text-sm mt-2">{error?.error}</p>}
+                {/* {error && <p className="text-red-500 text-sm mt-2">{error?.error}</p>} */}
                 <button type="submit" className="mt-4 w-full bg-oliveLight hover:bg-oliveDark text-white p-3 rounded-md flex justify-center items-center" disabled={isLoading}>
                     {isLoading ? <><FaSpinner className="animate-spin mr-2" /> Logging in...</> : "Login"}
                 </button>

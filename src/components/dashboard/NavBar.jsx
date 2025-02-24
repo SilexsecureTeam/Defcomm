@@ -5,6 +5,7 @@ import { IoBarbellOutline, IoChatbubbleEllipsesSharp, IoSettings } from "react-i
 import { useNavigate } from "react-router-dom";
 import { PiBellLight } from "react-icons/pi";
 import { IoIosArrowDown } from "react-icons/io";
+import ProfileDropdown from "./ProfileDropdown";
 
 function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
   const navigate = useNavigate();
@@ -47,14 +48,7 @@ function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
           <PiBellLight size={20} />
         </div>
 
-        {/* profile */}
-        <div className="flex items-center gap-2 ml-2 font-medium">
-          <p className="text-sm">Hello, {user?.name || "DefComm"}</p>
-          <div className="flex items-center rounded-full bg-gray-100/50 w-max p-1">
-            <span className="w-8 h-8 rounded-full bg-gray-300"></span>
-            <span className="w-8 h-8 rounded-full flex items-center justify-center"><IoIosArrowDown size={20}/> </span>
-          </div>
-        </div>
+        <ProfileDropdown user={user} />
       </div>
     </nav>
   );

@@ -1,86 +1,111 @@
-import { useContext, useEffect, useState } from "react";
-import {axiosClient} from "../services/axios-client";
-import {AuthContext} from "../context/AuthContext";
-import { FormatError } from "../utils/formmaters";
+import { useContext, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query"; // Ensure this is from @tanstack/react-query
+import { useNavigate } from "react-router-dom";
+import { axiosClient } from "../services/axios-client";
+import { AuthContext } from "../context/AuthContext";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { onSuccess } from "../utils/notifications/OnSuccess";
-import { useNavigate } from "react-router-dom";
+import { queryClient } from "../services/query-client";
 const useAuth = () => {
-  const navigate=useNavigate();
-  const { setAuthDetails, authDetails } = useContext(AuthContext);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState({
-    message: "",
-    error: "",
-  });
-  const client=axiosClient(authDetails?.token)
+  const navigate = useNavigate();
+  const { authDetails } = useContext(AuthContext);
+  
+  const client = axiosClient(authDetails?.token);
 
-  const login = async (credentials) => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  // Login Mutation
+  const loginMutation = useMutation({
+    mutationFn: async (credentials) => {
       const { data } = await client.post("/login", credentials);
-      console.log(data)
-      setAuthDetails(data.user); // Store user data in memory only
-      navigate('/dashboard/home');
-    } catch (err) {
-      //setError(err.response?.data?.message || "Login failed");
-      console.log(err)
-      FormatError(err, setError, "Login Error");
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (userData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
+      if (!data?.data?.user) {
+        throw new Error("Invalid response: User data not found");
+      }
+  
+      return data.data; // Return only the user object
+    },
+    onSuccess: (userData) => {
+      if (!userData) {
+        return;
+      }
+      // Store user data in React Query
+      queryClient.setQueryData(["authUser"], userData);
+      // Store in sessionStorage for persistence
+      sessionStorage.setItem("authUser", JSON.stringify(userData));
+      // Show success message
+      onSuccess({ message: "Login Successful!", success: "Continuing to dashboard" });
+      // Navigate to dashboard
+      navigate("/dashboard/home");
+    },
+    onError: (error) => {
+      onFailure({ message: "Login Failed", error: error.response?.data?.message || error?.message });
+    },
+  });
+  
+  // Register Mutation
+  const registerMutation = useMutation({
+    mutationFn: async (userData) => {
+      console.log("Registering user..."); // Debugging
       const { data } = await client.post("/register", userData);
-      setAuthDetails(data.user);
       return data;
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onSuccess: () => {
+      console.log("Registration successful!"); // Debugging
+      onSuccess({ message: "Registration Successful!", error: "" });
+    },
+    onError: (err) => {
+      console.log("Registration error:", err); // Debugging
+      onFailure({ message: "Registration Failed", error: err.response?.data?.message || err.message });
+    },
+  });
 
-  const verifyOtp = async (otpData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  // Verify OTP Mutation
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (otpData) => {
+      console.log("Verifying OTP..."); // Debugging
       const { data } = await client.post("/verify-otp", otpData);
       return data;
-    } catch (err) {
-      setError(err.response?.data?.message || "OTP verification failed");
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onSuccess: () => {
+      console.log("OTP verification successful!"); // Debugging
+      onSuccess({ message: "OTP Verified!", error: "" });
+    },
+    onError: (err) => {
+      console.log("OTP verification failed:", err); // Debugging
+      onFailure({ message: "OTP Verification Failed", error: err.response?.data?.message || err.message });
+    },
+  });
 
-  const logout = async () => {
-    setIsLoading(true);
-    try {
-      await client.post("/logout", {}, { withCredentials: true });
-      setAuthDetails(null); // Clear user from memory
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    //console.log(error)
-    if (error?.message && error?.error) {
-      onFailure(error);
-    }
-  }, [error]);
+  // Logout Mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      queryClient.clear();
+    },
+    onSuccess: () => {
+     queryClient.invalidateQueries(["authUser"]);
+      sessionStorage.clear();
+      navigate("/", {replace:true});
+      onSuccess({
+        message: "Logout successful",
+        success: `Logged out ${authDetails?.user?.name}`,
+      });
+    },
+    onError: (err) => {
+      onFailure({ message: "Logout Failed", error: err.message });
+    },
+  });
 
-  return { login, register, verifyOtp, logout, isLoading, error };
+  // Check if any mutation is loading
+  const isLoading =
+    loginMutation.isPending ||
+    registerMutation.isPending ||
+    verifyOtpMutation.isPending ||
+    logoutMutation.isPending;
+  return {
+    login: loginMutation.mutate,
+    register: registerMutation.mutate,
+    verifyOtp: verifyOtpMutation.mutate,
+    logout: logoutMutation.mutate,
+    isLoading,
+  };
 };
 
 export default useAuth;

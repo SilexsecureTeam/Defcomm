@@ -67,14 +67,14 @@ function useDashBoardRoute() {
       setSidebarItemComponent(() => SideBarItem);
       setOption(dashboardOptions)
     }
-    console.log(options, state)
+  
   }, [pathname]);
 
   const toggleIsOpen = () => setIsOpen(!isOpen);
 
   return (
     <>
-      {true ? (
+      {authDetails?.user?.role === "user" ? (
         <main
           className="h-screen w-screen relative flex overflow-hidden"
           style={{
@@ -91,9 +91,9 @@ function useDashBoardRoute() {
             state={state}
           >
             <ul className="flex flex-col gap-[10px]">
-              {option.map((currentOption) => (
+              {option.map((currentOption, idx) => (
                 <SidebarItemComponent
-                  key={currentOption.type}
+                  key={idx}
                   data={currentOption}
                   dispatch={dispatch}
                   state={state}

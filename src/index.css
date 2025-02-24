@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+
+body, html{
+  width:100vw;
+  height:100vh;
+}
 /* Style the entire website's scrollbar */
 ::-webkit-scrollbar {
     width: 2px; /* Set the width of the scrollbar */

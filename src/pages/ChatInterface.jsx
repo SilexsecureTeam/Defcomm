@@ -4,17 +4,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import CustomAudioMessage from "../components/Chat/CustomAudioMessage";
 import { messages } from "../utils/dummies";
 import CallInterface from "../components/Chat/CallInterface";
+import useChat from "../hooks/useChat";
+import SEOHelmet from "../engine/SEOHelmet";
 
 const ChatInterface = () => {
     const [showCall, setShowCall] = useState(false);
+    const { fetchGroupMembers }=useChat();
     const messageRef=useRef(null)
     useEffect(()=>{
+        const mem=fetchGroupMembers();
+        console.log(mem);
         if(messageRef.current){
             messageRef.current.scrollTop=messageRef.current.scrollHeight;
         }
     },[])
     return (
         <div className="relative flex flex-col lg:flex-row gap-4 h-full">
+            {/* SEO Content */}
+    <SEOHelmet title="Secure Chat" />
+
             {/* Header for Small Screens */}
             <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
                 <h2 className="text-lg font-semibold">Chat</h2>

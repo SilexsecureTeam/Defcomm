@@ -6,6 +6,7 @@ import { TbArrowsMaximize } from "react-icons/tb";
 import { FaBook, FaTrash } from "react-icons/fa";
 import { CgFileDocument } from "react-icons/cg";
 import { GrSort } from "react-icons/gr";
+import SEOHelmet from "../engine/SEOHelmet";
 
 const tabs = ["My Files", "Other File", "My File Requests"];
 
@@ -36,6 +37,8 @@ const FileManager = () => {
 
     return (
         <div className="min-h-screen text-white">
+             {/* SEO Content */}
+            <SEOHelmet title="File Manager" />
             <div className="mx-auto">
                 {/* Search and Header Section */}
                 <div className="flex flex-wrap justify-between items-center mb-6 gap-2">

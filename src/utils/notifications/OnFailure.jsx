@@ -6,8 +6,8 @@ export const onFailure = (error) => {
     <div className="flex items-center w-fit z-[999] text-red-600 gap-[10px]">
       <MdCancel className="text-[25px] " />
       <div className="flex flex-col">
-       <strong className="text-[14px] capitalize">{error?.message}</strong>
-       <p className="text-little text-gray-500 ">{error?.error}</p>
+       <strong className="text-sm capitalize">{error?.message}</strong>
+       <p className="text-[14px] text-gray-500 ">{error?.error}</p>
       </div>
        
     </div>

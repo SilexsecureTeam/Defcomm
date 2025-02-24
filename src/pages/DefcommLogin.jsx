@@ -16,6 +16,7 @@ import LoginForm from "../components/LoginForm";
 import LoginTwo from "../components/LoginTwo";
 import BackToTopButton from "../components/BackToTopButton";
 import { FaSearch } from "react-icons/fa";
+import SEOHelmet from "../engine/SEOHelmet";
 
 const DefcommLogin = () => {
   const { scrollYProgress } = useScroll();
@@ -25,6 +26,10 @@ const DefcommLogin = () => {
   const rotateScroll = useTransform(scrollYProgress, [0, 1], [0, 360]); // Rotates scroll image
 
   return (
+    <>
+      {/* SEO Content */}
+    <SEOHelmet title="Login" />
+
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -123,6 +128,7 @@ const DefcommLogin = () => {
       </motion.section>
       <BackToTopButton />
     </motion.div>
+    </>
   );
 };
 
