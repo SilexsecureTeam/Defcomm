@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import FallBack from "./components/Fallback";
 import { DashboardContextProvider } from "./context/DashboardContext";
 import { queryClient } from "./services/query-client";
+import { ChatProvider } from "./context/ChatContext";
 
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
@@ -16,26 +17,28 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <DashboardContextProvider>
-          <Suspense fallback={<FallBack />}>
-            <Router>
-              <Routes>
-                <Route path="/" element={<DefcommLogin />} />
+        <ChatProvider>
+          <DashboardContextProvider>
+            <Suspense fallback={<FallBack />}>
+              <Router>
+                <Routes>
+                  <Route path="/" element={<DefcommLogin />} />
 
-                {/* Using ProtectedRoute as a Component */}
-                <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
+                  {/* Using ProtectedRoute as a Component */}
+                  <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
 
-                {/* Catch-all redirect */}
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </Router>
-          </Suspense>
-          <ToastContainer autoClose={2000} draggable />
-        </DashboardContextProvider>
+                  {/* Catch-all redirect */}
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </Router>
+            </Suspense>
+            <ToastContainer autoClose={2000} draggable />
+          </DashboardContextProvider>
+        </ChatProvider>
       </AuthProvider>
 
       {/* Show DevTools only in development mode */}
-      {import.meta.env.VITE_MODE === "development" && (
+      {import.meta.env.VITE_MODE !== "development" && (
         <ReactQueryDevtools initialIsOpen={false} position="right" />
       )}
     </QueryClientProvider>

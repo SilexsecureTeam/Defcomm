@@ -1,27 +1,66 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { MdAttachFile, MdOutlineEmojiEmotions, MdCall, MdClose } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomAudioMessage from "../components/Chat/CustomAudioMessage";
-import { messages } from "../utils/dummies";
 import CallInterface from "../components/Chat/CallInterface";
 import useChat from "../hooks/useChat";
 import SEOHelmet from "../engine/SEOHelmet";
+import { ChatContext } from "../context/ChatContext";
+import { useQuery } from "@tanstack/react-query";
+import { FaSpinner } from "react-icons/fa6";
+import SendMessage from "../components/Chat/SendMessage";
 
 const ChatInterface = () => {
+    const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
     const [showCall, setShowCall] = useState(false);
-    const { fetchGroupMembers }=useChat();
-    const messageRef=useRef(null)
-    useEffect(()=>{
-        const mem=fetchGroupMembers();
-        console.log(mem);
-        if(messageRef.current){
-            messageRef.current.scrollTop=messageRef.current.scrollHeight;
+    const { fetchChatMessages } = useChat();
+    const messageRef = useRef(null);
+    // Fetch messages using React Query
+    const { data: messages, isLoading, error } = useQuery({
+        queryKey: ["chatMessages", selectedChatUser?.contact_id],
+        queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
+        refetchOnWindowFocus: true,
+        enabled: !!selectedChatUser?.contact_id, // Only fetch if chat is selected
+    });
+
+    useEffect(() => {
+        return () => {
+            setSelectedChatUser(null); // Clear chat context on unmount
+        };
+    }, []);
+
+    useEffect(() => {
+        if (messageRef.current) {
+            messageRef.current.scrollTop = messageRef.current.scrollHeight - 50; // Offset of 50px
         }
-    },[])
+    }, [messages]);
+    
+
+    // Format the date for messages
+    const getFormattedDate = (dateString) => {
+        const messageDate = new Date(dateString);
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        if (messageDate.toDateString() === today.toDateString()) {
+            return "Today";
+        } else if (messageDate.toDateString() === yesterday.toDateString()) {
+            return "Yesterday";
+        } else {
+            return messageDate.toLocaleDateString(undefined, {
+                weekday: "long",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            });
+        }
+    };
+
     return (
         <div className="relative flex flex-col lg:flex-row gap-4 h-full">
             {/* SEO Content */}
-    <SEOHelmet title="Secure Chat" />
+            <SEOHelmet title="Secure Chat" />
 
             {/* Header for Small Screens */}
             <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
@@ -32,50 +71,62 @@ const ChatInterface = () => {
             </div>
 
             {/* Chat Section */}
-            <div
-                className="relative w-full lg:w-2/3 h-full bg-[#d0eb8e] pt-4 transition-all duration-300"
-            >
-                <div ref={messageRef} className="flex-1 overflow-y-auto w-full h-screen flex flex-col space-y-4 p-4 pb-10">
-                    {messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={msg.sender === "self" ? "self-end" : msg.sender === "system" ? "text-center text-gray-500" : "self-start"}
-                        >{msg.sender === "system" ? (
-                            <div className="flex items-center justify-center gap-2 my-2">
-                                <div className="flex-1 border-t border-gray-500"></div>
-                                <span className="text-gray-500 text-sm font-medium">{msg.text}</span>
-                                <div className="flex-1 border-t border-gray-500"></div>
+            <div className="relative w-full lg:w-2/3 h-[80vh] bg-[#d0eb8e] pt-4 transition-all duration-300">
+                <div ref={messageRef} className="flex-1 overflow-y-auto w-full h-full flex flex-col space-y-4 p-4 pb-10">
+                    {selectedChatUser ? (
+                        isLoading ? (
+                            <div className="h-20 flex justify-center items-center text-oliveDark gap-2">
+                                <FaSpinner className="animate-spin text-2xl" /> Loading Messages
                             </div>
-                        ) : (
-                            <div
-                                className={msg.sender === "self" ? "self-end" : "self-start"}
-                            >
-                                <div
-                                    className={
-                                        msg.sender === "self"
-                                            ? "bg-oliveDark text-white p-2 rounded-lg shadow-md"
-                                            : "bg-white p-2 rounded-lg shadow-md"
-                                    }
-                                >
-                                    {msg.type === "audio" ? <CustomAudioMessage /> : msg.text}
-                                </div>
-                                {msg.time && (
-                                    <div className={`${msg.sender === "self" ? "text-right" : "text-left"} text-xs mt-1`}>{msg.time}</div>
-                                )}
-                            </div>
-                        )}
+                        ) : error ? (
+                            <p className="text-red-500 text-center">Failed to load messages. Please try again.</p>
+                        ) : messages?.data?.length > 0 ? (
+                            (() => {
+                                let lastDate = null;
+                                return messages?.data.map((msg) => {
+                                    const formattedDate = getFormattedDate(msg?.updated_at);
+                                    const showDateHeader = lastDate !== formattedDate;
+                                    lastDate = formattedDate;
 
-                        </div>
-                    ))}
+                                    return (
+                                        <React.Fragment key={msg?.id}>
+                                            {showDateHeader && (
+                                                <div className="flex items-center justify-center gap-2 my-4 text-gray-500 text-sm font-medium">
+                                                    <div className="flex-1 border-t border-gray-400"></div>
+                                                    <span>{formattedDate}</span>
+                                                    <div className="flex-1 border-t border-gray-400"></div>
+                                                </div>
+                                            )}
+                                            <div className={msg?.is_my_chat === "yes" ? "self-end" : msg?.is_my_chat === "system" ? "text-center text-gray-500" : "self-start"}>
+                                                <div className={msg?.is_my_chat === "yes" ? "self-end" : "self-start"}>
+                                                    <div className={msg?.is_my_chat === "yes" ? "bg-oliveDark text-white p-2 rounded-lg shadow-md w-max max-w-60" : "bg-white p-2 rounded-lg shadow-md w-max max-w-60"}>
+                                                        {msg?.type === "audio" ? <CustomAudioMessage /> : msg?.message}
+                                                    </div>
+                                                    {msg?.time && (
+                                                        <div className={`${msg?.is_my_chat === "yes" ? "text-right" : "text-left"} text-xs mt-1`}>
+                                                            {new Date(msg?.updated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </React.Fragment>
+                                    );
+                                });
+                            })()
+                        ) : (
+                            <p className="text-gray-500 text-center">No messages yet.</p>
+                        )
+                    ) : (
+                        <p className="text-oliveDark text-center text-lg font-bold mt-10">
+                            Select a chat to start messaging.
+                        </p>
+                    )}
                 </div>
-                <div className="sticky bottom-0 w-full h-16 bg-oliveLight flex gap-2 p-4 items-center text-white">
-                    <MdAttachFile size={24} className="flex-shrink-0" />
-                    <MdOutlineEmojiEmotions size={24} className="flex-shrink-0" />
-                    <textarea
-                        placeholder="Write a message..."
-                        className="flex-1 p-2 pt-6 bg-transparent border-none outline-none resize-y leading-none text-base"
-                    ></textarea>
-                </div>
+
+                {/* Input Section */}
+                {selectedChatUser && (
+                    <SendMessage messageData={messages?.chat_meta} />
+                )}
             </div>
 
             {/* Call Interface (Desktop) */}
@@ -93,10 +144,7 @@ const ChatInterface = () => {
                         className="w-80 h-max fixed lg:hidden top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
                     >
                         <CallInterface />
-                        <button
-                            className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full"
-                            onClick={() => setShowCall(false)}
-                        >
+                        <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => setShowCall(false)}>
                             <MdClose size={24} />
                         </button>
                     </motion.div>
