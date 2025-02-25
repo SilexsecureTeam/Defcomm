@@ -23,8 +23,8 @@ const CallInterface = () => {
     <button className="bg-oliveDark text-white py-2 px-4 rounded-lg mt-2 flex gap-3 items-center justify-around font-medium min-w-[180px]"><FaSignal className="flex-shrink-0" /> Checking call...</button>
     <div className="grid grid-cols-2 gap-4 mt-4 text-white py-5" >
         {categories.map((cat, index) => (
-            <div key={index} className={`${index > 0 ? "bg-[#1a2b12]" : "bg-green-600"} hover:bg-green-600/60 cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center`}>
-                <span className="text-white text-xl rounded-full">{cat.icon}</span>
+            <div key={index} className={`${index > 0 ? "bg-[#1a2b12]" : "bg-green-600"} hover:bg-green-600/60 hover:text-gray-800 text-white cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center`}>
+                <span className="text-xl rounded-full">{cat.icon}</span>
                 <div>
                     <p className="text-sm">{cat.title}</p>
                 </div>

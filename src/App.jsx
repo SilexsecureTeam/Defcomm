@@ -38,7 +38,7 @@ const App = () => {
       </AuthProvider>
 
       {/* Show DevTools only in development mode */}
-      {import.meta.env.VITE_MODE !== "development" && (
+      {import.meta.env.VITE_MODE === "development" && (
         <ReactQueryDevtools initialIsOpen={false} position="right" />
       )}
     </QueryClientProvider>

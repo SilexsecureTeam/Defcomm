@@ -7,6 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 import Fallback from "../components/Fallback";
 import { DashboardContext } from "../context/DashboardContext";
 import useChat from "../hooks/useChat";
+import { ChatContext } from "../context/ChatContext";
 
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
 const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
@@ -21,6 +22,7 @@ const FileManager = lazy(() => import("../pages/FileManager"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
+  const { setSelectedChatUser } = useContext(ChatContext);
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
   const { fetchContacts } = useChat();
@@ -53,6 +55,7 @@ function useDashBoardRoute() {
       setSidebarItemComponent(() => SideBarItemTwo);
       setOption(contacts?.data || []);
     } else {
+      setSelectedChatUser(null); // Clear chat context on unmount
       setSidebarComponent(() => SideBar);
       setSidebarItemComponent(() => SideBarItem);
       setOption(dashboardOptions);
