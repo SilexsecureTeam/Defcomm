@@ -29,7 +29,7 @@ const LoginForm = ({ version }) => {
                     <div className="relative w-full flex items-center">
                         <input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Enter your Password" className="w-full p-3 mb-4 border border-gray-600 rounded-md" required />
                         <button type="button" onClick={togglePasswordVisibility} className="absolute right-3 top-[25%] my-auto transform text-gray-600 flex items-cente h-max">
-                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            {!showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
                 </div>
