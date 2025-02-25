@@ -9,9 +9,10 @@ import { ChatContext } from "../context/ChatContext";
 import { useQuery } from "@tanstack/react-query";
 import { FaSpinner } from "react-icons/fa6";
 import SendMessage from "../components/Chat/SendMessage";
+import ChatFilePreview from "../components/Chat/ChatFilePreview";
 
 const ChatInterface = () => {
-    const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
+    const { selectedChatUser } = useContext(ChatContext);
     const [showCall, setShowCall] = useState(false);
     const { fetchChatMessages } = useChat();
     const messageRef = useRef(null);
@@ -24,17 +25,11 @@ const ChatInterface = () => {
     });
 
     useEffect(() => {
-        return () => {
-            setSelectedChatUser(null); // Clear chat context on unmount
-        };
-    }, []);
-
-    useEffect(() => {
         if (messageRef.current) {
             messageRef.current.scrollTop = messageRef.current.scrollHeight - 50; // Offset of 50px
         }
     }, [messages]);
-    
+
 
     // Format the date for messages
     const getFormattedDate = (dateString) => {
@@ -100,7 +95,18 @@ const ChatInterface = () => {
                                             <div className={msg?.is_my_chat === "yes" ? "self-end" : msg?.is_my_chat === "system" ? "text-center text-gray-500" : "self-start"}>
                                                 <div className={msg?.is_my_chat === "yes" ? "self-end" : "self-start"}>
                                                     <div className={msg?.is_my_chat === "yes" ? "bg-oliveDark text-white p-2 rounded-lg shadow-md w-max max-w-60" : "bg-white p-2 rounded-lg shadow-md w-max max-w-60"}>
-                                                        {msg?.type === "audio" ? <CustomAudioMessage /> : msg?.message}
+                                                        {msg?.type === "audio" ? (
+                                                            <CustomAudioMessage />
+                                                        ) : msg?.is_file === "yes" && msg?.message ? (
+                                                            <ChatFilePreview
+                                                                isMyChat={msg?.is_my_chat}
+                                                                fileType={msg?.message?.split(".")[1]} // e.g., "image/png", "application/pdf" msg?.file_type
+                                                                fileUrl={`${import.meta.env.VITE_BASE_URL}${msg?.message}`} // The file URL
+                                                                fileName={msg?.file_name} // The file name
+                                                            />
+                                                        ) : (
+                                                            msg?.message
+                                                        )}
                                                     </div>
                                                     {msg?.time && (
                                                         <div className={`${msg?.is_my_chat === "yes" ? "text-right" : "text-left"} text-xs mt-1`}>

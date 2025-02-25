@@ -17,6 +17,11 @@ const useChat = () => {
         const { data } = await client.get(`/user/contact`);
         return data || [];
     };
+     // Fetch Contacts Manually
+     const fetchChatHistory = async () => {
+        const { data } = await client.get(`/user/chat/history`);
+        return data?.data || [];
+    };
 
     // Fetch Group Members Manually
     const fetchGroupMembers = async () => {
@@ -32,23 +37,12 @@ const useChat = () => {
         return data || [];
     };
 
-    // Send Message
-    const { mutate: sendMessage, isLoading: sending } = useMutation({
-        mutationFn: async ({ receiverId, message }) => {
-            const { data } = await client.post("/user/chat/messages/send", { receiverId, message });
-            return data;
-        },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries(["chats", variables.receiverId]); // Refresh chat messages
-        },
-    });
-
     return {
         fetchContacts,
+        fetchChatHistory,
         fetchGroupMembers,
         fetchChatMessages,
-        sendMessage,
-        isLoading: sending,
+
     };
 };
 

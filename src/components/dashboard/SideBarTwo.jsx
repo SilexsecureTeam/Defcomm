@@ -1,21 +1,22 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FiLogOut } from "react-icons/fi";
 import mainLogo from "../../assets/logo-icon.png";
-import { MdKey } from "react-icons/md";
-import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { chatUtilOptions, dashboardTabs } from "../../utils/constants";
-import { Link } from "react-router-dom";
+import { dashboardTabs } from "../../utils/constants";
+import useChat from "../../hooks/useChat";
+import { useQuery } from "@tanstack/react-query";
 
 function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
-    const navigateToPage = () => {
-        dispatch({ ...state });
-        navigate(state.route);
-        toogleIsOpen();
-    };
-    const Component = state?.icon; // Extract the icon component
+    const { fetchChatHistory } = useChat();
 
+    // Fetch Chat History using React Query
+    const { data: chatHistory, isLoading } = useQuery({
+        queryKey: ["chat-history"],
+        queryFn: fetchChatHistory,
+        refetchOnMount: true, // Refetch when component mounts
+        // refetchOnWindowFocus: true, // Refetch when the page is focused
+        // refetchOnReconnect: true, // Refetch when the network reconnects
+    });
     return (
         <>
             {/* SidebarTwo */}
@@ -44,7 +45,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         {state?.type && (
                             <motion.section className="flex gap-2 item-center bg-gray-400/50 p-2 border-l-[5px] border-l-olive overflow-x-auto" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                                 <motion.figure
-                                    className="bg-oliveDark/70 cursor-pointer p-3 rounded-xl shadow-md transition-all"
+                                    className="bg-oliveDark/70 cursor-pointer p-3 rounded-xl shadow-md flex items-center justify-center !text-black font-bold transition-all"
                                     whileHover={{ scale: 1.1 }}
                                 >
                                     <img
@@ -57,39 +58,30 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         )}
                     </div>
                     <p className="mt-4 mb-2 font-medium text-xl text-center">Secure Contact</p>
-                    {children[0] ? (
+                    {children?.length ? (
                         <>
                             <ul className="overflow-y-auto h-80">{children[0]}</ul>
                             <ul className="flex flex-col gap-[10px] mt-20">
-                                {chatUtilOptions.map((currentOption, idx) => (
+                                {chatHistory?.reverse()?.slice(0, 2)?.map((chat) => (
                                     <li
-                                        key={idx}
-                                        onClick={navigateToPage}
-                                        className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium ${state?.type === currentOption?.type ? "bg-black text-olive" : "bg-none"
-                                            }`}
+                                        key={chat?.id}
+                                        className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium bg-none`}
                                     >
-                                        <Link className="flex items-center gap-3">
+                                        <section className="flex items-center gap-3">
                                             <figure className="flex-shrink-0 relative w-12 h-12 bg-gray-300 rounded-full">
-                                                <img src={currentOption?.image} alt={currentOption?.title} className="rounded-full" />
-                                                <span className={`${currentOption?.status === "Online"
-                                                    ? "bg-green-500"
-                                                    : currentOption?.status === "Busy"
-                                                        ? "bg-red-500"
-                                                        : currentOption?.status === "Away"
-                                                            ? "bg-yellow"
-                                                            : "bg-gray-400"
-                                                    } w-3 h-3 absolute bottom-[-2%] right-[5%] rounded-full border-[2px] border-white`}></span>
+                                                <img src={chat?.image} alt={chat?.chat_user_to_name?.split("")[0]} className="rounded-full" />
+
                                             </figure>
-                                            <div>
-                                                <p className="font-bold text-sm">{currentOption?.name}</p>
-                                                <span className="text-oliveGreen text-xs ">{currentOption?.message?.length > 20 ? `${currentOption?.message?.slice(0, 20)}...` : currentOption?.message}</span>
+                                            <div className="mr-auto">
+                                                <p className="font-bold text-sm">{chat?.chat_user_to_name}</p>
+                                                <span className="text-oliveGreen text-xs ">{chat?.last_message?.length > 15 ? `${chat?.last_message?.slice(0, 15)}...` : chat?.last_message}</span>
                                             </div>
-                                            <div className="flex flex-col items-end text-[10px]">
+                                            <div className="ml-auto flex flex-col items-end text-[10px]">
                                                 <span className="text-gray-200">Yesterday</span>
                                                 <span className="w-max font-medium px-2 py-1 bg-red-700 rounded-lg tet-center">12</span>
                                             </div>
 
-                                        </Link>
+                                        </section>
                                     </li>
                                 ))}
                             </ul>
