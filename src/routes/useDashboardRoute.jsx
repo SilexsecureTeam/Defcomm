@@ -1,74 +1,60 @@
 import { lazy, Suspense, useContext, useEffect, useReducer, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import DashboardReducer from "../reducers/DashboardReducer";
-import { contactList, utilOptions, dashboardOptions, dashboardTabs } from "../utils/constants";
+import { utilOptions, dashboardOptions, dashboardTabs } from "../utils/constants";
 import { AuthContext } from "../context/AuthContext";
 import Fallback from "../components/Fallback";
-import { DashboardContext } from "../context/DashboardContext";  // Import DashboardContext
+import { DashboardContext } from "../context/DashboardContext";
+import useChat from "../hooks/useChat";
 
-const NavBar = lazy(() =>
-  import("../components/dashboard/NavBar").catch(() => ({ default: () => <div>Error loading NavBar</div> }))
-);
-const SideBarTwo = lazy(() =>
-  import("../components/dashboard/SideBarTwo").catch(() => ({ default: () => <div>Error loading Sidebar</div> }))
-);
+const NavBar = lazy(() => import("../components/dashboard/NavBar"));
+const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
+const SideBar = lazy(() => import("../components/dashboard/SideBar"));
+const SideBarItem = lazy(() => import("../components/dashboard/SideBarItem"));
+const SideBarItemTwo = lazy(() => import("../components/dashboard/SideBarItemTwo"));
+const DashboardLayout = lazy(() => import("../layout/DashboardLayout"));
+const Home = lazy(() => import("../pages/Dashboard"));
+const ChatInterface = lazy(() => import("../pages/ChatInterface"));
+const ComingSoon = lazy(() => import("../pages/ComingSoon"));
+const FileManager = lazy(() => import("../pages/FileManager"));
 
-const SideBar = lazy(() =>
-  import("../components/dashboard/SideBar").catch(() => ({ default: () => <div>Error loading Sidebar</div> }))
-);
-const SideBarItem = lazy(() =>
-  import("../components/dashboard/SideBarItem").catch(() => ({ default: () => <div>Error loading SidebarItem</div> }))
-);
-const SideBarItemTwo = lazy(() =>
-  import("../components/dashboard/SideBarItemTwo").catch(() => ({
-    default: () => <div>Error loading SidebarItemTwo</div>,
-  }))
-);
-
-const DashboardLayout = lazy(() =>
-  import("../layout/DashboardLayout").catch(() => ({ default: () => <div>Error loading Layout</div> }))
-);
-const Home = lazy(() =>
-  import("../pages/Dashboard").catch(() => ({ default: () => <div>Error loading Home</div> }))
-);
-const ChatInterface = lazy(() =>
-  import("../pages/ChatInterface").catch(() => ({ default: () => <div>Error loading Chat</div> }))
-);
-const ComingSoon = lazy(() =>
-  import("../pages/ComingSoon").catch(() => ({ default: () => <div>Error loading ComingSoon</div> }))
-);
-const FileManager = lazy(() =>
-  import("../pages/FileManager").catch(() => ({ default: () => <div>Error loading ComingSoon</div> }))
-);
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
+  const { fetchContacts } = useChat();
+  const { state, dispatch } = useContext(DashboardContext);
 
   const options = [...dashboardOptions, ...utilOptions, ...dashboardTabs];
-  const { state, dispatch } = useContext(DashboardContext);  // Access state and dispatch from RouterContext
-  const [SidebarComponent, setSidebarComponent] = useState(() => SideBar); // Default sidebar
-  const [SidebarItemComponent, setSidebarItemComponent] = useState(() => SideBarItem); // Default sidebar
-  const [option, setOption] = useState(dashboardOptions); // Default sidebar
- 
-  // Handle Sidebar change based on route
+
+  const [SidebarComponent, setSidebarComponent] = useState(() => SideBar);
+  const [SidebarItemComponent, setSidebarItemComponent] = useState(() => SideBarItem);
+  const [option, setOption] = useState(dashboardOptions);
+
+  // Fetch Contacts using React Query
+  const { data: contacts, isLoading } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: fetchContacts,
+    enabled: state?.type === "CHAT", // Fetch only when in chat
+  });
+
   useEffect(() => {
-    const matchedOption = options.find((opt) => pathname===opt.route);
+    const matchedOption = options.find((opt) => pathname === opt.route);
     if (matchedOption) {
       dispatch(matchedOption);
-    } 
+    }
 
     if (matchedOption?.type === "CHAT") {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
-      setOption(contactList)
+      setOption(contacts?.data || []);
     } else {
       setSidebarComponent(() => SideBar);
       setSidebarItemComponent(() => SideBarItem);
-      setOption(dashboardOptions)
+      setOption(dashboardOptions);
     }
-  
-  }, [pathname]);
+  }, [pathname, contacts]);
 
   const toggleIsOpen = () => setIsOpen(!isOpen);
 
@@ -84,55 +70,40 @@ function useDashBoardRoute() {
           }}
         >
           {/* Sidebar */}
-          <SidebarComponent
-            authDetails={authDetails}
-            toogleIsOpen={toggleIsOpen}
-            isMenuOpen={isOpen}
-            state={state}
-          >
+          <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} state={state}>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-[10px]">
+                {option?.map((currentOption, idx) => (
+                  <SidebarItemComponent key={idx} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
+                ))}
+              </ul>
+            )}
+
             <ul className="flex flex-col gap-[10px]">
-              {option.map((currentOption, idx) => (
-                <SidebarItemComponent
-                  key={idx}
-                  data={currentOption}
-                  dispatch={dispatch}
-                  state={state}
-                  setIsOpen={setIsOpen}
-                />
-              ))}
-            </ul>
-            <ul className="flex flex-col gap-[10px]">
-              {utilOptions.map((currentOption) => (
-                <SidebarItemComponent
-                  key={currentOption.type}
-                  data={currentOption}
-                  dispatch={dispatch}
-                  state={state}
-                  setIsOpen={setIsOpen}
-                />
+              {utilOptions?.map((currentOption) => (
+                <SidebarItemComponent key={currentOption.type} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
               ))}
             </ul>
           </SidebarComponent>
 
           {/* Main Content */}
           <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
-            <NavBar
-              title={state?.title}
-              toogleIsOpen={toggleIsOpen}
-              isMenuOpen={isOpen}
-              user={authDetails?.user}
-            />
+            <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
             <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              {/*<Suspense fallback={<Fallback />}>*/}
+              <Suspense fallback={<Fallback />}>
                 <Routes>
-                  <Route path="/" element={<DashboardLayout />} >
+                  <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
-              {/*</Suspense>*/}
+              </Suspense>
             </div>
           </div>
         </main>

@@ -57,44 +57,66 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         )}
                     </div>
                     <p className="mt-4 mb-2 font-medium text-xl text-center">Secure Contact</p>
+                    {children[0]?.length > 0 ? (
+                        <>
+                            <ul className="overflow-y-auto h-80">{children[0]}</ul>
+                            <ul className="flex flex-col gap-[10px] mt-20">
+                                {chatUtilOptions.map((currentOption, idx) => (
+                                    <li
+                                        key={idx}
+                                        onClick={navigateToPage}
+                                        className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium ${state?.type === currentOption?.type ? "bg-black text-olive" : "bg-none"
+                                            }`}
+                                    >
+                                        <Link className="flex items-center gap-3">
+                                            <figure className="flex-shrink-0 relative w-12 h-12 bg-gray-300 rounded-full">
+                                                <img src={currentOption?.image} alt={currentOption?.title} className="rounded-full" />
+                                                <span className={`${currentOption?.status === "Online"
+                                                    ? "bg-green-500"
+                                                    : currentOption?.status === "Busy"
+                                                        ? "bg-red-500"
+                                                        : currentOption?.status === "Away"
+                                                            ? "bg-yellow"
+                                                            : "bg-gray-400"
+                                                    } w-3 h-3 absolute bottom-[-2%] right-[5%] rounded-full border-[2px] border-white`}></span>
+                                            </figure>
+                                            <div>
+                                                <p className="font-bold text-sm">{currentOption?.name}</p>
+                                                <span className="text-oliveGreen text-xs ">{currentOption?.message?.length > 20 ? `${currentOption?.message?.slice(0, 20)}...` : currentOption?.message}</span>
+                                            </div>
+                                            <div className="flex flex-col items-end text-[10px]">
+                                                <span className="text-gray-200">Yesterday</span>
+                                                <span className="w-max font-medium px-2 py-1 bg-red-700 rounded-lg tet-center">12</span>
+                                            </div>
 
-                    <ul className="overflow-y-auto h-80">{children[0]}</ul>
-                    
-
-                    
-                    <ul className="flex flex-col gap-[10px] mt-20">
-                        {chatUtilOptions.map((currentOption, idx) => (
-                            <li
-                            key={idx}
-                                onClick={navigateToPage}
-                                className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium ${state?.type === currentOption?.type ? "bg-black text-olive" : "bg-none"
-                                    }`}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="w-16 h-16 text-gray-400"
                             >
-                                <Link className="flex items-center gap-3">
-                                    <figure className="flex-shrink-0 relative w-12 h-12 bg-gray-300 rounded-full">
-                                        <img src={currentOption?.image} alt={currentOption?.title} className="rounded-full" />
-                                        <span className={`${currentOption?.status === "Online"
-                                            ? "bg-green-500"
-                                            : currentOption?.status === "Busy"
-                                                ? "bg-red-500"
-                                                : currentOption?.status === "Away"
-                                                    ? "bg-yellow"
-                                                    : "bg-gray-400"
-                                            } w-3 h-3 absolute bottom-[-2%] right-[5%] rounded-full border-[2px] border-white`}></span>
-                                    </figure>
-                                    <div>
-                                        <p className="font-bold text-sm">{currentOption?.name}</p>
-                                        <span className="text-oliveGreen text-xs ">{currentOption?.message?.length >20 ? `${currentOption?.message?.slice(0,20)}...` : currentOption?.message}</span>
-                                    </div>
-                                    <div className="flex flex-col items-end text-[10px]">
-                                        <span className="text-gray-200">Yesterday</span>
-                                        <span className="w-max font-medium px-2 py-1 bg-red-700 rounded-lg tet-center">12</span>
-                                    </div>
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19.5 10.5V8.25a6.75 6.75 0 10-13.5 0V10.5M12 15v2.25m-3.75-3h7.5"
+                                />
+                            </svg>
+                            <p className="text-lg mt-2">No contacts available</p>
+                            <p className="text-sm text-gray-400 text-center">Start a conversation by adding new contacts.</p>
+                        </div>
+                    )}
 
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+
+
                 </nav>
             </motion.aside>
 
