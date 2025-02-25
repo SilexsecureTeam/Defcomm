@@ -37,6 +37,9 @@ function useDashBoardRoute() {
     queryKey: ["contacts"],
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT", // Fetch only when in chat
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when the page is focused
+      // refetchOnReconnect: true, // Refetch when the network reconnects
   });
 
   useEffect(() => {
