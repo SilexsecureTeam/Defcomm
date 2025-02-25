@@ -57,7 +57,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         )}
                     </div>
                     <p className="mt-4 mb-2 font-medium text-xl text-center">Secure Contact</p>
-                    {children[0]?.length > 0 ? (
+                    {children[0] ? (
                         <>
                             <ul className="overflow-y-auto h-80">{children[0]}</ul>
                             <ul className="flex flex-col gap-[10px] mt-20">
