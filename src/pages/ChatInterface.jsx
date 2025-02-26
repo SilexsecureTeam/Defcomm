@@ -10,7 +10,9 @@ import { useQuery } from "@tanstack/react-query";
 import { FaSpinner } from "react-icons/fa6";
 import SendMessage from "../components/Chat/SendMessage";
 import ChatFilePreview from "../components/Chat/ChatFilePreview";
-
+import call from "../assets/call.png";
+import { FaCog } from "react-icons/fa";
+import CallComponent from "../components/video-sdk/CallComponent";
 const ChatInterface = () => {
     const { selectedChatUser } = useContext(ChatContext);
     const [showCall, setShowCall] = useState(false);
@@ -21,6 +23,7 @@ const ChatInterface = () => {
         queryKey: ["chatMessages", selectedChatUser?.contact_id],
         queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
         refetchOnWindowFocus: true,
+        refetchInterval: 5000,
         enabled: !!selectedChatUser?.contact_id, // Only fetch if chat is selected
     });
 
@@ -66,7 +69,7 @@ const ChatInterface = () => {
             </div>
 
             {/* Chat Section */}
-            <div className="relative w-full lg:w-2/3 h-[80vh] bg-[#d0eb8e] pt-4 transition-all duration-300">
+            <div className="relative w-full lg:w-2/3 flex-1 h-[80vh] bg-[#d0eb8e] pt-4 transition-all duration-300">
                 <div ref={messageRef} className="flex-1 overflow-y-auto w-full h-full flex flex-col space-y-4 p-4 pb-10">
                     {selectedChatUser ? (
                         isLoading ? (
@@ -136,9 +139,12 @@ const ChatInterface = () => {
             </div>
 
             {/* Call Interface (Desktop) */}
-            <div className="w-1/3 hidden lg:block">
-                <CallInterface />
+            {selectedChatUser && (
+                <div className="w-[180px] hidden lg:block">
+                <CallInterface />  
             </div>
+            )
+            }
 
             {/* Call Interface (Mobile) */}
             <AnimatePresence>
@@ -149,7 +155,7 @@ const ChatInterface = () => {
                         exit={{ opacity: 0, y: 50 }}
                         className="w-80 h-max fixed lg:hidden top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
                     >
-                        <CallInterface />
+                         <CallComponent />
                         <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => setShowCall(false)}>
                             <MdClose size={24} />
                         </button>
