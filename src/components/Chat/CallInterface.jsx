@@ -1,44 +1,46 @@
 import React, { useState } from 'react'
 import { FaSignal } from "react-icons/fa";
 import logo from "../../assets/logo.png";
-import { PiSpeakerHighFill } from "react-icons/pi";
-import { AiOutlineAudioMuted } from "react-icons/ai";
-import { MdPersonAddAlt, MdPhoneInTalk } from "react-icons/md";
 
-const categories = [
-    { title: "Receiver", icon: <MdPhoneInTalk />, bg: "bg-green-600" },
-    { title: "Speaker", icon: <PiSpeakerHighFill />, bg: "bg-gray-700" },
-    { title: "Mute", icon: <AiOutlineAudioMuted />, bg: "bg-gray-700" },
-    { title: "New Call", icon: <MdPersonAddAlt />, bg: "bg-gray-700" },
-];
+import Modal from "../modal/Modal";
+import callImg from "../../assets/call.png";
+import { FaCog } from "react-icons/fa";
+import CallComponent from '../video-sdk/CallComponent';
+
 
 const CallInterface = () => {
-    const [call, setCall]=useState(false)
-  return (
-    <div className="w-full h-max bg-white p-4 py-10 shadow-md flex flex-col items-center mt-4 md:mt-0">
-    <p className="text-gray-700 text-center font-medium">Secure Call Initiated from <br/>
-    <small className="text-xs text-gray-500">Major John To Sgt Amos</small>
-    </p>
-    <p className="text-gray-500">Call encrypted: 00:03</p>
-    <button className="bg-oliveDark text-white py-2 px-4 rounded-lg mt-2 flex gap-3 items-center justify-around font-medium min-w-[180px]"><FaSignal className="flex-shrink-0" /> Checking call...</button>
-    <div className="grid grid-cols-2 gap-4 mt-4 text-white py-5" >
-        {categories.map((cat, index) => (
-            <div key={index} className={`${index > 0 ? "bg-[#1a2b12]" : "bg-green-600"} hover:bg-green-600/60 hover:text-gray-800 text-white cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center`}>
-                <span className="text-xl rounded-full">{cat.icon}</span>
-                <div>
-                    <p className="text-sm">{cat.title}</p>
+    const [call, setCall] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    return (
+        <>
+            <Modal isOpen={isOpen} closeModal={() => setIsOpen(false)}>
+                <CallComponent />
+            </Modal>
+
+
+            <div className="font-bold">
+                <div
+                    onClick={() => {
+                        setIsOpen(true);
+                    }}
+                    className="bg-oliveGreen hover:bg-green-600/60 text-white cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center min-h-40"
+                >
+                    <img src={callImg} alt="img" className="w-14" />
+                    <div>
+                        <p className="text-sm">Secure call</p>
+                    </div>
+                </div>
+
+                <div className="bg-oliveLight hover:bg-green-600/60 text-white cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center min-h-40">
+                    <FaCog size={40} />
+                    <div>
+                        <p className="text-sm">Settings</p>
+                    </div>
                 </div>
             </div>
-        ))}
-    </div>
-    <div className="relative mt-8 text-gray-700 font-medium">
-        <p className="absolute right-3 z-10 top-[-2px]">Secured by </p>
-        <img src={logo} alt="Defcomm Icon" className="reltive w-40 filter invert" />
-    </div>
-    
-    <button onClick={()=>setCall(!call)} className={`${call ? "bg-red-500":"bg-green-500"} text-white p-2 rounded-full mt-4 min-w-40 font-bold`}>{call ? "End Call":"Start Call"}</button>
-</div>
-  )
+            
+        </>
+    )
 }
 
 export default CallInterface
