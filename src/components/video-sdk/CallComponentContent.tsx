@@ -92,7 +92,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 message: "Meeting Join Failed",
                 error: error.message || "Something went wrong while joining the meeting.",
             });
-        } finally {
             setIsLoading(false);
         }
     };
