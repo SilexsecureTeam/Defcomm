@@ -118,7 +118,7 @@ const ChatInterface = () => {
                                                             <ChatFilePreview
                                                                 isMyChat={msg?.is_my_chat}
                                                                 fileType={msg?.message?.split(".")[1]} // e.g., "image/png", "application/pdf" msg?.file_type
-                                                                fileUrl={`${import.meta.env.VITE_BASE_URL}${msg?.message}`} // The file URL
+                                                                fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${msg?.message}`} // The file URL
                                                                 fileName={msg?.file_name} // The file name
                                                             />
                                                         ) : (

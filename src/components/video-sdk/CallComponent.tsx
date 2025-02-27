@@ -4,7 +4,6 @@ import { MdCallEnd } from "react-icons/md";
 import { createMeeting, getAuthToken } from "./Api";
 import {
   MeetingProvider,
-  MeetingConsumer,
   useMeeting,
 } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
@@ -92,10 +91,10 @@ const CallComponentContent = ({
 }: any) => {
   const meeting = useMeeting({
     onParticipantJoined: (participant) => {
-      console.log("🔹 Participant joined:", participant);
+      console.log("✅ Participant joined:", participant);
     },
     onParticipantLeft: (participant) => {
-      console.log("🔸 Participant left:", participant);
+      console.log("❌ Participant left:", participant);
     },
   });
 
@@ -103,6 +102,8 @@ const CallComponentContent = ({
   const numParticipants = Object.keys(participants).length;
 
   useEffect(() => {
+    console.log("👥 Current Participants:", numParticipants, participants);
+
     let callTimer: NodeJS.Timeout | null = null;
 
     if (numParticipants >= 2) {
@@ -131,24 +132,24 @@ const CallComponentContent = ({
       setIsLoading(true);
       try {
         let newMeetingId = meetingId;
-
+  
         if (!newMeetingId) {
           newMeetingId = await createMeeting();
-
+  
           if (!newMeetingId) {
             onFailure({ message: "Meeting Creation Failed", error: "No meeting ID was returned." });
             setIsLoading(false);
             return;
           }
-
+  
           console.log("✅ Meeting created with ID:", newMeetingId);
-
+  
           if (!messageData || !sendMessageUtil) {
             onFailure({ message: "Failed to Send Invite", error: "Missing chat data or sendMessageUtil." });
             setIsLoading(false);
             return;
           }
-
+  
           console.log("📨 Sending meeting invite...");
           await sendMessageUtil({
             client,
@@ -162,10 +163,19 @@ const CallComponentContent = ({
         } else {
           console.log(`🔗 Joining existing meeting: ${newMeetingId}`);
         }
-
+  
         setMeetingId(newMeetingId);
         setIsMeetingActive(true);
         setCallSummary(null);
+  
+        // 🔥 Force the host to join the meeting
+        if (meeting?.join) {
+          console.log("👤 Joining meeting as host...");
+          meeting.join();
+        } else {
+          console.error("❌ Meeting instance is undefined. Cannot join.");
+        }
+  
       } catch (error: any) {
         console.error("❌ Error handling meeting:", error);
         onFailure({
@@ -177,6 +187,7 @@ const CallComponentContent = ({
       }
     }
   };
+  
 
   return (
     <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
@@ -206,28 +217,11 @@ const CallComponentContent = ({
         toggleSpeaker={() => setIsSpeakerOn((prev) => !prev)}
       />
 
-      <div className="relative mt-8 text-gray-700 font-medium">
-        <p className="absolute right-3 z-10 top-[-2px]">Secured by</p>
-        <img src={logo} alt="Defcomm Icon" className="relative w-40 filter invert" />
-      </div>
-
       <button
         onClick={handleToggleMeeting}
-        className={`${
-          isMeetingActive ? "bg-red-500" : "bg-green-600"
-        } text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2`}
+        className={`${isMeetingActive ? "bg-red-500" : "bg-green-600"} text-white p-2 rounded-full mt-4`}
       >
-        {isLoading ? (
-          <FaSpinner size={24} className="animate-spin" />
-        ) : isMeetingActive ? (
-          <>
-            <MdCallEnd className="text-lg" /> End Call
-          </>
-        ) : meetingId ? (
-          "Join Call"
-        ) : (
-          "Start Call"
-        )}
+        {isLoading ? <FaSpinner className="animate-spin" /> : isMeetingActive ? "End Call" : meetingId ? "Join Call" : "Start Call"}
       </button>
     </div>
   );
