@@ -191,7 +191,7 @@ const ChatInterface = () => {
                         exit={{ opacity: 0, y: 50 }}
                         className="w-80 h-max fixed top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
                     >
-                        <CallComponent meetingId={meetingId} />
+                        <CallComponent initialMeetingId={meetingId} />
                         <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => setShowCall(false)}>
                             <MdClose size={24} />
                         </button>
