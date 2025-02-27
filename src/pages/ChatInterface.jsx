@@ -14,6 +14,7 @@ import call from "../assets/call.png";
 import { FaCog } from "react-icons/fa";
 import CallComponent from "../components/video-sdk/CallComponent";
 import ChatCallInvite from "../components/Chat/ChatCallInvite";
+import MeetingVid from "../components/video-sdk/MeetingVid";
 const ChatInterface = () => {
     const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
     const [showCall, setShowCall] = useState(false);
@@ -177,7 +178,8 @@ const ChatInterface = () => {
             {/* Call Interface (Desktop) */}
             {selectedChatUser && (
                 <div className="w-max hidden lg:block">
-                    <CallInterface />
+                    {/* <CallInterface /> */}
+                    <MeetingVid />
                 </div>
             )
             }
