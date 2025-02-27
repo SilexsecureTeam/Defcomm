@@ -9,17 +9,26 @@ import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
 import CallInfo from "../Chat/CallInfo";
 import CallControls from "../Chat/CallControls";
+import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
+import { axiosClient } from "../../services/axios-client";
+import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
+import { onFailure } from "../../utils/notifications/OnFailure";
 
-function CallComponent() {
-  const [meetingId, setMeetingId] = useState<string | null>(null);
+function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
+  const [meetingId, setMeetingId] = useState<string | null>(initialMeetingId || null);
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [callSummary, setCallSummary] = useState<{ caller: string; duration: number } | null>(null);
+
   const { authDetails } = useContext(AuthContext);
   const { selectedChatUser } = useContext(ChatContext);
+  const messageData = selectedChatUser?.chat_meta;
+
+  const client = axiosClient(authDetails?.access_token);
+  const sendMessageMutation = useSendMessageMutation(client);
 
   useEffect(() => {
     let callTimer: NodeJS.Timeout | null = null;
@@ -47,21 +56,74 @@ function CallComponent() {
     } else {
       setIsLoading(true);
       try {
-        const newMeetingId = await createMeeting();
+        let newMeetingId = meetingId; // Use existing meetingId if available
+
+        if (!newMeetingId) {
+          newMeetingId = await createMeeting();
+
+          if (!newMeetingId) {
+            onFailure({
+              message: "Meeting Creation Failed",
+              error: "No meeting ID was returned.",
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          console.log("✅ Meeting created with ID:", newMeetingId);
+
+          if (!messageData || !sendMessageUtil) {
+            onFailure({
+              message: "Failed to Send Invite",
+              error: "Missing chat data or sendMessageUtil.",
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          console.log("📨 Sending meeting invite...");
+
+          await sendMessageUtil({
+            client,
+            message: `CALL_INVITE:${newMeetingId}`,
+            file: null,
+            chat_user_type: messageData.chat_user_type,
+            chat_user_id: messageData.chat_user_id,
+            chat_id: messageData.chat_id,
+            sendMessageMutation,
+          });
+        } else {
+          console.log(`🔗 Joining existing meeting: ${newMeetingId}`);
+        }
+
         setMeetingId(newMeetingId);
         setIsMeetingActive(true);
         setCallSummary(null);
-      } catch (error) {
-        console.error("Failed to create meeting:", error);
+      } catch (error: any) {
+        console.error("❌ Error handling meeting:", error);
+        onFailure({
+          message: "Meeting Start/Join Failed",
+          error: error.message || "Something went wrong while starting/joining the meeting.",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   };
 
   return (
     <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
       <CallSummary callSummary={callSummary} />
-      {!isMeetingActive ? <p className="text-gray-700 text-center font-medium">You can place a call to <br/> <small className="text-xs text-gray-500">{selectedChatUser?.contact_name}</small></p> : <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />}
+
+      {!isMeetingActive ? (
+        <p className="text-gray-700 text-center font-medium">
+          You can place a call to <br />
+          <small className="text-xs text-gray-500">{selectedChatUser?.contact_name}</small>
+        </p>
+      ) : (
+        <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
+      )}
+
       <CallControls
         isMuted={isMuted}
         isSpeakerOn={isSpeakerOn}
@@ -85,7 +147,7 @@ function CallComponent() {
             <MdCallEnd className="text-lg" /> End Call
           </>
         ) : (
-          "Start Call"
+          meetingId ? "Join Call" : "Start Call"
         )}
       </button>
 
@@ -99,7 +161,9 @@ function CallComponent() {
           token={getAuthToken()}
         >
           <MeetingConsumer>
-            {({ join }) => <button onClick={join} className="hidden"></button>}
+            {({ join }) => (
+              <button onClick={join} className="hidden"></button>
+            )}
           </MeetingConsumer>
         </MeetingProvider>
       )}
