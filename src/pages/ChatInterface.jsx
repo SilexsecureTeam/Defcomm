@@ -63,7 +63,7 @@ const ChatInterface = () => {
     };
 
     const handleAcceptCall = (msg) => {
-        setMeetingId(msg?.includes("CALL_INVITE") ? msg.slice("CALL_INVITE".length) : "");
+        setMeetingId(msg?.slice("CALL_INVITE".length) : "");
         setShowCall(true); // This will open the CallComponent
     };
     
