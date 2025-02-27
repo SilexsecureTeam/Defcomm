@@ -10,9 +10,9 @@ interface ChatCallInviteProps {
 
 function ChatCallInvite({ isMyChat, onAcceptCall, status, caller }: ChatCallInviteProps) {
     return (
-        <div className={`flex items-center gap-3 p-3 rounded-lg max-w-60 shadow-md font-medium text-sm ${isMyChat ? "bg-oliveLight text-white self-end" : "bg-gray-100 text-black self-start"}`}>
+        <div className={`flex flex-wrap items-center gap-3 p-3 rounded-lg w-full shadow-md font-medium text-sm ${isMyChat ? "bg-oliveLight text-white self-end" : "bg-gray-100 text-black self-start"}`}>
             <MdCall size={24} className={`text-${status === "Ringing..." ? "green" : "red"}-500`} />
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-col">
                 <span className="truncate">
                     {isMyChat
                         ? status === "Ringing..." 
