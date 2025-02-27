@@ -23,7 +23,6 @@ const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
         meetingId: providerMeetingId, // Use updated meetingId
         name: authDetails?.user?.name || "You",
         participantId: authDetails?.user?.role,
-        mode: "SEND_AND_RECV",
         micEnabled: true,
         webcamEnabled: false,
       }}

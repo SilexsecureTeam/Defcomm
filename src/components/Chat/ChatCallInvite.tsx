@@ -32,7 +32,7 @@ function ChatCallInvite({ isMyChat, onAcceptCall, status, caller }: ChatCallInvi
                     onClick={onAcceptCall}
                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
                 >
-                    Accept
+                   {isMyChat ? "Join" : "Accept"}
                 </button>
             )}
         </div>

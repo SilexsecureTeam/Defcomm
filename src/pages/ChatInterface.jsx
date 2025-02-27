@@ -63,8 +63,8 @@ const ChatInterface = () => {
     };
 
     const handleAcceptCall = (msg) => {
-        setMeetingId(msg?.message?.slice("CALL_INVITE".length));
-        console.log(msg?.message?.slice("CALL_INVITE".length))
+        setMeetingId(msg?.message?.slice("CALL_INVITE:".length));
+        console.log(msg?.message?.slice("CALL_INVITE:".length))
         setShowCall(true); // This will open the CallComponent
     };
     
@@ -111,7 +111,7 @@ const ChatInterface = () => {
                                             )}
                                             <div className={msg?.is_my_chat === "yes" ? "self-end" : msg?.is_my_chat === "system" ? "text-center text-gray-500" : "self-start"}>
                                                 <div className={msg?.is_my_chat === "yes" ? "self-end" : "self-start"}>
-                                                    <div className={msg?.is_my_chat === "yes" ? "bg-oliveDark text-white p-2 rounded-lg shadow-md w-max max-w-60" : "bg-white p-2 rounded-lg shadow-md w-max max-w-60"}>
+                                                    <div className={msg?.is_my_chat === "yes" ? "bg-oliveDark text-white p-2 rounded-lg shadow-md w-max max-w-60 break-all" : "bg-white p-2 rounded-lg shadow-md w-max max-w-60 break-all"}>
                                                         {msg?.type === "audio" ? (
                                                             <CustomAudioMessage />
                                                         ) : msg?.is_file === "yes" && msg?.message ? (
