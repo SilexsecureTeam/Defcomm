@@ -30,7 +30,7 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
   const client = axiosClient(authDetails?.access_token);
   const sendMessageMutation = useSendMessageMutation(client);
 
-  const { participants } = useMeeting();
+  const { participants = [] } = useMeeting() || {};
   const numParticipants = Object.keys(participants).length;
 
   useEffect(() => {
