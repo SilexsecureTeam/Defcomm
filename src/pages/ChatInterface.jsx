@@ -133,7 +133,7 @@ const ChatInterface = () => {
                                                                             isMyChat={msg?.is_my_chat === "yes"} // Ensure you pass a valid comparison
                                                                             onAcceptCall={() => handleAcceptCall(msg)} // Define `handleAcceptCall`
                                                                             status={timeDifference <= 30 ? "Ringing..." : "Call Ended"}
-                                                                            caller={msg?.user_to_name} // Assuming `sender_name` exists
+                                                                            caller={selectedChatUser?.contact_name} // Assuming `sender_name` exists
                                                                         />
                                                                     );
                                                                 })()
