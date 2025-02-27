@@ -16,12 +16,11 @@ const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
         setProviderMeetingId(meetingId);
     }
 }, [meetingId]);
-
   return (
     <MeetingProvider
       config={{
         meetingId: providerMeetingId, // Use updated meetingId
-        name: "devteam's Org",
+        name: authDetails?.user?.name || "You",
         participantId: authDetails?.user?.role,
         micEnabled: true,
         webcamEnabled: false,

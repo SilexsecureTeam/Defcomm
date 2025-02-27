@@ -107,26 +107,31 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         join();
     };
 
-   useEffect(() => {
-    let callTimer: NodeJS.Timeout | null = null;
-
-    if (isMeetingActive) {
-        const participantCount = Object.keys(participants).length;
-
-        if (participantCount >= 2) { // Ensure at least 2 participants
-            setIsRinging(false);
-            callTimer = setInterval(() => {
-                setCallDuration((prev) => prev + 1);
-            }, 1000);
-        } else {
-            setIsRinging(true);
+    useEffect(() => {
+        let callTimer: NodeJS.Timeout | null = null;
+    
+        if (isMeetingActive) {
+            const participantCount = Object.keys(participants).length;
+    
+            if (participantCount >= 2) { // Ensure at least 2 participants
+                setIsRinging(false);
+    
+                // Prevent unnecessary resets
+                if (callDuration === 0) {
+                    callTimer = setInterval(() => {
+                        setCallDuration((prev) => prev + 1);
+                    }, 1000);
+                }
+            } else {
+                setIsRinging(true);
+            }
         }
-    }
-
-    return () => {
-        if (callTimer) clearInterval(callTimer);
-    };
-}, [isMeetingActive, participants]);
+    
+        return () => {
+            if (callTimer) clearInterval(callTimer);
+        };
+    }, [isMeetingActive, participants, callDuration]); // Add `callDuration` to dependencies
+    
 
 
     return (
