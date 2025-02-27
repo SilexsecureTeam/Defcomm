@@ -2,7 +2,11 @@ import React, { useState, useContext, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
 import { createMeeting, getAuthToken } from "./Api";
-import { MeetingProvider, MeetingConsumer, useMeeting } from "@videosdk.live/react-sdk";
+import {
+  MeetingProvider,
+  MeetingConsumer,
+  useMeeting,
+} from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import logo from "../../assets/logo.png";
@@ -14,7 +18,7 @@ import { axiosClient } from "../../services/axios-client";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { onFailure } from "../../utils/notifications/OnFailure";
 
-function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
+const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
   const [meetingId, setMeetingId] = useState<string | null>(initialMeetingId || null);
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,18 +34,83 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
   const client = axiosClient(authDetails?.access_token);
   const sendMessageMutation = useSendMessageMutation(client);
 
-  const { participants = [] } = useMeeting() || {};
+  return (
+    <MeetingProvider
+      config={{
+        meetingId: meetingId || "",
+        micEnabled: !isMuted,
+        name: authDetails?.user?.name || `User-${authDetails?.user?.id}`,
+        participantId: authDetails?.user?.id || `random-${Math.random()}`,
+      }}
+      token={getAuthToken()}
+    >
+      <CallComponentContent
+        meetingId={meetingId}
+        setMeetingId={setMeetingId}
+        isMeetingActive={isMeetingActive}
+        setIsMeetingActive={setIsMeetingActive}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        isMuted={isMuted}
+        setIsMuted={setIsMuted}
+        isSpeakerOn={isSpeakerOn}
+        setIsSpeakerOn={setIsSpeakerOn}
+        callDuration={callDuration}
+        setCallDuration={setCallDuration}
+        callSummary={callSummary}
+        setCallSummary={setCallSummary}
+        selectedChatUser={selectedChatUser}
+        authDetails={authDetails}
+        messageData={messageData}
+        client={client}
+        sendMessageMutation={sendMessageMutation}
+      />
+    </MeetingProvider>
+  );
+};
+
+const CallComponentContent = ({
+  meetingId,
+  setMeetingId,
+  isMeetingActive,
+  setIsMeetingActive,
+  isLoading,
+  setIsLoading,
+  isMuted,
+  setIsMuted,
+  isSpeakerOn,
+  setIsSpeakerOn,
+  callDuration,
+  setCallDuration,
+  callSummary,
+  setCallSummary,
+  authDetails,
+  selectedChatUser,
+  messageData,
+  client,
+  sendMessageMutation,
+}: any) => {
+  const meeting = useMeeting({
+    onParticipantJoined: (participant) => {
+      console.log("🔹 Participant joined:", participant);
+    },
+    onParticipantLeft: (participant) => {
+      console.log("🔸 Participant left:", participant);
+    },
+  });
+
+  const participants = meeting?.participants || {};
   const numParticipants = Object.keys(participants).length;
 
   useEffect(() => {
     let callTimer: NodeJS.Timeout | null = null;
 
-    if (numParticipants === 2) {
+    if (numParticipants >= 2) {
       callTimer = setInterval(() => {
         setCallDuration((prev) => prev + 1);
       }, 1000);
     } else {
-      setCallDuration(0); // Reset duration when waiting for the other user
+      setCallDuration(0);
     }
 
     return () => {
@@ -123,7 +192,11 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
       )}
 
       <p className="text-gray-700 text-center font-medium mt-2">
-        {numParticipants < 2 ? "Waiting for the other user to join..." : `Call Duration: ${callDuration}s`}
+        {numParticipants === 0
+          ? "Waiting for the other user to join..."
+          : numParticipants === 1
+          ? "You are in the call alone."
+          : `Call Duration: ${callDuration}s`}
       </p>
 
       <CallControls
@@ -140,7 +213,9 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
 
       <button
         onClick={handleToggleMeeting}
-        className={`${isMeetingActive ? "bg-red-500" : "bg-green-600"} text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2`}
+        className={`${
+          isMeetingActive ? "bg-red-500" : "bg-green-600"
+        } text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2`}
       >
         {isLoading ? (
           <FaSpinner size={24} className="animate-spin" />
@@ -148,30 +223,14 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
           <>
             <MdCallEnd className="text-lg" /> End Call
           </>
+        ) : meetingId ? (
+          "Join Call"
         ) : (
-          meetingId ? "Join Call" : "Start Call"
+          "Start Call"
         )}
       </button>
-
-      {isMeetingActive && meetingId && (
-        <MeetingProvider
-          config={{
-            meetingId,
-            micEnabled: !isMuted,
-            name: authDetails?.user?.name || "You",
-          }}
-          token={getAuthToken()}
-        >
-          <MeetingConsumer>
-            {({ join }) => (
-              <button onClick={join} className="hidden"></button>
-            )}
-          </MeetingConsumer>
-        </MeetingProvider>
-      )}
     </div>
   );
-}
+};
 
 export default CallComponent;
-            
