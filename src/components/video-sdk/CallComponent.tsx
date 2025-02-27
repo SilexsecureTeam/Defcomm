@@ -174,10 +174,4 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
 }
 
 export default CallComponent;
-          ider>
-      )}
-    </div>
-  );
-}
-
-export default CallComponent;
+            
