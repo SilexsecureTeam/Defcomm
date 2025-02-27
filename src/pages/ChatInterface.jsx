@@ -13,9 +13,11 @@ import ChatFilePreview from "../components/Chat/ChatFilePreview";
 import call from "../assets/call.png";
 import { FaCog } from "react-icons/fa";
 import CallComponent from "../components/video-sdk/CallComponent";
+import ChatCallInvite from "../components/Chat/ChatCallInvite";
 const ChatInterface = () => {
-    const { selectedChatUser } = useContext(ChatContext);
+    const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
     const [showCall, setShowCall] = useState(false);
+    const [meetingId, setMeetingId] = useState(false);
     const { fetchChatMessages } = useChat();
     const messageRef = useRef(null);
     // Fetch messages using React Query
@@ -28,8 +30,13 @@ const ChatInterface = () => {
     });
 
     useEffect(() => {
-        if (messageRef.current) {
-            messageRef.current.scrollTop = messageRef.current.scrollHeight - 50; // Offset of 50px
+        if (messages?.chat_meta) {
+            setSelectedChatUser((prev) => {
+                return { ...prev, chat_meta: messages.chat_meta };
+            });
+        }
+        if (messages?.data && messageRef.current) {
+            messageRef.current.scrollTo({ top: messageRef.current.scrollHeight, behavior: "smooth" });
         }
     }, [messages]);
 
@@ -54,6 +61,12 @@ const ChatInterface = () => {
             });
         }
     };
+
+    const handleAcceptCall = (msg) => {
+        setMeetingId(msg?.includes("CALL_INVITE") ? msg.slice("CALL_INVITE".length) : "");
+        setShowCall(true); // This will open the CallComponent
+    };
+    
 
     return (
         <div className="relative flex flex-col lg:flex-row gap-4 h-full">
@@ -108,14 +121,36 @@ const ChatInterface = () => {
                                                                 fileName={msg?.file_name} // The file name
                                                             />
                                                         ) : (
-                                                            msg?.message
+                                                            msg?.message.startsWith("CALL_INVITE") ? (
+                                                                (() => {
+                                                                    const callTimestamp = new Date(msg?.updated_at).getTime();
+                                                                    const currentTime = Date.now();
+                                                                    const timeDifference = (currentTime - callTimestamp) / 1000; // in seconds
+
+                                                                    return (
+                                                                        <ChatCallInvite
+                                                                            isMyChat={msg?.is_my_chat === "yes"} // Ensure you pass a valid comparison
+                                                                            onAcceptCall={() => handleAcceptCall(msg)} // Define `handleAcceptCall`
+                                                                            status={timeDifference <= 30 ? "Ringing..." : "Call Ended"}
+                                                                            caller={msg?.user_to_name} // Assuming `sender_name` exists
+                                                                        />
+                                                                    );
+                                                                })()
+                                                            ) : (
+                                                                msg?.message
+                                                            )
+
+
                                                         )}
                                                     </div>
-                                                    {msg?.time && (
-                                                        <div className={`${msg?.is_my_chat === "yes" ? "text-right" : "text-left"} text-xs mt-1`}>
-                                                            {new Date(msg?.updated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}
-                                                        </div>
-                                                    )}
+
+                                                    <div className={`${msg?.is_my_chat === "yes" ? "text-right" : "text-left"} text-xs mt-1`}>
+                                                        {new Date(msg?.updated_at).toLocaleTimeString("en-GB", {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                            hour12: false,
+                                                        })}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </React.Fragment>
@@ -140,9 +175,9 @@ const ChatInterface = () => {
 
             {/* Call Interface (Desktop) */}
             {selectedChatUser && (
-                <div className="w-[180px] hidden lg:block">
-                <CallInterface />  
-            </div>
+                <div className="w-max hidden lg:block">
+                    <CallInterface />
+                </div>
             )
             }
 
@@ -155,7 +190,7 @@ const ChatInterface = () => {
                         exit={{ opacity: 0, y: 50 }}
                         className="w-80 h-max fixed lg:hidden top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
                     >
-                         <CallComponent />
+                        <CallComponent meetingId={meetingId || ""} />
                         <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => setShowCall(false)}>
                             <MdClose size={24} />
                         </button>
