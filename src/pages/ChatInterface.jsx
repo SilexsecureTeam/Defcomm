@@ -64,6 +64,7 @@ const ChatInterface = () => {
 
     const handleAcceptCall = (msg) => {
         setMeetingId(msg?.message?.slice("CALL_INVITE".length));
+        console.log(msg?.message?.slice("CALL_INVITE".length))
         setShowCall(true); // This will open the CallComponent
     };
     
@@ -188,9 +189,9 @@ const ChatInterface = () => {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="w-80 h-max fixed lg:hidden top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
+                        className="w-80 h-max fixed top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
                     >
-                        <CallComponent meetingId={meetingId || ""} />
+                        <CallComponent meetingId={meetingId} />
                         <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => setShowCall(false)}>
                             <MdClose size={24} />
                         </button>
