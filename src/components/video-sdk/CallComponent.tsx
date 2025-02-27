@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
 import { createMeeting, getAuthToken } from "./Api";
-import { MeetingProvider, MeetingConsumer } from "@videosdk.live/react-sdk";
+import { MeetingProvider, MeetingConsumer, useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import logo from "../../assets/logo.png";
@@ -30,19 +30,24 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
   const client = axiosClient(authDetails?.access_token);
   const sendMessageMutation = useSendMessageMutation(client);
 
+  const { participants } = useMeeting();
+  const numParticipants = Object.keys(participants).length;
+
   useEffect(() => {
     let callTimer: NodeJS.Timeout | null = null;
 
-    if (isMeetingActive) {
+    if (numParticipants === 2) {
       callTimer = setInterval(() => {
         setCallDuration((prev) => prev + 1);
       }, 1000);
+    } else {
+      setCallDuration(0); // Reset duration when waiting for the other user
     }
 
     return () => {
       if (callTimer) clearInterval(callTimer);
     };
-  }, [isMeetingActive]);
+  }, [numParticipants]);
 
   const handleToggleMeeting = async () => {
     if (isMeetingActive) {
@@ -56,16 +61,13 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
     } else {
       setIsLoading(true);
       try {
-        let newMeetingId = meetingId; // Use existing meetingId if available
+        let newMeetingId = meetingId;
 
         if (!newMeetingId) {
           newMeetingId = await createMeeting();
 
           if (!newMeetingId) {
-            onFailure({
-              message: "Meeting Creation Failed",
-              error: "No meeting ID was returned.",
-            });
+            onFailure({ message: "Meeting Creation Failed", error: "No meeting ID was returned." });
             setIsLoading(false);
             return;
           }
@@ -73,16 +75,12 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
           console.log("✅ Meeting created with ID:", newMeetingId);
 
           if (!messageData || !sendMessageUtil) {
-            onFailure({
-              message: "Failed to Send Invite",
-              error: "Missing chat data or sendMessageUtil.",
-            });
+            onFailure({ message: "Failed to Send Invite", error: "Missing chat data or sendMessageUtil." });
             setIsLoading(false);
             return;
           }
 
           console.log("📨 Sending meeting invite...");
-
           await sendMessageUtil({
             client,
             message: `CALL_INVITE:${newMeetingId}`,
@@ -123,6 +121,10 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
       ) : (
         <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
       )}
+
+      <p className="text-gray-700 text-center font-medium mt-2">
+        {numParticipants < 2 ? "Waiting for the other user to join..." : `Call Duration: ${callDuration}s`}
+      </p>
 
       <CallControls
         isMuted={isMuted}
@@ -166,6 +168,13 @@ function CallComponent({ initialMeetingId }: { initialMeetingId?: string }) {
             )}
           </MeetingConsumer>
         </MeetingProvider>
+      )}
+    </div>
+  );
+}
+
+export default CallComponent;
+          ider>
       )}
     </div>
   );
