@@ -21,7 +21,7 @@ const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
       config={{
         meetingId: providerMeetingId, // Use updated meetingId
         name: authDetails?.user?.name || "You",
-        participantId: authDetails?.user?.role,
+        participantId: authDetails?.user?.id,
         micEnabled: true,
         webcamEnabled: false,
         mode: "CONFERENCE",
