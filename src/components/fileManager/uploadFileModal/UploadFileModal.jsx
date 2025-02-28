@@ -2,11 +2,14 @@ import React, { useState, useContext } from "react";
 import { axiosClient } from "../../../services/axios-client";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
+import useFileManager from "../../../hooks/useFileManager";
 
 const UploadFileModal = ({ isOpen, onClose }) => {
 
     const { authDetails } = useContext(AuthContext);
     const client = axiosClient(authDetails?.access_token);
+
+    const { fetchFiles } = useFileManager();
 
     const [form, setForm] = useState({
         fileLabel: "",
@@ -49,7 +52,10 @@ const UploadFileModal = ({ isOpen, onClose }) => {
             });
 
             console.log("Upload response:", response.data);
-            toast.success(response.data.message || "File uploaded successfully!");
+            toast.success(response.data.message || "File uploaded successfully!", {
+                id: toastId,
+            });
+            toast.dismiss(toastId);
             //Clear form data
             setForm({
                 fileLabel: "",
@@ -57,9 +63,13 @@ const UploadFileModal = ({ isOpen, onClose }) => {
                 file: null,
             });
             onClose();
+            await fetchFiles(); // Fetch files to update files            
         } catch (error) {
             console.error("Upload failed:", error);
-            toast.error(error.response.data.message || "Failed to upload file. Please try again.");
+            toast.error(error.response.data.message || "Failed to upload file. Please try again.",{
+                id: toastId,
+            });
+            toast.dismiss(toastId);
         } finally {
             setLoading(false);
             toast.dismiss(toastId);
