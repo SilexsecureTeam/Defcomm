@@ -38,7 +38,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         onMeetingLeft: () => {
             setIsMeetingActive(false);
             setCallDuration(0);
-            setMeetingId(null);
+            
         },
         onError: (error) => {
             onFailure({ message: "Technical Error", error: error?.message || "An error occurred" });
@@ -110,7 +110,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     let callTimer: NodeJS.Timeout | null = null;
 
     if (isMeetingActive) {
-        const participantCount = Object.keys(participants).length;
+        const participantCount = [...participants?.values())]?.length;
 
         if (participantCount >= 2) { // Ensure at least 2 participants
             setIsRinging(false);
@@ -156,7 +156,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                     {isRinging && <p className="text-gray-500 text-lg font-semibold">Ringing...</p>}
                     <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
                     <CallControls />
-                    <button onClick={() => leave()} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                    <button onClick={() => {setMeetingId(null); leave()}} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                         <MdCallEnd /> End Call
                     </button>
                 </>
