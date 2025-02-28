@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react"; 
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
 import CallInfo from "../Chat/CallInfo";
@@ -9,7 +9,7 @@ import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { createMeeting } from "./Api";
 import { FaSpinner } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
-import { useMeeting } from "@videosdk.live/react-sdk";
+import { MeetingProvider, useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
@@ -39,38 +39,22 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             setIsMeetingActive(true);
             onSuccess({ message: "Call Started", success: "You have successfully joined the interview" });
 
-            // Ensure the microphone is turned on
-            if (!localMicOn) {
-                console.log("🔊 Toggling mic on...");
-                toggleMic();
-            }
+            if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
-            console.log("🔴 Meeting Left");
-            setIsMeetingActive(false);
-            setIsRinging(false);
-            setCallDuration(0);
+            
             if (callTimer) clearInterval(callTimer);
         },
         onParticipantJoined: (participant) => {
             console.log("✅ New participant joined:", participant);
-            setIsRinging(false);
 
-            // Ensure call timer starts only once
-            if (!callTimer) {
-                const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
-                setCallTimer(timer);
-            }
+    setIsRinging(false);
+    console.log("Audio Track:", participant.audioTrack);
 
-            // Debug: Check if audio track exists
-            console.log("🔊 Audio Track Received:", participant.audioTrack);
-
-            // Play the participant's audio if available
-            if (participant.audioTrack) {
-                const audio = new Audio();
-                audio.srcObject = new MediaStream([participant.audioTrack]);
-                audio.play().catch((err) => console.error("❌ Audio Play Error:", err));
-            }
+    if (!callTimer) {
+        const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
+        setCallTimer(timer);
+    }
         },
         onParticipantLeft: () => {
             console.log("⚠ Participant Left");
@@ -87,25 +71,31 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         },
     });
 
-    useEffect(() => {
-        // Ensure microphone is turned on when the meeting starts
-        if (isMeetingActive && !localMicOn) {
-            console.log("🔊 Enabling microphone manually...");
-            toggleMic();
+    const getMe = () => {
+        const speakerParticipants = [...participants.values()].find(
+          (current) => current.id === authDetails?.user?.role
+        );
+        console.log(speakerParticipants)
+        setMe(speakerParticipants);
+      };
+    
+      const getOther = () => {
+        const speakerParticipants = [...participants.values()].find(
+          (current) => current.id !== authDetails?.user?.role
+        );
+        console.log(speakerParticipants)
+      setOther(speakerParticipants)
+      };
+
+      useEffect(() => {
+    participants.forEach((participant) => {
+        if (participant.audioTrack) {
+            const audio = new Audio();
+            audio.srcObject = new MediaStream([participant.audioTrack]);
+            audio.play().catch((err) => console.error("Audio Play Error:", err));
         }
-    }, [isMeetingActive, localMicOn]);
-
-    useEffect(() => {
-        console.log("Participants Count:", [...participants.values()].length);
-
-        if (isMeetingActive) {
-            setIsRinging([...participants.values()].length < 2);
-        }
-
-        return () => {
-            if (callTimer) clearInterval(callTimer);
-        };
-    }, [participants, isMeetingActive]);
+    });
+}, [participants]);
 
     // Create Meeting
     const handleCreateMeeting = async () => {
@@ -117,7 +107,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             setMeetingId(newMeetingId);
             setIsInitiator(true);
             console.log("Meeting Created:", newMeetingId);
-        } catch (error: any) {
+        } catch (error) {
             onFailure({ message: "Meeting Creation Failed", error: error.message });
         } finally {
             setIsCreatingMeeting(false);
@@ -134,7 +124,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         setIsLoading(true);
         try {
             console.log("Joining as Initiator...");
-            join();
+            join(); // Initiator joins first
 
             setTimeout(async () => {
                 console.log("Sending Call Invite...");
@@ -148,10 +138,13 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                     sendMessageMutation,
                 });
                 console.log("Call Invite Sent!");
-            }, 1000);
+            }, 1000); // Small delay to ensure initiator is inside
         } catch (error: any) {
             console.error("❌ Error joining meeting:", error);
-            onFailure({ message: "Meeting Join Failed", error: error.message || "Something went wrong." });
+            onFailure({
+                message: "Meeting Join Failed",
+                error: error.message || "Something went wrong while joining the meeting.",
+            });
         } finally {
             setIsLoading(false);
         }
@@ -166,6 +159,21 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         setIsLoading(true);
         join();
     };
+
+    // Memoize participant count
+    const participantCount = useMemo(() => [...participants.values()].length, [participants]);
+
+    useEffect(() => {
+        console.log("Participants Count:", participantCount);
+
+        if (isMeetingActive) {
+            setIsRinging(participantCount < 2);
+        }
+
+        return () => {
+            if (callTimer) clearInterval(callTimer);
+        };
+    }, [participantCount, isMeetingActive]);
 
     return (
         <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
@@ -189,19 +197,26 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 </>
             ) : (
                 <>
+                    {isRinging && <p className="text-gray-500 text-lg font-semibold">Ringing...</p>}
                     <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
                     <CallControls />
-                    <button onClick={leave} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                    <button onClick={() => { 
+                        console.log("Leaving Meeting...");
+                        leave();
+                        setIsMeetingActive(false);
+                        setCallDuration(0);
+                        setMeetingId(null); // Prevent initiator from resetting
+                    }} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                         <MdCallEnd /> End Call
                     </button>
                 </>
             )}
-        </div>
-    );
-};
 
-export default CallComponentContent;
->
+            <div className="relative mt-8 text-gray-700 font-medium">
+                <p className="absolute right-3 z-10 top-[-2px]">Secured by</p>
+                <img src={logo} alt="Defcomm Icon" className="relative w-40 filter invert" />
+            </div>
+        </div>
     );
 };
 
