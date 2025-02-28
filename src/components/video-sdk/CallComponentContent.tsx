@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react"; 
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
 import CallInfo from "../Chat/CallInfo";
@@ -21,7 +21,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
     const [isRinging, setIsRinging] = useState(true);
     const [callDuration, setCallDuration] = useState(0);
-    const [isInitiator, setIsInitiator] = useState(false); // Track initiator status
+    const [isInitiator, setIsInitiator] = useState(false);
+    const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
 
     const { authDetails } = useContext(AuthContext);
     const { selectedChatUser } = useContext(ChatContext);
@@ -29,23 +30,48 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const client = axiosClient(authDetails?.access_token);
     const sendMessageMutation = useSendMessageMutation(client);
 
-    const { join, leave, participants } = useMeeting({
+    const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
         onMeetingJoined: () => {
-            onSuccess({ message: "Call Started", success: "You have successfully joined the interview" });
+            console.log("✅ onMeetingJoined Triggered");
             setIsLoading(false);
             setIsMeetingActive(true);
+            onSuccess({ message: "Call Started", success: "You have successfully joined the interview" });
+
+            if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
+            console.log("❌ onMeetingLeft Triggered");
             setIsMeetingActive(false);
             setCallDuration(0);
-            
+            setIsRinging(true);
+            if (callTimer) clearInterval(callTimer);
+        },
+        onParticipantJoined: (participant) => {
+            console.log("✅ New participant joined:", participant);
+            setIsRinging(false);
+
+            // Start call duration only if it's not already running
+            if (!callTimer) {
+                const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
+                setCallTimer(timer);
+            }
+        },
+        onParticipantLeft: () => {
+            console.log("⚠ Participant Left");
+            if (Object.keys(participants).length <= 1) {
+                setIsRinging(true);
+                if (callTimer) {
+                    clearInterval(callTimer);
+                    setCallTimer(null);
+                }
+            }
         },
         onError: (error) => {
             onFailure({ message: "Technical Error", error: error?.message || "An error occurred" });
         },
     });
 
-    // Step 1: Create Meeting (But don't join yet)
+    // Create Meeting
     const handleCreateMeeting = async () => {
         setIsCreatingMeeting(true);
         try {
@@ -53,7 +79,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             if (!newMeetingId) throw new Error("No meeting ID returned.");
 
             setMeetingId(newMeetingId);
-            setIsInitiator(true); // Mark user as initiator
+            setIsInitiator(true);
             console.log("Meeting Created:", newMeetingId);
         } catch (error) {
             onFailure({ message: "Meeting Creation Failed", error: error.message });
@@ -62,7 +88,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         }
     };
 
-    // Step 2: Start Call (Send Invite & Join)
+    // Start Call (for initiator)
     const handleStartCall = async () => {
         if (!meetingId) {
             onFailure({ message: "Meeting ID Error", error: "Meeting ID is missing." });
@@ -71,32 +97,34 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
         setIsLoading(true);
         try {
-            console.log("Starting Call with ID:", meetingId);
+            console.log("Joining as Initiator...");
+            join(); // Initiator joins first
 
-            // Send Invite Message **before joining**
-            await sendMessageUtil({
-                client,
-                message: `CALL_INVITE:${meetingId}`,
-                file: null,
-                chat_user_type: messageData.chat_user_type,
-                chat_user_id: messageData.chat_user_id,
-                chat_id: messageData.chat_id,
-                sendMessageMutation,
-            });
-            console.log("Call Invite Sent!");
-
-            join(); // Now join the meeting
+            setTimeout(async () => {
+                console.log("Sending Call Invite...");
+                await sendMessageUtil({
+                    client,
+                    message: `CALL_INVITE:${meetingId}`,
+                    file: null,
+                    chat_user_type: messageData.chat_user_type,
+                    chat_user_id: messageData.chat_user_id,
+                    chat_id: messageData.chat_id,
+                    sendMessageMutation,
+                });
+                console.log("Call Invite Sent!");
+            }, 1000); // Small delay to ensure initiator is inside
         } catch (error: any) {
             console.error("❌ Error joining meeting:", error);
             onFailure({
                 message: "Meeting Join Failed",
                 error: error.message || "Something went wrong while joining the meeting.",
             });
+        } finally {
             setIsLoading(false);
         }
     };
 
-    // Step 3: Join Meeting (For other users)
+    // Join Meeting (for invited participant)
     const handleJoinMeeting = () => {
         if (!meetingId) {
             onFailure({ message: "Meeting ID Error", error: "Meeting ID is missing." });
@@ -106,27 +134,20 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         join();
     };
 
-   useEffect(() => {
-    let callTimer: NodeJS.Timeout | null = null;
+    // Memoize participant count
+    
+    useEffect(() => {
+        const participantCount = [...participants?.values()].length;
+        console.log("Participants Count:", participantCount);
 
-    if (isMeetingActive) {
-        const participantCount = [...participants?.values()]?.length;
-
-        if (participantCount >= 2) { // Ensure at least 2 participants
-            setIsRinging(false);
-            callTimer = setInterval(() => {
-                setCallDuration((prev) => prev + 1);
-            }, 1000);
-        } else {
-            setIsRinging(true);
+        if (isMeetingActive) {
+            setIsRinging(participantCount < 2);
         }
-    }
 
-    return () => {
-        if (callTimer) clearInterval(callTimer);
-    };
-}, [isMeetingActive, participants]);
-
+        return () => {
+            if (callTimer) clearInterval(callTimer);
+        };
+    }, [participantCount, isMeetingActive, participants]);
 
     return (
         <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
@@ -135,17 +156,14 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             {!isMeetingActive ? (
                 <>
                     {!meetingId ? (
-                        // Step 1: Create Meeting
                         <button onClick={handleCreateMeeting} className="bg-oliveLight hover:oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                             Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
                         </button>
                     ) : isInitiator ? (
-                        // Step 2: Start Call (Only for Initiator)
                         <button onClick={handleStartCall} className="bg-blue-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                             Start Call {isLoading && <FaSpinner className="animate-spin" />}
                         </button>
                     ) : (
-                        // Step 3: Join Call (For other users)
                         <button onClick={handleJoinMeeting} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                             Join Call {isLoading && <FaSpinner className="animate-spin" />}
                         </button>
@@ -156,7 +174,13 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                     {isRinging && <p className="text-gray-500 text-lg font-semibold">Ringing...</p>}
                     <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
                     <CallControls />
-                    <button onClick={() => {setMeetingId(null); leave()}} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                    <button onClick={() => { 
+                        console.log("Leaving Meeting...");
+                        leave();
+                        setIsMeetingActive(false);
+                        setCallDuration(0);
+                        setMeetingId(null); // Prevent initiator from resetting
+                    }} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                         <MdCallEnd /> End Call
                     </button>
                 </>
@@ -171,3 +195,4 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default CallComponentContent;
+            
