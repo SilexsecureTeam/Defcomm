@@ -178,8 +178,8 @@ const ChatInterface = () => {
             {/* Call Interface (Desktop) */}
             {selectedChatUser && (
                 <div className="w-max hidden lg:block">
-                    {/* <CallInterface /> */}
-                    <MeetingVid />
+                    <CallInterface />
+                  
                 </div>
             )
             }
@@ -194,7 +194,7 @@ const ChatInterface = () => {
                         className="w-80 h-max fixed top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
                     >
                         <CallComponent initialMeetingId={meetingId} />
-                        <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => setShowCall(false)}>
+                        <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => {setMeetingId(null); setShowCall(false)}}>
                             <MdClose size={24} />
                         </button>
                     </motion.div>
