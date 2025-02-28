@@ -20,6 +20,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
     const [isRinging, setIsRinging] = useState(true);
+    const [other, setOther] = useState(null);
+    const [me, setMe] = useState(null);
     const [callDuration, setCallDuration] = useState(0);
     const [isInitiator, setIsInitiator] = useState(false);
     const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
@@ -40,10 +42,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
-            console.log("❌ onMeetingLeft Triggered");
-            setIsMeetingActive(false);
-            setCallDuration(0);
-            setIsRinging(true);
+            
             if (callTimer) clearInterval(callTimer);
         },
         onParticipantJoined: (participant) => {
@@ -71,6 +70,27 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         },
     });
 
+    const getMe = () => {
+        const speakerParticipants = [...participants.values()].find(
+          (current) => current.id === authDetails?.user?.role
+        );
+        console.log(speakerParticipants)
+        setMe(speakerParticipants);
+      };
+    
+      const getOther = () => {
+        const speakerParticipants = [...participants.values()].find(
+          (current) => current.id !== authDetails?.user?.role
+        );
+        console.log(speakerParticipants)
+      setOther(speakerParticipants)
+      };
+
+      useEffect(() => {
+        if (isMeetingActive) {
+            getOther(), getMe();
+        }
+      }, [participants]);
     // Create Meeting
     const handleCreateMeeting = async () => {
         setIsCreatingMeeting(true);
@@ -135,9 +155,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     };
 
     // Memoize participant count
-    
+    const participantCount = useMemo(() => [...participants.values()].length, [participants]);
+
     useEffect(() => {
-        const participantCount = [...participants?.values()].length;
         console.log("Participants Count:", participantCount);
 
         if (isMeetingActive) {
@@ -147,7 +167,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         return () => {
             if (callTimer) clearInterval(callTimer);
         };
-    }, [participantCount, isMeetingActive, participants]);
+    }, [participantCount, isMeetingActive]);
 
     return (
         <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
@@ -195,4 +215,4 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default CallComponentContent;
-            
+                       
