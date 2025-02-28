@@ -22,7 +22,11 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isRinging, setIsRinging] = useState(true);
     const [other, setOther] = useState(null);
     const [me, setMe] = useState(null);
+    const [other, setOther] = useState(null);
+    const [me, setMe] = useState(null);
     const [callDuration, setCallDuration] = useState(0);
+    const [isInitiator, setIsInitiator] = useState(false);
+    const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
     const [isInitiator, setIsInitiator] = useState(false);
     const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
 
@@ -33,7 +37,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const sendMessageMutation = useSendMessageMutation(client);
 
     const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
+    const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
         onMeetingJoined: () => {
+            console.log("✅ onMeetingJoined Triggered");
             console.log("✅ onMeetingJoined Triggered");
             setIsLoading(false);
             setIsMeetingActive(true);
@@ -106,6 +112,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
             setMeetingId(newMeetingId);
             setIsInitiator(true);
+            setIsInitiator(true);
             console.log("Meeting Created:", newMeetingId);
         } catch (error) {
             onFailure({ message: "Meeting Creation Failed", error: error.message });
@@ -114,6 +121,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         }
     };
 
+    // Start Call (for initiator)
     // Start Call (for initiator)
     const handleStartCall = async () => {
         if (!meetingId) {
@@ -125,7 +133,22 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         try {
             console.log("Joining as Initiator...");
             join(); // Initiator joins first
+            console.log("Joining as Initiator...");
+            join(); // Initiator joins first
 
+            setTimeout(async () => {
+                console.log("Sending Call Invite...");
+                await sendMessageUtil({
+                    client,
+                    message: `CALL_INVITE:${meetingId}`,
+                    file: null,
+                    chat_user_type: messageData.chat_user_type,
+                    chat_user_id: messageData.chat_user_id,
+                    chat_id: messageData.chat_id,
+                    sendMessageMutation,
+                });
+                console.log("Call Invite Sent!");
+            }, 1000); // Small delay to ensure initiator is inside
             setTimeout(async () => {
                 console.log("Sending Call Invite...");
                 await sendMessageUtil({
@@ -150,6 +173,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     };
 
     // Join Meeting (for invited participant)
+    // Join Meeting (for invited participant)
     const handleJoinMeeting = () => {
         if (!meetingId) {
             onFailure({ message: "Meeting ID Error", error: "Meeting ID is missing." });
@@ -166,6 +190,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
         console.log("Participants Count:", participantCount);
 
+        if (isMeetingActive) {
+            setIsRinging(participantCount < 2);
+        }
         if (isMeetingActive) {
             setIsRinging(participantCount < 2);
         }
@@ -221,3 +248,4 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default CallComponentContent;
+                       
