@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from "react"; 
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
 import CallInfo from "../Chat/CallInfo";
@@ -37,24 +37,24 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             console.log("✅ onMeetingJoined Triggered");
             setIsLoading(false);
             setIsMeetingActive(true);
-            onSuccess({ message: "Call Started", success: "You have successfully joined the interview" });
+            onSuccess({ message: "Call Started", success: "You have successfully joined the call" });
 
             if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
-            
+
             if (callTimer) clearInterval(callTimer);
         },
         onParticipantJoined: (participant) => {
             console.log("✅ New participant joined:", participant);
 
-    setIsRinging(false);
-    console.log("Audio Track:", participant.audioTrack);
+            setIsRinging(false);
+            console.log("Audio Track:", participant.audioTrack);
 
-    if (!callTimer) {
-        const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
-        setCallTimer(timer);
-    }
+            if (!callTimer) {
+                const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
+                setCallTimer(timer);
+            }
         },
         onParticipantLeft: () => {
             console.log("⚠ Participant Left");
@@ -73,29 +73,29 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     const getMe = () => {
         const speakerParticipants = [...participants.values()].find(
-          (current) => current.id === authDetails?.user?.role
+            (current) => current.id === authDetails?.user?.role
         );
         console.log(speakerParticipants)
         setMe(speakerParticipants);
-      };
-    
-      const getOther = () => {
+    };
+
+    const getOther = () => {
         const speakerParticipants = [...participants.values()].find(
-          (current) => current.id !== authDetails?.user?.role
+            (current) => current.id !== authDetails?.user?.role
         );
         console.log(speakerParticipants)
-      setOther(speakerParticipants)
-      };
+        setOther(speakerParticipants)
+    };
 
-      useEffect(() => {
-    participants.forEach((participant) => {
-        if (participant.audioTrack) {
-            const audio = new Audio();
-            audio.srcObject = new MediaStream([participant.audioTrack]);
-            audio.play().catch((err) => console.error("Audio Play Error:", err));
-        }
-    });
-}, [participants]);
+    useEffect(() => {
+        participants.forEach((participant) => {
+            if (participant.audioTrack) {
+                const audio = new Audio();
+                audio.srcObject = new MediaStream([participant.audioTrack]);
+                audio.play().catch((err) => console.error("Audio Play Error:", err));
+            }
+        });
+    }, [participants]);
 
     // Create Meeting
     const handleCreateMeeting = async () => {
@@ -140,13 +140,12 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 console.log("Call Invite Sent!");
             }, 1000); // Small delay to ensure initiator is inside
         } catch (error: any) {
+            setIsLoading(false);
             console.error("❌ Error joining meeting:", error);
             onFailure({
                 message: "Meeting Join Failed",
                 error: error.message || "Something went wrong while joining the meeting.",
             });
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -161,9 +160,10 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     };
 
     // Memoize participant count
-    const participantCount = useMemo(() => [...participants.values()].length, [participants]);
-
+   
     useEffect(() => {
+        const participantCount =[...participants.values()].length;
+
         console.log("Participants Count:", participantCount);
 
         if (isMeetingActive) {
@@ -173,12 +173,12 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         return () => {
             if (callTimer) clearInterval(callTimer);
         };
-    }, [participantCount, isMeetingActive]);
+    }, [participants, isMeetingActive]);
 
     return (
         <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
-            <CallSummary callSummary={isMeetingActive ? null : { duration: callDuration, caller: authDetails?.user?.name || "Unknown" }} />
-
+            {callDuration > 0 && <CallSummary callSummary={isMeetingActive ? null : { duration: callDuration, caller: authDetails?.user?.name || "Unknown" }} />
+}
             {!isMeetingActive ? (
                 <>
                     {!meetingId ? (
@@ -186,7 +186,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                             Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
                         </button>
                     ) : isInitiator ? (
-                        <button onClick={handleStartCall} className="bg-blue-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                        <button onClick={handleStartCall} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                             Start Call {isLoading && <FaSpinner className="animate-spin" />}
                         </button>
                     ) : (
@@ -200,7 +200,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                     {isRinging && <p className="text-gray-500 text-lg font-semibold">Ringing...</p>}
                     <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
                     <CallControls />
-                    <button onClick={() => { 
+                    <button onClick={() => {
                         console.log("Leaving Meeting...");
                         leave();
                         setIsMeetingActive(false);
@@ -221,4 +221,3 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default CallComponentContent;
-                       

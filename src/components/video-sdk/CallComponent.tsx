@@ -12,11 +12,10 @@ const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
   const [providerMeetingId, setProviderMeetingId] = useState<string | null>(null);
   const { authDetails } = useContext(AuthContext);
   useEffect(() => {
-    if (meetingId) {
-      setProviderMeetingId(meetingId);
+    if (meetingId && !providerMeetingId) { // Only set once
+        setProviderMeetingId(meetingId);
     }
-  }, [meetingId]); // This ensures MeetingProvider gets the latest meetingId
-
+}, [meetingId]);
   return (
     <MeetingProvider
       config={{

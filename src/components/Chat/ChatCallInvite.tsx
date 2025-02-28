@@ -27,7 +27,7 @@ function ChatCallInvite({ isMyChat, onAcceptCall, status, caller }: ChatCallInvi
                 </span>
             </div>
             {/* Show "Accept" button only if the user is NOT the caller */}
-            {status === "Ringing..." && !isMyChat && (
+            {status === "Ringing..." && (
                 <button
                     onClick={onAcceptCall}
                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"

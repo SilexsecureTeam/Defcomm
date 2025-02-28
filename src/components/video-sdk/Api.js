@@ -2,7 +2,7 @@ import { onFailure } from "../../utils/notifications/OnFailure";
 
 let authToken =
 
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI1Nzk3NWJmMi0zNGZkLTQzMGUtOTU4Mi1lMjBiODI3ZWQ5NTIiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTczNjQ2NzIyNCwiZXhwIjoxNzY4MDAzMjI0fQ.OEVlKBS6Zni6cSplfbgLOhj96_jz60ymZclUZqNgUsw";
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI4M2YyYTM1MC1hN2MyLTQyY2YtODQ0Ny0xOGRjMGI3Y2JiNDgiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTc0MDY4NjE1OSwiZXhwIjoxNzQxMjkwOTU5fQ.x9NM69_tMHYijdBWLLr_pamlS2OQ8X2o02C9JNRl7mk";
 // Getter for the current auth token
 export const getAuthToken = () => authToken;
 
@@ -18,7 +18,7 @@ export const createMeeting = async () => {
       method: "POST",
       headers: {
         Authorization: getAuthToken(),
-        "Content-Type": "application/json",
+        "Content-Type": "Bearer application/json",
       },
       body: JSON.stringify({}),
     });
