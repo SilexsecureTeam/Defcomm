@@ -19,10 +19,16 @@ const useFileManager = () => {
     const fetchFiles = async () => {
       setLoading(true);
       try {
-        const [myFilesRes, otherFilesRes, fileRequestsRes] = await Promise.all([
+        const [
+          myFilesRes,
+          otherFilesRes,
+          fileRequestsRes,
+          pendingFileRequests,
+        ] = await Promise.all([
           client.get("/user/file"),
           client.get("/user/file/other"),
           client.get("/user/file/request"),
+          client.get("/user/file/pending"),
         ]);
         console.log(
           "my files:",
@@ -30,7 +36,9 @@ const useFileManager = () => {
           "other files:",
           otherFilesRes.data.data,
           "file requests:",
-          fileRequestsRes.data.data
+          fileRequestsRes.data.data,
+          "pending file requests:",
+          pendingFileRequests.data.data
         );
 
         setMyFiles(myFilesRes.data.data);
@@ -47,11 +55,10 @@ const useFileManager = () => {
     fetchContacts();
   }, []);
 
-  // 🔹 Function to fetch contacts
+  //Function to fetch contacts
   const fetchContacts = async () => {
     try {
       const response = await client.get("/user/contact");
-      //console.log("Contacts fetched:", response.data.data);
       setContacts(response.data.data);
     } catch (error) {
       toast.error("Failed to fetch contacts. Please try again.");
@@ -65,7 +72,7 @@ const useFileManager = () => {
       });
 
       // Sanitize the HTML response
-      const sanitizedHTML = DOMPurify.sanitize(response.data);
+      //const sanitizedHTML = DOMPurify.sanitize(response.data);
 
       // Store sanitized HTML in state
       setFileContent(response.data);
@@ -76,7 +83,7 @@ const useFileManager = () => {
     }
   };
 
-  // 🔹 Function to Share a File
+  //Function to Share a File
   const shareFile = async (fileId, selectedContacts) => {
     if (!fileId) {
       toast.error("Invalid file");

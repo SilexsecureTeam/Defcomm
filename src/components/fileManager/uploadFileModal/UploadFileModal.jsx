@@ -59,9 +59,6 @@ const UploadFileModal = ({ isOpen, onClose }) => {
             onClose();
         } catch (error) {
             console.error("Upload failed:", error);
-            /* if (error.response.message) {
-                toast.error(error.response.message);
-            } */
             toast.error(error.response.data.message || "Failed to upload file. Please try again.");
         } finally {
             setLoading(false);
@@ -97,18 +94,6 @@ const UploadFileModal = ({ isOpen, onClose }) => {
                         placeholder="File Label"
                     />
                 </div>
-
-                {/* <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1" htmlFor="fileInput">
-                        File <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="file"
-                        id="fileInput"
-                        className="w-full rounded-lg py-2.5 px-3 focus:outline-none bg-[rgb(249,249,249)]"
-                        accept=".pdf"
-                    />
-                </div> */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-1" htmlFor="fileInput">
                         File <span className="text-red-500">*</span>
