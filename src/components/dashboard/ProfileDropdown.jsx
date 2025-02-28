@@ -39,7 +39,7 @@ const ProfileDropdown = ({ user }) => {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white font-medium border rounded-md shadow-md">
+                <div className="absolute z-[1000] right-0 mt-2 w-44 bg-white font-medium border rounded-md shadow-md">
                     <ul className="py-2 text-sm text-gray-700">
                         <li className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
                             <FiUser size={16} /> Profile

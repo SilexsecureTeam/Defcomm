@@ -33,7 +33,7 @@ const DefcommLogin = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
+      transition={{ duration: 0.5 }}
       className="relative w-full min-h-screen flex flex-col items-center justify-center text-white p-6"
       style={{
         background: `linear-gradient(to bottom, #36460A 10%, #000000 40%, #36460A 90%)`,

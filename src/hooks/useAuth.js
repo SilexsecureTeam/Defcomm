@@ -8,7 +8,7 @@ import { onSuccess } from "../utils/notifications/OnSuccess";
 import { queryClient } from "../services/query-client";
 const useAuth = () => {
   const navigate = useNavigate();
-  const { authDetails } = useContext(AuthContext);
+  const { authDetails, updateAuth } = useContext(AuthContext);
   
   const client = axiosClient(authDetails?.token);
 
@@ -19,20 +19,11 @@ const useAuth = () => {
       if (!data?.data?.user) {
         throw new Error("Invalid response: User data not found");
       }
-  
-      return data.data; // Return only the user object
+      return data.data;
     },
     onSuccess: (userData) => {
-      if (!userData) {
-        return;
-      }
-      // Store user data in React Query
-      queryClient.setQueryData(["authUser"], userData);
-      // Store in sessionStorage for persistence
-      sessionStorage.setItem("authUser", JSON.stringify(userData));
-      // Show success message
+      updateAuth(userData); // Immediately update auth state
       onSuccess({ message: "Login Successful!", success: "Continuing to dashboard" });
-      // Navigate to dashboard
       navigate("/dashboard/home");
     },
     onError: (error) => {
@@ -74,18 +65,16 @@ const useAuth = () => {
     },
   });
 
-  // Logout Mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      queryClient.clear();
+      queryClient.clear(); // Clear all cached data
     },
     onSuccess: () => {
-     queryClient.invalidateQueries(["authUser"]);
-      sessionStorage.clear();
-      navigate("/", {replace:true});
+      updateAuth(null); // Reset auth state
+      navigate("/", { replace: true });
       onSuccess({
         message: "Logout successful",
-        success: `Logged out ${authDetails?.user?.name}`,
+        success: "You have been logged out.",
       });
     },
     onError: (err) => {
