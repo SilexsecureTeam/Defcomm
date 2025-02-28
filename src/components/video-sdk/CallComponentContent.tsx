@@ -110,7 +110,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     let callTimer: NodeJS.Timeout | null = null;
 
     if (isMeetingActive) {
-        const participantCount = [...participants?.values())]?.length;
+        const participantCount = [...participants?.values()]?.length;
 
         if (participantCount >= 2) { // Ensure at least 2 participants
             setIsRinging(false);
