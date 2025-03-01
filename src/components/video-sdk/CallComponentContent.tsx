@@ -1,20 +1,19 @@
- import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
-import CallInfo from "../Chat/CallInfo";
-import CallControls from "../Chat/CallControls";
+
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { createMeeting } from "./Api";
 import { FaSpinner } from "react-icons/fa";
-import { MdCallEnd } from "react-icons/md";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { axiosClient } from "../../services/axios-client";
 import ParticipantMedia from "./ParticipantMedia";
+import Receiver from "./Receiver";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isMeetingActive, setIsMeetingActive] = useState(false);
@@ -32,9 +31,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const messageData = selectedChatUser?.chat_meta;
     const client = axiosClient(authDetails?.access_token);
     const sendMessageMutation = useSendMessageMutation(client);
-    const [isMicEnabled, setIsMicEnabled] = useState(true);
-    const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-    const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
+
+    const { join, participants, localMicOn, toggleMic, leave } = useMeeting({
         onMeetingJoined: () => {
             console.log("✅ onMeetingJoined Triggered");
             setIsLoading(false);
@@ -53,7 +51,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 setCallDuration(0); // Reset call duration
                 setCallTimer(null);
             }
-            
+
         },
         onParticipantJoined: (participant) => {
             console.log("✅ New participant joined:", participant);
@@ -81,7 +79,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     const getMe = () => {
         const speakerParticipants = [...participants.values()].find(
-            (current) => current.id === authDetails?.user?.role
+            (current) => Number(current.id) === Number(authDetails?.user?.id)
         );
         console.log(speakerParticipants)
         setMe(speakerParticipants);
@@ -89,28 +87,24 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     const getOther = () => {
         const speakerParticipants = [...participants.values()].find(
-            (current) => current.id !== authDetails?.user?.role
+            (current) => Number(current.id) !== Number(authDetails?.user?.id)
         );
         console.log(speakerParticipants)
         setOther(speakerParticipants)
     };
-
+    const handleLeave = () => {
+        leave();
+        setShowSummary(true);
+        clearInterval(callTimer);
+        setCallTimer(null);
+    }
     // Ensure participant audio plays
     useEffect(() => {
-        // participants.forEach((participant) => {
-        //     if (participant.audioTrack) {
-        //         console.log("🎤 Attaching audio track:", participant.audioTrack);
-        //         const audio = document.createElement("audio");
-        //         audio.srcObject = new MediaStream([participant.audioTrack]);
-        //         audio.autoplay = true;
-        //         audio.muted = false;
-        //         document.body.appendChild(audio);
-        //     }
-        // });
-if(isMeetingActive){
-    getMe(), getOther();
-}
-    }, [isMeetingActive]);
+
+        if (participants && isMeetingActive) {
+            getMe(), getOther();
+        }
+    }, [participants, isMeetingActive]);
 
     // Create Meeting
     const handleCreateMeeting = async () => {
@@ -179,6 +173,13 @@ if(isMeetingActive){
         setIsRinging(participantCount < 2);
     }, [participants]);
 
+    useEffect(() => {
+        if (isMeetingActive && !localMicOn) {
+            toggleMic();
+        }
+    }, [isMeetingActive, localMicOn]);
+
+
     return (
         <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
             {showSummary && (
@@ -203,23 +204,13 @@ if(isMeetingActive){
                 </>
             ) : (
                 <>
-                    <div className="flex items-center flex-wrap">
-                    <ParticipantMedia participantId={me?.id} auth={authDetails} setIsMicEnabled={setIsMicEnabled} isMicEnabled={isMicEnabled} />}
-                    <ParticipantMedia participantId={other?.id} auth={authDetails} setIsMicEnabled={setIsMicEnabled} isMicEnabled={isMicEnabled} />
-                    
-                    </div>
-                    {isRinging && <p className="text-gray-500 text-lg font-semibold">Ringing...</p>}
-                    <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
-                    <CallControls
-                        isMuted={isMicEnabled}
-                        toggleMute={setIsMicEnabled}
-                        isSpeakerOn={isSpeakerEnabled} 
-                        toggleSpeaker={()=>setIsSpeakerEnabled(!isSpeakerEnabled)} 
-                    />
+                    <div className="flex flex-col gap-2 items-center">
+                        {other && <Receiver participantId={other?.id} />}
+                        {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} />}
 
-                    <button onClick={() => { leave(); setShowSummary(true); }} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                        <MdCallEnd /> End Call
-                    </button>
+
+                    </div>
+
                 </>
             )}
 
