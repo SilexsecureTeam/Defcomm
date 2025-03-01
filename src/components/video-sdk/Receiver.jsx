@@ -4,9 +4,9 @@ import ReactPlayer from "react-player";
 import mainLogoTwo from "../../assets/logo-icon.png";
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 
-const Receiver = ({ participantId }) => {
+const Receiver = ({ participant }) => {
   const micRef = useRef(null);
-  const { webcamStream, micStream, webcamOn, micOn } = useParticipant(participantId);
+  const { webcamStream, micStream, webcamOn, micOn } = useParticipant(participant?.id);
 
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
