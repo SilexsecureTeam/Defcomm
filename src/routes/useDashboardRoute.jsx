@@ -39,28 +39,37 @@ function useDashBoardRoute() {
     queryKey: ["contacts"],
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT", // Fetch only when in chat
-    refetchOnMount: true, // Refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when the page is focused
+    refetchOnMount: false, // Refetch when component mounts
+    refetchOnWindowFocus: false, // Refetch when the page is focused
       // refetchOnReconnect: true, // Refetch when the network reconnects
   });
 
   useEffect(() => {
-    const matchedOption = options.find((opt) => pathname === opt.route);
-    if (matchedOption) {
-      dispatch(matchedOption);
-    }
+  const matchedOption = options.find((opt) => pathname === opt.route);
+  
+  if (matchedOption) {
+    dispatch(matchedOption);
+  }
 
-    if (matchedOption?.type === "CHAT") {
+  if (matchedOption?.type === "CHAT") {
+    if (SidebarComponent !== SideBarTwo) {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
-      setOption(contacts?.data || []);
-    } else {
-      setSelectedChatUser(null); // Clear chat context on unmount
+    }
+    if (contacts?.data && option !== contacts.data) {
+      setOption(contacts.data);
+    }
+  } else {
+    setSelectedChatUser(null);
+    if (SidebarComponent !== SideBar) {
       setSidebarComponent(() => SideBar);
       setSidebarItemComponent(() => SideBarItem);
+    }
+    if (option !== dashboardOptions) {
       setOption(dashboardOptions);
     }
-  }, [pathname, contacts]);
+  }
+}, [pathname]); // Removed `contacts` from dependencies
 
   const toggleIsOpen = () => setIsOpen(!isOpen);
 
