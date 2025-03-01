@@ -57,7 +57,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
   };
 
   return (
-    <div className="w-[90vw] flex flex-col md:flex-row justify-center gap-2 h-[80vh]">
+    <div className="w-[90%] flex flex-col md:flex-row justify-center gap-2 h-[80vh]">
 
       {/* Call Controls */}
       <div className="hidden w-96 md:flex flex-col items-center bg-white rounded-lg py-10">
@@ -116,7 +116,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
         </figure>
       </section>
       {/* Mobile Controls */}
-      <div className="absolute bottom-0 w-full flex md:hidden justify-around items-center bg-black/70 py-3 px-5 rounded-t-lg z-[1000]">
+      <div className="absolute bottom-0 w-full flex md:hidden mx-auto md:mx-0 justify-around items-center bg-black/70 py-3 px-5 z-[1000]">
         {/* Toggle Mic Button */}
         <button
           onClick={handleToggleMic}
