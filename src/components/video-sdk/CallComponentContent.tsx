@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from "react";
+ import React, { useState, useContext, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
 import CallInfo from "../Chat/CallInfo";
@@ -9,47 +9,55 @@ import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { createMeeting } from "./Api";
 import { FaSpinner } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
-import { MeetingProvider, useMeeting } from "@videosdk.live/react-sdk";
+import { useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { axiosClient } from "../../services/axios-client";
+import ParticipantMedia from "./ParticipantMedia";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isMeetingActive, setIsMeetingActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
     const [isRinging, setIsRinging] = useState(true);
-    const [other, setOther] = useState(null);
-    const [me, setMe] = useState(null);
     const [callDuration, setCallDuration] = useState(0);
     const [isInitiator, setIsInitiator] = useState(false);
     const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
-
+    const [showSummary, setShowSummary] = useState(false);
+    const [other, setOther] = useState(null);
+    const [me, setMe] = useState(null);
     const { authDetails } = useContext(AuthContext);
     const { selectedChatUser } = useContext(ChatContext);
     const messageData = selectedChatUser?.chat_meta;
     const client = axiosClient(authDetails?.access_token);
     const sendMessageMutation = useSendMessageMutation(client);
-
+    const [isMicEnabled, setIsMicEnabled] = useState(true);
+    const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
     const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
         onMeetingJoined: () => {
             console.log("✅ onMeetingJoined Triggered");
             setIsLoading(false);
             setIsMeetingActive(true);
+            setShowSummary(false);
             onSuccess({ message: "Call Started", success: "You have successfully joined the call" });
 
             if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
-
-            if (callTimer) clearInterval(callTimer);
+            console.log("❌ Meeting Left");
+            setIsMeetingActive(false);
+            setShowSummary(true);
+            if (callTimer) {
+                clearInterval(callTimer);
+                setCallDuration(0); // Reset call duration
+                setCallTimer(null);
+            }
+            
         },
         onParticipantJoined: (participant) => {
             console.log("✅ New participant joined:", participant);
-
             setIsRinging(false);
-            console.log("Audio Track:", participant.audioTrack);
 
             if (!callTimer) {
                 const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
@@ -87,15 +95,22 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         setOther(speakerParticipants)
     };
 
+    // Ensure participant audio plays
     useEffect(() => {
-        participants.forEach((participant) => {
-            if (participant.audioTrack) {
-                const audio = new Audio();
-                audio.srcObject = new MediaStream([participant.audioTrack]);
-                audio.play().catch((err) => console.error("Audio Play Error:", err));
-            }
-        });
-    }, [participants]);
+        // participants.forEach((participant) => {
+        //     if (participant.audioTrack) {
+        //         console.log("🎤 Attaching audio track:", participant.audioTrack);
+        //         const audio = document.createElement("audio");
+        //         audio.srcObject = new MediaStream([participant.audioTrack]);
+        //         audio.autoplay = true;
+        //         audio.muted = false;
+        //         document.body.appendChild(audio);
+        //     }
+        // });
+if(isMeetingActive){
+    getMe(), getOther();
+}
+    }, [isMeetingActive]);
 
     // Create Meeting
     const handleCreateMeeting = async () => {
@@ -103,7 +118,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         try {
             const newMeetingId = await createMeeting();
             if (!newMeetingId) throw new Error("No meeting ID returned.");
-
             setMeetingId(newMeetingId);
             setIsInitiator(true);
             console.log("Meeting Created:", newMeetingId);
@@ -124,7 +138,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         setIsLoading(true);
         try {
             console.log("Joining as Initiator...");
-            join(); // Initiator joins first
+            join();
 
             setTimeout(async () => {
                 console.log("Sending Call Invite...");
@@ -138,7 +152,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                     sendMessageMutation,
                 });
                 console.log("Call Invite Sent!");
-            }, 1000); // Small delay to ensure initiator is inside
+            }, 1000);
         } catch (error: any) {
             setIsLoading(false);
             console.error("❌ Error joining meeting:", error);
@@ -159,26 +173,18 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         join();
     };
 
-    // Memoize participant count
-   
     useEffect(() => {
-        const participantCount =[...participants.values()].length;
-
+        const participantCount = [...participants.values()].length;
         console.log("Participants Count:", participantCount);
-
-        if (isMeetingActive) {
-            setIsRinging(participantCount < 2);
-        }
-
-        return () => {
-            if (callTimer) clearInterval(callTimer);
-        };
-    }, [participants, isMeetingActive]);
+        setIsRinging(participantCount < 2);
+    }, [participants]);
 
     return (
         <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
-            {callDuration > 0 && <CallSummary callSummary={isMeetingActive ? null : { duration: callDuration, caller: authDetails?.user?.name || "Unknown" }} />
-}
+            {showSummary && (
+                <CallSummary callSummary={{ duration: callDuration, caller: authDetails?.user?.name || "Unknown" }} />
+            )}
+
             {!isMeetingActive ? (
                 <>
                     {!meetingId ? (
@@ -197,25 +203,27 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 </>
             ) : (
                 <>
+                    <div className="flex items-center flex-wrap">
+                    <ParticipantMedia participantId={me?.id} auth={authDetails} setIsMicEnabled={setIsMicEnabled} isMicEnabled={isMicEnabled} />}
+                    <ParticipantMedia participantId={other?.id} auth={authDetails} setIsMicEnabled={setIsMicEnabled} isMicEnabled={isMicEnabled} />
+                    
+                    </div>
                     {isRinging && <p className="text-gray-500 text-lg font-semibold">Ringing...</p>}
                     <CallInfo callerName={authDetails?.user?.name || "Unknown"} callDuration={callDuration} />
-                    <CallControls />
-                    <button onClick={() => {
-                        console.log("Leaving Meeting...");
-                        leave();
-                        setIsMeetingActive(false);
-                        setCallDuration(0);
-                        setMeetingId(null); // Prevent initiator from resetting
-                    }} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                    <CallControls
+                        isMuted={isMicEnabled}
+                        toggleMute={setIsMicEnabled}
+                        isSpeakerOn={isSpeakerEnabled} 
+                        toggleSpeaker={()=>setIsSpeakerEnabled(!isSpeakerEnabled)} 
+                    />
+
+                    <button onClick={() => { leave(); setShowSummary(true); }} className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
                         <MdCallEnd /> End Call
                     </button>
                 </>
             )}
 
-            <div className="relative mt-8 text-gray-700 font-medium">
-                <p className="absolute right-3 z-10 top-[-2px]">Secured by</p>
-                <img src={logo} alt="Defcomm Icon" className="relative w-40 filter invert" />
-            </div>
+            <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />
         </div>
     );
 };
