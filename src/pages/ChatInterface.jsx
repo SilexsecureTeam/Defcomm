@@ -176,7 +176,7 @@ const ChatInterface = () => {
             {/* Call Interface (Desktop) */}
             {selectedChatUser && (
                 <div className="w-max hidden lg:block">
-                    <CallInterface setShowCall={setShowCall} />
+                    <CallInterface setShowCall={setShowCall} initialMeetingId={meetingId} />
 
                 </div>
             )
