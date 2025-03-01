@@ -64,7 +64,7 @@ function useDashBoardRoute() {
   };
 
   // Handle Navigation
-  const handleNavigation = (route: string) => {
+  const handleNavigation = (route) => {
     setIsTransitioning(true);
     navigate(route);
   };
