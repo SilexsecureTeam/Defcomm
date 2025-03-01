@@ -109,7 +109,7 @@ function useDashBoardRoute() {
           <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
             <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
             <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              {/* <Suspense fallback={<Fallback />}> */}
+              <Suspense fallback={<Fallback />}>
                 <Routes>
                   <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
@@ -118,7 +118,7 @@ function useDashBoardRoute() {
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
-              {/* </Suspense> */}
+               </Suspense> 
             </div>
           </div>
         </main>
