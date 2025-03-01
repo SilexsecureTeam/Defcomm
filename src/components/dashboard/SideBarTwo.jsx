@@ -13,9 +13,8 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
     const { data: chatHistory, isLoading } = useQuery({
         queryKey: ["chat-history"],
         queryFn: fetchChatHistory,
-        refetchOnMount: true, // Refetch when component mounts
-        // refetchOnWindowFocus: true, // Refetch when the page is focused
-        // refetchOnReconnect: true, // Refetch when the network reconnects
+        //  refetchInterval: 5000,
+        staleTime:0
     });
     return (
         <>
@@ -62,7 +61,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         <>
                             <ul className="overflow-y-auto h-80">{children[0]}</ul>
                             <ul className="flex flex-col gap-[10px] mt-20">
-                                {chatHistory?.reverse()?.slice(0, 2)?.map((chat) => (
+                                {chatHistory?.slice(-2)?.reverse()?.map((chat) => (
                                     <li
                                         key={chat?.id}
                                         className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium bg-none`}
@@ -116,4 +115,4 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
     );
 }
 
-export default React.memo(SideBarTwo);
+export default SideBarTwo;

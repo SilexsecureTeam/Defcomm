@@ -1,12 +1,13 @@
-import { lazy, Suspense, useContext, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useContext, useEffect, useReducer, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AuthContext } from "../context/AuthContext";
-import { DashboardContext } from "../context/DashboardContext";
-import { ChatContext } from "../context/ChatContext";
-import useChat from "../hooks/useChat";
+import DashboardReducer from "../reducers/DashboardReducer";
 import { utilOptions, dashboardOptions, dashboardTabs } from "../utils/constants";
+import { AuthContext } from "../context/AuthContext";
 import Fallback from "../components/Fallback";
+import { DashboardContext } from "../context/DashboardContext";
+import useChat from "../hooks/useChat";
+import { ChatContext } from "../context/ChatContext";
 
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
 const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
@@ -22,34 +23,24 @@ const FileManager = lazy(() => import("../pages/FileManager"));
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
   const { setSelectedChatUser } = useContext(ChatContext);
+  const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
   const { fetchContacts } = useChat();
   const { state, dispatch } = useContext(DashboardContext);
 
   const options = [...dashboardOptions, ...utilOptions, ...dashboardTabs];
-  const [isOpen, setIsOpen] = useState(false);
 
   const [SidebarComponent, setSidebarComponent] = useState(() => SideBar);
   const [SidebarItemComponent, setSidebarItemComponent] = useState(() => SideBarItem);
+  const [option, setOption] = useState(dashboardOptions);
 
   // Fetch Contacts using React Query
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT", // Fetch only when in chat
-    refetchOnMount: true, // Refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when the page is focused
+    staleTime:0
   });
-
-  // Memoized options list
-  const option = useMemo(() => {
-    const matchedOption = options.find((opt) => pathname === opt.route);
-
-    if (matchedOption?.type === "CHAT" && contacts?.data) {
-      return contacts.data;
-    }
-    return dashboardOptions;
-  }, [pathname, contacts]); // Recalculate when pathname or contacts change
 
   useEffect(() => {
     const matchedOption = options.find((opt) => pathname === opt.route);
@@ -60,12 +51,14 @@ function useDashBoardRoute() {
     if (matchedOption?.type === "CHAT") {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
+      setOption(contacts?.data || []);
     } else {
       setSelectedChatUser(null); // Clear chat context on unmount
       setSidebarComponent(() => SideBar);
       setSidebarItemComponent(() => SideBarItem);
+      setOption(dashboardOptions);
     }
-  }, [pathname]);
+  }, [pathname, contacts]);
 
   const toggleIsOpen = () => setIsOpen(!isOpen);
 
@@ -105,14 +98,16 @@ function useDashBoardRoute() {
           <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
             <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
             <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              <Routes>
-                <Route path="/" element={<DashboardLayout />}>
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/chat" element={<ChatInterface />} />
-                  <Route path="/file-sharing" element={<FileManager />} />
-                  <Route path="/*" element={<ComingSoon />} />
-                </Route>
-              </Routes>
+              {/* <Suspense fallback={<Fallback />}> */}
+                <Routes>
+                  <Route path="/" element={<DashboardLayout />}>
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/chat" element={<ChatInterface />} />
+                    <Route path="/file-sharing" element={<FileManager />} />
+                    <Route path="/*" element={<ComingSoon />} />
+                  </Route>
+                </Routes>
+              {/* </Suspense> */}
             </div>
           </div>
         </main>

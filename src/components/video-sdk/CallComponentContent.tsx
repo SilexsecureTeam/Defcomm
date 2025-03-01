@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
+import callerTone from "../../assets/audio/caller.mp3"; // Outgoing call tone
+import receiverTone from "../../assets/audio/receiver.mp3"; // Incoming call tone
 
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
 import { onFailure } from "../../utils/notifications/OnFailure";
@@ -83,7 +85,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         const speakerParticipants = [...participants.values()].find(
             (current) => Number(current.id) !== Number(authDetails?.user?.id)
         );
-        
+
         setOther(speakerParticipants)
     };
     const handleLeave = () => {
@@ -91,14 +93,34 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         setShowSummary(true);
         clearInterval(callTimer);
         setCallTimer(null);
+        setMeetingId(null)
     }
     // Ensure participant audio plays
     useEffect(() => {
-
+        let audio: HTMLAudioElement | null = null;
+    
         if (participants && isMeetingActive) {
-            getMe(), getOther();
-        }
-    }, [participants, isMeetingActive]);
+            getMe();
+            getOther();
+            const participantCount = [...participants.values()].length;
+            
+            if (participantCount < 2) {
+                audio = new Audio(isInitiator && callerTone);
+                audio.loop = true;
+                audio.play().catch((err) => console.error("Error playing ringtone:", err));
+            }
+            }
+
+            return () => {
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+            };
+    
+    }, [participants, isMeetingActive, isInitiator]);
+    
+
 
     // Create Meeting
     const handleCreateMeeting = async () => {
@@ -171,40 +193,40 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     return (
         <div className="flex flex-col items-center bg-olive/30 p-5">
-            
-                {!isMeetingActive ? (
-                    <div className="py-10 w-80 md:w-96 rounded-lg flex flex-col items-center">
-                        {showSummary && (
-                            <CallSummary callSummary={{ 
-                                duration: callDuration, 
-                                caller:isInitiator ? "You" : selectedChatUser?.contact_name, 
-                                 receiver: !isInitiator ? "You" : selectedChatUser?.contact_name || "Unknown"
-                             }} />
-                        )}
-                        {!meetingId ? (
-                            <button onClick={handleCreateMeeting} className="bg-oliveLight hover:oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                                Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
-                            </button>
-                        ) : isInitiator ? (
-                            <button onClick={handleStartCall} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                                Start Call {isLoading && <FaSpinner className="animate-spin" />}
-                            </button>
-                        ) : (
-                            <button onClick={handleJoinMeeting} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                                Join Call {isLoading && <FaSpinner className="animate-spin" />}
-                            </button>
-                        )}
+
+            {!isMeetingActive ? (
+                <div className="py-10 w-80 md:w-96 rounded-lg flex flex-col items-center">
+                    {showSummary && (
+                        <CallSummary callSummary={{
+                            duration: callDuration,
+                            caller: isInitiator ? "You" : selectedChatUser?.contact_name,
+                            receiver: !isInitiator ? "You" : selectedChatUser?.contact_name || "Unknown"
+                        }} />
+                    )}
+                    {!meetingId ? (
+                        <button onClick={handleCreateMeeting} className="bg-oliveLight hover:oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                            Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
+                        </button>
+                    ) : isInitiator ? (
+                        <button onClick={handleStartCall} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                            Start Call {isLoading && <FaSpinner className="animate-spin" />}
+                        </button>
+                    ) : (
+                        <button onClick={handleJoinMeeting} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                            Join Call {isLoading && <FaSpinner className="animate-spin" />}
+                        </button>
+                    )}
                 </div>
             ) : (
-            <>
-                <div className="flex flex-col gap-2 items-center">
+                <>
+                    <div className="flex flex-col gap-2 items-center">
 
-                    {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} participant={other} isInitiator={isInitiator} />}
+                        {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} participant={other} isInitiator={isInitiator} />}
 
 
-                </div>
+                    </div>
 
-            </>
+                </>
             )}
 
             <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />

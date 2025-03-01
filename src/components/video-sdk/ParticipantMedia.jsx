@@ -16,7 +16,7 @@ import {
   AiOutlineAudio,
 } from "react-icons/ai";
 
-const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isInitiator, participant }) => {
+const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isInitiator, participant , isRinging}) => {
   const micRef = useRef(null);
   const { webcamStream, micStream, webcamOn, micOn, isLocal } = useParticipant(participantId);
   const { localMicOn, toggleMic, toggleWebcam } = useMeeting();
@@ -64,6 +64,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
 
       {/* Call Controls */}
       <div className="hidden w-96 md:flex flex-col items-center bg-white rounded-lg py-10">
+      {isRinging && <p className="text-green-500 text-lg font-semibold"> Ringing...</p>}
         <CallInfo participant={participant?.displayName || "Unknown"} callDuration={callDuration} isInitiator={isInitiator} />
         <CallControls isMuted={!micOn} toggleMute={handleToggleMic} isSpeakerOn={isSpeakerEnabled} />
         <button
