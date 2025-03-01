@@ -72,7 +72,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
       </div>
 
       {/* Video Section */}
-      <section className="flex-1 w-full md:w-2/3 h-[80%] md:min-h-full relative bg-black/80 rounded-[10px] flex justify-center items-center overflow-hidden">
+      <section className="flex-1 w-full md:w-2/3 h-96 md:min-h-full relative bg-black/80 rounded-[10px] flex justify-center items-center overflow-hidden">
 
         {/* Receiver Video */}
         <div className={`absolute bottom-0 right-0 z-[100] transition-all duration-300 ${isMaximized ? "w-full h-full" : "w-40 h-40"}`}>
