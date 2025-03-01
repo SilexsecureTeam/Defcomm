@@ -45,31 +45,22 @@ function useDashBoardRoute() {
   });
 
   useEffect(() => {
-  const matchedOption = options.find((opt) => pathname === opt.route);
-  
-  if (matchedOption) {
-    dispatch(matchedOption);
-  }
+    const matchedOption = options.find((opt) => pathname === opt.route);
+    if (matchedOption) {
+      dispatch(matchedOption);
+    }
 
-  if (matchedOption?.type === "CHAT") {
-    if (SidebarComponent !== SideBarTwo) {
+    if (matchedOption?.type === "CHAT") {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
-    }
-    if (contacts?.data && option !== contacts.data) {
-      setOption(contacts.data);
-    }
-  } else {
-    setSelectedChatUser(null);
-    if (SidebarComponent !== SideBar) {
+      setOption(contacts?.data || []);
+    } else {
+      setSelectedChatUser(null); // Clear chat context on unmount
       setSidebarComponent(() => SideBar);
       setSidebarItemComponent(() => SideBarItem);
-    }
-    if (option !== dashboardOptions) {
       setOption(dashboardOptions);
     }
-  }
-}, [pathname]); // Removed `contacts` from dependencies
+  }, [pathname]);
 
   const toggleIsOpen = () => setIsOpen(!isOpen);
 
@@ -109,7 +100,7 @@ function useDashBoardRoute() {
           <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
             <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
             <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              <Suspense fallback={<Fallback />}>
+              {/* <Suspense fallback={<Fallback />}> */}
                 <Routes>
                   <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
@@ -118,7 +109,7 @@ function useDashBoardRoute() {
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
-               </Suspense> 
+              {/* </Suspense> */}
             </div>
           </div>
         </main>
