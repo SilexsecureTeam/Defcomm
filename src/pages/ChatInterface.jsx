@@ -74,12 +74,14 @@ const ChatInterface = () => {
             <SEOHelmet title="Secure Chat" />
 
             {/* Header for Small Screens */}
-            <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
+            {selectedChatUser && 
+                (<div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
                 <h2 className="text-lg font-semibold">Chat</h2>
                 <button onClick={() => setShowCall(true)}>
                     <MdCall size={24} />
                 </button>
-            </div>
+            </div>)
+            }
 
             {/* Chat Section */}
             <div className="relative w-full lg:w-2/3 flex-1 h-[80vh] bg-[#d0eb8e] pt-4 transition-all duration-300">
