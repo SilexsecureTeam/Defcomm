@@ -23,7 +23,7 @@ const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
         name: authDetails?.user?.name || "You",
         participantId: authDetails?.user?.id,
         micEnabled: true,
-        webcamEnabled: false,
+        webcamEnabled: true,
         mode: "CONFERENCE",
       }}
       token={getAuthToken()}

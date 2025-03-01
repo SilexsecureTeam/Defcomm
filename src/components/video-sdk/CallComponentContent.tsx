@@ -34,7 +34,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     const { join, participants, localMicOn, toggleMic, leave } = useMeeting({
         onMeetingJoined: () => {
-            console.log("✅ onMeetingJoined Triggered");
             setIsLoading(false);
             setIsMeetingActive(true);
             setShowSummary(false);
@@ -43,18 +42,15 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
-            console.log("❌ Meeting Left");
             setIsMeetingActive(false);
             setShowSummary(true);
             if (callTimer) {
                 clearInterval(callTimer);
-                setCallDuration(0); // Reset call duration
                 setCallTimer(null);
             }
 
         },
         onParticipantJoined: (participant) => {
-            console.log("✅ New participant joined:", participant);
             setIsRinging(false);
 
             if (!callTimer) {
@@ -63,8 +59,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             }
         },
         onParticipantLeft: () => {
-            console.log("⚠ Participant Left");
-            if (Object.keys(participants).length <= 1) {
+            if ([...participants.values()].length <= 1) {
                 setIsRinging(true);
                 if (callTimer) {
                     clearInterval(callTimer);
@@ -81,7 +76,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         const speakerParticipants = [...participants.values()].find(
             (current) => Number(current.id) === Number(authDetails?.user?.id)
         );
-        console.log(speakerParticipants)
         setMe(speakerParticipants);
     };
 
@@ -89,7 +83,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         const speakerParticipants = [...participants.values()].find(
             (current) => Number(current.id) !== Number(authDetails?.user?.id)
         );
-        console.log(speakerParticipants)
+        
         setOther(speakerParticipants)
     };
     const handleLeave = () => {
@@ -114,7 +108,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             if (!newMeetingId) throw new Error("No meeting ID returned.");
             setMeetingId(newMeetingId);
             setIsInitiator(true);
-            console.log("Meeting Created:", newMeetingId);
         } catch (error) {
             onFailure({ message: "Meeting Creation Failed", error: error.message });
         } finally {
@@ -131,7 +124,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
         setIsLoading(true);
         try {
-            console.log("Joining as Initiator...");
             join();
 
             setTimeout(async () => {
@@ -145,11 +137,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                     chat_id: messageData.chat_id,
                     sendMessageMutation,
                 });
-                console.log("Call Invite Sent!");
             }, 1000);
         } catch (error: any) {
             setIsLoading(false);
-            console.error("❌ Error joining meeting:", error);
             onFailure({
                 message: "Meeting Join Failed",
                 error: error.message || "Something went wrong while joining the meeting.",
@@ -179,39 +169,42 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         }
     }, [isMeetingActive, localMicOn]);
 
-
     return (
-        <div className="w-96 py-10 flex flex-col items-center mt-4 md:mt-0">
-            {showSummary && (
-                <CallSummary callSummary={{ duration: callDuration, caller: authDetails?.user?.name || "Unknown" }} />
-            )}
-
-            {!isMeetingActive ? (
-                <>
-                    {!meetingId ? (
-                        <button onClick={handleCreateMeeting} className="bg-oliveLight hover:oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                            Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
-                        </button>
-                    ) : isInitiator ? (
-                        <button onClick={handleStartCall} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                            Start Call {isLoading && <FaSpinner className="animate-spin" />}
-                        </button>
-                    ) : (
-                        <button onClick={handleJoinMeeting} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
-                            Join Call {isLoading && <FaSpinner className="animate-spin" />}
-                        </button>
-                    )}
-                </>
+        <div className="flex flex-col items-center bg-olive/30 p-5">
+            
+                {!isMeetingActive ? (
+                    <div className="py-10 w-96 rounded-lg flex flex-col items-center">
+                        {showSummary && (
+                            <CallSummary callSummary={{ 
+                                duration: callDuration, 
+                                caller:isInitiator ? "You" : selectedChatUser?.contact_name, 
+                                 receiver: !isInitiator ? "You" : selectedChatUser?.contact_name || "Unknown"
+                             }} />
+                        )}
+                        {!meetingId ? (
+                            <button onClick={handleCreateMeeting} className="bg-oliveLight hover:oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                                Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
+                            </button>
+                        ) : isInitiator ? (
+                            <button onClick={handleStartCall} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                                Start Call {isLoading && <FaSpinner className="animate-spin" />}
+                            </button>
+                        ) : (
+                            <button onClick={handleJoinMeeting} className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2">
+                                Join Call {isLoading && <FaSpinner className="animate-spin" />}
+                            </button>
+                        )}
+                </div>
             ) : (
-                <>
-                    <div className="flex flex-col gap-2 items-center">
-                        {other && <Receiver participantId={other?.id} />}
-                        {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} />}
+            <>
+                <div className="flex flex-col gap-2 items-center">
+
+                    {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} caller={other} isInitiator={isInitiator} />}
 
 
-                    </div>
+                </div>
 
-                </>
+            </>
             )}
 
             <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />

@@ -8,20 +8,16 @@ import { FaCog } from "react-icons/fa";
 import CallComponent from '../video-sdk/CallComponent';
 
 
-const CallInterface = () => {
-    const [call, setCall] = useState(false)
-    const [isOpen, setIsOpen] = useState(false)
+const CallInterface = ({setShowCall}) => {
     return (
         <>
-            <Modal isOpen={isOpen} closeModal={() => setIsOpen(false)}>
-                <CallComponent />
-            </Modal>
+            
 
 
             <div className="font-bold">
                 <div
                     onClick={() => {
-                        setIsOpen(true);
+                        setShowCall(true);
                     }}
                     className="bg-oliveGreen hover:bg-green-600/60 text-white cursor-pointer p-2 flex flex-col items-center justify-center gap-2 text-center h-20"
                 >

@@ -37,7 +37,7 @@ function CallControls({ isMuted, isSpeakerOn, toggleMute, toggleSpeaker }: CallC
       <div
         onClick={toggleMute}
         className={`${
-          isMuted ? "bg-red-500" : "bg-[#1a2b12]"
+          isMuted ? "bg-red-500" : "bg-[#4b8032]"
         } cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center`}
       >
         {isMuted ? <AiOutlineAudio className="text-xl" /> : <AiOutlineAudioMuted className="text-xl" />}

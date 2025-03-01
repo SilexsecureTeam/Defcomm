@@ -2,7 +2,7 @@ import { useParticipant } from "@videosdk.live/react-sdk";
 import { useEffect, useMemo, useRef } from "react";
 import ReactPlayer from "react-player";
 import mainLogoTwo from "../../assets/logo-icon.png";
-import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
+import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 
 const Receiver = ({ participantId }) => {
   const micRef = useRef(null);
@@ -32,7 +32,7 @@ const Receiver = ({ participantId }) => {
   }, [micStream, micOn]);
 
   return (
-    <li className="w-20 h-20 relative bg-black/80 rounded-[10px] flex justify-center items-center">
+    <figure className="w-full h-full relative bg-black/80 rounded-[10px] flex justify-center items-center">
       <audio ref={micRef} autoPlay playsInline />
       {webcamOn ? (
         <ReactPlayer
@@ -56,7 +56,13 @@ const Receiver = ({ participantId }) => {
       >
         {micOn ? <FaMicrophone size={24} /> : <FaMicrophoneSlash size={24} />}
       </div>
-    </li>
+      <div className={`absolute cursor-pointer hover:scale-105 duration-100 flex items-center justify-center right-2 bottom-2 ${
+          webcamOn ? "bg-green" : "bg-red-700"
+        } rounded-full h-[20px] w-[20px]`}
+      >
+        {webcamOn ? <FaVideo size={24} /> : <FaVideoSlash size={24} />}
+      </div>
+    </figure>
   );
 };
 

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { MdAttachFile, MdOutlineEmojiEmotions, MdCall, MdClose } from "react-icons/md";
-import { motion, AnimatePresence } from "framer-motion";
+import { MdCall } from "react-icons/md";
 import CustomAudioMessage from "../components/Chat/CustomAudioMessage";
 import CallInterface from "../components/Chat/CallInterface";
 import useChat from "../hooks/useChat";
@@ -10,11 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { FaSpinner } from "react-icons/fa6";
 import SendMessage from "../components/Chat/SendMessage";
 import ChatFilePreview from "../components/Chat/ChatFilePreview";
-import call from "../assets/call.png";
-import { FaCog } from "react-icons/fa";
+
 import CallComponent from "../components/video-sdk/CallComponent";
 import ChatCallInvite from "../components/Chat/ChatCallInvite";
-import MeetingVid from "../components/video-sdk/MeetingVid";
+import Modal from "../components/modal/Modal";
 const ChatInterface = () => {
     const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
     const [showCall, setShowCall] = useState(false);
@@ -37,7 +35,7 @@ const ChatInterface = () => {
             });
         }
         if (messages?.data && messageRef.current) {
-            messageRef.current.scrollTo({ top: messageRef.current.scrollHeight, behavior: "smooth" });
+            messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
 
@@ -68,7 +66,7 @@ const ChatInterface = () => {
         console.log(msg?.message?.slice("CALL_INVITE:".length))
         setShowCall(true); // This will open the CallComponent
     };
-    
+
 
     return (
         <div className="relative flex flex-col lg:flex-row gap-4 h-full">
@@ -178,28 +176,17 @@ const ChatInterface = () => {
             {/* Call Interface (Desktop) */}
             {selectedChatUser && (
                 <div className="w-max hidden lg:block">
-                    <CallInterface />
-                  
+                    <CallInterface setShowCall={setShowCall} />
+
                 </div>
             )
             }
 
-            {/* Call Interface (Mobile) */}
-            <AnimatePresence>
-                {showCall && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="w-80 h-max fixed top-4 inset-0 bg-white bg-opacity-90 flex justify-center items-center ml-auto z-[100]"
-                    >
-                        <CallComponent initialMeetingId={meetingId} />
-                        <button className="absolute top-4 right-4 text-white bg-red-500 p-2 rounded-full" onClick={() => {setMeetingId(null); setShowCall(false)}}>
-                            <MdClose size={24} />
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            
+
+            {showCall && <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
+                <CallComponent />
+            </Modal>}
         </div>
     );
 };
