@@ -199,7 +199,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             <>
                 <div className="flex flex-col gap-2 items-center">
 
-                    {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} caller={other} isInitiator={isInitiator} />}
+                    {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} participant={other} isInitiator={isInitiator} />}
 
 
                 </div>
