@@ -24,10 +24,11 @@ function useDashBoardRoute() {
   const { pathname } = useLocation();
   const { fetchContacts } = useChat();
   const { state, dispatch } = useContext(DashboardContext);
-  
-  const options = [...dashboardOptions, ...utilOptions, ...dashboardTabs];
+
+  const options = useMemo(() => [...dashboardOptions, ...utilOptions, ...dashboardTabs], []);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isSidebarLoaded, setIsSidebarLoaded] = useState(false); // NEW: Prevent flash
   const [SidebarComponent, setSidebarComponent] = useState(() => SideBar);
   const [SidebarItemComponent, setSidebarItemComponent] = useState(() => SideBarItem);
 
@@ -35,20 +36,20 @@ function useDashBoardRoute() {
   const { data: contacts } = useQuery({
     queryKey: ["contacts"],
     queryFn: fetchContacts,
-    enabled: state?.type === "CHAT", // Fetch only when in chat
+    enabled: state?.type === "CHAT",
     refetchOnMount: true, 
     refetchOnWindowFocus: true, 
   });
 
-  // Memoized sidebar options to prevent flickering
+  // Determine sidebar options
   const sidebarOptions = useMemo(() => {
     const matchedOption = options.find((opt) => pathname === opt.route);
     
     if (matchedOption?.type === "CHAT" && contacts?.data?.length) {
-      return contacts.data; // Set contacts as options only when they exist
+      return contacts.data; // Use contacts when available
     }
     return dashboardOptions;
-  }, [pathname, contacts?.data]);
+  }, [pathname, contacts?.data, options]);
 
   useEffect(() => {
     const matchedOption = options.find((opt) => pathname === opt.route);
@@ -57,15 +58,20 @@ function useDashBoardRoute() {
       dispatch(matchedOption);
     }
 
-    if (matchedOption?.type === "CHAT") {
-      setSidebarComponent(() => SideBarTwo);
-      setSidebarItemComponent(() => SideBarItemTwo);
-    } else {
-      setSelectedChatUser(null);
-      setSidebarComponent(() => SideBar);
-      setSidebarItemComponent(() => SideBarItem);
-    }
-  }, [pathname]); // Removed contacts dependency to prevent flickering
+    // Avoid re-render flash by updating once
+    setIsSidebarLoaded(false);
+    setTimeout(() => {
+      if (matchedOption?.type === "CHAT") {
+        setSidebarComponent(() => SideBarTwo);
+        setSidebarItemComponent(() => SideBarItemTwo);
+      } else {
+        setSelectedChatUser(null);
+        setSidebarComponent(() => SideBar);
+        setSidebarItemComponent(() => SideBarItem);
+      }
+      setIsSidebarLoaded(true);
+    }, 50); // Small delay prevents UI flash
+  }, [pathname, options]);
 
   const toggleIsOpen = () => setIsOpen(!isOpen);
 
@@ -81,25 +87,29 @@ function useDashBoardRoute() {
           }}
         >
           {/* Sidebar */}
-          <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} state={state}>
-            {sidebarOptions.length === 0 ? (
-              <div className="flex justify-center items-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
-              </div>
-            ) : (
+          {isSidebarLoaded ? (
+            <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} state={state}>
+              {sidebarOptions.length === 0 ? (
+                <div className="flex justify-center items-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-[10px]">
+                  {sidebarOptions.map((currentOption, idx) => (
+                    <SidebarItemComponent key={idx} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
+                  ))}
+                </ul>
+              )}
+
               <ul className="flex flex-col gap-[10px]">
-                {sidebarOptions.map((currentOption, idx) => (
-                  <SidebarItemComponent key={idx} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
+                {utilOptions.map((currentOption) => (
+                  <SidebarItemComponent key={currentOption.type} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
                 ))}
               </ul>
-            )}
-
-            <ul className="flex flex-col gap-[10px]">
-              {utilOptions.map((currentOption) => (
-                <SidebarItemComponent key={currentOption.type} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
-              ))}
-            </ul>
-          </SidebarComponent>
+            </SidebarComponent>
+          ) : (
+            <div className="w-[250px] h-screen bg-gray-900 animate-pulse" />
+          )}
 
           {/* Main Content */}
           <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
