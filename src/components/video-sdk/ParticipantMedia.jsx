@@ -57,7 +57,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
   };
 
   return (
-    <div className="w-[90%] flex flex-col md:flex-row justify-center gap-2 h-[80vh]">
+    <div className="w-[90vw] flex flex-col md:flex-row justify-center gap-2 h-[80vh]">
 
       {/* Call Controls */}
       <div className="hidden w-96 md:flex flex-col items-center bg-white rounded-lg py-10">
