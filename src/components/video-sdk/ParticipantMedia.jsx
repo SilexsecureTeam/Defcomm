@@ -1,4 +1,4 @@
-import { useParticipant } from "@videosdk.live/react-sdk";
+import { useMeeting, useParticipant } from "@videosdk.live/react-sdk";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import mainLogoTwo from "../../assets/logo-icon.png";
