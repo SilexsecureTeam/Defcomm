@@ -39,7 +39,7 @@ const ParticipantMedia = ({ participantId, auth, isRinging, callDuration, handle
   return (
     <div className="flex flex-col items-center">
       <figure className="w-20 h-20 relative bg-black/80 rounded-[10px] flex justify-center items-center">
-        <audio ref={micRef} autoPlay playsInline />
+        <audio ref={micRef} autoPlay playsInline muted={isLocal} />
         {webcamOn ? (
           <ReactPlayer
             playsinline
