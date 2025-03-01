@@ -62,7 +62,7 @@ const ParticipantMedia = ({ participantId, auth, isRinging, callDuration, handle
             webcamOn ? "bg-green" : "bg-red-700"
           } rounded-full h-[24px] w-[24px]`}
         >
-          {micOn ? FaVideo size={16} /> : FaVideoSlash size={16} />}
+          {micOn ? <FaVideo size={16} /> : <FaVideoSlash size={16} />}
         </div>
       </figure>
       <CallInfo callerName={auth?.user?.name || "Unknown"} callDuration={callDuration} />
