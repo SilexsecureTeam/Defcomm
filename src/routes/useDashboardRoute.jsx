@@ -40,7 +40,7 @@ function useDashBoardRoute() {
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT", // Fetch only when in chat
     refetchOnMount: false, // Refetch when component mounts
-    refetchOnWindowFocus: false, // Refetch when the page is focused
+    refetchOnWindowFocus: true, // Refetch when the page is focused
       // refetchOnReconnect: true, // Refetch when the network reconnects
   });
 
