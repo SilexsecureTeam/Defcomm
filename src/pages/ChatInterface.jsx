@@ -176,7 +176,7 @@ const ChatInterface = () => {
             {/* Call Interface (Desktop) */}
             {selectedChatUser && (
                 <div className="w-max hidden lg:block">
-                    <CallInterface setShowCall={setShowCall} initialMeetingId={meetingId} />
+                    <CallInterface setShowCall={setShowCall} />
 
                 </div>
             )
@@ -185,7 +185,7 @@ const ChatInterface = () => {
             
 
             {showCall && <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
-                <CallComponent />
+                <CallComponent initialMeetingId={meetingId} />
             </Modal>}
         </div>
     );
