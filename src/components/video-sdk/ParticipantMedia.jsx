@@ -116,7 +116,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
         </figure>
       </section>
       {/* Mobile Controls */}
-      <div className="absolute bottom-0 w-screen flex md:hidden mx-auto md:mx-0 justify-around items-center bg-black/70 py-3 px-5 z-[1000]">
+      <div className="fixed bottom-0 w-screen left-0 flex md:hidden mx-auto md:mx-0 justify-around items-center bg-black/70 py-3 px-5 z-[1000]">
         {/* Toggle Mic Button */}
         <button
           onClick={handleToggleMic}
