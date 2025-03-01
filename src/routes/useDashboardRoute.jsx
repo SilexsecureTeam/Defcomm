@@ -57,7 +57,7 @@ function useDashBoardRoute() {
   }, [pathname, dispatch, options, setSelectedChatUser]);
 
   // Preload data before navigating
-  const preloadData = (route: string) => {
+  const preloadData = (route) => {
     if (route === "/chat") {
       queryClient.prefetchQuery(["contacts"], fetchContacts);
     }
