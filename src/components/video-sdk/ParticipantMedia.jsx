@@ -76,7 +76,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
 
         {/* Receiver Video */}
         <div className={`absolute bottom-0 right-0 z-[100] transition-all duration-300 ${isMaximized ? "w-full h-full" : "w-40 h-40"}`}>
-          <Receiver data={participant} />
+          <Receiver participant={participant} />
           {/* Maximize Button */}
           <button
             onClick={toggleMaximize}
