@@ -50,6 +50,9 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
   const handleToggleMic = async () => {
     toggleMic();
   };
+  const handleToggleCam = async () => {
+    toggleWebcam();
+  };
 
   // Toggle maximize video
   const toggleMaximize = () => {
@@ -107,7 +110,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
           )}
           {/* Toggle Camera Button */}
           <div
-            onClick={toggleWebcam}
+            onClick={handleToggleCam}
             className={`hidden absolute cursor-pointer hover:scale-105 duration-100 md:flex items-center justify-center left-2 bottom-2 ${webcamOn ? "bg-green" : "bg-red-700"
               } rounded-full h-[24px] w-[24px]`}
           >
