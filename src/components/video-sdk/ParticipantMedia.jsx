@@ -72,7 +72,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
       </div>
 
       {/* Video Section */}
-      <section className="flex-1 w-full md:w-2/3 h-96 md:min-h-full relative bg-black/80 rounded-[10px] flex justify-center items-center overflow-hidden">
+      <section className="flex-1 w-full md:w-2/3 h-[80vh] md:min-h-full relative bg-black/80 rounded-[10px] flex justify-center items-center overflow-hidden">
 
         {/* Receiver Video */}
         <div className={`absolute bottom-0 right-0 z-[100] transition-all duration-300 ${isMaximized ? "w-full h-full" : "w-40 h-40"}`}>
@@ -116,7 +116,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
         </figure>
       </section>
       {/* Mobile Controls */}
-      <div className="absolute bottom-0 w-full flex md:hidden mx-auto md:mx-0 justify-around items-center bg-black/70 py-3 px-5 z-[1000]">
+      <div className="absolute bottom-0 w-screen flex md:hidden mx-auto md:mx-0 justify-around items-center bg-black/70 py-3 px-5 z-[1000]">
         {/* Toggle Mic Button */}
         <button
           onClick={handleToggleMic}
