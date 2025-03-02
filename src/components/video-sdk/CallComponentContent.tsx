@@ -1,8 +1,6 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
-import callerTone from "../../assets/audio/caller.mp3"; // Outgoing call tone
-import receiverTone from "../../assets/audio/receiver.mp3"; // Incoming call tone
 
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
 import { onFailure } from "../../utils/notifications/OnFailure";
@@ -15,8 +13,7 @@ import { ChatContext } from "../../context/ChatContext";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { axiosClient } from "../../services/axios-client";
 import ParticipantMedia from "./ParticipantMedia";
-import Receiver from "./Receiver";
-
+import audioController from "../../utils/audioController";
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isMeetingActive, setIsMeetingActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +21,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isRinging, setIsRinging] = useState(true);
     const [callDuration, setCallDuration] = useState(0);
     const [isInitiator, setIsInitiator] = useState(false);
-    const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
     const [showSummary, setShowSummary] = useState(false);
     const [other, setOther] = useState(null);
     const [me, setMe] = useState(null);
@@ -33,6 +29,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const messageData = selectedChatUser?.chat_meta;
     const client = axiosClient(authDetails?.access_token);
     const sendMessageMutation = useSendMessageMutation(client);
+
+    const callTimer = useRef<NodeJS.Timeout | null>(null);
 
     const { join, participants, localMicOn, toggleMic, leave } = useMeeting({
         onMeetingJoined: () => {
@@ -46,27 +44,22 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         onMeetingLeft: () => {
             setIsMeetingActive(false);
             setShowSummary(true);
-            if (callTimer) {
-                clearInterval(callTimer);
-                setCallTimer(null);
+            if (callTimer.current) {
+                clearInterval(callTimer.current);
+                callTimer.current = null;
             }
-
         },
         onParticipantJoined: (participant) => {
             setIsRinging(false);
-
-            if (!callTimer) {
-                const timer = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
-                setCallTimer(timer);
+            if (!callTimer.current) {
+                callTimer.current = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
             }
         },
         onParticipantLeft: () => {
-            if ([...participants.values()].length <= 1) {
-                setIsRinging(true);
-                if (callTimer) {
-                    clearInterval(callTimer);
-                    setCallTimer(null);
-                }
+            const participantCount = participants ? [...participants.values()].length : 0;
+            console.log("Participant Left, Current Count:", participantCount);
+            if (participantCount <= 1) {
+                handleLeave();
             }
         },
         onError: (error) => {
@@ -88,38 +81,33 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
         setOther(speakerParticipants)
     };
-    const handleLeave = () => {
+
+    const handleLeave = async () => {
+        if (callTimer.current) {
+            clearInterval(callTimer.current);
+            callTimer.current = null;
+        }
         leave();
+        setIsMeetingActive(false);
+        setMeetingId(null);
+        audioController.stopRingtone();
         setShowSummary(true);
-        clearInterval(callTimer);
-        setCallTimer(null);
-        setMeetingId(null)
-    }
-    // Ensure participant audio plays
+    };
+
     useEffect(() => {
-        let audio: HTMLAudioElement | null = null;
-    
+
         if (participants && isMeetingActive) {
             getMe();
             getOther();
-            const participantCount = [...participants.values()].length;
-            
-            if (participantCount < 2) {
-                audio = new Audio(isInitiator && callerTone);
-                audio.loop = true;
-                audio.play().catch((err) => console.error("Error playing ringtone:", err));
-            }
-            }
+            const participantCount = participants ? [...participants.values()].length : 0;
 
-            return () => {
-                if (audio) {
-                    audio.pause();
-                    audio.currentTime = 0;
-                }
-            };
-    
-    }, [participants, isMeetingActive, isInitiator]);
-    
+            if (participantCount > 1) {
+                audioController.stopRingtone();
+            }
+        }
+
+    }, [participants, isMeetingActive]);
+
 
 
     // Create Meeting
@@ -146,20 +134,18 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
         setIsLoading(true);
         try {
-            join();
+            await join();
 
-            setTimeout(async () => {
-                console.log("Sending Call Invite...");
-                await sendMessageUtil({
-                    client,
-                    message: `CALL_INVITE:${meetingId}`,
-                    file: null,
-                    chat_user_type: messageData.chat_user_type,
-                    chat_user_id: messageData.chat_user_id,
-                    chat_id: messageData.chat_id,
-                    sendMessageMutation,
-                });
-            }, 1000);
+            await sendMessageUtil({
+                client,
+                message: `CALL_INVITE:${meetingId}`,
+                file: null,
+                chat_user_type: messageData.chat_user_type,
+                chat_user_id: messageData.chat_user_id,
+                chat_id: messageData.chat_id,
+                sendMessageMutation,
+            });
+
         } catch (error: any) {
             setIsLoading(false);
             onFailure({

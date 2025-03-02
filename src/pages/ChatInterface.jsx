@@ -188,7 +188,7 @@ const ChatInterface = () => {
             
 
             {showCall && <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
-                <CallComponent initialMeetingId={meetingId} />
+                <CallComponent initialMeetingId={meetingId} setInitialMeetingId={setMeetingId} />
             </Modal>}
         </div>
     );
