@@ -85,7 +85,7 @@ const ChatInterface = () => {
             }
 
             {/* Chat Section */}
-            <div className="relative w-full lg:w-2/3 flex-1 h-[80vh] bg-[#d0eb8e] pt-4 transition-all duration-300">
+            <div className="relative w-full lg:w-2/3 flex-1 h-[70vh] bg-[#d0eb8e] pt-4 transition-all duration-300">
                 <div ref={messageRef} className="flex-1 overflow-y-auto w-full h-full flex flex-col space-y-4 p-4 pb-10">
                     {selectedChatUser ? (
                         isLoading ? (
