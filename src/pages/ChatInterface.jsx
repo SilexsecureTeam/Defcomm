@@ -35,7 +35,7 @@ const ChatInterface = () => {
             });
         }
         if (messages?.data && messageRef.current) {
-            messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+            messageRef.current?.lastElementChild?.scrollIntoView();
         }
         
     }, [messages]);
