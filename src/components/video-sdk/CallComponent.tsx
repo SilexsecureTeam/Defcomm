@@ -7,12 +7,13 @@ import {
 import { AuthContext } from "../../context/AuthContext";
 import CallComponentContent from './CallComponentContent'
 
-const CallComponent = ({ initialMeetingId }: { initialMeetingId?: string }) => {
+const CallComponent = ({ initialMeetingId, setInitialMeetingId }: { initialMeetingId?: string, setInitialMeetingId: (id: string | null) => void }) => {
   const [meetingId, setMeetingId] = useState<string | null>(initialMeetingId || null);
   const [providerMeetingId, setProviderMeetingId] = useState<string | null>(null);
   const { authDetails } = useContext(AuthContext);
   useEffect(() => {
     if (meetingId && !providerMeetingId) { // Only set once
+        setInitialMeetingId(null)
         setProviderMeetingId(meetingId);
     }
 }, [meetingId]);

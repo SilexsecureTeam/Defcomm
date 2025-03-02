@@ -1,32 +1,25 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { MdCall } from "react-icons/md";
-// import callerTone from "../../assets/audio/caller.mp3"; // Outgoing call tone
-// import receiverTone from "../../assets/audio/receiver.mp3"; // Incoming call tone
+import callerTone from "../../assets/audio/caller.mp3";
+import receiverTone from "../../assets/audio/receiver.mp3";
+import audioController from "../../utils/audioController"; // Import the shared audio controller
 
 interface ChatCallInviteProps {
-    isMyChat: boolean; // If true, the user initiated the call; otherwise, they received it
-    onAcceptCall: () => void; // Function to handle call acceptance
-    status: "Ringing..." | "Call Ended"; // Current call status
-    caller: string; // Name of the caller
+    isMyChat: boolean;
+    onAcceptCall: () => void;
+    status: "Ringing..." | "Call Ended";
+    caller: string;
 }
 
 function ChatCallInvite({ isMyChat, onAcceptCall, status, caller }: ChatCallInviteProps) {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    // useEffect(() => {
-    //     if (status === "Ringing...") {
-    //         const ringtone = isMyChat ? callerTone : receiverTone; // Select correct audio
-
-    //         if (!audioRef.current) {
-    //             audioRef.current = new Audio(ringtone);
-    //             audioRef.current.loop = true; // Loop the ringtone until stopped
-    //         }
-    //         audioRef.current.play();
-    //     } else {
-    //         audioRef.current?.pause();
-    //         audioRef.current = null;
-    //     }
-    // }, [status, isMyChat]);
+    useEffect(() => {
+        if (status === "Ringing...") {
+            const ringtone = isMyChat ? callerTone : receiverTone;
+            audioController.playRingtone(ringtone);
+        } else {
+            audioController.stopRingtone();
+        }
+    }, [status, isMyChat]);
 
     return (
         <div className={`flex flex-wrap items-center gap-3 p-3 rounded-lg w-full shadow-md font-medium text-sm ${isMyChat ? "bg-oliveLight text-white self-end" : "bg-gray-100 text-black self-start"}`}>
@@ -45,7 +38,6 @@ function ChatCallInvite({ isMyChat, onAcceptCall, status, caller }: ChatCallInvi
                     {status}
                 </span>
             </div>
-            {/* Show "Accept" button only if the user is NOT the caller */}
             {status === "Ringing..." && (
                 <button
                     onClick={onAcceptCall}
