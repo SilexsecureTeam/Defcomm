@@ -77,7 +77,7 @@ const LoginForm = ({ version }) => {
                                 },
                             })}
                             type="text"
-                            placeholder="Enter Nigerian Phone Number"
+                            placeholder="Enter Phone Number"
                             className="w-full p-3 border border-gray-600 rounded-md"
                             maxLength={11}
                         />
