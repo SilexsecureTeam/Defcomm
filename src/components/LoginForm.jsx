@@ -57,7 +57,7 @@ const LoginForm = ({ version }) => {
     return (
         <div
             id="login-form"
-            className="w-full max-w-[800px] flex justify-center lg:justify-end items-center pt-20"
+            className="w-full max-w-[780px] flex justify-center lg:justify-end items-center pt-20"
         >
             <form
                 onSubmit={handleSubmit(onSubmit)}

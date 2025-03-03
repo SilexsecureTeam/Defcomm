@@ -20,7 +20,7 @@ const ProfileDropdown = ({ user }) => {
                     {/* Show user avatar if available, otherwise show MdAccountCircle icon */}
                     {user?.avatar ? (
                         <img
-                            src={user.avatar}
+                            src={`${import.meta.env.VITE_BASE_URL}${user.avatar}`}
                             alt="User Avatar"
                             className="w-8 h-8 rounded-full object-cover"
                         />

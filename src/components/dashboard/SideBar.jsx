@@ -5,7 +5,7 @@ import mainLogo from "../../assets/logo-icon.png";
 import { MdKey } from "react-icons/md";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { FaBars, FaTimes } from "react-icons/fa";
-
+import {Link} from 'react-router-dom'
 function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
   return (
     <>
@@ -24,7 +24,7 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
           >
             {!isMenuOpen ? <FaBars size={24} /> : <FaTimes size={24} />}
           </div>
-          <img src={mainLogo} alt="logo" className="w-14" />
+          <Link to={"/dashboard/home"}><img src={mainLogo} alt="logo" className="w-14" /></Link>
         </div>
 
         {/* ✅ Make sure this section also allows scrolling if needed */}

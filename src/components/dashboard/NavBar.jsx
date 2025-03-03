@@ -1,10 +1,8 @@
 import React, { useState, memo } from "react";
-import { FaCartShopping, FaBell } from "react-icons/fa6";
 import { FaBars, FaSearch, FaTimes } from "react-icons/fa";
 import { IoBarbellOutline, IoChatbubbleEllipsesSharp, IoSettings } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { PiBellLight } from "react-icons/pi";
-import { IoIosArrowDown } from "react-icons/io";
 import ProfileDropdown from "./ProfileDropdown";
 
 function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
@@ -38,11 +36,7 @@ function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
 
       {/* Icons and Profile Section */}
       <div className="flex items-center gap-4 text-white">
-        {/* Language Selector */}
-        <div className="hidden md:flex items-center cursor-pointer gap-2 w-10 h-10 rounded-full bg-gray-500/50">
-          {/* <img src={UsFlag} alt="US Flag" /> */}
-          <p className="font-semibold text-gray-600 text-xs">Eng</p>
-        </div>
+        
         {/* Notification */}
         <div className="hidden md:flex items-center justify-center cursor-pointer gap-2 w-10 h-10 rounded-full bg-gray-500/50">
           <PiBellLight size={20} />
