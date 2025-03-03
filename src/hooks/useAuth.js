@@ -9,13 +9,14 @@ import { queryClient } from "../services/query-client";
 const useAuth = () => {
   const navigate = useNavigate();
   const { authDetails, updateAuth } = useContext(AuthContext);
-  
+
   const client = axiosClient(authDetails?.token);
 
   // Login Mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials) => {
       const { data } = await client.post("/login", credentials);
+      console.log(data)
       if (!data?.data?.user) {
         throw new Error("Invalid response: User data not found");
       }
@@ -30,16 +31,14 @@ const useAuth = () => {
       onFailure({ message: "Login Failed", error: error.response?.data?.message || error?.message });
     },
   });
-  
+
   // Register Mutation
   const registerMutation = useMutation({
     mutationFn: async (userData) => {
-      console.log("Registering user..."); // Debugging
       const { data } = await client.post("/register", userData);
       return data;
     },
     onSuccess: () => {
-      console.log("Registration successful!"); // Debugging
       onSuccess({ message: "Registration Successful!", error: "" });
     },
     onError: (err) => {
@@ -49,18 +48,37 @@ const useAuth = () => {
   });
 
   // Verify OTP Mutation
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (otpData) => {
-      console.log("Verifying OTP..."); // Debugging
-      const { data } = await client.post("/verify-otp", otpData);
+  const requestOtpMutation = useMutation({
+    mutationFn: async (credential) => {
+      const { data } = await client.post("/requestOtpSms", { phone: credential?.phone });
+      if (data?.status !== 200) {
+        throw new Error("An error occured");
+      }
       return data;
     },
-    onSuccess: () => {
-      console.log("OTP verification successful!"); // Debugging
-      onSuccess({ message: "OTP Verified!", error: "" });
+    onSuccess: (data) => {
+      onSuccess({ message: "OTP Requested!", success: data?.message });
     },
     onError: (err) => {
-      console.log("OTP verification failed:", err); // Debugging
+      onFailure({ message: "Login Failed", error: err?.response?.data?.error || err?.response?.data?.message || err?.message });
+    },
+  });
+  // Verify OTP Mutation
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (otpData) => {
+      
+      const { data } = await client.post("/loginWithPhone", otpData);
+      if (data?.status !== 200) {
+        throw new Error("Invalid response: User data not found");
+      }
+      return data.data;
+    },
+    onSuccess: (userData) => {
+      updateAuth(userData);
+      navigate("/dashboard/home");
+      onSuccess({ message: "OTP Verified!", success: "Continuing to dashboard" });
+    },
+    onError: (err) => {
       onFailure({ message: "OTP Verification Failed", error: err.response?.data?.message || err.message });
     },
   });
@@ -83,15 +101,25 @@ const useAuth = () => {
   });
 
   // Check if any mutation is loading
-  const isLoading =
-    loginMutation.isPending ||
-    registerMutation.isPending ||
-    verifyOtpMutation.isPending ||
-    logoutMutation.isPending;
+  const isLoading = {
+    login: loginMutation.isPending,
+    register: registerMutation.isPending,
+    requestOtp: requestOtpMutation.isPending,
+    verifyOtp: verifyOtpMutation.isPending,
+    logout: logoutMutation.isPending,
+    overall:
+      loginMutation.isPending ||
+      registerMutation.isPending ||
+      requestOtpMutation.isPending ||
+      verifyOtpMutation.isPending ||
+      logoutMutation.isPending,
+  };
+
   return {
     login: loginMutation.mutate,
     register: registerMutation.mutate,
     verifyOtp: verifyOtpMutation.mutate,
+    requestOtp: requestOtpMutation.mutateAsync,
     logout: logoutMutation.mutate,
     isLoading,
   };
