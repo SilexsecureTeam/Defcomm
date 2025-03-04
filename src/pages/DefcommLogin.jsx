@@ -26,7 +26,6 @@ const DefcommLogin = () => {
   const moveDown = useTransform(scrollYProgress, [0, 1], [0, 150]); // Moves intro1 up and down
   const moveUp = useTransform(scrollYProgress, [0, 1], [0, -40]); // Moves intro1 up and down
   const rotateScroll = useTransform(scrollYProgress, [0, 1], [0, 360]); // Rotates scroll image
-
   return (
     <>
       {/* SEO Content */}
@@ -38,7 +37,7 @@ const DefcommLogin = () => {
       transition={{ duration: 0.5 }}
       className="relative w-full min-h-screen flex flex-col items-center justify-center text-white p-6"
       style={{
-        background: `linear-gradient(to bottom, #36460A 10%, #000000 20%, #000000 65%, #36460A 90%)`,
+        background: `linear-gradient(to bottom, #101500 10%, #000000 15%, #000000 65%, #36460A 90%)`,
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
@@ -48,8 +47,8 @@ const DefcommLogin = () => {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="w-full sticky top-0 z-50 flex justify-between items-center bg-[#36460A]/50 backdrop:blur-lg"
-      >
+        className="w-full sticky top-0 z-50 flex justify-between items-center mb-auto bg-transparent backdrop-blur-lg px-4 py-2"
+    >
         <img src={logoIcon} alt="Defcomm Icon" className="w-20" />
         {/* <div className="flex gap-2">
           <p className="w-10 h-10 rounded-full bg-white/30 text-gray-200/50 flex items-center justify-center"><FaSearch /></p>
@@ -103,7 +102,7 @@ const DefcommLogin = () => {
         { img: connect, view: "connect" },
         { img: secure, view: "secure" },
         { img: talkie, view: "comm" }]?.map((item, idx) => (
-          <motion.li key={idx} onClick={() => setView(item?.view)} className={`${view !== item?.view ? "bg-oliveDark/70" : "bg-white"} cursor-pointer p-3 rounded-xl`} whileHover={{ scale: 1.1 }}>
+          <motion.li key={idx} className={`${view !== item?.view ? "bg-oliveDark/70" : "bg-white"} cursor-pointer p-3 rounded-xl`} whileHover={{ scale: 1.1 }}>
             <img src={item?.img} alt="img" className={`${view === item?.view && idx !== 1 && "filter invert"} w-5 h-5`} />
           </motion.li>
         ))}

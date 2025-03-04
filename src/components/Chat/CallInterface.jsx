@@ -1,16 +1,12 @@
 import React, { useState } from 'react'
-import Modal from "../modal/Modal";
 import callImg from "../../assets/call.png";
 import { FaCog } from "react-icons/fa";
-import Settings from '../../pages/Settings';
 
 const CallInterface = ({setShowCall}) => {
-    const [isOpen, setIsOpen] =useState(false);
+
     return (
         <>
-            <Modal isOpen={isOpen} closeModal={() => setIsOpen(false)}>
-                <Settings />
-            </Modal>
+            
             <div className="font-bold">
                 <div
                     onClick={() => {

@@ -7,8 +7,8 @@ import { onFailure } from "../utils/notifications/OnFailure";
 
 const LoginForm = ({ version }) => {
     const { register, handleSubmit, formState: { errors } } = useForm({
-    mode: "onChange", // Validates as the user types
-});
+        mode: "onChange", // Validates as the user types
+    });
     const { requestOtp, verifyOtp, isLoading } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [otpRequested, setOtpRequested] = useState(false);
@@ -112,7 +112,13 @@ const LoginForm = ({ version }) => {
                         </h2>
                         <OtpInput
                             value={otp}
-                            onChange={setOtp}
+                            onChange={(value) => {
+                                // Allow only numbers
+                                if (/^\d*$/.test(value)) {
+                                    setOtp(value);
+                                }
+                                return;
+                            }}
                             numInputs={4}
                             isInputNum
                             containerStyle="flex justify-center gap-2 mb-4"
@@ -125,7 +131,7 @@ const LoginForm = ({ version }) => {
                                 height: "50px",
                             }}
                             shouldAutoFocus
-                            renderInput={(props) => <input {...props} />}
+                            renderInput={(props) => <input {...props} inputMode="numeric" pattern="\d*" />}
                         />
 
                         <div className="mt-10 font-medium">
