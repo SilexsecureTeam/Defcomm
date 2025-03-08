@@ -9,41 +9,57 @@ interface Group {
   description?: string;
 }
 
-
 const useGroups = () => {
   const { authDetails } = useContext(AuthContext);
-  const client = axiosClient(authDetails?.access_token);
+  const token = authDetails?.access_token;
 
+  // Fetch groups
   const useFetchGroups = () =>
     useQuery<Group[]>({
       queryKey: ["groups"],
       queryFn: async () => {
+        const client = axiosClient(token);
         const { data } = await client.get("/user/group");
         return data?.data || [];
       },
       enabled: !!authDetails, // Fetch only when authenticated
       staleTime: 0, // Forces refetching every time you visit the page
-      cacheTime: 1000 * 60 * 5, // Cache data for 5 minutes, but still refetch on navigation
+      cacheTime: 1000 * 60 * 5, // Cache data for 5 minutes
       refetchOnMount: true, // Refetch when component mounts
       refetchOnWindowFocus: true, // Refetch when the page is focused
-      // refetchOnReconnect: true, // Refetch when the network reconnects
     });
-  
+
+     // Fetch [pending] groups
+  const useFetchPendingGroups = () =>
+    useQuery<Group[]>({
+      queryKey: ["pendingInvitations"],
+      queryFn: async () => {
+        const client = axiosClient(token);
+        const { data } = await client.get("/user/group/pending");
+        return data?.data || [];
+      },
+      enabled: !!authDetails, // Fetch only when authenticated
+      staleTime: 0, // Forces refetching every time you visit the page
+      cacheTime: 1000 * 60 * 5, // Cache data for 5 minutes
+      refetchOnMount: true, // Refetch when component mounts
+      refetchOnWindowFocus: true, // Refetch when the page is focused
+    });
 
   // Fetch members of a specific group
   const useFetchGroupMembers = (groupId: string | null) =>
     useQuery({
-      queryKey: ["groupMembers", groupId],
+      queryKey: ["groupMembers", groupId], // Ensure unique cache per groupId
       queryFn: async () => {
         if (!groupId) return [];
-        const { data } = await client.get(`/groups/${groupId}/members`);
+        const client = axiosClient(token);
+        const { data } = await client.get(`/user/group/member/${groupId}`);
         return data?.data || [];
       },
-      enabled: !!authDetails && !!groupId, // Fetch only when groupId exists
+      enabled: !!authDetails && !!groupId, // Fetch only when authenticated and groupId is provided
       staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     });
 
-  return { useFetchGroups, useFetchGroupMembers };
+  return { useFetchGroups, useFetchGroupMembers, useFetchPendingGroups };
 };
 
 export default useGroups;

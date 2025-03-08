@@ -1,6 +1,6 @@
 //Dashboard icons import
 import { FaHome, FaRegUserCircle, FaCog } from "react-icons/fa";
-import { MdOutlineCall, MdOutlineFolderShared } from "react-icons/md";
+import { MdGroups, MdOutlineCall, MdOutlineFolderShared } from "react-icons/md";
 import { IoIosChatboxes, IoMdWifi } from "react-icons/io";
 import { BiCategoryAlt } from "react-icons/bi";
 
@@ -28,6 +28,13 @@ export const dashboardOptions = [
     title: "Secure Chat",
     route: "/dashboard/chat",
     icon: IoIosChatboxes,
+    iconActive: null,
+  },
+  {
+    type: "GROUP",
+    title: "Secure Groups",
+    route: "/dashboard/groups",
+    icon: MdGroups,
     iconActive: null,
   },
   {

@@ -1,21 +1,35 @@
-import React from "react";
+import React, { useState, } from "react";
 import { motion } from "framer-motion";
 import mainLogo from "../../assets/logo-icon.png";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserPlus } from "react-icons/fa";
 import { dashboardTabs } from "../../utils/constants";
 import useChat from "../../hooks/useChat";
 import { useQuery } from "@tanstack/react-query";
+import useGroups from "../../hooks/useGroup";
+import Modal from "../modal/Modal";
 
 function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
     const { fetchChatHistory } = useChat();
-
+    // State for modal and selected group
+    const [isModalOpen, setIsModalOpen] = useState(false);
     // Fetch Chat History using React Query
     const { data: chatHistory, isLoading } = useQuery({
         queryKey: ["chat-history"],
         queryFn: fetchChatHistory,
         //  refetchInterval: 5000,
-        staleTime:0
+        staleTime: 0
     });
+    const { useFetchGroups, useFetchGroupMembers } = useGroups();
+
+
+    // Fetch groups
+    const { data: groups } = useFetchGroups();
+
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
+    // Fetch group members when a group is selected
+    const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroupId);
+
+
     return (
         <>
             {/* SidebarTwo */}
@@ -58,7 +72,15 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                     </div>
                     <p className="mt-4 mb-2 font-medium text-xl text-center">Secure Contact</p>
                     {children?.length ? (
-                        <>
+                        <div className="relative">
+                            {/* Add Contact Button */}
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="absolute right-2 top-2 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                            >
+                                <FaUserPlus />
+                                Add Contact
+                            </button>
                             <ul className="overflow-y-auto h-80">{children[0]}</ul>
                             <ul className="flex flex-col gap-[10px] mt-20">
                                 {chatHistory?.slice(-2)?.reverse()?.map((chat) => (
@@ -84,7 +106,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                                     </li>
                                 ))}
                             </ul>
-                        </>
+                        </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-40 text-gray-500">
                             <svg
@@ -106,10 +128,59 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         </div>
                     )}
 
-
-
                 </nav>
+                
+            )}
             </motion.aside>
+
+            {isModalOpen && (
+                <Modal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)}>
+                    <div className="flex flex-col gap-3 md:gap-6 p-5 w-[90%] md:w-96 min-h-32 py-14 bg-oliveDark text-white">
+                        {groups?.length ? groups?.map((group, index) => (
+                            <motion.div
+                                key={group?.id}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="flex items-center gap-2 cursor-pointer hover:bg-oliveLight"
+                                onClick={() => setSelectedGroupId(group?.id)} // Set selected group ID
+                            >
+                                <figure className="w-12 h-12 bg-olive/40 rounded-full overflow-hidden">
+                                    <img
+                                        src={group?.image || mainLogo}
+                                        alt="G"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </figure>
+                                <section>
+                                <p className="text-xl mt-1 font-medium">{group?.group_name}</p>
+                                <p className="text-sm mt-1 font-medium">{group?.company_name}</p>
+                                </section>
+                            </motion.div>
+                        )):(
+                            <div>No groups available </div>
+                        )}
+
+                        {/* Show group members when a group is selected */}
+                        {selectedGroupId && (
+                            <div className="mt-6">
+                                {isGroupMembersLoading ? <>Loading...</>
+                                    : <>
+                                        <h3 className="text-lg font-bold">Group Members:</h3>
+                                        <ul className="mt-2 space-y-2">
+                                            {groupMembers?.map((member) => (
+                                                <li key={member.id} className="bg-gray-700 p-2 rounded-md">
+                                                    {member.name}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>}
+
+                            </div>
+                        )}
+                    </div>
+                </Modal>
+            )}
 
         </>
     );

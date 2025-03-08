@@ -19,11 +19,6 @@ const Dashboard = () => {
   // Fetch groups
   const { data: groups, isLoading, error } = useFetchGroups();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   return (
     <>
       {/* SEO Content */}

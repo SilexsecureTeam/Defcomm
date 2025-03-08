@@ -8,6 +8,7 @@ import Fallback from "../components/Fallback";
 import { DashboardContext } from "../context/DashboardContext";
 import useChat from "../hooks/useChat";
 import { ChatContext } from "../context/ChatContext";
+import Groups from "../pages/Groups";
 
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
 const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
@@ -104,6 +105,7 @@ function useDashBoardRoute() {
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
                     <Route path="/file-sharing" element={<FileManager />} />
+                    <Route path="/groups" element={<Groups />} />
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
