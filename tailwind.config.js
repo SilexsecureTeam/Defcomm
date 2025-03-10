@@ -5,7 +5,8 @@ export default {
   theme: {
     extend: {
       gridTemplateColumns:{
-        'responsive': 'repeat(auto-fill, minmax(200px, 1fr))'
+        'responsive': 'repeat(auto-fill, minmax(200px, 1fr))',
+        'responsive-sm': 'repeat(auto-fill, minmax(180px, 1fr))'
       },
       colors: {
         oliveLight: "#36460A",

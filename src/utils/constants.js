@@ -1,5 +1,5 @@
 //Dashboard icons import
-import { FaHome, FaRegUserCircle, FaCog } from "react-icons/fa";
+import { FaHome, FaRegUserCircle, FaCog, FaRobot } from "react-icons/fa";
 import { MdGroups, MdOutlineCall, MdOutlineFolderShared } from "react-icons/md";
 import { IoIosChatboxes, IoMdWifi } from "react-icons/io";
 import { BiCategoryAlt } from "react-icons/bi";
@@ -35,6 +35,13 @@ export const dashboardOptions = [
     title: "Secure Groups",
     route: "/dashboard/groups",
     icon: MdGroups,
+    iconActive: null,
+  },
+  {
+    type: "AI",
+    title: "Defcomm AI",
+    route: "/dashboard/bot",
+    icon: FaRobot,
     iconActive: null,
   },
   {
