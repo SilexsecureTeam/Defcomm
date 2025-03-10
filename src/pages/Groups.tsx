@@ -71,7 +71,7 @@ const Groups = () => {
 
             {/* Pending Invitations Section */}
             <section className="bg-oliveGreen/60 p-5 rounded-lg">
-                <h2 className="text-2xl font-semibold mb-4">Pending Invitations</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-white/70">Pending Invitations</h2>
                 {loadingInvitations ? (
                     <div className="flex justify-center">
                         <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
@@ -80,7 +80,7 @@ const Groups = () => {
                     <ul className="space-y-4">
                         {invitations.map((inv) => (
                             <li key={inv.id} className="p-4 rounded-lg flex flex-col md:flex-row justify-between md:items-center shadow-md gap-1">
-                                <span className="text-xl md:text-lg font-medium">{inv.group_name}</span>
+                                <span className="text-xl md:text-lg font-medium text-white/90">{inv.group_name}</span>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleAccept(inv.id)}
