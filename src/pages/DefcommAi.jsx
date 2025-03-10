@@ -47,7 +47,7 @@ const DefcommAi = () => {
         </div>
 
         {/* Right */}
-        <div className="group absolute top-2 right-2 md:w-24 md:relative flex flex-col gap-2 py-5 text-center">
+        <div className="group absolute top-2 right-2 md:w-24 md:relative flex flex-col gap-2 md:py-5 text-center">
           <motion.figure 
             whileTap={{ scale: 0.9 }}
             className="cursor-pointer w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center shadow-md"
@@ -59,7 +59,7 @@ const DefcommAi = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.05 }}
-            className="p-2 rounded-md shadow-md hidden group-hover:block"
+            className="absolute top-2 right-0 p-2 rounded-md shadow-md hidden group-hover:block"
           >
             <p className="px-3 py-1 rounded-md my-2 bg-gray-300">Igbo</p>
             <p className="px-3 py-1 rounded-md my-2 bg-gray-300">Hausa</p>
