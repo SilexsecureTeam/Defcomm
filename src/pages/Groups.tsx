@@ -79,8 +79,8 @@ const Groups = () => {
                 ) : invitations?.length ? (
                     <ul className="space-y-4">
                         {invitations.map((inv) => (
-                            <li key={inv.id} className="p-4 rounded-lg flex justify-between items-center shadow-md">
-                                <span className="text-lg font-medium">{inv.group_name}</span>
+                            <li key={inv.id} className="p-4 rounded-lg flex justify-between items-center shadow-md gap-1">
+                                <span className="text-sm md:text-lg font-medium">{inv.group_name}</span>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleAccept(inv.id)}
