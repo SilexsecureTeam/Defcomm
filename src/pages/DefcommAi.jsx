@@ -14,7 +14,7 @@ const DefcommAi = () => {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="p-6"
     >
-      <div className="flex w-full">
+      <div className="flex w-full relative">
         {/* Left */}
         <div className="flex-1 flex flex-col justify-center">
           <motion.section 
@@ -47,7 +47,7 @@ const DefcommAi = () => {
         </div>
 
         {/* Right */}
-        <div className="group w-24 relative flex flex-col gap-2 py-5 text-center">
+        <div className="group absolute top-2 right-2 md:w-24 md:relative flex flex-col gap-2 py-5 text-center">
           <motion.figure 
             whileTap={{ scale: 0.9 }}
             className="cursor-pointer w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center shadow-md"
@@ -59,7 +59,7 @@ const DefcommAi = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.05 }}
-            className="absolute top-full left-1/2  md:relative md:top-0 md:left-0 md:translate-x-0 transform -translate-x-1/2 p-2 rounded-md shadow-md hidden group-hover:block"
+            className="p-2 rounded-md shadow-md hidden group-hover:block"
           >
             <p className="px-3 py-1 rounded-md my-2 bg-gray-300">Igbo</p>
             <p className="px-3 py-1 rounded-md my-2 bg-gray-300">Hausa</p>
