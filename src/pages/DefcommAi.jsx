@@ -27,7 +27,7 @@ const DefcommAi = () => {
             <p className="text-sm text-oliveGreen">Ai assistance for iSurvive Protocol</p>
           </motion.section>
 
-          <section className="grid grid-cols-responsive gap-4 mx-auto max-w-lg w-full">
+          <section className="grid grid-cols-responsive gap-4 mx-auto md:max-w-lg w-full">
             <motion.div 
             onClick={()=>navigate('/dashboard/bot/chat')}
               whileHover={{ scale: 1.05 }}
