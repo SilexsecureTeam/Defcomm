@@ -59,7 +59,7 @@ const DefcommAi = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.05 }}
-            className="absolute top-2 right-0 p-2 rounded-md shadow-md hidden group-hover:block"
+            className="absolute top-full mt-3 right-0 p-2 rounded-md shadow-md hidden group-hover:block"
           >
             <p className="px-3 py-1 rounded-md my-2 bg-gray-300">Igbo</p>
             <p className="px-3 py-1 rounded-md my-2 bg-gray-300">Hausa</p>
