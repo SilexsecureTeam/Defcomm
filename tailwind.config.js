@@ -4,6 +4,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      gridTemplateColumns:{
+        'responsive': 'repeat(auto-fill, minmax(200px, 1fr))'
+      },
       colors: {
         oliveLight: "#36460A",
         oliveDark: "#101500",

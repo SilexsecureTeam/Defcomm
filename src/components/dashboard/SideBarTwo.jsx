@@ -1,12 +1,13 @@
 import React, { useState, } from "react";
 import { motion } from "framer-motion";
 import mainLogo from "../../assets/logo-icon.png";
-import { FaBars, FaTimes, FaUserPlus } from "react-icons/fa";
+import { FaBars, FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
 import { dashboardTabs } from "../../utils/constants";
 import useChat from "../../hooks/useChat";
 import { useQuery } from "@tanstack/react-query";
 import useGroups from "../../hooks/useGroup";
 import Modal from "../modal/Modal";
+import GroupSlide from "../GroupSlide";
 
 function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
     const { fetchChatHistory } = useChat();
@@ -25,9 +26,9 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
     // Fetch groups
     const { data: groups } = useFetchGroups();
 
-    const [selectedGroupId, setSelectedGroupId] = useState(null);
+    const [selectedGroup, setSelectedGroup] = useState(null);
     // Fetch group members when a group is selected
-    const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroupId);
+    const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.id);
 
 
     return (
@@ -79,7 +80,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                                 className="absolute right-2 top-2 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                             >
                                 <FaUserPlus />
-                                Add Contact
+                                <span className="hidden md:block">Add Contact</span>
                             </button>
                             <ul className="overflow-y-auto h-80">{children[0]}</ul>
                             <ul className="flex flex-col gap-[10px] mt-20">
@@ -135,38 +136,21 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
 
             {isModalOpen && (
                 <Modal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)}>
-                    <div className="flex flex-col gap-3 md:gap-6 p-5 w-[90%] md:w-96 min-h-32 py-14 bg-oliveDark text-white">
-                        {groups?.length ? groups?.map((group, index) => (
-                            <motion.div
-                                key={group?.id}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="flex items-center gap-2 cursor-pointer hover:bg-oliveLight"
-                                onClick={() => setSelectedGroupId(group?.id)} // Set selected group ID
-                            >
-                                <figure className="w-12 h-12 bg-olive/40 rounded-full overflow-hidden">
-                                    <img
-                                        src={group?.image || mainLogo}
-                                        alt="G"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </figure>
-                                <section>
-                                <p className="text-xl mt-1 font-medium">{group?.group_name}</p>
-                                <p className="text-sm mt-1 font-medium">{group?.company_name}</p>
-                                </section>
-                            </motion.div>
-                        )):(
+                    <div className="p-5 w-[80vw] md:w-[600px] min-h-32 max-h-[80vh] py-14 bg-oliveDark text-white">
+                        {groups?.length ? 
+                        (<GroupSlide groups={groups} setSelectedGroup={setSelectedGroup} forceSingleView={true} />) : (
                             <div>No groups available </div>
                         )}
 
                         {/* Show group members when a group is selected */}
-                        {selectedGroupId && (
-                            <div className="mt-6">
-                                {isGroupMembersLoading ? <>Loading...</>
+                        {selectedGroup && (
+                            <div className="mt-3">
+                                {isGroupMembersLoading ?
+                                    <div className="flex justify-center">
+                                        <FaSpinner className="animate-spin text-white text-2xl" />
+                                    </div>
                                     : <>
-                                        <h3 className="text-lg font-bold">Group Members:</h3>
+                                        <h3 className="text-lg font-bold"><strong>{selectedGroup?.group_name} -</strong> Group Members:</h3>
                                         <ul className="mt-2 space-y-2">
                                             {groupMembers?.map((member) => (
                                                 <li key={member.id} className="bg-gray-700 p-2 rounded-md">

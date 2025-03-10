@@ -1,116 +1,113 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 import useGroups from "../hooks/useGroup";
 import { motion } from "framer-motion";
 import mainLogo from "../assets/logo-icon.png";
-interface Group {
-    id: string;
-    name: string;
-}
-
-interface Invitation {
-    id: string;
-    groupName: string;
-}
-
-
-const fetchPendingInvitations = async () => {
-    const { data } = await axios.get<Invitation[]>("/api/invitations/pending");
-    return data;
-};
+import GroupSlide from "../components/GroupSlide";
 
 const Groups = () => {
-    const queryClient = useQueryClient();
-
-    const { useFetchGroups, useFetchPendingGroups } = useGroups();
-
-    // Fetch groups
-    const { data: groups, isLoading, error } = useFetchGroups();
-    // Fetch pending groups
+    const { useFetchGroups, useFetchPendingGroups, acceptMutation, declineMutation, useFetchGroupMembers } = useGroups();
+    const { data: groups, isLoading } = useFetchGroups();
     const { data: invitations, isLoading: loadingInvitations } = useFetchPendingGroups();
 
+    // Track loading state for each invitation
+    const [loadingStates, setLoadingStates] = useState<{ [key: string]: string | null }>({});
+    const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+    
+    const handleAccept = async (id: string) => {
+        setLoadingStates((prev) => ({ ...prev, [id]: "accepting" }));
+        await acceptMutation.mutateAsync(id);
+        setLoadingStates((prev) => ({ ...prev, [id]: null }));
+    };
 
-    // Accept invitation mutation
-    const acceptMutation = useMutation({
-        mutationFn: (invitationId: string) =>
-            axios.post(`/api/invitations/${invitationId}/accept`),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["groups"]);
-            queryClient.invalidateQueries(["pendingInvitations"]);
-        },
-    });
+    const handleDecline = async (id: string) => {
+        setLoadingStates((prev) => ({ ...prev, [id]: "declining" }));
+        await declineMutation.mutateAsync(id);
+        setLoadingStates((prev) => ({ ...prev, [id]: null }));
+    };
 
-    // Decline invitation mutation
-    const declineMutation = useMutation({
-        mutationFn: (invitationId: string) =>
-            axios.post(`/api/invitations/${invitationId}/decline`),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["pendingInvitations"]);
-        },
-    });
+     // Fetch group members when a group is selected
+     const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.id);
 
     return (
-        <div className="p-6 text-white flex flex-col gap-4">
+        <div className="p-6 text-white flex flex-col gap-6">
+            {/* Your Groups Section */}
             <section>
                 <h2 className="text-2xl font-semibold mb-4">Your Groups</h2>
                 {isLoading ? (
-                    <p>Loading groups...</p>
-                ) : groups?.length ? groups?.map((group, index) => (
-                    <motion.div
-                        key={group?.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        className="flex items-center gap-2 cursor-pointer hover:bg-oliveLight"
-                        onClick={() => setSelectedGroupId(group?.id)} // Set selected group ID
-                    >
-                        <figure className="w-12 h-12 bg-olive/40 rounded-full overflow-hidden">
-                            <img
-                                src={group?.image || mainLogo}
-                                alt="G"
-                                className="w-full h-full object-cover"
-                            />
-                        </figure>
-                        <section>
-                            <p className="text-xl mt-1 font-medium">{group?.group_name}</p>
-                            <p className="text-sm mt-1 font-medium">{group?.company_name}</p>
-                        </section>
-                    </motion.div>
-                )) : (
-                    <div>No groups found. </div>
+                    <div className="flex justify-center">
+                        <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
+                    </div>
+                ) : (
+                    <div className="">
+                        {groups?.length ? (
+                            <GroupSlide groups={groups} setSelectedGroup={setSelectedGroup} />
+                        ) : (
+                            <p className="text-gray-400">No groups found.</p>
+                        )}
+                    </div>
                 )}
             </section>
 
-            <section>
+            {/* Group Members Section */}
+            {selectedGroup && (
+                <section className="bg-gray-800 p-5 rounded-lg">
+                    <h2 className="text-xl font-semibold mb-4"><strong>{selectedGroup?.group_name} -</strong> Group Members</h2>
+                    {isGroupMembersLoading ? (
+                        <div className="flex justify-center">
+                            <FaSpinner className="animate-spin text-white text-2xl" />
+                        </div>
+                    ) : groupMembers?.length ? (
+                        <ul className="space-y-2">
+                            {groupMembers.map((member) => (
+                                <li key={member.id} className="p-2 bg-gray-700 rounded-md">{member.name}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-gray-400">No members found.</p>
+                    )}
+                </section>
+            )}
+
+            {/* Pending Invitations Section */}
+            <section className="bg-oliveGreen/60 p-5 rounded-lg">
                 <h2 className="text-2xl font-semibold mb-4">Pending Invitations</h2>
                 {loadingInvitations ? (
-                    <p>Loading invitations...</p>
+                    <div className="flex justify-center">
+                        <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
+                    </div>
                 ) : invitations?.length ? (
-                    <ul>
-                        {invitations?.map((inv) => (
-                            <li key={inv?.id} className="p-2 border-b flex justify-between">
-                                <span>{inv?.group_name}</span>
-                                <div>
+                    <ul className="space-y-4">
+                        {invitations.map((inv) => (
+                            <li key={inv.id} className="p-4 rounded-lg flex justify-between items-center shadow-md">
+                                <span className="text-lg font-medium">{inv.group_name}</span>
+                                <div className="flex gap-2">
                                     <button
-                                        onClick={() => acceptMutation.mutate(inv.id)}
-                                        className="bg-green-500 text-white px-3 py-1 mr-2"
-                                        disabled={acceptMutation.isLoading}
+                                        onClick={() => handleAccept(inv.id)}
+                                        className="bg-oliveLight hover:bg-oliveDark text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                                        disabled={loadingStates[inv.id] === "accepting"}
                                     >
-                                        {acceptMutation.isLoading ? "Accepting..." : "Accept"}
+                                        {loadingStates[inv.id] === "accepting" && (
+                                            <FaSpinner className="animate-spin text-white" />
+                                        )}
+                                        Accept
                                     </button>
                                     <button
-                                        onClick={() => declineMutation.mutate(inv.id)}
-                                        className="bg-red-500 text-white px-3 py-1"
-                                        disabled={declineMutation.isLoading}
+                                        onClick={() => handleDecline(inv.id)}
+                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                                        disabled={loadingStates[inv.id] === "declining"}
                                     >
-                                        {declineMutation.isLoading ? "Declining..." : "Decline"}
+                                        {loadingStates[inv.id] === "declining" && (
+                                            <FaSpinner className="animate-spin text-white" />
+                                        )}
+                                        Decline
                                     </button>
                                 </div>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p>No pending invitations.</p>
+                    <p className="text-gray-400">No pending invitations.</p>
                 )}
             </section>
         </div>

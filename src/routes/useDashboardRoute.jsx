@@ -1,20 +1,22 @@
-import { lazy, Suspense, useContext, useEffect, useReducer, useState } from "react";
+import { lazy, Suspense, useContext, useLayoutEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import DashboardReducer from "../reducers/DashboardReducer";
 import { utilOptions, dashboardOptions, dashboardTabs } from "../utils/constants";
 import { AuthContext } from "../context/AuthContext";
-import Fallback from "../components/Fallback";
 import { DashboardContext } from "../context/DashboardContext";
 import useChat from "../hooks/useChat";
 import { ChatContext } from "../context/ChatContext";
 import Groups from "../pages/Groups";
+import SideBar from "../components/dashboard/SideBar"
+import SideBarTwo from "../components/dashboard/SideBarTwo"
+import SideBarItem from "../components/dashboard/SideBarItem"
+import SideBarItemTwo from "../components/dashboard/SideBarItemTwo"
 
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
-const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
-const SideBar = lazy(() => import("../components/dashboard/SideBar"));
-const SideBarItem = lazy(() => import("../components/dashboard/SideBarItem"));
-const SideBarItemTwo = lazy(() => import("../components/dashboard/SideBarItemTwo"));
+// const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
+// const SideBar = lazy(() => import("../components/dashboard/SideBar"));
+// const SideBarItem = lazy(() => import("../components/dashboard/SideBarItem"));
+// const SideBarItemTwo = lazy(() => import("../components/dashboard/SideBarItemTwo"));
 const DashboardLayout = lazy(() => import("../layout/DashboardLayout"));
 const Home = lazy(() => import("../pages/Dashboard"));
 const ChatInterface = lazy(() => import("../pages/ChatInterface"));
@@ -43,7 +45,7 @@ function useDashBoardRoute() {
     staleTime:0
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const matchedOption = options.find((opt) => pathname === opt.route);
     if (matchedOption) {
       dispatch(matchedOption);
