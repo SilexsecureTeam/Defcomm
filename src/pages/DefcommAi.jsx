@@ -31,7 +31,7 @@ const DefcommAi = () => {
             <motion.div 
             onClick={()=>navigate('/dashboard/bot/chat')}
               whileHover={{ scale: 1.05 }}
-              className="bg-oliveGreen text-white flex items-center justify-center p-5 min-w-40 min-h-24 rounded-lg shadow-lg cursor-pointer"
+              className="bg-oliveGreen text-white flex items-center justify-center p-5 min-h-24 rounded-lg shadow-lg cursor-pointer"
             >
               <img src={voice_chat} alt="Voice Chat" className="w-16" />
             </motion.div>
@@ -39,7 +39,7 @@ const DefcommAi = () => {
             <motion.div 
             onClick={()=>navigate('/dashboard/bot/chat')}
               whileHover={{ scale: 1.05 }}
-              className="bg-white flex items-center justify-center p-5 min-w-40 min-h-24 rounded-lg shadow-lg cursor-pointer"
+              className="bg-white flex items-center justify-center p-5 min-h-24 rounded-lg shadow-lg cursor-pointer"
             >
               <img src={chat_icon} alt="Chat Icon" className="w-16" />
             </motion.div>
