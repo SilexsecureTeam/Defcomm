@@ -1,0 +1,99 @@
+import React, { useState, useContext } from "react";
+import { MdOutlineImage } from "react-icons/md";
+import { FaFileAlt, FaPaperPlane, FaSpinner, FaTimes, FaMicrophone, FaMicrophoneAlt } from "react-icons/fa";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { axiosClient } from "../../services/axios-client";
+import { AuthContext } from "../../context/AuthContext";
+import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
+import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
+import { IoSend } from "react-icons/io5";
+
+interface MessageData {
+  chat_user_id: string;
+  chat_user_type: string;
+  chat_id: string;
+}
+
+interface SendMessageProps {
+  messageData: MessageData;
+}
+
+function ChatBotInput({ messageData }: SendMessageProps) {
+  const { authDetails } = useContext(AuthContext);
+  const [message, setMessage] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const queryClient = useQueryClient();
+  const client = axiosClient(authDetails?.access_token);
+
+  const clearMessageInput = () => {
+    setMessage(""); // Clears the input field
+    setFile(null); // Clears the file selection
+  };
+
+  const sendMessageMutation = useSendMessageMutation(client, clearMessageInput);
+
+  const handleSendMessage = () => {
+    sendMessageUtil({
+      client,
+      message,
+      file,
+      chat_user_type: messageData.chat_user_type,
+      chat_user_id: messageData.chat_user_id,
+      chat_id: messageData.chat_id,
+      sendMessageMutation,
+    });
+  };
+
+  return (
+    <div className="sticky bottom-0 w-full bg-white flex flex-col p-4">
+      {file && (
+        <div className="flex items-center gap-3 bg-white p-3 mb-2 rounded-lg shadow-md">
+          <FaFileAlt className="text-oliveGreen" size={20} />
+          <div className="flex-1">
+            <p className="text-sm font-medium w-[90%] truncate">{file.name}</p>
+            <p className="text-xs text-gray-400">{(file.size / 1024).toFixed(2)} KB</p>
+          </div>
+          <button onClick={() => setFile(null)} className="text-red-400 hover:text-red-500 transition">
+            <FaTimes size={18} />
+          </button>
+        </div>
+      )}
+
+      <div className="relative flex items-center gap-2">
+        {/* Image Upload Button */}
+        <label htmlFor="fileUpload" className="cursor-pointer">
+          <MdOutlineImage size={24} className="flex-shrink-0" />
+          <input type="file" id="fileUpload" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+        </label>
+
+        {/* Text Input with Mic Icon */}
+        <div className="relative flex-1">
+          <textarea
+            placeholder="Ask me anything.."
+            className="w-full p-4 pr-10 bg-gray-200 rounded-lg border-none outline-none resize-none leading-none text-base font-medium placeholder:text-gray-700"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={1}
+          />
+          <FaMicrophoneAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer hover:text-black transition" size={18} />
+        </div>
+
+        {/* Send Button */}
+        <button
+          className="bg-oliveGreen text-white w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
+          onClick={handleSendMessage}
+          disabled={sendMessageMutation.isPending}
+        >
+          {sendMessageMutation.isPending ? <FaSpinner size={20} className="animate-spin" /> : <IoSend size={20} />}
+        </button>
+      </div>
+
+      {/* Footnote */}
+      <small className="max-w-[90%] text-[10px] md:text-xs text-gray-600 text-center font-bold mt-2 md:tracking-[1px] mx-auto">
+        ChatMate can make mistakes. Consider checking important information. Your Privacy & ChatMate
+      </small>
+    </div>
+  );
+}
+
+export default ChatBotInput;

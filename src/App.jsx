@@ -8,6 +8,7 @@ import FallBack from "./components/Fallback";
 import { DashboardContextProvider } from "./context/DashboardContext";
 import { queryClient } from "./services/query-client";
 import { ChatProvider } from "./context/ChatContext";
+import { BotProvider } from "./context/BotContext";
 
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
@@ -18,22 +19,24 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ChatProvider>
-          <DashboardContextProvider>
-            <Suspense fallback={<FallBack />}>
-              <Router>
-                <Routes>
-                  <Route path="/" element={<DefcommLogin />} />
+          <BotProvider>
+            <DashboardContextProvider>
+              <Suspense fallback={<FallBack />}>
+                <Router>
+                  <Routes>
+                    <Route path="/" element={<DefcommLogin />} />
 
-                  {/* Using ProtectedRoute as a Component */}
-                  <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
+                    {/* Using ProtectedRoute as a Component */}
+                    <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
 
-                  {/* Catch-all redirect */}
-                  <Route path="*" element={<Navigate to="/" />} />
-                </Routes>
-              </Router>
-            </Suspense>
-            <ToastContainer autoClose={2000} draggable />
-          </DashboardContextProvider>
+                    {/* Catch-all redirect */}
+                    <Route path="*" element={<Navigate to="/" />} />
+                  </Routes>
+                </Router>
+              </Suspense>
+              <ToastContainer autoClose={2000} draggable />
+            </DashboardContextProvider>
+          </BotProvider>
         </ChatProvider>
       </AuthProvider>
 

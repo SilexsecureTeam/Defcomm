@@ -8,6 +8,7 @@ import useChat from "../hooks/useChat";
 import { ChatContext } from "../context/ChatContext";
 import Groups from "../pages/Groups";
 import SideBar from "../components/dashboard/SideBar"
+import AiSideBar from "../components/dashboard/AiSideBar"
 import SideBarTwo from "../components/dashboard/SideBarTwo"
 import SideBarItem from "../components/dashboard/SideBarItem"
 import SideBarItemTwo from "../components/dashboard/SideBarItemTwo"
@@ -22,6 +23,8 @@ const Home = lazy(() => import("../pages/Dashboard"));
 const ChatInterface = lazy(() => import("../pages/ChatInterface"));
 const ComingSoon = lazy(() => import("../pages/ComingSoon"));
 const FileManager = lazy(() => import("../pages/FileManager"));
+const DefcommAi = lazy(() => import("../pages/DefcommAi"));
+const ChatBox = lazy(() => import("../pages/ChatBox"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -55,6 +58,10 @@ function useDashBoardRoute() {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
       setOption(contacts?.data || []);
+    }else if (matchedOption?.type === "AI" ||  pathname === "/dashboard/bot/chat") {
+      setSidebarComponent(() => AiSideBar);
+      setSidebarItemComponent(null);
+      setOption( []);
     } else {
       setSelectedChatUser(null); // Clear chat context on unmount
       setSidebarComponent(() => SideBar);
@@ -108,6 +115,8 @@ function useDashBoardRoute() {
                     <Route path="/chat" element={<ChatInterface />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/groups" element={<Groups />} />
+                    <Route path="/bot" element={<DefcommAi />} />
+                    <Route path="/bot/chat" element={<ChatBox />} />
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
