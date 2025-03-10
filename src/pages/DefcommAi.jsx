@@ -14,7 +14,7 @@ const DefcommAi = () => {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="p-6"
     >
-      <div className="flex">
+      <div className="flex w-full">
         {/* Left */}
         <div className="flex-1 flex flex-col justify-center">
           <motion.section 
