@@ -52,7 +52,7 @@ const Groups = () => {
             {/* Group Members Section */}
             {selectedGroup && (
                 <section className="bg-gray-800 p-5 rounded-lg">
-                    <h2 className="text-xl font-semibold mb-4"><strong>{selectedGroup?.group_name} -</strong> Group Members</h2>
+                    <h2 className="text-xl font-medium mb-4"><strong>{selectedGroup?.group_name} -</strong> Group Members</h2>
                     {isGroupMembersLoading ? (
                         <div className="flex justify-center">
                             <FaSpinner className="animate-spin text-white text-2xl" />
