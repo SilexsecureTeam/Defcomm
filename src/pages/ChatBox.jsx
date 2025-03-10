@@ -17,13 +17,13 @@ const ChatBox = () => {
       {/* Header Section */}
       <div className="sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4 text-sm font-medium">
         <button className="bg-white text-black rounded-lg flex items-center gap-2 px-3 py-2 border border-olive transition-all hover:scale-105">
-          <IoFlash /> Upgrade to Premium
+          <IoFlash /> <span className="hidden md:block">Upgrade to Premium</span>
         </button>
 
         <p>{selectedBotChat}</p>
 
         <button className="bg-oliveGreen text-black rounded-lg flex items-center gap-2 px-3 py-2 border border-olive transition-all hover:scale-105">
-          <BiMoon /> Dark Mode
+          <BiMoon /> <span className="hidden md:block">Dark Mode</span>
         </button>
       </div>
 
