@@ -25,13 +25,12 @@ function AiSideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
 
   return (
     <motion.aside
-      initial={{ x: "-100%" }}
-      animate={{ x: isMenuOpen ? 0 : "-100%" }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`$ {
-        isMenuOpen ? "fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
-      } md:!flex flex-col md:!translate-x-0 md:relative bg-transparent w-72 text-white h-full overflow-y-auto`}
-    >
+                initial={{ x: "-100%" }}
+                animate={{ x: isMenuOpen ? 0 : "-100%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className={`${isMenuOpen ? "!bg-[#2c3b03] fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
+                    } md:!flex flex-col md:!translate-x-0 md:relative bg-transparent w-72 text-white h-full overflow-y-auto`} // ✅ Ensure sidebarTwo scrolls
+            >
       <div className="relative p-4 text-xl font-bold flex flex-col items-center min-h-28 bg-[#2c3b03]">
         <div
           onClick={toogleIsOpen}
