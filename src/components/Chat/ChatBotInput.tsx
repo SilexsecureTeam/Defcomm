@@ -45,7 +45,7 @@ function ChatBotInput({ messageData }: SendMessageProps) {
   };
 
   return (
-    <div className="sticky bottom-0 w-full bg-white flex flex-col p-4">
+    <div className="sticky bottom-0 w-full bg-white dark:bg-gray-900 text-gray-800 dark:text-white flex flex-col p-4">
       {file && (
         <div className="flex items-center gap-3 bg-white p-3 mb-2 rounded-lg shadow-md">
           <FaFileAlt className="text-oliveGreen" size={20} />
@@ -70,7 +70,7 @@ function ChatBotInput({ messageData }: SendMessageProps) {
         <div className="relative flex-1">
           <textarea
             placeholder="Ask me anything.."
-            className="w-full p-4 pr-10 bg-gray-200 rounded-lg border-none outline-none resize-none leading-none text-base font-medium placeholder:text-gray-700"
+            className="w-full p-4 pr-10 bg-gray-200 dark:bg-gray-500 rounded-lg border-none outline-none resize-none leading-none text-base font-medium placeholder:text-gray-700 dark:placeholder:text-gray-300"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={1}
@@ -80,7 +80,7 @@ function ChatBotInput({ messageData }: SendMessageProps) {
 
         {/* Send Button */}
         <button
-          className="bg-oliveGreen text-white w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
+          className="bg-oliveGreen dark:bg-oliveLight text-white w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
           onClick={handleSendMessage}
           disabled={sendMessageMutation.isPending}
         >
@@ -89,7 +89,7 @@ function ChatBotInput({ messageData }: SendMessageProps) {
       </div>
 
       {/* Footnote */}
-      <small className="max-w-[90%] text-[10px] md:text-xs text-gray-600 text-center font-bold mt-2 md:tracking-[1px] mx-auto">
+      <small className="max-w-[90%] text-[10px] md:text-xs text-gray-600 dark:text-gray-200 text-center font-bold mt-2 md:tracking-[1px] mx-auto">
         ChatMate can make mistakes. Consider checking important information. Your Privacy & ChatMate
       </small>
     </div>

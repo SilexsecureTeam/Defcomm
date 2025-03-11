@@ -9,7 +9,7 @@ import { FaBars, FaTimes, FaRegFileAlt, FaChevronDown, FaChevronRight } from "re
 import { Link } from "react-router-dom";
 
 const chatHistory = {
-  Today: ["What is a linked list?", "Debugging chess game input..."],
+  Today: ["What is a linked list used for certain necessary captions, which makes developers question it", "Debugging chess game input..."],
   Yesterday: ["Logo vs Icons", "Scamming with purpose the f..."],
   "March 9": ["Study figma with happiness"],
 };
@@ -25,12 +25,12 @@ function AiSideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
 
   return (
     <motion.aside
-                initial={{ x: "-100%" }}
-                animate={{ x: isMenuOpen ? 0 : "-100%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className={`${isMenuOpen ? "!bg-[#2c3b03] fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
-                    } md:!flex flex-col md:!translate-x-0 md:relative bg-transparent w-72 text-white h-full overflow-y-auto`} // ✅ Ensure sidebarTwo scrolls
-            >
+      initial={{ x: "-100%" }}
+      animate={{ x: isMenuOpen ? 0 : "-100%" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className={`${isMenuOpen ? "!bg-[#2c3b03] fixed left-0 top-0 bottom-0 z-[100000]" : "hidden"
+        } md:!flex flex-col md:!translate-x-0 md:relative bg-transparent w-72 text-white h-full overflow-y-auto`} // ✅ Ensure sidebarTwo scrolls
+    >
       <div className="relative p-4 text-xl font-bold flex flex-col items-center min-h-28 bg-[#2c3b03]">
         <div
           onClick={toogleIsOpen}
@@ -50,7 +50,7 @@ function AiSideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
             Echxxxxxx
           </h3>
         </div>
-        <button className="w-full rounded-md bg-white text-black text-sm my-2 flex items-center justify-between gap-2 px-3 py-2">
+        <button onClick={()=>{setSelectedBotChat(null); toogleIsOpen()}} className="w-full rounded-md bg-white text-black text-sm my-2 flex items-center justify-between gap-2 px-3 py-2">
           New Chat <span className="text-xl">+</span>
         </button>
         {/* Chat history */}
@@ -67,8 +67,8 @@ function AiSideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
               {openSections[date] && (
                 <ul className="ml-2 mt-2 pl-3">
                   {chats.map((chat, index) => (
-                    <li key={index} onClick={()=>setSelectedBotChat(chat)} className={`p-2 rounded-md text-sm hover:underline flex items-center gap-2 cursor-pointer ${selectedBotChat === chat ? "bg-white/40":""}`}>
-                      <FaRegFileAlt /> {chat}
+                    <li key={index} onClick={() => {setSelectedBotChat(chat); toogleIsOpen()}} className={`p-2 rounded-md text-sm hover:underline flex items-center gap-2 cursor-pointer ${selectedBotChat === chat ? "bg-white/40" : ""}`}>
+                      <FaRegFileAlt className="flex-shrink-0" /> <span className="truncate">{chat}</span>
                     </li>
                   ))}
                 </ul>

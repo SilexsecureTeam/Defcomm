@@ -12,6 +12,7 @@ import AiSideBar from "../components/dashboard/AiSideBar"
 import SideBarTwo from "../components/dashboard/SideBarTwo"
 import SideBarItem from "../components/dashboard/SideBarItem"
 import SideBarItemTwo from "../components/dashboard/SideBarItemTwo"
+import { ThemeProvider } from "../context/ThemeContext";
 
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
 // const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
@@ -45,7 +46,7 @@ function useDashBoardRoute() {
     queryKey: ["contacts"],
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT", // Fetch only when in chat
-    staleTime:0
+    staleTime: 0
   });
 
   useLayoutEffect(() => {
@@ -58,10 +59,10 @@ function useDashBoardRoute() {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
       setOption(contacts?.data || []);
-    }else if (matchedOption?.type === "AI" ||  pathname === "/dashboard/bot/chat") {
+    } else if (pathname === "/dashboard/bot/chat") {
       setSidebarComponent(() => AiSideBar);
       setSidebarItemComponent(null);
-      setOption( []);
+      setOption([]);
     } else {
       setSelectedChatUser(null); // Clear chat context on unmount
       setSidebarComponent(() => SideBar);
@@ -75,40 +76,41 @@ function useDashBoardRoute() {
   return (
     <>
       {authDetails?.user?.role === "user" ? (
-        <main
-          className="h-screen w-screen relative flex overflow-hidden"
-          style={{
-            background: `linear-gradient(to bottom, #36460A 10%, #000000 40%)`,
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          {/* Sidebar */}
-          <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} state={state}>
-            {isLoading ? (
-              <div className="flex justify-center items-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
-              </div>
-            ) : (
+        <ThemeProvider>
+          <main
+            className="h-screen w-screen relative flex overflow-hidden"
+            style={{
+              background: `linear-gradient(to bottom, #36460A 10%, #000000 40%)`,
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            {/* Sidebar */}
+            <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} state={state}>
+              {isLoading ? (
+                <div className="flex justify-center items-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-[10px]">
+                  {option?.map((currentOption, idx) => (
+                    <SidebarItemComponent key={idx} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
+                  ))}
+                </ul>
+              )}
+
               <ul className="flex flex-col gap-[10px]">
-                {option?.map((currentOption, idx) => (
-                  <SidebarItemComponent key={idx} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
+                {utilOptions?.map((currentOption) => (
+                  <SidebarItemComponent key={currentOption.type} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
                 ))}
               </ul>
-            )}
+            </SidebarComponent>
 
-            <ul className="flex flex-col gap-[10px]">
-              {utilOptions?.map((currentOption) => (
-                <SidebarItemComponent key={currentOption.type} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
-              ))}
-            </ul>
-          </SidebarComponent>
-
-          {/* Main Content */}
-          <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
-            <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
-            <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              {/* <Suspense fallback={<Fallback />}> */}
+            {/* Main Content */}
+            <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
+              <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
+              <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
+                {/* <Suspense fallback={<Fallback />}> */}
                 <Routes>
                   <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
@@ -120,10 +122,11 @@ function useDashBoardRoute() {
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
-              {/* </Suspense> */}
+                {/* </Suspense> */}
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </ThemeProvider>
       ) : (
         <Navigate to={"/login"} replace />
       )}
