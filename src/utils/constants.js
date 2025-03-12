@@ -39,8 +39,8 @@ export const dashboardOptions = [
   },
   {
     type: "AI",
-    title: "Defcomm AI",
-    route: "/dashboard/bot",
+    title: "iSurvive",
+    route: "/dashboard/isurvive",
     icon: FaRobot,
     iconActive: null,
   },
@@ -148,7 +148,7 @@ export const dashboardTabs = [
     title: "Military",
     img: military, 
     view: "military",
-    route:"/dashboard/military",  
+    route:"/dashboard/isurvive",  
   }
 ]
 

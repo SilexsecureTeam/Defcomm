@@ -6,6 +6,7 @@ import { axiosClient } from "../../services/axios-client";
 import { AuthContext } from "../../context/AuthContext";
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
+import { parseHtml } from "../../utils/formmaters";
 
 interface MessageData {
   chat_user_id: string;
@@ -69,7 +70,7 @@ function SendMessage({ messageData }: SendMessageProps) {
         <textarea
           placeholder="Write a message..."
           className="flex-1 p-2 bg-transparent border-none outline-none resize-none leading-none text-base"
-          value={message}
+          value={parseHtml(message)}
           onChange={(e) => setMessage(e.target.value)}
           rows={1}
         />

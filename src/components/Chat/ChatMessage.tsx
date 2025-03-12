@@ -4,6 +4,7 @@ import CustomAudioMessage from "./CustomAudioMessage";
 import ChatFilePreview from "./ChatFilePreview";
 import ChatCallInvite from "./ChatCallInvite";
 import { ChatContext } from "../../context/ChatContext";
+import { parseHtml } from "../../utils/formmaters";
 
 const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
     const { chatVisibility } = useContext(ChatContext);
@@ -126,7 +127,7 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
                                             </button>
                                         </>
                                     ) : (
-                                        msg?.message
+                                        parseHtml(msg?.message)
                                     )}
                                 </div>
                             )}
