@@ -13,6 +13,7 @@ import SideBarTwo from "../components/dashboard/SideBarTwo"
 import SideBarItem from "../components/dashboard/SideBarItem"
 import SideBarItemTwo from "../components/dashboard/SideBarItemTwo"
 import { ThemeProvider } from "../context/ThemeContext";
+import ChatBoxTwo from "../pages/ChatBoxTwo";
 
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
 // const SideBarTwo = lazy(() => import("../components/dashboard/SideBarTwo"));
@@ -59,7 +60,7 @@ function useDashBoardRoute() {
       setSidebarComponent(() => SideBarTwo);
       setSidebarItemComponent(() => SideBarItemTwo);
       setOption(contacts?.data || []);
-    } else if (pathname === "/dashboard/bot/chat") {
+    } else if (pathname === "/dashboard/isurvive/chat" || pathname === "/dashboard/isurvive/voice") {
       setSidebarComponent(() => AiSideBar);
       setSidebarItemComponent(null);
       setOption([]);
@@ -93,16 +94,16 @@ function useDashBoardRoute() {
                 </div>
               ) : (
                 <ul className="flex flex-col gap-[10px]">
-                  {option?.map((currentOption, idx) => (
+                  {SidebarItemComponent ? option?.map((currentOption, idx) => (
                     <SidebarItemComponent key={idx} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
-                  ))}
+                  )): null}
                 </ul>
               )}
 
               <ul className="flex flex-col gap-[10px]">
-                {utilOptions?.map((currentOption) => (
+                {SidebarItemComponent ? utilOptions?.map((currentOption) => (
                   <SidebarItemComponent key={currentOption.type} data={currentOption} dispatch={dispatch} state={state} setIsOpen={setIsOpen} />
-                ))}
+                )): null}
               </ul>
             </SidebarComponent>
 
@@ -117,8 +118,9 @@ function useDashBoardRoute() {
                     <Route path="/chat" element={<ChatInterface />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/groups" element={<Groups />} />
-                    <Route path="/bot" element={<DefcommAi />} />
-                    <Route path="/bot/chat" element={<ChatBox />} />
+                    <Route path="/isurvive" element={<DefcommAi />} />
+                    <Route path="/isurvive/chat" element={<ChatBox />} />
+                    <Route path="/isurvive/voice" element={<ChatBoxTwo />} />
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>

@@ -1,44 +1,19 @@
 import { toast } from "react-toastify";
 
-export const handleOnChange = (e, setDetails) => {
-  const { name, value } = e.target;
 
-  setDetails((prev) => {
-    return { ...prev, [name]: value };
-  });
+import DOMPurify from "dompurify";
+
+export const parseHtml = (inputString) => {
+  if (typeof inputString !== "string") return "";
+  
+  // Sanitize input to prevent XSS attacks
+  const sanitizedString = DOMPurify.sanitize(inputString, { ALLOWED_TAGS: [] });
+
+  // Preserve line breaks (`\n`) by replacing them with `<br />`
+  return sanitizedString.replace(/\n/g, "  \n"); // Markdown uses "  \n" for new line
 };
 
-export const formatTime = (seconds) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`; // Add leading zero for single-digit seconds
-};
 
-export const highlightKeyword = (sentence, keyword) => {
-  const regex = new RegExp(`\\b${keyword.name}\\b`, "gi");
-
-  return sentence.replace(
-    regex,
-    `<span class="${keyword.color} font-bold cursor-pointer hover:underline ">${keyword.name}</span>`
-  );
-};
-export const FormatPrice = (price, removecode = false) => {
-  return `${!removecode ? '' : ''}${price.toLocaleString(navigator.language, {
-    minimumFractionDigits: 0, // Fixed the typo here
-  })}`;
-};
-
-export const FormatNumber = (price) => {
-  return `${price.toLocaleString(navigator.language, {
-    minmumFractionDigits: 0,
-  })}`;
-};
-
-export const FormatPriceInUsd = (price) => {
-  return `USD ${price.toLocaleString(navigator.language, {
-    minmumFractionDigits: 0,
-  })}`;
-};
 
 export const FormatError = (error, setError, message) => {
   console.log(error);
@@ -87,91 +62,6 @@ export const formatResponse = (response, setDatum, responseType) => {
   );
 
   return setDatum(response.data[key]);
-};
-
-export const setSelectedData = (dataList, setData, value) => {
-  if (!value) {
-    setData(dataList[0]);
-    return;
-  } else if (value) {
-    const newData = dataList.find((currentData) => (currentData.name = value));
-    if (newData) {
-      setData(newData);
-      return;
-    } else {
-      setData(dataList[0]);
-      return;
-    }
-  }
-};
-
-export const getImageURL = (e, setStateFunctionUrl, setDetails) => {
-  const { name } = e.target;
-  const file = e.target.files[0]; //filelist is an object carrying all details of file, .files[0] collects the value from key 0 (not array), and stores it in file
-
-  if (file && (file.size > (1024 * 1024))) {
-    const maxSizeMB = ((1024 * 1024) / (1024 * 1024)).toFixed(2); // Convert file size limit to MB
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2); // Convert uploaded file size to MB
-
-    // Truncate long file names to 20 characters for better UI readability
-    const truncatedFileName = file.name.length > 10 ? `${file.name.substring(0, 10)}...` : file.name;
-
-
-    toast.error(`File size of "${truncatedFileName}" exceeds the limit of ${maxSizeMB} MB. The uploaded file is ${fileSizeMB} MB. Please select a smaller file.`);
-    
-    return null;
-  }
-  if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
-    // You can also perform additional actions with the valid file
-    const generatedUrl = URL.createObjectURL(file);
-    if (setStateFunctionUrl) {
-      setStateFunctionUrl(generatedUrl);
-    }
-    setDetails((prev) => {
-      return { ...prev, [name]: file };
-    });
-  } else {
-    // Handle invalid file type
-    alert("Please select a valid JPEG or PNG file.");
-  }
-};
-export const getDocument = (e, setDetails) => {
-  const { name } = e.target;
-  const file = e.target.files[0]; //filelist is an object carrying all details of file, .files[0] collects the value from key 0 (not array), and stores it in file
-  if (file && (file.size > (1024 * 1024))) {
-    const maxSizeMB = ((1024 * 1024) / (1024 * 1024)).toFixed(2); // Convert file size limit to MB
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2); // Convert uploaded file size to MB
-
-    // Truncate long file names to 20 characters for better UI readability
-    const truncatedFileName = file.name.length > 10 ? `${file.name.substring(0, 10)}...` : file.name;
-
-
-    toast.error(`File size of "${truncatedFileName}" exceeds the limit of ${maxSizeMB} MB. The uploaded file is ${fileSizeMB} MB. Please select a smaller file.`);
-    
-    return null;
-  }
-
-    console.log(file)
-  const validTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
-
-  if (file && validTypes.includes(file.type)) {
-    // You can also perform additional actions with the valid file
-    const generatedUrl = URL.createObjectURL(file);
-    setDetails(file);
-  } else {
-    // Handle invalid file type
-    alert("Please select a valid JPEG or PNG file.");
-  }
-
-};
-
-export const onTextChange = (e, details, setDetails) => {
-  const { name, value } = e.target;
-  setDetails({ ...details, [name]: value });
 };
 
 // Get the names of the months in an array

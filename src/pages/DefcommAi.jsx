@@ -30,7 +30,7 @@ const DefcommAi = () => {
 
           <section className="grid grid-cols-responsive gap-4 mx-auto md:max-w-lg w-full">
             <motion.div
-              onClick={() => navigate('/dashboard/bot/chat')}
+              onClick={() => navigate('/dashboard/isurvive/voice')}
               whileHover={{ scale: 1.05 }}
               className="bg-oliveGreen text-white flex items-center justify-center p-5 min-h-24 rounded-lg shadow-lg cursor-pointer"
             >
@@ -38,7 +38,7 @@ const DefcommAi = () => {
             </motion.div>
 
             <motion.div
-              onClick={() => navigate('/dashboard/bot/chat')}
+              onClick={() => navigate('/dashboard/isurvive/chat')}
               whileHover={{ scale: 1.05 }}
               className="bg-white flex items-center justify-center p-5 min-h-24 rounded-lg shadow-lg cursor-pointer"
             >
