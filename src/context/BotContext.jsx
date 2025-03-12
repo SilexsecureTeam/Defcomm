@@ -5,12 +5,15 @@ export const BotContext = createContext();
 export const BotProvider = ({ children }) => {
    
     const [selectedBotChat, setSelectedBotChat] = useState(null);
+    const [selectedBotReference, setSelectedBotReference] = useState(null);
    
 
     return (
         <BotContext.Provider value={{ 
             selectedBotChat, 
-            setSelectedBotChat
+            setSelectedBotChat,
+            setSelectedBotReference,
+            selectedBotReference
         }}>
             {children}
         </BotContext.Provider>
