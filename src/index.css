@@ -3,9 +3,60 @@
 @tailwind utilities;
 
 
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate {
+  animation: rotate 15s linear infinite;
+  transform-origin: center;
+}
+
+@layer utilities{
+  .bg-nav-background{
+  background-color: rgba(42, 65, 1, 0.144);
+  
+}
+}
+
+
+@layer utilities{
+  .bg-linear-gradient{
+  background-image: linear-gradient(to bottom, rgb(42, 65, 1), black, black);
+  
+}
+}
+
+@layer utilities{
+  .bg-linear-gradientone{
+  background-image: linear-gradient(to bottom,  black, rgb(42, 65, 1));
+  
+}
+}
+
+@layer utilities{
+  .bg-linear-gradienttwo{
+  background-image: linear-gradient(to bottom, rgb(42, 65, 1), black, black);
+  
+}
+}
+
+@Layer base {
+  @font-face{
+      font-family: 'Poppins';
+      src: local('Poppins'), url(./fonts/Poppins-Medium.ttf) format('truetype');
+    }
+}
+
 body, html{
   width:100vw;
   height:100vh;
+  scroll-behavior:smooth;
 }
 /* Style the entire website's scrollbar */
 ::-webkit-scrollbar {
