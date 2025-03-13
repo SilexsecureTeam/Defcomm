@@ -21,6 +21,8 @@ const PhoneIntro = () => {
         autoplay={{ delay: 4000, disableOnInteraction: false }}
         loop
         speed={1500} // Smooth transitions
+        lazyPreloadPrevNext={1}
+        preloadImages={true}
         className="w-full flex justify-center"
       >
         {phoneImages.map((src, index) => (
