@@ -30,13 +30,13 @@ const ChatBoxTwo = () => {
             <>
               {
                 selectedBotReference ?
-                  <div className="bg-[#d0eb8e] p-4 h-full w-full my-2  pb-10">
+                  <div className="bg-[#d0eb8e] dark:bg-olive p-4 h-full w-full my-2  pb-10">
                     <div className="py-2 flex items-center text-black text-xl lg:text-2xl font-medium">
-                      <p className="px-3 rounded-full border border-olive text-olive flex items-center justify-center leading-0">{selectedBotReference?.id}</p>
-                      <p className="px-3 truncate font-medium">{selectedBotReference?.title}</p>
+                      <p className="px-3 rounded-full border border-olive text-olive dark:border-oliveLight dark:text-oliveLight flex items-center justify-center leading-0">{selectedBotReference?.id}</p>
+                      <p className="px-3 truncate font-medium text-xl lg:text-2xl">{selectedBotReference?.title}</p>
                     </div>
-                    <p className="text-xs lg:text-sm my-2">{selectedBotReference?.content}</p>
-                    <p className="text-xs lg:text-sm my-2">{selectedBotReference?.more_content}</p>
+                    <p className="text-sm lg:text-sm my-2">{selectedBotReference?.content}</p>
+                    <p className="text-sm lg:text-sm my-2">{selectedBotReference?.more_content}</p>
                   </div>
                   :
                   <ChatInterface />
@@ -87,9 +87,9 @@ const ChatBoxTwo = () => {
         </div>
         {
           BotReference?.map((item) => (
-            <div onClick={() => setSelectedBotReference(item)} className={`${selectedBotReference?.id === item.id ? "bg-[#d0eb8e]/80" : "bg-[#d0eb8e]"} p-4 w-[95%] min-h-40 mx-auto my-2 cursor-pointer`}>
+            <div onClick={() => setSelectedBotReference(item)} className={`${selectedBotReference?.id === item.id ? "bg-[#ddf2ab]/80 dark:bg-olive/70" : "bg-[#ddf2ab] dark:bg-olive"} p-4 w-[95%] min-h-40 mx-auto my-2 cursor-pointer`}>
               <div className="py-2 flex items-center text-black text-sm font-medium">
-                <p className="px-2 rounded-full border border-olive text-olive flex items-center justify-center text-sm">{item.id}</p>
+                <p className="px-2 rounded-full border border-olive text-olive dark:border-oliveLight dark:text-oliveLight flex items-center justify-center text-sm">{item.id}</p>
                 <p className="text-sm px-3 truncate font-medium">{item.title}</p>
               </div>
               <p className="text-xs">{item?.content}</p>
