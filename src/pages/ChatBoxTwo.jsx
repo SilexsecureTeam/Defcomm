@@ -1,34 +1,51 @@
-import React, { useContext } from "react";
-import { IoFlash } from "react-icons/io5";
-import { BiInfoCircle, BiMoon } from "react-icons/bi";
+import React, { useContext, useState } from "react";
+import { AiOutlineMenuFold } from "react-icons/ai";
+import { BiInfoCircle } from "react-icons/bi";
 import SEOHelmet from "../engine/SEOHelmet";
 import ChatBotInput from "../components/Chatbot/ChatBotInput";
 import { BotContext } from "../context/BotContext"; // Import Bot Context
 import { BotReference, tasks } from "../utils/dummies"; // Import Bot Context
 import ThemeToggleButton from "../components/ThemeToggleButton";
 import ChatInterface from "../components/Chatbot/ChatInterface"
+import { MdClose } from "react-icons/md";
 const ChatBoxTwo = () => {
-  const { selectedBotChat } = useContext(BotContext); // Use context
-
+  const { selectedBotChat, setSelectedBotReference, selectedBotReference } = useContext(BotContext); // Use context
+  const [more, showMore] = useState(false)
   return (
-    <div className="relative flex flex-col md:flex-row gap-4 h-full">
+    <div className="relative flex flex-col lg:flex-row gap-4 h-full">
       <SEOHelmet title="Defcomm Ai" />
-      <div className="relative flex flex-col gap-4 h-full">
+      <div className="relative flex-1 min-w-80 flex flex-col gap-4 h-full">
         {/* Header Section */}
-        <div className="sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4 text-sm font-medium dark:bg-oliveLight">
-          <p className="px-3 truncate w-[60%]">{selectedBotChat}</p>
+        <div className="sticky top-0 z-50 flex justify-between items-center gap-2 bg-oliveDark text-white p-4 text-sm font-medium dark:bg-oliveLight">
+          <p className="px-3 truncate w-[60%] flex-1">{selectedBotChat}</p>
 
           {/* Dark Mode Toggle Button */}
           <ThemeToggleButton />
+          <AiOutlineMenuFold onClick={() => showMore(true)} size={24} className="block lg:hidden ml-2 cursor-pointer" />
         </div>
 
         {/* Chat UI */}
-        <div className="relative w-full flex flex-col bg-[#d0eb8e] dark:bg-oliveDark min-h-[70vh] pt-10 transition-all duration-300">
+        <div className="flex-1 relative w-full flex flex-col bg-[#d0eb8e] dark:bg-oliveDark max-h-[70vh] pt-10 transition-all duration-300 overflow-y-auto">
           {selectedBotChat ? (
-            <ChatInterface />
+            <>
+              {
+                selectedBotReference ?
+                  <div className="bg-[#d0eb8e] dark:bg-olive p-4 h-full w-full my-2  pb-10">
+                    <div className="py-2 flex items-center text-black text-xl lg:text-2xl font-medium">
+                      <p className="px-3 rounded-full border border-olive text-olive dark:border-oliveLight dark:text-oliveLight flex items-center justify-center leading-0">{selectedBotReference?.id}</p>
+                      <p className="px-3 truncate font-medium text-xl lg:text-2xl">{selectedBotReference?.title}</p>
+                    </div>
+                    <p className="text-sm lg:text-sm my-2">{selectedBotReference?.content}</p>
+                    <p className="text-sm lg:text-sm my-2">{selectedBotReference?.more_content}</p>
+                  </div>
+                  :
+                  <ChatInterface />
+              }
+            </>
+
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto w-full flex flex-col items-center space-y-4 p-4 py-2">
+              <div className="flex-1 w-full flex flex-col items-center space-y-4 p-4 py-2">
                 <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 dark:text-gray-200 mb-1 font-bold animate-fadeIn">
                   Hello, Defcomm!
                 </p>
@@ -58,9 +75,11 @@ const ChatBoxTwo = () => {
           <ChatBotInput />
         </div>
       </div>
-      <div className="w-72 h-full bg-oliveLight min-h-[70vh]">
+      <div className={`${more ? "absolute top-0 right-0" : "hidden"} lg:relative lg:block max-w-72 bg-oliveDark max-h-[80vh] overflow-y-auto`}>
         {/* Header Section */}
         <div className="sticky top-0 z-50 flex justify-between items-center bg-oliveGreen text-gray-300 p-4 text-sm font-medium dark:bg-oliveLight">
+          <MdClose onClick={() => showMore(false)} size={20} className="block lg:hidden cursor-pointer text-red-500 hover:text-red-600" />
+
           <p className="text-[18px] px-3 truncate w-[60%]">References</p>
 
           {/* Dark Mode Toggle Button */}
@@ -68,12 +87,12 @@ const ChatBoxTwo = () => {
         </div>
         {
           BotReference?.map((item) => (
-            <div className="p-2 w-[90%] h-40 bg-[#d0eb8e] mx-auto overflow-y-auto my-2">
-              <div className="flex justify-between items-center bg-oliveGreen text-gray-300 text-sm font-medium dark:bg-oliveLight">
-                <p className="p-2 rounded-full border border-oliveGreen">{item.id}</p>
-                <p className="text-xs px-3 truncate w-[60%]">{item.title}</p>
+            <div onClick={() => setSelectedBotReference(item)} className={`${selectedBotReference?.id === item.id ? "bg-[#ddf2ab]/80 dark:bg-olive/70" : "bg-[#ddf2ab] dark:bg-olive"} p-4 w-[95%] min-h-40 mx-auto my-2 cursor-pointer`}>
+              <div className="py-2 flex items-center text-black text-sm font-medium">
+                <p className="px-2 rounded-full border border-olive text-olive dark:border-oliveLight dark:text-oliveLight flex items-center justify-center text-sm">{item.id}</p>
+                <p className="text-sm px-3 truncate font-medium">{item.title}</p>
               </div>
-              <p>{item.content}</p>
+              <p className="text-xs">{item?.content}</p>
             </div>
           ))
         }

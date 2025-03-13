@@ -15,7 +15,7 @@ const ChatInterface = () => {
         }, [Botmessages]);
 
     return (
-        <div ref={messageRef} className="flex-1 overflow-y-auto w-full h-full flex flex-col space-y-4 p-4 pb-10">
+        <div ref={messageRef} className="overflow-y-auto w-full h-full flex flex-col space-y-4 p-4 pb-10">
             {
                 isLoading ? (
                     <div className="h-20 flex justify-center items-center text-oliveDark gap-2">
