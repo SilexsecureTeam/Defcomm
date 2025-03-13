@@ -50,7 +50,7 @@ function Home() {
 
           <div className="relative text-white ml-[10%] lg:ml-[0px] h-96 lg:h-[500px] lg:pl-[100px]">
             {/* Phone intro */}
-            <div className="w-96 md:w-[500px] lg:w-[600px] mx-auto flex justify-center">
+            <div className="w-[90%] md:w-[500px] lg:w-[600px] mx-auto flex justify-center">
               <PhoneIntro />
             </div>
 
