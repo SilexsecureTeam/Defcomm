@@ -18,7 +18,9 @@ const PhoneIntro = () => {
       <Swiper
         modules={[EffectFade, Autoplay]}
         effect="fade"
-        autoplay={{ delay: 4000, disableOnInteraction: false }}
+        slidesPerView={2}
+        autoplay={{ delay: 2000, disableOnInteraction: false }}
+        
         loop
         speed={1500} // Smooth transitions
         lazyPreloadPrevNext={1}
