@@ -14,7 +14,7 @@ const swiperRef=useRef(null);
 useEffect(()=>{
   const timer =setTimeout(()=>{
     if(swiperRef.current){
-      swiperRef.current.swiper.slideNet(); //Manually move to the next slide
+      swiperRef.current.swiper.slideNext(); //Manually move to the next slide
     }
   }, 500);
 
