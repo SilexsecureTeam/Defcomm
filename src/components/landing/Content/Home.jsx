@@ -6,14 +6,16 @@ import PhoneIntro from "./PhoneIntro";
 import LogoSlider from "./LogoSlider";
 import deffcommhomeimage from "../../../assets/landing/phone1.png";
 import RedBlack from "../../../assets/landing/Red&BlackLogo.png";
+import privacy from "../../../assets/landing/privacy.png";
 import RedBlackTwo from "../../../assets/landing/Red&BlackLogoTwo.png";
 import RedBlackThree from "../../../assets/landing/Red&BlackLogoThree.png";
 import NavyLogo from "../../../assets/landing/navylogo.png";
 import SarsLogo from "../../../assets/landing/sarslogo.png";
-import SvgOne from "../Pages/SvgOne.jsx";
-import SvgTwo from "../Pages/SvgTwo.jsx";
-import SvgThree from "../Pages/SvgThree.jsx";
-import SvgFive from "../Pages/SvgFive.jsx";
+import SvgOne from "../Pages/SvgOne";
+import SvgTwo from "../Pages/SvgTwo";
+import SvgThree from "../Pages/SvgThree";
+import SvgFive from "../Pages/SvgFive";
+import HeroSlider from "./HeroSlider";
 
 function Home() {
   const targetRef = useRef(null);
@@ -23,7 +25,7 @@ function Home() {
   const darkenOverlay = useTransform(scrollY, [0, 300], [0, 0.9]);
 
   // Rotation Effect for Icon
-  const rotationYscroll = useTransform(scrollY, [1, 200], ["0deg", "360deg"]);
+  const rotateScroll = useTransform(scrollY, [1, 200], ["0deg", "360deg"]);
 
   // Auto-slide images for LogoSlider
   const images = [NavyLogo, RedBlack, RedBlackTwo, RedBlackThree, SarsLogo];
@@ -47,9 +49,35 @@ function Home() {
           <div className="lg:hidden absolute pt-[180px]">
             <SvgFive />
           </div>
+          <div className="relative mt-10 text-white ml-[10%] lg:ml-[0px] h-96 lg:h-[500px]">
+            <motion.img src={privacy} alt="" className="w-16 md:w-20 absolute right-[8%] top-[2%]"
+              style={{ rotate: rotateScroll }}
+            />
+            <div className="w-full max-w-96 mx-auto">
+            <HeroSlider />
+            </div>
 
-          <div className="relative text-white ml-[10%] lg:ml-[0px] h-96 lg:h-[500px] lg:pl-[100px]">
-            {/* Phone intro */}
+            {/* Animated Elements */}
+            <motion.div className="hidden md:block absolute text-white bottom-[18%] left-[4%] lg:left-[12%] min[1200px]:left-[18%] text-sm md:w-48 lg:w-60">
+              <SvgOne width="100%" />
+              <p className="pt-4">USB Detectors Automatic.</p>
+              <p>Wipes With Foreign Elements</p>
+            </motion.div>
+
+            <motion.div className="hidden md:flex absolute lg:right-[10%] mt-[-200px] right-[5%] text-xs flex-col items-end md:w-48 lg:w-[200px]">
+              <SvgTwo width="100%" />
+              <p className="pt-2">Built-In TPM Chips Provide Secure Key Storage</p>
+            </motion.div>
+
+            <motion.div className="hidden md:block absolute lg:left-[12%] min[1200px]:left-[18%] top-[-5%] text-sm md:w-48 lg:w-60">
+              <p className="pb-4">Killer Switch</p>
+              <SvgThree width="100%" />
+            </motion.div>
+          </div>
+
+
+          {/* <div className="relative text-white ml-[10%] lg:ml-[0px] h-96 lg:h-[500px] lg:pl-[100px]">
+            
             <div className="w-[90%] md:w-[500px] lg:w-[600px] mx-auto flex justify-center">
               <PhoneIntro />
             </div>
@@ -58,7 +86,7 @@ function Home() {
               <SvgFive />
             </div>
 
-            {/* Animated Elements */}
+           
             <motion.div className="hidden md:block absolute text-white bottom-[9%] left-[4%] lg:left-[10%] text-sm md:w-48 lg:w-60">
               <SvgOne width="100%" />
               <p className="pt-4">USB Detectors Automatic.</p>
@@ -96,7 +124,7 @@ function Home() {
                 </svg>
               </div>
             </motion.div>
-          </div>
+          </div> */}
 
           <div className="w-[90%] mx-auto flex flex-col lg:flex-row gap-4 lg:gap-10 lg:items-center py-1 lg:pl-10">
             <div className="flex items-center gap-2 lg:gap-6">

@@ -5,7 +5,7 @@ import { FreeMode, Autoplay } from "swiper/modules";
 
 function LogoSlider({ images }) {
   return (
-    <div className="flex-1 relative w-full">
+    <div className="flex-1 relative w-full overflow-auto">
       <div className="w-full border border-lime-400 rounded-lg shadow-lg p-2">
         <Swiper
           spaceBetween={20} // Spacing between images
