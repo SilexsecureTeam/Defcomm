@@ -38,7 +38,7 @@ function CoreValue() {
   return (
     <div className='flex flex-col lg:flex-row justify-between gap-8 font-[poppins] bg-linear-gradientone min-h-full py-20 px-4 lg:px-10'>
       <motion.div
-        className='w-[80%] lg:w-1/2 flex flex-col justify-center lg:justify-start lg:border-l-2 border-lime-600'
+        className='lg:w-1/2 flex flex-col justify-center lg:justify-start lg:border-l-2 border-lime-600'
         variants={textVariants}
         initial='hidden'
         whileInView='visible'
@@ -64,13 +64,13 @@ function CoreValue() {
 
       >
         {/* Image or other content goes here */}
-        <div className='flex flex-col gap-3 bg-oliveLight text-white p-8 min-h-24 w-[80%]'>
+        <div className='flex flex-col gap-3 bg-oliveLight text-white p-8 min-h-24 w-[90%]'>
           <img src={icon1} alt="" className="w-10" />
           <h2 className="text-xl font-medium">Innovation</h2>
           <p className="text-sm">Harness cutting edge technologies tostay ahead in rapidly evolving cybersecurity landscape.</p>
         </div>
 
-        <div className='flex flex-col gap-3 bg-black text-white p-8 min-h-24 w-[80%]'>
+        <div className='flex flex-col gap-3 bg-black text-white p-8 min-h-24 w-[90%]'>
           <img src={icon2} alt="" className="w-10" />
           <h2 className="text-xl font-medium">Simplicity</h2>
           <p className="text-sm">Simplify complex processes with intuitive interfaces and streamlined workflows.</p>
