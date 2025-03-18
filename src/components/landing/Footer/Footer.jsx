@@ -28,7 +28,7 @@ function Footer() {
         <h1 className="font-bold pt-4 text-[28px] md:text-[40px] text-center">
           Request More Information
         </h1>
-        <p className="text-xs md:text-lg mt-2 md:mt-4 text-gray-400 text-center leading-6 max-w-[600px] mx-auto">
+        <p className="text-xs md:text-lg mt-2 md:mt-4 text-white text-center leading-6 max-w-[600px] mx-auto">
          The Defcomm Platform stands as the epitome of secure connectivity for defense operational communication.
         </p>
 

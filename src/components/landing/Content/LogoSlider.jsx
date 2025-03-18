@@ -24,7 +24,7 @@ function LogoSlider({ images }) {
               <img
                 src={img}
                 alt={`Logo ${i + 1}`}
-                className="h-16 w-16 object-contain transition-transform duration-300 hover:scale-110"
+                className="h-20 w-20 object-contain transition-transform duration-300 hover:scale-110"
               />
             </SwiperSlide>
           ))}

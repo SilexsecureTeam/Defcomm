@@ -58,18 +58,18 @@ function Home() {
             </div>
 
             {/* Animated Elements */}
-            <motion.div className="hidden md:block absolute text-white bottom-[18%] left-[4%] lg:left-[12%] min[1200px]:left-[18%] text-sm md:w-48 lg:w-60">
+            <motion.div className="hidden md:block absolute text-white bottom-[18%] left-[4%] lg:left-[12%] min-[1200px]:left-[20%] text-sm md:w-48 lg:w-60">
               <SvgOne width="100%" />
               <p className="pt-4">USB Detectors Automatic.</p>
               <p>Wipes With Foreign Elements</p>
             </motion.div>
 
-            <motion.div className="hidden md:flex absolute lg:right-[10%] mt-[-200px] right-[5%] text-xs flex-col items-end md:w-48 lg:w-[200px]">
+            <motion.div className="hidden md:flex absolute lg:right-[10%] min-[1200px]:right-[20%] mt-[-200px] right-[5%] text-xs flex-col items-end md:w-48 lg:w-[200px]">
               <SvgTwo width="100%" />
               <p className="pt-2">Built-In TPM Chips Provide Secure Key Storage</p>
             </motion.div>
 
-            <motion.div className="hidden md:block absolute lg:left-[12%] min[1200px]:left-[18%] top-[-5%] text-sm md:w-48 lg:w-60">
+            <motion.div className="hidden md:block absolute lg:left-[12%] min-[1200px]:left-[20%] top-[-5%] text-sm md:w-48 lg:w-60">
               <p className="pb-4">Killer Switch</p>
               <SvgThree width="100%" />
             </motion.div>

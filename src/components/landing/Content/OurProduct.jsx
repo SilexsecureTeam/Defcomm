@@ -108,7 +108,7 @@ function OurProduct() {
               <motion.div className="text-white text-center md:text-left" variants={textVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
                 <h1 className="text-lime-400 text-[18px] md:text-xl">{product.title}</h1>
                 <h2 className="font-bold py-2 text-2xl md:text-3xl lg:text-4xl capitalize">{product.subtitle}</h2>
-                <p className="text-sm md:text-[15px] !font-thin mt-2 md:mt-4 text-gray-400 leading-6">
+                <p className="text-sm md:text-[15px] !font-thin mt-2 md:mt-4 text-white leading-6">
                   {product?.content || (
                     <ul className="list-disc pl-4 w-max text-left mx-auto md:mx-0">
                       <li>Unbreakable Security</li>

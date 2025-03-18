@@ -8,7 +8,7 @@ import BackToTopButton from "../components/BackToTopButton.jsx"
 
 function Landing() {
     return (
-        <div className="w-full max-w-peak mx-auto">
+        <div className="w-full mx-auto">
             <Nav />
             <Home />
             <CoreValue />
