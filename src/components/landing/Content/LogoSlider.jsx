@@ -6,7 +6,7 @@ import { Autoplay } from "swiper/modules";
 function LogoSlider({ images }) {
   return (
     <div className="flex-1 relative w-full overflow-hidden">
-      <div className="w-full border border-lime-400 rounded-lg shadow-lg p-2">
+      <div className="w-full border border-lime-400/60 rounded-lg shadow-lg p-2">
         <Swiper
           loop={true}
           loopFillGroupWithBlank={true} // ✅ Prevents empty spaces
@@ -30,7 +30,7 @@ function LogoSlider({ images }) {
               <img
                 src={img}
                 alt={`Logo ${i + 1}`}
-                className="h-24 w-24 object-contain transition-transform duration-300 hover:scale-110"
+                className="h-16 w-16 object-contain transition-transform duration-300 hover:scale-110"
               />
             </SwiperSlide>
           ))}

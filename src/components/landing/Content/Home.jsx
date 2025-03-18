@@ -49,7 +49,7 @@ function Home() {
           <div className="lg:hidden absolute pt-[180px]">
             <SvgFive />
           </div>
-          <div className="relative mt-10 text-white ml-[10%] lg:ml-[0px] h-96 lg:h-[500px]">
+          <div className="relative mt-10 mb-5 text-white ml-[10%] lg:ml-[0px] h-96 lg:h-[500px]">
             <motion.img src={privacy} alt="" className="w-16 md:w-20 absolute right-[8%] top-[2%]"
               style={{ rotate: rotateScroll }}
             />
@@ -126,7 +126,7 @@ function Home() {
             </motion.div>
           </div> */}
 
-          <div className="w-[90%] mx-auto flex flex-col lg:flex-row gap-4 lg:gap-10 lg:items-center py-1 lg:pl-10">
+          <div className="w-[90%] mx-auto flex flex-col lg:flex-row gap-4 lg:gap-10 lg:items-center py-4 lg:pl-10">
             <div className="flex items-center gap-2 lg:gap-6">
               <p className="text-white p-2 lg:p-4 border rounded-[50%] lg:w-[50px]">
                 <RxDoubleArrowDown />

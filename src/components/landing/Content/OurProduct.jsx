@@ -60,7 +60,7 @@ function OurProduct() {
           <h1 className="mx-auto text-center pt-10 font-bold text-[24px] md:text-[40px] text-white z-10">
             Security Beyond Encryption
           </h1>
-          <p className="max-w-[600px] mx-auto text-center text-sm md:text-[16px] md:mt-2 text-gray-400 leading-6 z-10">
+          <p className="max-w-[600px] mx-auto text-center text-sm md:text-[16px] md:mt-2 text-white leading-6 z-10">
             AI Defcomm, we develop and implement advanced encryption solutions that safeguard communications across all defense channels.
           </p>
         </motion.div>
@@ -102,7 +102,6 @@ function OurProduct() {
               viewport={{ once: true }}
             >
               <img src={product?.image} alt="" className="h-full mx-auto" />
-              {index === 0 && <img src={productTags} alt="" className=" mx-auto absolute top-[2%] right-[2%] z-0 -skew-x-[5deg]" />}
             </motion.div>
             <div className="flex flex-col justify-center w-full p-4 md:pl-10">
               <motion.div className="text-white text-center md:text-left" variants={textVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
