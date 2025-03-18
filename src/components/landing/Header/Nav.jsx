@@ -22,7 +22,7 @@ function Nav() {
       variants={initialVariant}
       initial="hidden"
       animate="visible"
-      className="fixed z-20 w-full backdrop-blur-lg bg-transparent px-6 md:px-10 py-3 flex items-center justify-between"
+      className="fixed z-20 w-full backdrop-blur-lg bg-transparent px-6 md:px-10 py-1 flex items-center justify-between"
     >
       {/* Logo */}
       <img src={defcommlogo} alt="DeffComm Logo" className="w-[150px] md:w-[250px]" />

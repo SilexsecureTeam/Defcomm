@@ -13,7 +13,7 @@ function ResultsVideo() {
                         src="https://www.youtube.com/embed/Cdk2dfkOmWw?rel=0&modestbranding=1&autoplay=1&controls=1"
                         title="YouTube video"
                         frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                     ></iframe>
                     {/* <figure className="z-[10] w-16 h-16 flex items-center justify-center bg-white text-black rounded-full absolute">

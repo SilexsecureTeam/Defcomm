@@ -129,13 +129,7 @@ function OurProduct() {
           </div>
         ))}
 
-        {/* View More Button */}
-        <motion.div
-          className="flex gap-2 items-center justify-center mx-auto py-2 px-4 md:px-6 rounded-full w-max text-center my-4 md:my-8 text-black bg-lime-400 border border-lime-400 cursor-pointer z-10"
-          whileHover="hover"
-        >
-          View More <LiaLongArrowAltRightSolid />
-        </motion.div>
+       
       </div>
     </motion.div>
   );
