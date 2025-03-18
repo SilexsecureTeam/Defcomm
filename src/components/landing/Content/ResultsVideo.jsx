@@ -6,11 +6,11 @@ function ResultsVideo() {
         <>
             <div className=' flex flex-col items-center font-[poppins] pb-20 bg-linear-gradient text-white '>
                 <h1 className='text-2xl my-2 md:text-4xl  font-bolder text-center w-full'>Trusted Defense Communication Platform</h1>
-                <p className='text-xs tracking-wider mb-6 text-center max-w-[800px] w-[90%]'>Get started with the Africa's premier interoperable tactical communication platform, designe for military, government, and defense industry.</p>
+                <p className='text-sm tracking-wider mb-6 text-center max-w-[800px] w-[90%]'>Get started with the Africa's premier interoperable tactical communication platform, designe for military, government, and defense industry.</p>
                 <div className="relative bg-gray-200 w-[90%] max-w-[1000px] h-96 md:h-[400px] rounded-lg flex items-center justify-center p-0">
                     <iframe
                         className="w-full h-full rounded-lg"
-                        src="https://www.youtube.com/watch?v=Cdk2dfkOmWw"
+                        src="https://www.youtube.com/embed/Cdk2dfkOmWw?rel=0&modestbranding=1&autoplay=1&controls=1"
                         title="YouTube video"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
