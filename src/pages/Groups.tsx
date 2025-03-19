@@ -1,8 +1,7 @@
+import React from "react";
 import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import useGroups from "../hooks/useGroup";
-import { motion } from "framer-motion";
-import mainLogo from "../assets/logo-icon.png";
 import GroupSlide from "../components/GroupSlide";
 
 const Groups = () => {
@@ -12,7 +11,7 @@ const Groups = () => {
 
     // Track loading state for each invitation
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: string | null }>({});
-    const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+    const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
     
     const handleAccept = async (id: string) => {
         setLoadingStates((prev) => ({ ...prev, [id]: "accepting" }));
@@ -52,7 +51,7 @@ const Groups = () => {
             {/* Group Members Section */}
             {selectedGroup && (
                 <section className="bg-gray-800 p-5 rounded-lg">
-                    <h2 className="text-xl font-medium mb-4"><strong>{selectedGroup?.group_name} -</strong> Group Members</h2>
+                    <h2 className="text-xl font-medium mb-4"><strong className="text-oliveHover">{selectedGroup?.group_name} -</strong> Members</h2>
                     {isGroupMembersLoading ? (
                         <div className="flex justify-center">
                             <FaSpinner className="animate-spin text-white text-2xl" />

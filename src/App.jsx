@@ -26,7 +26,7 @@ const App = () => {
                 <Router>
                   <Routes>
                     <Route path="/login" element={<DefcommLogin />} />
-                    <Route path="/" element={<Landing />} />
+                    <Route path="/" element={<Navigate to="/login" />} />
                     {/* Using ProtectedRoute as a Component */}
                     <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
 
