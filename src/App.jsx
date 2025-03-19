@@ -13,7 +13,6 @@ import { BotProvider } from "./context/BotContext";
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
 const Dashboard = lazy(() => import("./routes/useDashboardRoute"));
-const Landing = lazy(() => import("./pages/Landing"));
 
 const App = () => {
   return (
