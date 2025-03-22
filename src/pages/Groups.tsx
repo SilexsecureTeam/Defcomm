@@ -15,18 +15,24 @@ const Groups = () => {
     
     const handleAccept = async (id: string) => {
         setLoadingStates((prev) => ({ ...prev, [id]: "accepting" }));
-        await acceptMutation.mutateAsync(id);
-        setLoadingStates((prev) => ({ ...prev, [id]: null }));
+        try{
+            await acceptMutation.mutateAsync(id);
+        }finally{
+            setLoadingStates((prev) => ({ ...prev, [id]: null }));
+        }
     };
 
     const handleDecline = async (id: string) => {
         setLoadingStates((prev) => ({ ...prev, [id]: "declining" }));
-        await declineMutation.mutateAsync(id);
-        setLoadingStates((prev) => ({ ...prev, [id]: null }));
+        try{
+            await declineMutation.mutateAsync(id);
+        }finally{
+            setLoadingStates((prev) => ({ ...prev, [id]: null }));
+        }
     };
 
      // Fetch group members when a group is selected
-     const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.id);
+     const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.group_id);
 
     return (
         <div className="p-6 text-white flex flex-col gap-6">
@@ -59,7 +65,7 @@ const Groups = () => {
                     ) : groupMembers?.length ? (
                         <ul className="space-y-2">
                             {groupMembers.map((member) => (
-                                <li key={member.id} className="p-2 bg-gray-700 rounded-md">{member.name}</li>
+                                <li key={member.id} className="p-2 bg-gray-700 rounded-md">{member?.member_name || "Anonymous"}</li>
                             ))}
                         </ul>
                     ) : (

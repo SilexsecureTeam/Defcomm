@@ -1,7 +1,7 @@
 import React, { useState, } from "react";
 import { motion } from "framer-motion";
 import mainLogo from "../../assets/logo-icon.png";
-import { FaBars, FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
+import { FaBars, FaCheck, FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
 import { dashboardTabs } from "../../utils/constants";
 import useChat from "../../hooks/useChat";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import useGroups from "../../hooks/useGroup";
 import Modal from "../modal/Modal";
 import GroupSlide from "../GroupSlide";
 
-function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
+function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
     const { fetchChatHistory } = useChat();
     // State for modal and selected group
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,17 +20,26 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
         //  refetchInterval: 5000,
         staleTime: 0
     });
-    const { useFetchGroups, useFetchGroupMembers } = useGroups();
+   const { useFetchGroups, useFetchGroupMembers, addContactMutation } = useGroups();
 
-
-    // Fetch groups
+    //add member to contact
     const { data: groups } = useFetchGroups();
 
     const [selectedGroup, setSelectedGroup] = useState(null);
+    const [loadingStates, setLoadingStates] = useState({});
     // Fetch group members when a group is selected
-    const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.id);
+    const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.group_id);
 
-
+    const handleAddContact = async (member) => {
+        setLoadingStates((prev) => ({ ...prev, [member?.id]: "adding" }));
+      
+        try {
+          await addContactMutation.mutateAsync(member?.member_id_encrpt);
+        }finally {
+          setLoadingStates((prev) => ({ ...prev, [member?.id]: null })); // ✅ Stops loader in all cases
+        }
+      };
+      
     return (
         <>
             {/* SidebarTwo */}
@@ -72,17 +81,36 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                         )}
                     </div>
                     <p className="mt-4 mb-2 font-medium text-xl text-center">Secure Contact</p>
-                    {children?.length ? (
+                    {children?.length &&
                         <div className="relative">
                             {/* Add Contact Button */}
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="absolute right-2 top-2 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                className="ml-auto flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                             >
                                 <FaUserPlus />
                                 <span className="hidden md:block">Add Contact</span>
                             </button>
-                            <ul className="overflow-y-auto h-80">{children[0]}</ul>
+                            <ul className="overflow-y-auto h-80">{children[0] ? children[0] : (
+                                <div className="flex flex-col items-center justify-center h-60 text-gray-500">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-16 h-16 text-gray-400"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19.5 10.5V8.25a6.75 6.75 0 10-13.5 0V10.5M12 15v2.25m-3.75-3h7.5"
+                                        />
+                                    </svg>
+                                    <p className="text-lg mt-2">No contacts available</p>
+                                    <p className="text-sm text-gray-400 text-center">Start a conversation by adding new contacts.</p>
+                                </div>
+                            )}</ul>
                             <ul className="flex flex-col gap-[10px] mt-20">
                                 {chatHistory?.slice(-2)?.reverse()?.map((chat) => (
                                     <li
@@ -108,39 +136,18 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                                 ))}
                             </ul>
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="w-16 h-16 text-gray-400"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M19.5 10.5V8.25a6.75 6.75 0 10-13.5 0V10.5M12 15v2.25m-3.75-3h7.5"
-                                />
-                            </svg>
-                            <p className="text-lg mt-2">No contacts available</p>
-                            <p className="text-sm text-gray-400 text-center">Start a conversation by adding new contacts.</p>
-                        </div>
-                    )}
+                    }
 
                 </nav>
-                
-            )}
             </motion.aside>
 
             {isModalOpen && (
                 <Modal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)}>
                     <div className="p-5 w-[80vw] md:w-[600px] min-h-32 max-h-[80vh] py-14 bg-oliveDark text-white">
-                        {groups?.length ? 
-                        (<GroupSlide groups={groups} setSelectedGroup={setSelectedGroup} forceSingleView={true} />) : (
-                            <div>No groups available </div>
-                        )}
+                        {groups?.length ?
+                            (<GroupSlide groups={groups} setSelectedGroup={setSelectedGroup} forceSingleView={true} />) : (
+                                <div>No groups available </div>
+                            )}
 
                         {/* Show group members when a group is selected */}
                         {selectedGroup && (
@@ -150,13 +157,27 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen }) {
                                         <FaSpinner className="animate-spin text-white text-2xl" />
                                     </div>
                                     : <>
-                                        <h3 className="text-lg font-bold"><strong>{selectedGroup?.group_name} -</strong> Group Members:</h3>
+                                        <h3 className="text-lg font-bold"><strong>{selectedGroup?.group_name} -</strong> Members:</h3>
                                         <ul className="mt-2 space-y-2">
-                                            {groupMembers?.map((member) => (
-                                                <li key={member.id} className="bg-gray-700 p-2 rounded-md">
-                                                    {member.name}
-                                                </li>
-                                            ))}
+                                            {groupMembers?.map((member) => {
+                                                if(!member?.member_name) return null
+                                                const isAlreadyAdded = contacts?.some((c) => c.contact_id === member?.member_id);
+                                                return (
+                                                    <li
+                                                        key={member?.id}
+                                                        onClick={() => handleAddContact(member)}
+                                                        className="bg-gray-700 p-3 rounded-md flex items-center justify-between gap-2 cursor-pointer"
+                                                        disabled={loadingStates[member?.id] === "adding"}
+                                                    >
+                                                        {member?.member_name || "Anonymous"}
+                                                        {isAlreadyAdded ? (
+                                                            <FaCheck className="text-green-400" />
+                                                        ) : loadingStates[member?.id] === "adding" ? (
+                                                            <FaSpinner className="animate-spin text-white" />
+                                                        ) : null}
+                                                    </li>
+                                                )
+                                            })}
                                         </ul>
                                     </>}
 

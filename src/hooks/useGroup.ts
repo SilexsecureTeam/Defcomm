@@ -3,6 +3,9 @@ import { axiosClient } from "../services/axios-client";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { onFailure } from "../utils/notifications/OnFailure";
+import { onSuccess } from "../utils/notifications/OnSuccess";
+import { extractErrorMessage } from "../utils/formmaters";
+
 interface Group {
   id: string;
   name: string;
@@ -29,7 +32,7 @@ const useGroups = () => {
       refetchOnWindowFocus: true, // Refetch when the page is focused
     });
 
-     // Fetch [pending] groups
+  // Fetch [pending] groups
   const useFetchPendingGroups = () =>
     useQuery<Group[]>({
       queryKey: ["pendingInvitations"],
@@ -58,32 +61,68 @@ const useGroups = () => {
     });
 
 
-     // Accept invitation mutation
-     const acceptMutation = useMutation({
-      mutationFn: (invitationId: string) =>
-          client.get(`/user/group/${invitationId}/accept`),
-      onSuccess: () => {
-          queryClient.invalidateQueries(["groups"]);
-          queryClient.invalidateQueries(["pendingInvitations"]);
-      },
-      onError:(err)=>{
-        onFailure({ message: "Failed to accept invitation", error: err.response?.data?.message || err.message });
-      }
+  // Add to contact mutation
+  const addContactMutation = useMutation({
+    mutationFn: (userId: string) =>
+      client.get(`/user/contact/add/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["contacts"]);
+      onSuccess({ message: "Contact Successfully Saved!", success: "user has been added to contact" });
+    },
+    onError: (err) => {
+      onFailure({ message: "Failed to accept invitation", error: extractErrorMessage(err)});
+      return false; // Return something to handle failure
+    }
+  });
+
+  // Remove to contact mutation
+  const removeContactMutation = useMutation({
+    mutationFn: (userId: string) =>
+      client.get(`/user/contact/remove/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["contacts"]);
+      onSuccess({ message: "Contact successfully removed!", success: "user has been removed from contact" });
+    },
+    onError: (err) => {
+      onFailure({ message: "Failed to accept invitation", error: extractErrorMessage(err) });
+      return false; // Return something to handle failure
+    }
+  });
+
+  // Accept invitation mutation
+  const acceptMutation = useMutation({
+    mutationFn: (invitationId: string) =>
+      client.get(`/user/group/${invitationId}/accept`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["groups"]);
+      queryClient.invalidateQueries(["pendingInvitations"]);
+    },
+    onError: (err) => {
+      onFailure({ message: "Failed to accept invitation", error: extractErrorMessage(err)});
+    }
   });
 
   // Decline invitation mutation
   const declineMutation = useMutation({
-      mutationFn: (invitationId: string) =>
-          client.get(`/user/group/${invitationId}/decline`),
-      onSuccess: () => {
-          queryClient.invalidateQueries(["pendingInvitations"]);
-      },
-      onError:(err)=>{
-        onFailure({ message: "Failed to decline invitation", error: err.response?.data?.message || err.message });
-      }
+    mutationFn: (invitationId: string) =>
+      client.get(`/user/group/${invitationId}/decline`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pendingInvitations"]);
+    },
+    onError: (err) => {
+      onFailure({ message: "Failed to decline invitation", error: extractErrorMessage(err)});
+    }
   });
 
-  return { useFetchGroups, useFetchGroupMembers, useFetchPendingGroups, acceptMutation, declineMutation };
+  return {
+    useFetchGroups,
+    useFetchGroupMembers,
+    useFetchPendingGroups,
+    acceptMutation,
+    declineMutation,
+    addContactMutation,
+    removeContactMutation
+  };
 };
 
 export default useGroups;

@@ -31,8 +31,11 @@ const ChatInterface = () => {
     });
 
     useEffect(() => {
-        if (messages?.chat_meta) {
-            setSelectedChatUser((prev) => ({ ...prev, chat_meta: messages.chat_meta }));
+        if (messages?.chat_meta && selectedChatUser) {
+            setSelectedChatUser((prev) => {
+                if (!prev) return prev; // 🔴 Prevents overwriting null
+                return { ...prev, chat_meta: messages.chat_meta };
+            });
         }
         if (messages?.data && messageRef.current) {
             messageRef.current?.lastElementChild?.scrollIntoView();
@@ -88,7 +91,7 @@ const ChatInterface = () => {
                 {selectedChatUser && <SendMessage messageData={messages?.chat_meta} />}
             </div>
 
-            {selectedChatUser && <div className="w-max hidden lg:block"><CallInterface setShowCall={setShowCall} /></div>}
+            {selectedChatUser && <div className="w-max hidden lg:block"><CallInterface setShowCall={setShowCall} setShowSettings={setShowSettings} /></div>}
 
             {showCall && (
                 <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>

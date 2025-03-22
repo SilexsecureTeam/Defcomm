@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import callImg from "../../assets/call.png";
 import { FaCog } from "react-icons/fa";
 
-const CallInterface = ({setShowCall}) => {
+const CallInterface = ({setShowCall, setShowSettings}) => {
 
     return (
         <>
@@ -21,7 +21,7 @@ const CallInterface = ({setShowCall}) => {
                 </div>
 
                 <div onClick={() => {
-                        setIsOpen(true);
+                        setShowSettings(true);
                     }}
                      className="bg-oliveLight hover:bg-green-600/60 text-white cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center h-20">
                     <FaCog size={30} />

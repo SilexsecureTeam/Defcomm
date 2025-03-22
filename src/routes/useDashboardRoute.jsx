@@ -88,7 +88,7 @@ function useDashBoardRoute() {
             }}
           >
             {/* Sidebar */}
-            <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} state={state}>
+            <SidebarComponent authDetails={authDetails} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} contacts={option} state={state}>
               {isLoading ? (
                 <div className="flex justify-center items-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
