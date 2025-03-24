@@ -28,6 +28,7 @@ const FileManager = lazy(() => import("../pages/FileManager"));
 const DefcommAi = lazy(() => import("../pages/DefcommAi"));
 const ChatBox = lazy(() => import("../pages/ChatBox"));
 const MyDrive = lazy(() => import("../pages/MyDrive"));
+const Settings = lazy(() => import("../pages/Settings"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -123,6 +124,8 @@ function useDashBoardRoute() {
                     <Route path="/isurvive" element={<DefcommAi />} />
                     <Route path="/isurvive/chat" element={<ChatBox />} />
                     <Route path="/isurvive/voice" element={<ChatBoxTwo />} />
+
+                    <Route path="/settings" element={<Settings />} />
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
