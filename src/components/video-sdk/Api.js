@@ -2,7 +2,7 @@ import { onFailure } from "../../utils/notifications/OnFailure";
 
 let authToken =
 
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI4M2YyYTM1MC1hN2MyLTQyY2YtODQ0Ny0xOGRjMGI3Y2JiNDgiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTc0MDY4NjE1OSwiZXhwIjoxNzQxMjkwOTU5fQ.x9NM69_tMHYijdBWLLr_pamlS2OQ8X2o02C9JNRl7mk";
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI4M2YyYTM1MC1hN2MyLTQyY2YtODQ0Ny0xOGRjMGI3Y2JiNDgiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTc0Mjc4NzY2MiwiZXhwIjoxNzc0MzIzNjYyfQ.8uR1wb9FBp5yU5VBCO0iPGPDUseqTZcRCjWwms3_0Pg"; //1 year
 // Getter for the current auth token
 export const getAuthToken = () => authToken;
 
