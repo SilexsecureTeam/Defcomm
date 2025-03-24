@@ -34,7 +34,7 @@ const App = () => {
                   </Routes>
                 </Router>
               </Suspense>
-              <ToastContainer autoClose={2000} draggable newestOnTop={true} />
+              <ToastContainer autoClose={2000} draggable />
             </DashboardContextProvider>
           </BotProvider>
         </ChatProvider>
