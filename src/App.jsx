@@ -34,7 +34,7 @@ const App = () => {
                   </Routes>
                 </Router>
               </Suspense>
-              <ToastContainer autoClose={2000} draggable />
+              <ToastContainer autoClose={2000} draggable className="z-[100000000000] mt-2" />
             </DashboardContextProvider>
           </BotProvider>
         </ChatProvider>
