@@ -3,7 +3,7 @@ import { MdCheckCircle } from "react-icons/md";
 
 export const onSuccess = (success) => {
   const successComponent = (
-    <div className="flex items-center z-[99999999] gap-[10px] text-lime-700">
+    <div className="flex items-center z-[100000000] gap-[10px] text-lime-700">
       <MdCheckCircle className="text-[25px] " />
       <div className="flex flex-col">
        <strong className="text-sm">{success.message}</strong>
