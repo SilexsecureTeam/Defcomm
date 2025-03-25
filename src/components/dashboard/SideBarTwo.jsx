@@ -86,7 +86,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
                             {/* Add Contact Button */}
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="ml-auto flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                className="ml-auto mb-2 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                             >
                                 <FaUserPlus />
                                 <span className="hidden md:block">Add Contact</span>

@@ -16,14 +16,14 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
 
     // Sync with chatVisibility from context if user hasn't manually toggled
     useEffect(() => {
-      if (chatVisibility && userToggled) {
-          setIsVisible(chatVisibility);
-          setUserToggled(false); 
-      }else{
-        setIsVisible(chatVisibility);
-      }
-  }, [chatVisibility]);
-  
+        if (chatVisibility && userToggled) {
+            setIsVisible(chatVisibility);
+            setUserToggled(false);
+        } else {
+            setIsVisible(chatVisibility);
+        }
+    }, [chatVisibility]);
+
 
     // Format message date
     const getFormattedDate = (dateString) => {
@@ -60,9 +60,8 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
                         }}
                     />
                     <div
-                        className={`w-10 h-5 rounded-full relative transition-all ${
-                            msg?.is_my_chat === "yes" ? "bg-oliveDark peer-checked:bg-oliveGreen" : "bg-gray-300 peer-checked:bg-oliveGreen"
-                        }`}
+                        className={`w-10 h-5 rounded-full relative transition-all ${msg?.is_my_chat === "yes" ? "bg-oliveDark peer-checked:bg-oliveGreen" : "bg-gray-300 peer-checked:bg-oliveGreen"
+                            }`}
                     >
                         <motion.div
                             className="absolute top-0 bottom-0 left-[2px] my-auto w-4 h-4 bg-white rounded-full shadow-md"
@@ -76,9 +75,8 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
 
             {/* Message Content */}
             <div
-                className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 break-all transition-all ${
-                    msg?.is_my_chat === "yes" ? "bg-oliveDark text-white" : "bg-white"
-                }`}
+                className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 break-all transition-all ${msg?.is_my_chat === "yes" ? "bg-oliveDark text-white" : "bg-white"
+                    }`}
             >
                 <AnimatePresence mode="wait">
                     {isVisible ? (
@@ -139,11 +137,9 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                             transition={{ duration: 0.2 }}
-                            className="w-full max-w-60 md:max-w-80 h-10 bg-gray-300 rounded-md blur-sm italic flex items-center justify-center relative"
+                            className="w-full max-w-60 md:max-w-80 rounded-md flex items-center justify-center relative font-bold tracking-widest"
                         >
-                            <span className="">
-                                Message is hidden
-                            </span>
+                            {msg?.message ? "*".repeat(Math.min(msg.message.length, 70)) : "****"}
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -162,3 +158,16 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
 };
 
 export default ChatMessage;
+
+{/* <motion.div
+                            key="hidden-message"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            className="w-full max-w-60 md:max-w-80 h-10 bg-gray-300 rounded-md blur-sm italic flex items-center justify-center relative"
+                        >
+                            <span className="">
+                                Message is hidden
+                            </span>
+                        </motion.div> */}
