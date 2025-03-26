@@ -15,11 +15,11 @@ const DriveContent = () => {
     const [isGrid, setIsGrid] = useState(true);
 
     const toggleImportant = (index) => {
-        setFiles((prevFiles) => {
-            const updatedFiles = [...prevFiles];
-            updatedFiles[index] = { ...updatedFiles[index], important: !updatedFiles[index].important };
-            return updatedFiles;
-        });
+        setFiles(prevFiles =>
+            prevFiles.map((file, i) =>
+                i === index ? { ...file, important: !file.important } : file
+            )
+        );
     };
 
 
