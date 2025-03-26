@@ -35,7 +35,7 @@ const DriveContent = () => {
         <div className="p-2 md:p-5 text-white">
             {/* Header Buttons */}
             <div className="flex flex-wrap gap-4 justify-between items-center mb-6">
-                <div className="flex rounded-3xl">
+                <div className="flex justify-center rounded-3xl">
                     <button
                         onClick={() => setView("explorer")}
                         className={`px-6 py-2 ${view === "explorer"
@@ -55,11 +55,11 @@ const DriveContent = () => {
                         Timeline View
                     </button>
                 </div>
-                <div className="flex space-x-4">
-                    <button className="px-5 py-2 bg-oliveGreen hover:bg-olive text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
+                <div className="flex justify-center space-x-4">
+                    <button className="px-5 py-2 bg-oliveGreen hover:bg-olive text-xs md:text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
                         <FaRegFileAlt /> Upload File
                     </button>
-                    <button className="px-6 py-2 bg-oliveGreen hover:bg-olive text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
+                    <button className="px-6 py-2 bg-oliveGreen hover:bg-olive text-xs md:text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
                         <FaRegFolderOpen /> Upload Folder
                     </button>
                 </div>
@@ -141,7 +141,7 @@ const DriveContent = () => {
                     <IoMdAdd strokeWidth={2} />
                 </motion.p>
             </div>
-            <div className="p-4 rounded-lg overflow-x-auto">
+            <div className="rounded-lg overflow-x-auto">
                 <table className="min-w-[700px] w-full text-left">
                     <thead>
                         <tr className="bg-oliveLight text-white">
