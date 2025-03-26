@@ -16,16 +16,19 @@ function ToggleSwitch({
   knobColor = "bg-white",
 }: ToggleSwitchProps) {
   return (
-    <label className="flex items-center cursor-pointer">
-      <input type="checkbox" className="sr-only" checked={isChecked} onChange={onToggle} />
+    <label className="relative flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        className="sr-only"
+        checked={isChecked}
+        onChange={onToggle}
+      />
       <div
-        className={`w-10 h-6 flex items-center rounded-full transition-all ${
-          isChecked ? activeBg : inactiveBg
-        }`}
+        className={`relative w-10 h-6 rounded-full transition-all duration-200 ${isChecked ? activeBg : inactiveBg}`}
       >
         <div
-          className={`w-5 h-5 rounded-full shadow-md transform transition-all ${
-            isChecked ? "translate-x-5" : "translate-x-0"
+          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full shadow-md transition-transform duration-200 ${
+            isChecked ? "translate-x-4" : "translate-x-0"
           } ${knobColor}`}
         ></div>
       </div>

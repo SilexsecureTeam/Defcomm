@@ -10,16 +10,16 @@ import { TbLayoutDashboardFilled } from "react-icons/tb";
 
 const DriveContent = () => {
     const [view, setView] = useState("timeline");
-    const [files, setFiles] = useState(initialFiles || []);
+    const [files, setFiles] = useState(initialFiles);
     const [selectedFiles, setSelectedFiles] = useState([]); // Track selected files
     const [isGrid, setIsGrid] = useState(true);
 
     const toggleImportant = (index) => {
-        setFiles(prevFiles =>
-            prevFiles.map((file, i) =>
-                i === index ? { ...file, important: !file.important } : file
-            )
-        );
+        setFiles((prevFiles) => {
+            const updatedFiles = [...prevFiles];
+            updatedFiles[index] = { ...updatedFiles[index], important: !updatedFiles[index].important };
+            return updatedFiles;
+        });
     };
 
 
@@ -32,14 +32,14 @@ const DriveContent = () => {
     };
 
     return (
-        <div className="p-2 md:p-5 text-white">
+        <div className="text-white">
             {/* Header Buttons */}
-            <div className="flex flex-wrap gap-4 justify-between items-center mb-6">
-                <div className="flex justify-center rounded-3xl">
+            <div className="flex flex-wrap gap-4 justify-around items-center mb-6">
+                <div className="flex rounded-3xl">
                     <button
                         onClick={() => setView("explorer")}
                         className={`px-6 py-2 ${view === "explorer"
-                            ? "bg-white text-gray-400"
+                            ? "bg-white text-gray-500"
                             : "bg-oliveLight text-white"
                             } rounded-l-3xl text-[15px] flex justify-between gap-2 items-center min-w-40`}
                     >
@@ -48,18 +48,18 @@ const DriveContent = () => {
                     <button
                         onClick={() => setView("timeline")}
                         className={`px-6 py-2 ${view === "timeline"
-                            ? "bg-white text-gray-400"
+                            ? "bg-white text-gray-500"
                             : "bg-oliveLight text-white"
                             } rounded-r-3xl text-[15px] flex justify-between gap-2 items-center min-w-40`}
                     >
                         Timeline View
                     </button>
                 </div>
-                <div className="flex justify-center space-x-4">
-                    <button className="px-5 py-2 bg-oliveGreen hover:bg-olive text-xs md:text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
+                <div className="flex space-x-4">
+                    <button className="px-6 py-2 bg-oliveGreen hover:bg-olive text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
                         <FaRegFileAlt /> Upload File
                     </button>
-                    <button className="px-6 py-2 bg-oliveGreen hover:bg-olive text-xs md:text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
+                    <button className="px-3 md:px-6 py-2 bg-oliveGreen hover:bg-olive text-[15px] font-medium flex justify-between gap-2 items-center min-w-40">
                         <FaRegFolderOpen /> Upload Folder
                     </button>
                 </div>
@@ -71,7 +71,6 @@ const DriveContent = () => {
                     Your folders | {folders.length} Folders
                 </h2>
                 <section className="flex items-center gap-2">
-                    {/* Toggle Button */}
                     {/* Toggle Button with Motion */}
                     <motion.div
                         className="flex bg-white shadow-lg rounded-xl overflow-hidden border-2 border-gray-300"
@@ -81,7 +80,7 @@ const DriveContent = () => {
                     >
                         <button
                             className={`p-2 rounded-l-xl border-4 transition-all duration-300 ${!isGrid
-                                    ? "border-oliveHover bg-black text-oliveHover scale-110"
+                                    ? "border-oliveGreen bg-black text-oliveGreen scale-110"
                                     : "text-gray-600 hover:bg-gray-200"
                                 }`}
                             onClick={() => setIsGrid(false)}
@@ -90,7 +89,7 @@ const DriveContent = () => {
                         </button>
                         <button
                             className={`p-2 rounded-r-xl border-4 transition-all duration-300 ${isGrid
-                                    ? "border-oliveHover bg-black text-oliveHover scale-110"
+                                    ? "border-oliveGreen bg-black text-oliveGreen scale-110"
                                     : "text-gray-600 hover:bg-gray-200"
                                 }`}
                             onClick={() => setIsGrid(true)}
@@ -149,7 +148,7 @@ const DriveContent = () => {
                                 <input
                                     type="checkbox"
                                     onChange={() => setSelectedFiles(selectedFiles.length === files.length ? [] : files.map((_, i) => i))}
-                                    checked={selectedFiles?.length === files?.length}
+                                    checked={selectedFiles.length === files.length}
                                     className="cursor-pointer w-[14px] h-[14px] rounded-md border-gray-400 focus:ring-oliveLight"
                                 />
                             </th>
@@ -161,9 +160,10 @@ const DriveContent = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {files?.map((file, index) => (
-                            <tr
+                        {files.map((file, index) => (
+                            <motion.tr
                                 key={index}
+                                whileHover={{ scale: 1.01 }}
                                 className={`${index === 0
                                     ? "bg-oliveGreen/80 text-black"
                                     : (index + 1) % 2 === 0
@@ -190,7 +190,7 @@ const DriveContent = () => {
                                     />
                                 </td>
                                 <td className="p-3">{file.date}</td>
-                            </tr>
+                            </motion.tr>
                         ))}
                     </tbody>
                 </table>

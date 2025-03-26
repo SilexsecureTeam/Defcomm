@@ -3,7 +3,7 @@ import searcherAnim from "../assets/anim/defcommLoader.json";
 import Lottie from "lottie-react";
 import mainLogoTwo from '../assets/logo.png'
 
-function FallbackComponent() {
+function Fallback() {
   const lottieRef = useRef();
 
 
@@ -27,4 +27,4 @@ function FallbackComponent() {
   );
 }
 
-export default FallbackComponent;
+export default Fallback;
