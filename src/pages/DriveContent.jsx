@@ -162,9 +162,8 @@ const DriveContent = () => {
                     </thead>
                     <tbody>
                         {files.map((file, index) => (
-                            <motion.tr
+                            <tr
                                 key={index}
-                                whileHover={{ scale: 1.01 }}
                                 className={`${index === 0
                                     ? "bg-oliveGreen/80 text-black"
                                     : (index + 1) % 2 === 0
@@ -191,7 +190,7 @@ const DriveContent = () => {
                                     />
                                 </td>
                                 <td className="p-3">{file.date}</td>
-                            </motion.tr>
+                            </tr>
                         ))}
                     </tbody>
                 </table>
