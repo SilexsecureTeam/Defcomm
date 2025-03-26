@@ -4,6 +4,7 @@ import { FaDropbox, FaAppStoreIos, FaFileAlt } from "react-icons/fa";
 import { SiMega, SiNextcloud } from "react-icons/si";
 import { IoIosMore } from "react-icons/io";
 import { FiPlus, FiSend } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const storageServices = [
   { name: "Dropbox", used: 120, total: 200, color: "bg-blue-500", iconColor: "text-blue-500", bgOpacity: "bg-blue-500/30", icon: <FaDropbox /> },
@@ -20,6 +21,7 @@ const recentFiles = [
 ];
 
 const MyDrive = () => {
+  const navigate=useNavigate();
   const [showMore, setShowMore] = useState(null);
 
   const toggleOptions = (index) => {
@@ -38,8 +40,9 @@ const MyDrive = () => {
       <div className="grid grid-cols-responsive-sm gap-6">
         {storageServices.map((service, index) => (
           <motion.div
+          onClick={()=>navigate(`/dashboard/drive/${service?.name?.toLowerCase()}`)}
             key={service.name}
-            className="bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
+            className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1, duration: 0.4 }}

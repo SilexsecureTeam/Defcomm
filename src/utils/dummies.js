@@ -82,3 +82,62 @@ export const tasks = [
       description: "Get guided troubleshooting and problem-solving support.",
     },
   ];
+
+  export const folders = [
+    { name: "Personal documents", files: 10, subFolders: 2 },
+    { name: "Legal documents", files: 10, subFolders: 2 },
+    { name: "Financial documents", files: 10, subFolders: 2 },
+    { name: "Deed documents", files: 10, subFolders: 2 },
+];
+
+export const initialFiles = [
+    {
+        name: "Passport copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: true,
+    },
+    {
+        name: "NIC copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: false,
+    },
+    {
+        name: "Passport copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: true,
+    },
+    {
+        name: "NIC copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: false,
+    },
+    {
+        name: "Passport copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: true,
+    },
+    {
+        name: "NIC copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: false,
+    },
+    {
+        name: "Passport copy",
+        location: "Personal documents",
+        type: ".pdf",
+        date: "12/06/2034",
+        important: true,
+    },
+];

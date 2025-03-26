@@ -1,14 +1,14 @@
 import React, { useContext, useState } from "react";
 import { ChatContext } from "../../context/ChatContext";
+import ToggleSwitch from "../ToggleSwitch";
 
-const MessageSettings = () => {
-
+function MessageSettings() {
   const { chatVisibility, setChatVisibility } = useContext(ChatContext);
   const [settings, setSettings] = useState({
     dragToRead: true,
     doubleClickToRead: true,
     pressAndHoldToRead: false,
-    visibility: chatVisibility
+    visibility: chatVisibility,
   });
 
   const toggleSetting = (setting: keyof typeof settings) => {
@@ -19,7 +19,6 @@ const MessageSettings = () => {
   };
 
   return (
-    /* Message Settings */
     <div className="w-full">
       <h3 className="text-gray-700 font-bold mb-4">Message Setting</h3>
 
@@ -38,24 +37,15 @@ const MessageSettings = () => {
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
               </p>
             </div>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={settings[key as keyof typeof settings]}
-                onChange={() => toggleSetting(key as keyof typeof settings)}
-              />
-              <div className={`w-10 h-6 flex items-center bg-gray-300 rounded-full transition-all ${settings[key as keyof typeof settings] ? "bg-oliveGreen" : "bg-gray-300"
-                }`}>
-                <div className={`bg-white w-5 h-5 rounded-full shadow-md transform ${settings[key as keyof typeof settings] ? "translate-x-5" : "translate-x-0"
-                  } transition-all`}></div>
-              </div>
-            </label>
+            <ToggleSwitch
+              isChecked={settings[key as keyof typeof settings]}
+              onToggle={() => toggleSetting(key as keyof typeof settings)}
+            />
           </div>
         ))}
       </div>
     </div>
   );
-};
+}
 
 export default MessageSettings;
