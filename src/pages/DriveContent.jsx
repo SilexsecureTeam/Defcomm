@@ -10,7 +10,7 @@ import { TbLayoutDashboardFilled } from "react-icons/tb";
 
 const DriveContent = () => {
     const [view, setView] = useState("timeline");
-    const [files, setFiles] = useState(initialFiles | []);
+    const [files, setFiles] = useState(initialFiles || []);
     const [selectedFiles, setSelectedFiles] = useState([]); // Track selected files
     const [isGrid, setIsGrid] = useState(true);
 
