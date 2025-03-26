@@ -10,7 +10,7 @@ import { TbLayoutDashboardFilled } from "react-icons/tb";
 
 const DriveContent = () => {
     const [view, setView] = useState("timeline");
-    const [files, setFiles] = useState(initialFiles);
+    const [files, setFiles] = useState(initialFiles | []);
     const [selectedFiles, setSelectedFiles] = useState([]); // Track selected files
     const [isGrid, setIsGrid] = useState(true);
 
@@ -149,7 +149,7 @@ const DriveContent = () => {
                                 <input
                                     type="checkbox"
                                     onChange={() => setSelectedFiles(selectedFiles.length === files.length ? [] : files.map((_, i) => i))}
-                                    checked={selectedFiles.length === files.length}
+                                    checked={selectedFiles?.length === files?.length}
                                     className="cursor-pointer w-[14px] h-[14px] rounded-md border-gray-400 focus:ring-oliveLight"
                                 />
                             </th>
@@ -161,7 +161,7 @@ const DriveContent = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {files.map((file, index) => (
+                        {files?.map((file, index) => (
                             <tr
                                 key={index}
                                 className={`${index === 0
