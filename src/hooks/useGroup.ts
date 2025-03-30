@@ -27,7 +27,6 @@ const useGroups = () => {
       },
       enabled: !!authDetails, // Fetch only when authenticated
       staleTime: 0, // Forces refetching every time you visit the page
-      cacheTime: 1000 * 60 * 5, // Cache data for 5 minutes
       refetchOnMount: true, // Refetch when component mounts
       refetchOnWindowFocus: true, // Refetch when the page is focused
     });
@@ -42,7 +41,6 @@ const useGroups = () => {
       },
       enabled: !!authDetails, // Fetch only when authenticated
       staleTime: 0, // Forces refetching every time you visit the page
-      cacheTime: 1000 * 60 * 5, // Cache data for 5 minutes
       refetchOnMount: true, // Refetch when component mounts
       refetchOnWindowFocus: true, // Refetch when the page is focused
     });

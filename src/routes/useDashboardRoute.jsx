@@ -7,6 +7,17 @@ import { DashboardContext } from "../context/DashboardContext";
 import useChat from "../hooks/useChat";
 import { ChatContext } from "../context/ChatContext";
 
+// Sidebar Components
+import SideBar from "../components/dashboard/SideBar";
+import AiSideBar from "../components/dashboard/AiSideBar";
+import SideBarTwo from "../components/dashboard/SideBarTwo";
+import SideBarItem from "../components/dashboard/SideBarItem";
+import SideBarItemTwo from "../components/dashboard/SideBarItemTwo";
+
+import { ThemeProvider } from "../context/ThemeContext";
+import Groups from "../pages/Groups";
+import ChatBoxTwo from "../pages/ChatBoxTwo";
+
 // Lazy Load Components
 const NavBar = lazy(() => import("../components/dashboard/NavBar"));
 const DashboardLayout = lazy(() => import("../layout/DashboardLayout"));
@@ -19,18 +30,7 @@ const ChatBox = lazy(() => import("../pages/ChatBox"));
 const MyDrive = lazy(() => import("../pages/MyDrive"));
 const DriveContent = lazy(() => import("../pages/DriveContent"));
 const Settings = lazy(() => import("../pages/Settings"));
-
-// Sidebar Components
-import SideBar from "../components/dashboard/SideBar";
-import AiSideBar from "../components/dashboard/AiSideBar";
-import SideBarTwo from "../components/dashboard/SideBarTwo";
-import SideBarItem from "../components/dashboard/SideBarItem";
-import SideBarItemTwo from "../components/dashboard/SideBarItemTwo";
-
-import { ThemeProvider } from "../context/ThemeContext";
-import Groups from "../pages/Groups";
-import ChatBoxTwo from "../pages/ChatBoxTwo";
-import Fallback from "../components/Fallback";
+const ContactPage = lazy(() => import("../pages/ContactList"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -61,7 +61,7 @@ function useDashBoardRoute() {
     } else if (state?.type === "CHAT") {
       Sidebar = SideBarTwo;
       SidebarItem = SideBarItemTwo;
-      option = contacts?.data || [];
+      option = contacts || [];
     }
 
     return { SidebarComponent: Sidebar, SidebarItemComponent: SidebarItem, optionList: option };
@@ -125,11 +125,11 @@ function useDashBoardRoute() {
             <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
               <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
               <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
-              <Suspense fallback={<Fallback />}>
                 <Routes>
                   <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
+                    <Route path="/contacts" element={<ContactPage />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/groups" element={<Groups />} />
                     <Route path="/drive" element={<MyDrive />} />
@@ -141,7 +141,6 @@ function useDashBoardRoute() {
                     <Route path="/*" element={<ComingSoon />} />
                   </Route>
                 </Routes>
-                </Suspense>
               </div>
             </div>
           </main>

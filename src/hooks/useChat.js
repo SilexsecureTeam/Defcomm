@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "../services/axios-client";
 import { AuthContext } from "../context/AuthContext";
 
@@ -12,10 +12,20 @@ const useChat = () => {
     const token = authDetails?.access_token;
     const client = axiosClient(token);
 
+    const useFetchContacts = () =>
+        useQuery({
+          queryKey: ["contacts"],
+          queryFn: async () => {
+            const { data } = await client.get("/user/contact");
+            return data?.data || [];
+          },
+          enabled: !!authDetails, // Fetch only when authenticated
+        });
+    
     // Fetch Contacts Manually
     const fetchContacts = async () => {
         const { data } = await client.get(`/user/contact`);
-        return data || [];
+        return data?.data || [];
     };
      // Fetch Contacts Manually
      const fetchChatHistory = async () => {

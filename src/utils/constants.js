@@ -47,7 +47,7 @@ export const dashboardOptions = [
   {
     type: "CALLS",
     title: "Secure Calls",
-    route: "/dashboard/calls",
+    route: "/dashboard/contacts",
     icon: MdOutlineCall,
     iconActive: null,
   },
@@ -134,7 +134,7 @@ export const dashboardTabs = [
     title: "Contact",
     img: contact, 
     view: "contact",
-    route:"/dashboard/calls", 
+    route:"/dashboard/contacts", 
   },
   { 
     type:"FILE-SHARING",
