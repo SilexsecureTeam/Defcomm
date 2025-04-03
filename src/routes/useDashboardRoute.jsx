@@ -31,6 +31,7 @@ const MyDrive = lazy(() => import("../pages/MyDrive"));
 const DriveContent = lazy(() => import("../pages/DriveContent"));
 const Settings = lazy(() => import("../pages/Settings"));
 const ContactPage = lazy(() => import("../pages/ContactList"));
+const WalkieTalkie= lazy(() => import("../pages/WalkieTalkie"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -132,6 +133,7 @@ function useDashBoardRoute() {
                     <Route path="/contacts" element={<ContactPage />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/groups" element={<Groups />} />
+                    <Route path="/comm" element={<WalkieTalkie />} />
                     <Route path="/drive" element={<MyDrive />} />
                     <Route path="/drive/:id" element={<DriveContent />} />
                     <Route path="/isurvive" element={<DefcommAi />} />

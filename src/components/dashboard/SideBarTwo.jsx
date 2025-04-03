@@ -6,8 +6,9 @@ import { dashboardTabs } from "../../utils/constants";
 import useChat from "../../hooks/useChat";
 import { useQuery } from "@tanstack/react-query";
 import useGroups from "../../hooks/useGroup";
+import AddContactInterface from "./AddContactInterface";
 import Modal from "../modal/Modal";
-import GroupSlide from "../GroupSlide";
+
 
 function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
     const { fetchChatHistory } = useChat();
@@ -20,26 +21,9 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
         //  refetchInterval: 5000,
         staleTime: 0
     });
-   const { useFetchGroups, useFetchGroupMembers, addContactMutation } = useGroups();
+    const { useFetchGroups, useFetchGroupMembers, addContactMutation } = useGroups();
 
-    //add member to contact
-    const { data: groups } = useFetchGroups();
 
-    const [selectedGroup, setSelectedGroup] = useState(null);
-    const [loadingStates, setLoadingStates] = useState({});
-    // Fetch group members when a group is selected
-    const { data: groupMembers, isLoading: isGroupMembersLoading } = useFetchGroupMembers(selectedGroup?.group_id);
-
-    const handleAddContact = async (member) => {
-        setLoadingStates((prev) => ({ ...prev, [member?.id]: "adding" }));
-      
-        try {
-          await addContactMutation.mutateAsync(member?.member_id_encrpt);
-        }finally {
-          setLoadingStates((prev) => ({ ...prev, [member?.id]: null })); // ✅ Stops loader in all cases
-        }
-      };
-      
     return (
         <>
             {/* SidebarTwo */}
@@ -86,7 +70,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
                             {/* Add Contact Button */}
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="ml-auto mb-2 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                className="font-medium ml-auto mb-2 flex items-center gap-2 px-4 py-2 bg-oliveHover text-black rounded-lg hover:bg-oliveGreen transition"
                             >
                                 <FaUserPlus />
                                 <span className="hidden md:block">Add Contact</span>
@@ -143,47 +127,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
 
             {isModalOpen && (
                 <Modal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)}>
-                    <div className="p-5 w-[80vw] md:w-[600px] min-h-32 max-h-[80vh] py-14 bg-oliveDark text-white">
-                        {groups?.length ?
-                            (<GroupSlide groups={groups} setSelectedGroup={setSelectedGroup} forceSingleView={true} />) : (
-                                <div>No groups available </div>
-                            )}
-
-                        {/* Show group members when a group is selected */}
-                        {selectedGroup && (
-                            <div className="mt-3">
-                                {isGroupMembersLoading ?
-                                    <div className="flex justify-center">
-                                        <FaSpinner className="animate-spin text-white text-2xl" />
-                                    </div>
-                                    : <>
-                                        <h3 className="text-lg font-bold"><strong>{selectedGroup?.group_name} -</strong> Members:</h3>
-                                        <ul className="mt-2 space-y-2">
-                                            {groupMembers?.map((member) => {
-                                                if(!member?.member_name) return null
-                                                const isAlreadyAdded = contacts?.some((c) => c.contact_id === member?.member_id);
-                                                return (
-                                                    <li
-                                                        key={member?.id}
-                                                        onClick={() => handleAddContact(member)}
-                                                        className="bg-gray-700 p-3 rounded-md flex items-center justify-between gap-2 cursor-pointer"
-                                                        disabled={loadingStates[member?.id] === "adding"}
-                                                    >
-                                                        {member?.member_name || "Anonymous"}
-                                                        {isAlreadyAdded ? (
-                                                            <FaCheck className="text-green-400" />
-                                                        ) : loadingStates[member?.id] === "adding" ? (
-                                                            <FaSpinner className="animate-spin text-white" />
-                                                        ) : null}
-                                                    </li>
-                                                )
-                                            })}
-                                        </ul>
-                                    </>}
-
-                            </div>
-                        )}
-                    </div>
+                    <AddContactInterface />
                 </Modal>
             )}
 

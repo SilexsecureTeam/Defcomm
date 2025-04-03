@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import useGroups from "../hooks/useGroup";
 import GroupSlide from "../components/GroupSlide";
+import { useLocation } from "react-router-dom";
 
 const Groups = () => {
+    const location= useLocation();
+
     const { useFetchGroups, useFetchPendingGroups, acceptMutation, declineMutation, useFetchGroupMembers } = useGroups();
     const { data: groups, isLoading } = useFetchGroups();
     const { data: invitations, isLoading: loadingInvitations } = useFetchPendingGroups();
@@ -13,6 +16,12 @@ const Groups = () => {
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: string | null }>({});
     const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
     
+    useEffect(()=>{
+        if(location?.state){
+            setSelectedGroup(location?.state?.group)
+        }
+    },[location?.state]);
+
     const handleAccept = async (id: string) => {
         setLoadingStates((prev) => ({ ...prev, [id]: "accepting" }));
         try{
@@ -56,7 +65,7 @@ const Groups = () => {
 
             {/* Group Members Section */}
             {selectedGroup && (
-                <section className="bg-gray-800 p-5 rounded-lg">
+                <section className="bg-gray-500 p-5 rounded-lg">
                     <h2 className="text-xl font-medium mb-4"><strong className="text-oliveHover">{selectedGroup?.group_name} -</strong> Members</h2>
                     {isGroupMembersLoading ? (
                         <div className="flex justify-center">
@@ -69,14 +78,14 @@ const Groups = () => {
                             ))}
                         </ul>
                     ) : (
-                        <p className="text-gray-400">No members found.</p>
+                        <p className="text-gray-800">No members found.</p>
                     )}
                 </section>
             )}
 
             {/* Pending Invitations Section */}
-            <section className="bg-oliveGreen/60 p-5 rounded-lg">
-                <h2 className="text-2xl font-semibold mb-4 text-white/70">Pending Invitations</h2>
+            <section className="bg-white p-5 rounded-lg">
+                <h2 className="text-2xl font-semibold mb-4 text-oliveDark">Pending Invitations</h2>
                 {loadingInvitations ? (
                     <div className="flex justify-center">
                         <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
@@ -84,26 +93,26 @@ const Groups = () => {
                 ) : invitations?.length ? (
                     <ul className="space-y-4">
                         {invitations.map((inv) => (
-                            <li key={inv.id} className="p-4 rounded-lg flex flex-col md:flex-row justify-between md:items-center shadow-md gap-1">
-                                <span className="text-xl md:text-lg font-medium text-white/90">{inv.group_name}</span>
-                                <div className="flex gap-2">
+                            <li key={inv?.id} className="p-4 rounded-lg flex flex-col md:flex-row justify-between md:items-center shadow-md gap-1">
+                                <span className="text-xl md:text-lg font-medium text-olive">{inv?.group_name}</span>
+                                <div className="flex gap-2 font-medium">
                                     <button
-                                        onClick={() => handleAccept(inv.id)}
-                                        className="bg-oliveLight hover:bg-oliveDark text-white px-4 py-2 rounded-lg flex items-center gap-2"
-                                        disabled={loadingStates[inv.id] === "accepting"}
+                                        onClick={() => handleAccept(inv?.id)}
+                                        className="bg-oliveLight hover:bg-oliveDark text-oliveHover px-4 py-2 rounded-lg flex items-center gap-2"
+                                        disabled={loadingStates[inv?.id] === "accepting"}
                                     >
-                                        {loadingStates[inv.id] === "accepting" && (
-                                            <FaSpinner className="animate-spin text-white" />
+                                        {loadingStates[inv?.id] === "accepting" && (
+                                            <FaSpinner className="animate-spin text-oliveHover" />
                                         )}
                                         Accept
                                     </button>
                                     <button
-                                        onClick={() => handleDecline(inv.id)}
-                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-                                        disabled={loadingStates[inv.id] === "declining"}
+                                        onClick={() => handleDecline(inv?.id)}
+                                        className="bg-red-500 hover:bg-red-600 text-red-100 px-4 py-2 rounded-lg flex items-center gap-2"
+                                        disabled={loadingStates[inv?.id] === "declining"}
                                     >
-                                        {loadingStates[inv.id] === "declining" && (
-                                            <FaSpinner className="animate-spin text-white" />
+                                        {loadingStates[inv?.id] === "declining" && (
+                                            <FaSpinner className="animate-spin text-red-100" />
                                         )}
                                         Decline
                                     </button>
@@ -112,7 +121,7 @@ const Groups = () => {
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-gray-400">No pending invitations.</p>
+                    <p className="text-gray-800">No pending invitations.</p>
                 )}
             </section>
         </div>
