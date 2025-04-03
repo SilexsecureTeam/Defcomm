@@ -38,7 +38,7 @@ const CommInterface = () => {
             </div>
 
             <div className="my-4 mx-auto">
-                <AudioVisualizer progress={0} width={200} height={60} />
+                <AudioVisualizer progress={40} width={200} height={60} />
             </div>
 
             <div className="flex items-center gap-3 my-4">
