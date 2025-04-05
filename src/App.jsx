@@ -13,6 +13,7 @@ import { BotProvider } from "./context/BotContext";
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
 const Dashboard = lazy(() => import("./routes/useDashboardRoute"));
+const DeffViewer = lazy(() => import("./pages/DeffViewer"));
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
                 <Router>
                   <Routes>
                     <Route path="/login" element={<DefcommLogin />} />
+                    <Route path="web" element={<DeffViewer />} />
                     <Route path="/" element={<Navigate to="/login" />} />
                     {/* Using ProtectedRoute as a Component */}
                     <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />

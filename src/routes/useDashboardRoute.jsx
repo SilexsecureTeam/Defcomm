@@ -32,6 +32,7 @@ const DriveContent = lazy(() => import("../pages/DriveContent"));
 const Settings = lazy(() => import("../pages/Settings"));
 const ContactPage = lazy(() => import("../pages/ContactList"));
 const WalkieTalkie= lazy(() => import("../pages/WalkieTalkie"));
+const DeffViewer= lazy(() => import("../pages/DeffViewer"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -130,7 +131,8 @@ function useDashBoardRoute() {
                   <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
-                    <Route path="/contacts" element={<ContactPage />} />
+                    <Route path="/file-view" element={<DeffViewer />} />
+                    <Route path="/contacts" element={<DeffViewer />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/groups" element={<Groups />} />
                     <Route path="/comm" element={<WalkieTalkie />} />

@@ -5,10 +5,12 @@ import ToggleSwitch from "../components/ToggleSwitch"; // Importing the reusable
 import { initialFiles, folders } from "../utils/dummies";
 import { IoMdAdd } from "react-icons/io";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
 
 
 
 const DriveContent = () => {
+    const navigate= useNavigate();
     const [view, setView] = useState("timeline");
     const [files, setFiles] = useState(initialFiles);
     const [selectedFiles, setSelectedFiles] = useState([]); // Track selected files
@@ -98,6 +100,7 @@ const DriveContent = () => {
                         </button>
                     </motion.div>
                     <motion.p
+                        onClick={()=>{scrollTo(0,0); navigate('/dashboard/file-view')}}
                         whileHover={{ scale: 1.1 }}
                         className="w-12 h-12 rounded-lg bg-olive text-white ml-auto flex items-center justify-center cursor-pointer"
                     >
