@@ -32,7 +32,7 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
           <div className="min-h-28">
             <h3 className="font-semibold text-xl flex gap-[10px] items-center p-3">
               <MdKey size={24} className="text-[#c0c00e] rotate-90" />
-              Echxxxxxx
+              {authDetails?.id?.slice(0, 3) + 'xxxx' + authDetails?.id?.slice(-3)}
             </h3>
           </div>
 
