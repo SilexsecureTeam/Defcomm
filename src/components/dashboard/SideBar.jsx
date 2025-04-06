@@ -30,9 +30,9 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
         {/* ✅ Make sure this section also allows scrolling if needed */}
         <nav className="bg-oliveLight flex-1 p-4">
           <div className="min-h-28">
-            <h3 className="font-semibold text-xl flex gap-[10px] items-center p-3">
+            <h3 className="font-semibold text-xl flex gap-[10px] items-center p-3 capitalize">
               <MdKey size={24} className="text-[#c0c00e] rotate-90" />
-              {authDetails?.id?.slice(0, 3) + 'xxxx' + authDetails?.id?.slice(-3)}
+              {authDetails?.user?.id?.slice(0, 3) + 'XXXX' + authDetails?.user?.id?.slice(-3)}
             </h3>
           </div>
 
