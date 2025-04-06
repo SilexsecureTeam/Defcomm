@@ -33,7 +33,7 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
             <h3 className="font-semibold text-xl flex gap-[10px] items-center p-3 capitalize">
               <MdKey size={24} className="text-[#c0c00e] rotate-90" />
               {authDetails?.user?.email
-  ? authDetails?.user?.email?.slice(0, 3) + 'XXXX' + authDetails?.user?.email?.slice(-3)
+  ? authDetails?.user?.email?.slice(0, 3) + 'xxxxxx'
   : "Anonymous"}
             </h3>
           </div>
