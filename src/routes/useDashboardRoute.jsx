@@ -131,8 +131,9 @@ function useDashBoardRoute() {
                   <Route path="/" element={<DashboardLayout />}>
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
-                    <Route path="/file-view" element={<DeffViewer />} />
-                    <Route path="/contacts" element={<DeffViewer />} />
+                    <Route path="/new-file" element={<DeffViewer />} />
+                    <Route path="/file-view/:fileUrl" element={<DeffViewer />} />
+                    <Route path="/contacts" element={<ContactPage />} />
                     <Route path="/file-sharing" element={<FileManager />} />
                     <Route path="/groups" element={<Groups />} />
                     <Route path="/comm" element={<WalkieTalkie />} />

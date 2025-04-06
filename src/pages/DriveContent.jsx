@@ -100,7 +100,7 @@ const DriveContent = () => {
                         </button>
                     </motion.div>
                     <motion.p
-                        onClick={()=>{scrollTo(0,0); navigate('/dashboard/file-view')}}
+                        onClick={()=>{scrollTo(0,0); navigate('/dashboard/new-file')}}
                         whileHover={{ scale: 1.1 }}
                         className="w-12 h-12 rounded-lg bg-olive text-white ml-auto flex items-center justify-center cursor-pointer"
                     >
@@ -166,13 +166,14 @@ const DriveContent = () => {
                         {files.map((file, index) => (
                             <motion.tr
                                 key={index}
+                                onClick={()=>navigate(`/dashboard/file-view/${encodeURIComponent(import.meta.env.VITE_FILE)}`)}
                                 whileHover={{ scale: 1.01 }}
                                 className={`${index === 0
                                     ? "bg-oliveGreen/80 text-black"
                                     : (index + 1) % 2 === 0
                                         ? "bg-white text-black" // Every 3rd row is always white
                                         : "bg-oliveLight/70 text-white" // Even index rows
-                                    }`}
+                                    } cursor-pointer`}
                             >
                                 <td className="p-3 pr-0">
                                     <input
