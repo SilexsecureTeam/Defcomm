@@ -25,7 +25,7 @@ const DeffViewer = () => {
         };
 
         if (decodedFileUrl) {
-          config.initialDoc = decodedFileUrl;
+          config.initialDoc = `/secure/${decodedFileUrl}`;
         } else {
           config.enableOfficeEditing = true;
         }
@@ -40,10 +40,10 @@ const DeffViewer = () => {
 
           documentViewer.setWatermark({
             diagonal: {
-              fontSize: 100,
+              fontSize: 70,
               fontFamily: 'sans-serif',
               color: '#36460A',
-              opacity: 50,
+              opacity: 20,
               text: 'Deffcomm',
             },
           });

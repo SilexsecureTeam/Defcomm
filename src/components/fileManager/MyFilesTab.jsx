@@ -2,7 +2,11 @@ import React from 'react';
 import { CgFileDocument } from 'react-icons/cg';
 import { BsEye, BsShare } from "react-icons/bs";
 import { motion } from "framer-motion";
-const MyFilesTab = ({ files, onShare }) => (
+import { useNavigate } from 'react-router-dom';
+const MyFilesTab = ({ files, onShare }) => {
+  const navigate = useNavigate();
+
+return (
   <div className="w-full overflow-x-auto">
     <table className="w-full text-left">
       <thead>
@@ -42,8 +46,7 @@ const MyFilesTab = ({ files, onShare }) => (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   className="bg-olive px-3 py-2 text-sm flex items-center gap-1"
-                //Disable the view file button for now
-                /* onClick={() => viewFile(file.id)} */
+                  onClick={() => navigate(`/dashboard/file-view/${encodeURI(file?.file)}`)}
                 >
                   <span><BsEye /></span>
                 </motion.button>
@@ -61,6 +64,7 @@ const MyFilesTab = ({ files, onShare }) => (
       </tbody>
     </table>
   </div>
-);
+)
+};
 
 export default MyFilesTab;

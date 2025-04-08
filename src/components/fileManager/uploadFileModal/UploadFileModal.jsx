@@ -8,7 +8,7 @@ const UploadFileModal = ({ isOpen, onClose }) => {
     const { authDetails } = useContext(AuthContext);
     const client = axiosClient(authDetails?.access_token);
 
-    const { refetchAllFiles } = useFileManager();
+    const { refetchMyFiles } = useFileManager();
 
     const [form, setForm] = useState({
         fileLabel: "",
@@ -66,7 +66,7 @@ const UploadFileModal = ({ isOpen, onClose }) => {
 
             resetForm();
             onClose();
-            await refetchAllFiles(); // Refresh file list
+            await refetchMyFiles(); // Refresh file list
         } catch (error) {
             console.error("Upload failed:", error);
             toast.error(error.response?.data?.message || "Failed to upload file. Please try again.", {

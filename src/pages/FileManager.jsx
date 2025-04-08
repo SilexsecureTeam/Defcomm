@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FiSearch, FiFilter, FiUpload } from "react-icons/fi";
-import { FaSpinner } from "react-icons/fa6";
+import { FiSearch, FiUpload } from "react-icons/fi";
+import { BsPlusLg } from "react-icons/bs";
+import { TbArrowsMaximize } from "react-icons/tb";
+import { FaBook, FaTrash } from "react-icons/fa";
 import { GrSort } from "react-icons/gr";
 import SEOHelmet from "../engine/SEOHelmet";
 import UploadFileModal from "../components/fileManager/uploadFileModal/UploadFileModal";
@@ -85,6 +87,22 @@ const FileManager = () => {
                         <p className="text-sm px-2 mr-2">Sort by</p>
                         <GrSort size={20} className="hover:text-olive cursor-pointer" />
                     </section>
+                </div>
+
+                {/* Icons */}
+                <div className="flex gap-4 items-center my-4">
+                    {[FiUpload, TbArrowsMaximize, FaBook, FaTrash, BsPlusLg].map((Icon, index) => (
+                        <motion.p
+                            key={index}
+                            whileHover={{ scale: 1.1 }}
+                            className="w-12 h-12 border border-[#DDDFE1] rounded bg-transparent text-[#DDF2AB] last:text-white last:ml-auto last:bg-olive flex items-center justify-center cursor-pointer"
+                            onClick={() => {
+                                if (index === 0) setFileModalsDisplay({ ...fileModalsDisplay, isUploadFileModal: true });
+                            }}
+                        >
+                            <Icon />
+                        </motion.p>
+                    ))}
                 </div>
 
                 {/* File Upload and file Share Modal */}
