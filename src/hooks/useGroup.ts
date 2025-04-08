@@ -58,6 +58,18 @@ const useGroups = () => {
       staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     });
 
+    // Fetch members of a specific group
+  const useFetchPendingFiles = () =>
+    useQuery({
+      queryKey: ["pendingFiles"], // Ensure unique cache per groupId
+      queryFn: async () => {
+        const { data } = await client.get(`/user/file/pending`);
+        return data?.data || [];
+      },
+      enabled: !!authDetails , // Fetch only when authenticated and groupId is provided
+      staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    });
+
 
   // Add to contact mutation
   const addContactMutation = useMutation({
@@ -119,7 +131,8 @@ const useGroups = () => {
     acceptMutation,
     declineMutation,
     addContactMutation,
-    removeContactMutation
+    removeContactMutation,
+    useFetchPendingFiles
   };
 };
 

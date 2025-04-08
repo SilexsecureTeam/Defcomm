@@ -33,7 +33,7 @@ const Settings = lazy(() => import("../pages/Settings"));
 const ContactPage = lazy(() => import("../pages/ContactList"));
 const WalkieTalkie= lazy(() => import("../pages/WalkieTalkie"));
 const DeffViewer= lazy(() => import("../pages/DeffViewer"));
-
+const FileDashboard = lazy(() => import("../pages/FileDashboard"));
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
   const { setSelectedChatUser } = useContext(ChatContext);
@@ -134,7 +134,8 @@ function useDashBoardRoute() {
                     <Route path="/new-file" element={<DeffViewer />} />
                     <Route path="/file-view/:fileUrl" element={<DeffViewer />} />
                     <Route path="/contacts" element={<ContactPage />} />
-                    <Route path="/file-sharing" element={<FileManager />} />
+                    <Route path="/file-manager" element={<FileManager />} />
+                    <Route path="/file-sharing" element={<FileDashboard />} />
                     <Route path="/groups" element={<Groups />} />
                     <Route path="/comm" element={<WalkieTalkie />} />
                     <Route path="/drive" element={<MyDrive />} />

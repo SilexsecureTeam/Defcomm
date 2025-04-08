@@ -1,174 +1,177 @@
-import { useState, useEffect, useContext } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { axiosClient } from "../services/axios-client";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import DOMPurify from "dompurify";
 
 const useFileManager = () => {
-  const [myFiles, setMyFiles] = useState([]);
-  const [otherFiles, setOtherFiles] = useState([]);
-  const [fileRequests, setFileRequests] = useState([]);
-  const [pendingFileRequests, setPendingFileRequests] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [contacts, setContacts] = useState([]);
-  const [fileContent, setFileContent] = useState(""); // State to store the HTML content
-
+  const [fileContent, setFileContent] = useState("");
   const { authDetails } = useContext(AuthContext);
   const client = axiosClient(authDetails?.access_token);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchFiles();
-    fetchContacts();
-  }, []);
+  const fetcher = (url) => client.get(url).then((res) => res.data.data);
 
-  // Function to fetch files
-  const fetchFiles = async () => {
-    setLoading(true);
-    try {
-      const [
-        myFilesRes,
-        otherFilesRes,
-        fileRequestsRes,
-        pendingFileRequestsRes,
-      ] = await Promise.all([
-        client.get("/user/file"),
-        client.get("/user/file/other"),
-        client.get("/user/file/request"),
-        client.get("/user/file/pending"),
-      ]);
-      console.log(
-        "my files:",
-        myFilesRes.data.data,
-        "other files:",
-        otherFilesRes.data.data,
-        "file requests:",
-        fileRequestsRes.data.data,
-        "pending file requests:",
-        pendingFileRequestsRes.data.data
-      );
+  // 🔹 My Files
+  const {
+    data: myFiles = [],
+    refetch: refetchMyFiles,
+    isLoading: isLoadingMyFiles,
+    isFetching: isFetchingMyFiles,
+    error: errorMyFiles,
+  } = useQuery({
+    queryKey: ["myFiles"],
+    queryFn: () => fetcher("/user/file"),
+    enabled: false,
+  });
 
-      setMyFiles(myFilesRes.data.data);
-      setOtherFiles(otherFilesRes.data.data);
-      setFileRequests(fileRequestsRes.data.data);
-      setPendingFileRequests(pendingFileRequestsRes.data.data);
-    } catch (error) {
-      console.error("Failed to fetch files. Please try again.", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 🔹 Other Files
+  const {
+    data: otherFiles = [],
+    refetch: refetchOtherFiles,
+    isLoading: isLoadingOtherFiles,
+    isFetching: isFetchingOtherFiles,
+    error: errorOtherFiles,
+  } = useQuery({
+    queryKey: ["otherFiles"],
+    queryFn: () => fetcher("/user/file/other"),
+    enabled: false,
+  });
 
-  //Function to fetch contacts
-  const fetchContacts = async () => {
-    try {
-      const response = await client.get("/user/contact");
-      setContacts(response.data.data);
-    } catch (error) {
-      console.error("Failed to fetch contacts. Please try again.", error);
-    }
-  };
+  // 🔹 File Requests
+  const {
+    data: fileRequests = [],
+    refetch: refetchFileRequests,
+    isLoading: isLoadingFileRequests,
+    isFetching: isFetchingFileRequests,
+    error: errorFileRequests,
+  } = useQuery({
+    queryKey: ["fileRequests"],
+    queryFn: () => fetcher("/user/file/request"),
+    enabled: false,
+  });
 
+  // 🔹 Pending File Requests
+  const {
+    data: pendingFileRequests = [],
+    refetch: refetchPendingFileRequests,
+    isLoading: isLoadingPendingFileRequests,
+    isFetching: isFetchingPendingFileRequests,
+    error: errorPendingFileRequests,
+  } = useQuery({
+    queryKey: ["pendingFileRequests"],
+    queryFn: () => fetcher("/user/file/pending"),
+    enabled: false,
+  });
+
+  // 🔹 Contacts
+  const {
+    data: contacts = [],
+    refetch: refetchContacts,
+    isLoading: isLoadingContacts,
+    isFetching: isFetchingContacts,
+    error: errorContacts,
+  } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: () => fetcher("/user/contact"),
+    enabled: false,
+  });
+
+  // 🔹 View file content
   const viewFile = async (fileId) => {
     try {
-      const response = await client.get(`/user/file/${fileId}/view`, {
+      const res = await client.get(`/user/file/${fileId}/view`, {
         responseType: "text",
       });
-
-      // Sanitize the HTML response
-      //const sanitizedHTML = DOMPurify.sanitize(response.data);
-
-      // Store sanitized HTML in state
-      setFileContent(response.data);
-      console.log(response.data);
+      setFileContent(res.data);
     } catch (error) {
-      console.error("Error viewing file:", error);
       toast.error("Failed to view file. Please try again.");
+      console.error(error);
     }
   };
 
-  //Function to Share a File
-  const shareFile = async (fileId, selectedContacts) => {
-    if (!fileId) {
-      toast.error("Invalid file");
-      return;
-    }
-    if (!selectedContacts.length) {
-      toast.error("No contacts selected.");
-      return;
-    }
-    const toastId = toast.loading("Sharing...");
-    try {
+  // 🔹 Share file
+  const shareFileMutation = useMutation({
+    mutationFn: ({ fileId, selectedContacts }) => {
       const payload = {
         id: fileId,
-        users: JSON.stringify(selectedContacts), // Ensure users are sent as a string
+        users: JSON.stringify(selectedContacts),
       };
+      return client.post("/user/file/share", payload);
+    },
+    onSuccess: (data) => {
+      toast.success(data.data.message || "File shared successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to share file.");
+    },
+  });
 
-      const result = await client.post("/user/file/share", payload);
-      console.log("File sharing response:", result.data);
-      toast.success(result.data.message || "File shared successfully!", {
-        id: toastId,
-      });
-    } catch (error) {
-      console.error("Error sharing file:", error);
-      toast.error(error.response?.data?.message || "Failed to share file.", {
-        id: toastId,
-      });
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
+  // 🔹 Accept file
+  const acceptFileMutation = useMutation({
+    mutationFn: (fileId) => client.get(`/user/file/${fileId}/accept`),
+    onSuccess: (data) => {
+      toast.success(data.data.message || "File accepted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["myFiles"] });
+      queryClient.invalidateQueries({ queryKey: ["fileRequests"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to accept file.");
+    },
+  });
 
-  const acceptFile = async (fileId) => {
-    const toastId = toast.loading("Accepting file...");
-    try {
-      const response = await client.get(`/user/file/${fileId}/accept`);
-      console.log(response.data);
-      toast.success(response.data.message || "File accepted successfully!", {
-        id: toastId,
-      });
-      await fetchFiles(); // Fetch files to update files
-    } catch (error) {
-      console.error("Error accepting file:", error);
-      toast.error(error.response?.data?.message || "Failed to accept file.", {
-        id: toastId,
-      });
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
-
-  const declineFile = async (fileId) => {
-    const toastId = toast.loading("Declining file...");
-    try {
-      const response = await client.get(`/user/file/${fileId}/decline`);
-      console.log(response.data);
-      toast.success(response.data.message || "File declined successfully!", {
-        id: toastId,
-      });
-      await fetchFiles(); // Fetch files to update files
-    } catch (error) {
-      console.error("Error declining file:", error);
-      toast.error(error.response?.data?.message || "Failed to decline file.", {
-        id: toastId,
-      });
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
+  // 🔹 Decline file
+  const declineFileMutation = useMutation({
+    mutationFn: (fileId) => client.get(`/user/file/${fileId}/decline`),
+    onSuccess: (data) => {
+      toast.success(data.data.message || "File declined successfully!");
+      queryClient.invalidateQueries({ queryKey: ["fileRequests"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to decline file.");
+    },
+  });
 
   return {
+    // 📁 Data
     myFiles,
     otherFiles,
     fileRequests,
     pendingFileRequests,
-    loading,
-    viewFile,
-    fileContent,
     contacts,
-    shareFile,
-    acceptFile,
-    declineFile,
-    fetchFiles,
+    fileContent,
+
+    // 📥 File actions
+    viewFile,
+    shareFile: shareFileMutation.mutateAsync,
+    acceptFile: acceptFileMutation.mutate,
+    declineFile: declineFileMutation.mutate,
+
+    // 🔄 Refetchers
+    refetchMyFiles,
+    refetchOtherFiles,
+    refetchFileRequests,
+    refetchPendingFileRequests,
+    refetchContacts,
+
+    // 🔄 Loaders
+    isLoadingMyFiles,
+    isFetchingMyFiles,
+    isLoadingOtherFiles,
+    isFetchingOtherFiles,
+    isLoadingFileRequests,
+    isFetchingFileRequests,
+    isLoadingPendingFileRequests,
+    isFetchingPendingFileRequests,
+    isLoadingContacts,
+    isFetchingContacts,
+
+    // ⚠️ Errors
+    errorMyFiles,
+    errorOtherFiles,
+    errorFileRequests,
+    errorPendingFileRequests,
+    errorContacts,
   };
 };
 
