@@ -6,7 +6,7 @@ import SEOHelmet from '../engine/SEOHelmet';
 const DeffViewer = () => {
   const { fileUrl } = useParams();
   const decodedFileUrl = fileUrl ? atob(fileUrl) : null;
-
+  const isProduction= import.meta.env.VITE_PROD
   const viewerRef = useRef(null);
   const instanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,9 @@ const DeffViewer = () => {
         };
 
         if (decodedFileUrl) {
-          config.initialDoc = `${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`;
+          config.initialDoc = isProduction
+    ? `${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`
+    : `/secure/${decodedFileUrl}`; // still works locally via Vite proxy
         } else {
           config.enableOfficeEditing = true;
         }
