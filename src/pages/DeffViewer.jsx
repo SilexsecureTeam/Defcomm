@@ -6,7 +6,7 @@ import SEOHelmet from '../engine/SEOHelmet';
 const DeffViewer = () => {
   const { fileUrl } = useParams();
   const decodedFileUrl = fileUrl ? atob(fileUrl) : null;
-  const isProduction= import.meta.env.VITE_PROD
+  const isProduction= import.meta.env.VITE_PROD ?? false
   const viewerRef = useRef(null);
   const instanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
