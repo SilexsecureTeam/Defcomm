@@ -17,7 +17,7 @@ const PendingFileInvitationsTab = ({ invitations, onAccept, onDecline }) => (
         {invitations.map((invitation, i) => (
           <tr key={i} className="border-b border-white/50 text-sm">
             <td>{invitation.file_name}</td>
-            <td>{invitation.shared_date.split('T')[0]}</td>
+            <td>{invitation?.shared_date?.split('T')[0]}</td>
             <td>{invitation.file_size}</td>
             <td>{invitation.uploaded_by}</td>
             <td>{invitation.shared_by}</td>

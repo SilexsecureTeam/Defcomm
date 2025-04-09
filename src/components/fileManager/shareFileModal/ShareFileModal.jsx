@@ -102,7 +102,7 @@ export default function ShareFileModal({ isOpen, onClose, fileId }) {
 
               {!isLoadingContacts &&
                 !errorContacts &&
-                contacts.map((contact) => (
+                contacts?.map((contact) => (
                   <div
                     key={contact.contact_id}
                     className="flex items-center p-2 border-b last:border-0"

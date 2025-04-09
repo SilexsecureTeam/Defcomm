@@ -5,7 +5,7 @@ import SEOHelmet from '../engine/SEOHelmet';
 
 const DeffViewer = () => {
   const { fileUrl } = useParams();
-  const decodedFileUrl = fileUrl ? decodeURIComponent(fileUrl) : null;
+  const decodedFileUrl = fileUrl ? atob(fileUrl) : null;
 
   const viewerRef = useRef(null);
   const instanceRef = useRef(null);

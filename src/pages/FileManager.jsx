@@ -156,7 +156,12 @@ const FileManager = () => {
                                 />
                             )}
                             {activeTab === "Other File" && (
-                                <OtherFileTab files={fileData["Other File"]} />
+                                <OtherFileTab 
+                                files={fileData["Other File"]}
+                                onShare={(fileId) => {
+                                        setFileToShare(fileId);
+                                        setFileModalsDisplay({ ...fileModalsDisplay, isShareFileModal: true });
+                                    }} />
                             )}
                             {activeTab === "My File Requests" && (
                                 <MyFileRequestsTab fileRequests={fileData["My File Requests"]} />
