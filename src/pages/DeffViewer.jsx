@@ -25,7 +25,7 @@ const DeffViewer = () => {
         };
 
         if (decodedFileUrl) {
-          config.initialDoc = `/secure/${decodedFileUrl}`;
+          config.initialDoc = `${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`;
         } else {
           config.enableOfficeEditing = true;
         }
