@@ -6,11 +6,12 @@ import SEOHelmet from '../engine/SEOHelmet';
 const DeffViewer = () => {
   const { fileUrl } = useParams();
   const decodedFileUrl = fileUrl ? atob(fileUrl) : null;
-  const isProduction= import.meta.env.VITE_PROD ?? false
+  const isProduction = import.meta.env.VITE_PROD ?? false
   const viewerRef = useRef(null);
   const instanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  console.log("file url",`/api/proxy?url=${encodeURIComponent(`${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`)}`)
 
   useEffect(() => {
     let cancelled = false;
@@ -26,8 +27,8 @@ const DeffViewer = () => {
 
         if (decodedFileUrl) {
           config.initialDoc = isProduction
-    ? `/api/proxy?url=${encodeURIComponent(`${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`)}`
-    : `/secure/${decodedFileUrl}`; // still works locally via Vite proxy
+            ? `/api/proxy?url=${encodeURIComponent(`${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`)}`
+            : `/secure/${decodedFileUrl}`; // still works locally via Vite proxy
         } else {
           config.enableOfficeEditing = true;
         }
@@ -79,7 +80,7 @@ const DeffViewer = () => {
     <div className="w-full h-[80vh] relative">
 
       {/* SEO Content */}
-        <SEOHelmet title="Deffcomm File" />
+      <SEOHelmet title="Deffcomm File" />
       {loading && !error && (
         <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
           <span className="text-gray-600 font-medium">Loading document...</span>
