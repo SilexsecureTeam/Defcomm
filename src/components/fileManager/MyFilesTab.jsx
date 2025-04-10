@@ -53,7 +53,7 @@ return (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   className="bg-oliveDark px-3 py-2 text-sm flex items-center gap-1"
-                  onClick={() => onShare(file.id)}
+                  onClick={() => onShare(file?.id)}
                 >
                   <span><BsShare /></span>
                 </motion.button>

@@ -3,6 +3,9 @@ import { toast } from "react-toastify";
 import { axiosClient } from "../services/axios-client";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { onFailure } from "../utils/notifications/OnFailure";
+import { onSuccess } from "../utils/notifications/OnSuccess";
+import { extractErrorMessage } from "../utils/formmaters";
 
 const useFileManager = () => {
   const [fileContent, setFileContent] = useState("");
@@ -85,7 +88,7 @@ const useFileManager = () => {
       });
       setFileContent(res.data);
     } catch (error) {
-      toast.error("Failed to view file. Please try again.");
+      onFailure({ message: "Failed to view file", error: extractErrorMessage(err)});
       console.error(error);
     }
   };
@@ -97,38 +100,42 @@ const useFileManager = () => {
         id: fileId,
         users: JSON.stringify(selectedContacts),
       };
-      return client.post("/user/file/share", payload);
+      return client.post(`/user/file/share`, payload);
     },
     onSuccess: (data) => {
       toast.success(data.data.message || "File shared successfully!");
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to share file.");
+      onFailure({ message: "Failed to share file", error: extractErrorMessage(err)});
     },
   });
 
   // 🔹 Accept file
   const acceptFileMutation = useMutation({
     mutationFn: (fileId) => client.get(`/user/file/${fileId}/accept`),
-    onSuccess: (data) => {
-      toast.success(data.data.message || "File accepted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["myFiles"] });
-      queryClient.invalidateQueries({ queryKey: ["fileRequests"] });
+    onSuccess: async(data) => {
+      await refetchOtherFiles()
+      await refetchFileRequests()
+      await refetchPendingFileRequests()
+      onSuccess({ message: "File", success: "File accepted successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["otherFiles"] });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to accept file.");
+      onFailure({ message: "Failed to accept invitation", error: extractErrorMessage(err)});
     },
   });
 
   // 🔹 Decline file
   const declineFileMutation = useMutation({
     mutationFn: (fileId) => client.get(`/user/file/${fileId}/decline`),
-    onSuccess: (data) => {
-      toast.success(data.data.message || "File declined successfully!");
-      queryClient.invalidateQueries({ queryKey: ["fileRequests"] });
+    onSuccess: async (data) => {
+      await refetchOtherFiles()
+      await refetchFileRequests()
+      await refetchPendingFileRequests()
+      onSuccess({ message: "File", success: "File declined successfully!" });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to decline file.");
+      onFailure({ message: "Failed to decline invitation", error: extractErrorMessage(err)});
     },
   });
 
@@ -144,8 +151,8 @@ const useFileManager = () => {
     // 📥 File actions
     viewFile,
     shareFile: shareFileMutation.mutateAsync,
-    acceptFile: acceptFileMutation.mutate,
-    declineFile: declineFileMutation.mutate,
+    acceptFile: acceptFileMutation.mutateAsync,
+    declineFile: declineFileMutation.mutateAsync,
 
     // 🔄 Refetchers
     refetchMyFiles,
