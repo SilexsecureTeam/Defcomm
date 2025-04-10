@@ -11,7 +11,7 @@ const DeffViewer = () => {
   const instanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log("file url",`/api/proxy?url=${`${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`}`)
+  console.log("file url",`/api/proxy?url=${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`)
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +27,7 @@ const DeffViewer = () => {
 
         if (decodedFileUrl) {
           config.initialDoc = isProduction
-            ? `/api/proxy?url=${`${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`}`
+            ? `/api/proxy?url=${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`
             : `/secure/${decodedFileUrl}`; // still works locally via Vite proxy
         } else {
           config.enableOfficeEditing = true;
