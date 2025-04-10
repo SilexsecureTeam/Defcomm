@@ -26,7 +26,7 @@ const DeffViewer = () => {
 
         if (decodedFileUrl) {
           config.initialDoc = isProduction
-    ? `/API/proxy?url=${encodeURIComponent(`${import.meta.env.VITE_BASE_URL}secure${decodedFileUrl}`)}`
+    ? `/API/proxy?url=${encodeURIComponent(`${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`)}`
     : `/secure/${decodedFileUrl}`; // still works locally via Vite proxy
         } else {
           config.enableOfficeEditing = true;
