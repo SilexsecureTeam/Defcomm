@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing or invalid file URL' });
   }
 
-  const fileUrl = decodeURIComponent(url); // Decode the URL properly
+  const fileUrl =url; // Decode the URL properly
   console.log("file url",fileUrl)
   try {
     const response = await fetch(fileUrl);
