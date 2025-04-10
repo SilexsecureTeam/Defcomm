@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+limport type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { url } = req.query;
@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing or invalid file URL' });
   }
 
-  const fileUrl = `${import.meta.env.VITE_BASE_URL}secure/${url}`;
+  const fileUrl = decodeURIComponent(url); // Decode the URL properly
 
   try {
     const response = await fetch(fileUrl);
@@ -16,8 +16,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(response.status).json({ error: 'Failed to fetch document' });
     }
 
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/pdf');
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/pdf');
     response.body.pipe(res);
   } catch (error) {
     console.error('Proxy error:', error);
