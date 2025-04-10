@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const fileUrl = decodeURIComponent(url); // Decode the URL properly
-
+  console.log(fileUrl)
   try {
     const response = await fetch(fileUrl);
 
