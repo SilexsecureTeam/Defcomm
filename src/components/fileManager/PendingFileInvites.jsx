@@ -1,8 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaFile } from 'react-icons/fa6'
 import {CiSearch } from 'react-icons/ci'
 import defIcon from '../../assets/logo-icon.png'
+import PendingFileInvitationsTab from "./PendingFileInvitationsTab";
+import useFileManager from "../../hooks/useFileManager";
 const PendingFileInvites = () => {
+
+  const {
+    fileRequests,
+    refetchFileRequests,
+    shareFile,
+  } = useFileManager();
+
+  useEffect(() => {
+      refetchFileRequests();
+  }, []);
   
   return (
     <div className="bg-[#2a4b14] text-white p-4 mb-6">
@@ -15,33 +27,7 @@ const PendingFileInvites = () => {
           <input type="text" placeholder="Search File" className="flex-1 bg-transparent px-2 rounded-full placeholder:text-inherit focus:ring-0 focus:border-0 focus:outline-0" />
         </div>
       </section>
-      <div className="w-full overflow-x-auto">
-      <table className="w-full min-w-[700px] text-left">
-        <thead>
-          <tr className="text-sm border-b *:p-3">
-            <th>NAME</th>
-            <th>SIZE</th>
-            <th>INVITATION CODE</th>
-            <th>ACTION</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[1, 2].map((_, idx) => (
-            <tr key={idx} className="text-sm *:p-3">
-              <td className="flex items-center gap-2">
-                <img src={defIcon} alt="icon" className="w-8 h-8" />
-                Joshua Damilare
-              </td>
-              <td>10kb</td>
-              <td>XXXXXXXXXXXXXXX</td>
-              <td>
-                <button className="bg-oliveGreen font-medium text-black px-4 py-1">Actions</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      </div>
+      <PendingFileInvitationsTab invitations={fileRequests} />
     </div>
   );
 };

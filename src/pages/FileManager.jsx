@@ -35,7 +35,7 @@ const FileManager = () => {
         otherFiles, refetchOtherFiles, isFetching: fetchingOtherFiles,
         fileRequests, refetchFileRequests, isFetching: fetchingFileRequests,
         pendingFileRequests, refetchPendingFileRequests, isFetching: fetchingPendingFileRequests,
-        error, fileContent, viewFile, acceptFile, declineFile
+        error, fileContent, viewFile
     } = useFileManager();
 
 
@@ -43,15 +43,15 @@ const FileManager = () => {
     const fileData = {
         "My Files": myFiles,
         "Other File": otherFiles,
-        "My File Requests": fileRequests,
-        "Pending File Invitations": pendingFileRequests,
+        "My File Requests": pendingFileRequests,
+        "Pending File Invitations": fileRequests,
     };
 
     const refetchData = {
         "My Files": refetchMyFiles,
         "Other File": refetchOtherFiles,
-        "My File Requests": refetchFileRequests,
-        "Pending File Invitations": refetchPendingFileRequests,
+        "My File Requests": refetchPendingFileRequests,
+        "Pending File Invitations": refetchFileRequests,
     };
 
     const fetchingMap = {
@@ -151,8 +151,6 @@ const FileManager = () => {
                             {activeTab === "Pending File Invitations" && (
                                 <PendingFileInvitationsTab
                                     invitations={fileData["Pending File Invitations"]}
-                                    onAccept={acceptFile}
-                                    onDecline={declineFile}
                                 />
                             )}
                             {activeTab === "Other File" && (

@@ -1,47 +1,98 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { CgFileDocument } from 'react-icons/cg';
+import { BsEye, BsShare } from "react-icons/bs";
+import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
+import useFileManager from '../../hooks/useFileManager';
+import { FaSpinner } from 'react-icons/fa6';
+const PendingFileInvitationsTab = ({ invitations }) => {
+  const navigate = useNavigate();
+  const [loadingStates, setLoadingStates] = useState({});
 
-const PendingFileInvitationsTab = ({ invitations, onAccept, onDecline }) => (
-  <div>
-    <table className="w-full text-left">
-      <thead>
-        <tr className="border-b border-white/50 text-sm">
-          <th>Name</th>
-          <th>Invitation Date</th>
-          <th>Size</th>
-          <th>Uploaded By</th>
-          <th>Shared By</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {invitations.map((invitation, i) => (
-          <tr key={i} className="border-b border-white/50 text-sm">
-            <td>{invitation.file_name}</td>
-            <td>{invitation?.shared_date?.split('T')[0]}</td>
-            <td>{invitation.file_size}</td>
-            <td>{invitation.uploaded_by}</td>
-            <td>{invitation.shared_by}</td>
-            <td>
-              <div className="flex items-center">
-                <button
-                  className="bg-olive px-3 py-2 text-sm"
-                  onClick={() => onAccept(invitation.file_id)}
-                >
-                  Accept
-                </button>
-                <button
-                  className="bg-oliveDark px-3 py-2 text-sm"
-                  onClick={() => onDecline(invitation.file_id)}
-                >
-                  Decline
-                </button>
-              </div>
-            </td>
+  // Fetch myFiles and loading state from file manager
+  const { acceptFile, declineFile } = useFileManager();
+  const handleAccept = async (id) => {
+          setLoadingStates((prev) => ({ ...prev, [id]: "accepting" }));
+          try{
+              await acceptFile(id);
+          }finally{
+              setLoadingStates((prev) => ({ ...prev, [id]: null }));
+          }
+      };
+  
+      const handleDecline = async (id) => {
+          setLoadingStates((prev) => ({ ...prev, [id]: "declining" }));
+          try{
+              await declineFile(id);
+          }finally{
+              setLoadingStates((prev) => ({ ...prev, [id]: null }));
+          }
+      };
+
+  return (
+    <div className="w-full overflow-x-auto">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="border-b border-white/50 *:p-2 *:mx-2 *:min-w-24 text-sm">
+            <th></th>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Shared By</th>
+            <th>Shared Date</th>
+            <th>Action</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+        </thead>
+        <tbody>
+          {(Array.isArray(invitations) ? invitations : [])?.map((invitation, i) => (
+            <tr key={invitation?.file_id} className="border-b border-white/50 text-sm *:p-2 *:mx-2 ">
+              <td className="w-5">
+                <CgFileDocument size={30} className="text-gray-400 bg-white rounded-lg p-2" />
+              </td>
+              <td className="min-w-24">
+                <div>
+                  <p>{invitation?.file_name}</p>
+                  <span className="text-gray-500">{invitation?.file_upload_date?.split('T')[0]}</span>
+                </div>
+              </td>
+              {/* <td className="min-w-24">
+              <div className="flex gap-3 items-center">
+                <span className={`${invitation?.file_ext === "pdf" ? "bg-green-500" : "bg-black"} w-3 h-3 rounded-full border-[2px] border-white`}></span>
+                <p >{invitation?.file_ext}</p>
+              </div>
+            </td> */}
+              <td className="min-w-24">{invitation?.file_size}</td>
+              <td className="min-w-24">{invitation?.shared_by}</td>
+              <td className="min-w-24">{invitation?.shared_date?.split('T')[0]}</td>
+              <td className="min-w-24">
+                <div className="flex gap-2 font-medium">
+                  <button
+                    onClick={() => handleAccept(invitation?.id)}
+                    className="bg-oliveLight hover:bg-oliveDark text-oliveHover px-4 py-2 rounded-lg flex items-center gap-2"
+                    disabled={loadingStates[invitation?.id] === "accepting"}
+                  >
+                    {loadingStates[invitation?.id] === "accepting" && (
+                      <FaSpinner className="animate-spin text-oliveHover" />
+                    )}
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleDecline(invitation?.id)}
+                    className="bg-red-500 hover:bg-red-600 text-red-100 px-4 py-2 rounded-lg flex items-center gap-2"
+                    disabled={loadingStates[invitation?.id] === "declining"}
+                  >
+                    {loadingStates[invitation?.id] === "declining" && (
+                      <FaSpinner className="animate-spin text-red-100" />
+                    )}
+                    Decline
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+};
 
 export default PendingFileInvitationsTab;
