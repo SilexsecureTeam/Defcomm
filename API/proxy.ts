@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing or invalid file URL' });
   }
 
-  const fileUrl = `https://dash.defcomm.ng/secure/${encodeURIComponent(url)}`;
+  const fileUrl = `${import.meta.env.VITE_BASE_URL}secure/${url}`;
 
   try {
     const response = await fetch(fileUrl);
