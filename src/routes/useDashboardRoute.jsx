@@ -33,6 +33,7 @@ const Settings = lazy(() => import("../pages/Settings"));
 const ContactPage = lazy(() => import("../pages/ContactList"));
 const WalkieTalkie= lazy(() => import("../pages/WalkieTalkie"));
 const DeffViewer= lazy(() => import("../pages/DeffViewer"));
+const PDFViewer= lazy(() => import("../components/fileManager/pdfViewer/PdfViewer"));
 const FileDashboard = lazy(() => import("../pages/FileDashboard"));
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -132,6 +133,7 @@ function useDashBoardRoute() {
                     <Route path="/home" element={<Home />} />
                     <Route path="/chat" element={<ChatInterface />} />
                     <Route path="/new-file" element={<DeffViewer />} />
+                    <Route path="/view/:fileId" element={<PDFViewer />} />
                     <Route path="/file-view/:fileUrl" element={<DeffViewer />} />
                     <Route path="/contacts" element={<ContactPage />} />
                     <Route path="/file-manager" element={<FileManager />} />

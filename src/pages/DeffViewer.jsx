@@ -11,7 +11,6 @@ const DeffViewer = () => {
   const instanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log("file url",`/api/proxy?url=${import.meta.env.VITE_BASE_URL}secure/${decodedFileUrl}`)
 
   useEffect(() => {
     let cancelled = false;
