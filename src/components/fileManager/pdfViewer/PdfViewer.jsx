@@ -18,8 +18,7 @@ const PdfViewer = () => {
           {
             headers: {
               Authorization: `Bearer ${authDetails?.access_token}`,
-              Accept: 'text/html',
-            },
+            }
           }
         );
 
@@ -28,6 +27,8 @@ const PdfViewer = () => {
         }
 
         const htmlText = await response.text();
+
+        // Create a Blob from the HTML content
         const blob = new Blob([htmlText], { type: 'text/html' });
         const blobUrl = URL.createObjectURL(blob);
         setIframeSrc(blobUrl);
@@ -42,7 +43,7 @@ const PdfViewer = () => {
 
     return () => {
       if (iframeSrc) {
-        URL.revokeObjectURL(iframeSrc);
+        URL.revokeObjectURL(iframeSrc); // Clean up the blob URL
       }
     };
   }, [fileId]);
@@ -63,11 +64,13 @@ const PdfViewer = () => {
         </div>
       )}
 
+      {/* Embed the Blob URL inside an iframe */}
       {!loading && !error && iframeSrc && (
         <iframe
           src={iframeSrc}
           title="PDF Viewer"
           className="w-full h-full border-none"
+          sandbox="allow-scripts allow-same-origin"
         ></iframe>
       )}
     </div>
