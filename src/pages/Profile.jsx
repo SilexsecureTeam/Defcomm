@@ -225,8 +225,8 @@ const Profile = () => {
                   {field.name === "email" && <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />}
                 </motion.div>
                 {field.name === "email" && (
-                  <p className="text-yellow-600 text-sm mt-1 flex items-center gap-2">
-                    <MdSecurity size={16} /> {field.warning}
+                  <p className="!text-yellow-600 text-sm mt-1 flex items-center gap-2">
+                    <MdSecurity size={16} className="flex-shrink-0" /> {field.warning}
                   </p>
                 )}
               </section>
