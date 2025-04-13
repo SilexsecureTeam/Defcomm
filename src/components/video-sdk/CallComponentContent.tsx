@@ -178,7 +178,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     }, [isMeetingActive, localMicOn]);
 
     return (
-        <div className="flex flex-col items-center bg-olive/30 p-5">
+        <div className="flex flex-col items-center bg-olive p-5">
 
             {!isMeetingActive ? (
                 <div className="py-10 w-80 md:w-96 rounded-lg flex flex-col items-center">

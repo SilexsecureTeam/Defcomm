@@ -214,10 +214,10 @@ const Profile = () => {
                 <label className="text-gray-600 text-sm px-3 flex items-center gap-3">
                   <LuNotebookText size={18} /> {field.label} {field?.sample}
                 </label>
-                <motion.div className={`relative ${field.name === "email" ? "pl-5":""}`}>
+                <motion.div className={`relative ${field.name === "email" ? "pl-5" : ""}`}>
                   <motion.input
                     type={field.type}
-                    className={`w-full p-3 rounded-lg bg-transparent text-xl md:text-2xl font-bold focus:outline-none ${field.readOnly ? "cursor-not-allowed opacity-70" : isEditing ?  "cursor-text" : "cursor-default"}`}
+                    className={`w-full p-3 rounded-lg bg-transparent text-xl md:text-2xl font-bold focus:outline-none ${field.readOnly ? "cursor-not-allowed opacity-70" : isEditing ? "cursor-text" : "cursor-default"}`}
                     value={field.value}
                     onChange={(e) => field.onChange?.(e.target.value)}
                     readOnly={field.name === "email" ? true : !isEditing}
@@ -277,17 +277,17 @@ const Profile = () => {
         {/* 2FA Toggle */}
         <div className="relative group">
           <div className="flex items-center justify-between px-3 opacity-80">
-          <label className="text-gray-600 text-sm flex items-center gap-3">
-            <MdSecurity size={18} />Two-Factor Authentication (2FA)
-          </label>
-          <ToggleSwitch isChecked={enable2FA} onToggle={() => {}} />
-          
-        </div>
+            <label className="text-gray-600 text-sm flex items-center gap-3">
+              <MdSecurity size={18} />Two-Factor Authentication (2FA)
+            </label>
+            <ToggleSwitch isChecked={enable2FA} onToggle={() => { }} />
+
+          </div>
 
           {/* Tooltip */}
-    <div style={{ color: "rgb(202, 138, 4)" }} className="bg-[#FEF3C7] absolute -bottom-10 right-0 text-yellow-700 text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 w-[200px]">
-      2FA must always be enabled for your security.
-    </div>
+          <div className="font-bold text-[#ddc20f] bg-[#ceb51128] absolute -bottom-10 right-8 text-yellow-700 text-xs p-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 w-[200px]">
+            2FA must always be enabled for your security.
+          </div>
         </div>
 
         {/* Save / Cancel Buttons */}

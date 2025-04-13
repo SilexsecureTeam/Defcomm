@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import SEOHelmet from "../engine/SEOHelmet";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiPhone, FiVideo } from "react-icons/fi";
 import { IoFilter } from "react-icons/io5";
 import defIcon from "../assets/logo-icon.png";
 import useChat from "../hooks/useChat";
@@ -31,12 +31,12 @@ const ContactList = () => {
     }
 
     const filteredContacts = Array.isArray(contacts)
-    ? contacts.filter(contact =>
-        contact?.contact_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact?.contact_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact?.contact_phone?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    : [];
+        ? contacts.filter(contact =>
+            contact?.contact_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            contact?.contact_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            contact?.contact_phone?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : [];
 
     return (
         <motion.div
@@ -57,12 +57,12 @@ const ContactList = () => {
                     {/* Search Input */}
                     <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="flex-1 relative w-60 text-gray-800"
+                        className="flex-1 relative max-w-60 text-gray-800"
                     >
                         <input
                             type="text"
                             value={searchQuery}
-                            onChange={(e)=> setSearchQuery(e.target.value)}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search..."
                             className="text-sm p-2 rounded-lg focus:outline-none w-full pl-10 transition-all duration-300 border border-gray-300 focus:ring-2 focus:ring-oliveHover"
                         />
@@ -151,13 +151,24 @@ const ContactList = () => {
                                     <td className="p-3">{maskContactInfo(contact?.contact_phone)}</td>
                                     <td className="p-3">{maskContactInfo(contact?.contact_email)}</td>
                                     {/* <td className="p-3">{contact?.lastLogin || "16 Mar 2022"}</td> */}
-                                    <td className="p-3">
+                                    <td className="p-3 flex gap-2">
                                         <motion.button
-                                            whileHover={{ scale: 1.2 }}
-                                            transition={{ type: "spring", stiffness: 200 }}
-                                            className="text-gray-500 hover:text-gray-700 transition-all duration-200"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            title="Call"
+                                            className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
+                                            onClick={() => console.log("Call", contact)}
                                         >
-                                            <MdMoreHoriz />
+                                            <FiPhone />
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            title="Video Call"
+                                            className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
+                                            onClick={() => console.log("Video Call", contact)}
+                                        >
+                                            <FiVideo />
                                         </motion.button>
                                     </td>
                                 </motion.tr>
