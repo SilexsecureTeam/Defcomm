@@ -275,12 +275,19 @@ const Profile = () => {
         </div>
 
         {/* 2FA Toggle */}
-        <div className="flex items-center justify-between px-3 opacity-80">
+        <div className="relative group">
+          <div className="flex items-center justify-between px-3 opacity-80">
           <label className="text-gray-600 text-sm flex items-center gap-3">
             <MdSecurity size={18} /> Enable 2-Factor Authentication
           </label>
           <ToggleSwitch isChecked={enable2FA} onToggle={() => {}} />
           
+        </div>
+
+          {/* Tooltip */}
+    <div className="absolute -top-10 right-0 bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 w-[200px]">
+      2FA must always be enabled for your security.
+    </div>
         </div>
 
         {/* Save / Cancel Buttons */}
