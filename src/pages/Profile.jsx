@@ -93,7 +93,7 @@ const Profile = () => {
     formData.append("email", email);
     formData.append("phone", phone);
     formData.append("address", address);
-    formData.append("enable_2fa", enable2FA ? 1 : 0);
+    formData.append("enable_2fa", 1);
 
     if (profileImage) formData.append("avatar", profileImage);
 
@@ -114,7 +114,7 @@ const Profile = () => {
       setEmail(user?.email || "");
       setPhone(user?.phone || "");
       setAddress(user?.address || "");
-      setEnable2FA(user?.enable_2fa == 0 ? false : true);
+      setEnable2FA(true);
       setPreviewImage(user?.avatar ? `${import.meta.env.VITE_BASE_URL}${user?.avatar}` : "");
     }
   }, [user]);
@@ -275,14 +275,11 @@ const Profile = () => {
         </div>
 
         {/* 2FA Toggle */}
-        <div className="flex items-center justify-between px-3">
+        <div className="flex items-center justify-between px-3 opacity-80">
           <label className="text-gray-600 text-sm flex items-center gap-3">
             <MdSecurity size={18} /> Enable 2-Factor Authentication
           </label>
-          <ToggleSwitch isChecked={enable2FA} onToggle={() => {
-            setIsEditing(true); // Show the Save/Cancel buttons when toggled
-            setEnable2FA(!enable2FA)
-            }} />
+          <ToggleSwitch isChecked={enable2FA} onToggle={() => {}} />
           
         </div>
 
