@@ -285,7 +285,7 @@ const Profile = () => {
         </div>
 
           {/* Tooltip */}
-    <div style={{ color: "rgb(202, 138, 4)" }} className="bg-yellow-200 absolute -bottom-10 right-0 text-yellow-700 text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 w-[200px]">
+    <div style={{ color: "rgb(202, 138, 4)" }} className="bg-[#FEF3C7] absolute -bottom-10 right-0 text-yellow-700 text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 w-[200px]">
       2FA must always be enabled for your security.
     </div>
         </div>
