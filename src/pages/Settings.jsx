@@ -14,7 +14,7 @@ const Settings = () => {
     ];
 
     return (
-        <div className="relative w-[90vw] md:w-[700px] lg:w-full h-[80vh] mx-auto bg-white shadow-md p-6 md:flex overflow-y-auto">
+        <div className="relative w-screen md:w-[700px] lg:w-full h-[80vh] mx-auto bg-white shadow-md p-3 md:p-6 md:flex overflow-y-auto">
             {/* Sidebar */}
             <div className="w-full md:w-max border-b border-r-0 md:border-r md:border-b-0 p-4 md:sticky md:top-0 overflow-y-auto">
                 <h3 className="text-gray-700 font-semibold mb-4">PROFILE</h3>
