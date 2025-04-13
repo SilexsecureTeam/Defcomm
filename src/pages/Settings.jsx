@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MessageSettings from "../components/settings/MessageSettings";
+import Profile from "./Profile";
 
 const Settings = () => {
     const [setting, setSetting] = useState("message");
 
     const features = [
+        { label: "Profile", key: "profile" },
         { label: "Notification", key: "notification" },
         { label: "Set 2FA", key: "2FA" },
         { label: "Message Reading Pattern", key: "message" },
     ];
 
     return (
-        <div className="w-[90vw] md:w-[700px] lg:w-full h-max mx-auto bg-white shadow-md p-6 md:flex">
+        <div className="relative w-[90vw] md:w-[700px] lg:w-full h-[80vh] mx-auto bg-white shadow-md p-6 md:flex overflow-y-auto">
             {/* Sidebar */}
-            <div className="w-full md:w-max border-b border-r-0 md:border-r md:border-b-0 p-4">
+            <div className="w-full md:w-max border-b border-r-0 md:border-r md:border-b-0 p-4 md:sticky md:top-0 overflow-y-auto">
                 <h3 className="text-gray-700 font-semibold mb-4">PROFILE</h3>
                 <div className="space-y-4">
                     {features.map((feature) => (
@@ -42,17 +44,27 @@ const Settings = () => {
             </div>
 
             {/* Content Area */}
-            <div className="w-full md:w-2/3 flex-1 p-4">
+            <div className="w-full md:w-2/3 flex-1 p-4 ">
                 <AnimatePresence mode="wait">
                     {setting === "message" ? (
                         <motion.div
-                            key="messageSettings"
+                            key={setting?.key}
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -50 }}
                             transition={{ duration: 0.3 }}
                         >
                             <MessageSettings />
+                        </motion.div>
+                    ) : setting === "profile" ? (
+                        <motion.div
+                            key={setting?.key}
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -50 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Profile />
                         </motion.div>
                     ) : (
                         <motion.div

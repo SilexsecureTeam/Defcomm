@@ -19,7 +19,7 @@ function MessageSettings() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full p-3 md:p-6 ">
       <h3 className="text-gray-700 font-bold mb-4">Message Setting</h3>
 
       {/* Setting Items */}
