@@ -8,18 +8,29 @@ export const ChatProvider = ({ children }) => {
 
     const [selectedChatUser, setSelectedChatUser] = useState(null);
     const [chatVisibility, setChatVisibility] = useState(initialVisibility);
-
+    const [showCall, setShowCall] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [meetingId, setMeetingId] = useState(false);
     // Store the boolean value correctly when it changes
     useEffect(() => {
         sessionStorage.setItem("chatVisibility", JSON.stringify(chatVisibility));
     }, [chatVisibility]);
+
+//     useEffect(()=>{
+// console.log(selectedChatUser)
+//     },[selectedChatUser])
+
 
     return (
         <ChatContext.Provider value={{ 
             selectedChatUser, 
             setSelectedChatUser, 
             setChatVisibility, 
-            chatVisibility 
+            chatVisibility,
+            showCall, setShowCall,
+            showSettings, setShowSettings,
+            meetingId, setMeetingId
+
         }}>
             {children}
         </ChatContext.Provider>

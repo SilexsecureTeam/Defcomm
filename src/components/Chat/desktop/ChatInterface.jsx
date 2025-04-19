@@ -11,10 +11,14 @@ import CallComponent from "../../video-sdk/CallComponent";
 import Modal from "../../modal/Modal";
 import ChatMessage from "../ChatMessage"; // Import the new Message component
 import { FaCog } from "react-icons/fa";
+import Settings from "../../../pages/Settings";
 
-const ChatInterface = ({desktop}) => {
-    const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
-    const [meetingId, setMeetingId] = useState(false);
+const ChatInterface = ({ desktop }) => {
+    const { 
+        selectedChatUser, setSelectedChatUser, 
+        setShowCall,
+        setShowSettings,
+        setMeetingId } = useContext(ChatContext);
     const { fetchChatMessages } = useChat();
     const messageRef = useRef(null);
 
@@ -73,7 +77,6 @@ const ChatInterface = ({desktop}) => {
 
                 {selectedChatUser && <SendMessage messageData={messages?.chat_meta} />}
             </div>
-    
         </div>
     );
 };

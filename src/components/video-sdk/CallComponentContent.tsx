@@ -134,8 +134,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
         setIsLoading(true);
         try {
-            await join();
-
             await sendMessageUtil({
                 client,
                 message: `CALL_INVITE:${meetingId}`,
@@ -145,6 +143,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 chat_id: messageData.chat_id,
                 sendMessageMutation,
             });
+
+            await join();
 
         } catch (error: any) {
             setIsLoading(false);

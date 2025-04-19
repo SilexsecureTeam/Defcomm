@@ -14,10 +14,18 @@ import SideBarTwo from "../components/dashboard/SideBarTwo";
 import SideBarItem from "../components/dashboard/SideBarItem";
 import SideBarItemTwo from "../components/dashboard/SideBarItemTwo";
 import NavBar from "../components/dashboard/NavBar";
+import Modal from '../components/modal/Modal'
+import CallComponent from '../components/video-sdk/CallComponent'
+import Settings from '../pages/Settings'
+
 
 const DashboardWrapper = ({children}) => {
     const { authDetails } = useContext(AuthContext);
-    const { setSelectedChatUser } = useContext(ChatContext);
+     const { 
+        setSelectedChatUser, 
+        showCall,setShowCall,
+        showSettings,
+        meetingId, setMeetingId} = useContext(ChatContext);
     const { state, dispatch } = useContext(DashboardContext);
     const { fetchContacts } = useChat();
     const { pathname } = useLocation();
@@ -60,6 +68,7 @@ const DashboardWrapper = ({children}) => {
     }, [pathname]);
 
     if (authDetails?.user?.role !== "user") return null;
+
 
     return (
         
@@ -123,6 +132,17 @@ const DashboardWrapper = ({children}) => {
 
                     </div>
                 </div>
+
+                {showCall && (
+                <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
+                    <CallComponent initialMeetingId={meetingId} setInitialMeetingId={setMeetingId} />
+                </Modal>
+            )}
+            {showSettings &&
+                <Modal isOpen={showSettings} closeModal={() => setShowSettings(false)}>
+                    <Settings />
+                </Modal>
+            }
             </main>
     );
 };

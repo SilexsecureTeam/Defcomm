@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import SEOHelmet from "../engine/SEOHelmet";
 import { FiSearch, FiPhone, FiVideo } from "react-icons/fi";
@@ -10,9 +10,16 @@ import { FaPlus } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import AddContactInterface from "../components/dashboard/AddContactInterface";
 import Modal from "../components/modal/Modal";
+import { ChatContext } from "../context/ChatContext";
 
 const ContactList = () => {
     // State for modal and selected group
+    const {
+        selectedChatUser, setSelectedChatUser,
+        showCall, setShowCall,
+        showSettings, setShowSettings,
+        meetingId, setMeetingId } = useContext(ChatContext);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -25,6 +32,20 @@ const ContactList = () => {
         staleTime: 0,
     });
 
+    const handleCall = (user) => {
+
+        setSelectedChatUser(
+            {
+                ...user,
+                chat_meta: {
+                    chat_user_type: user?.contact_type || "user",
+                    chat_user_id: user.contact_id,
+                    chat_id: "null",
+                }
+            }
+        );
+        setShowCall(true)
+    }
     function maskContactInfo(contactInfo) {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(contactInfo) ? contactInfo.replace(/^(.{8}).*?@/g, '$1xxxx@xxx.') : contactInfo.slice(0, -8) + 'X'.repeat(8);
@@ -157,7 +178,7 @@ const ContactList = () => {
                                             whileTap={{ scale: 0.95 }}
                                             title="Call"
                                             className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
-                                            onClick={() => console.log("Call", contact)}
+                                            onClick={() => handleCall(contact)}
                                         >
                                             <FiPhone />
                                         </motion.button>

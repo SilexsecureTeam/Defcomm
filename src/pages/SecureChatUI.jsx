@@ -2,11 +2,18 @@ import Sidebar from "../components/Chat/desktop/Sidebar";
 import ChatList from "../components/Chat/desktop/ChatList";
 import ChatHeader from "../components/Chat/desktop/ChatHeader";
 import MessageArea from "../components/Chat/desktop/MessageArea";
-import MessageInput from "../components/Chat/desktop/MessageInput";
 import RightPanel from "../components/Chat/desktop/RightPanel";
-import SendMessage from "../components/Chat/SendMessage";
+import Modal from '../components/modal/Modal'
+import CallComponent from '../components/video-sdk/CallComponent'
+import Settings from '../pages/Settings'
+import { useContext } from "react";
+import { ChatContext } from "../context/ChatContext";
 
 export default function SecureChatUI() {
+    const {
+        showCall, setShowCall,
+        showSettings, setShowSettings,
+        meetingId, setMeetingId } = useContext(ChatContext);
     return (
         <div className="flex h-screen text-white bg-gradient-to-b from-oliveLight to-black"
             style={{
@@ -21,6 +28,17 @@ export default function SecureChatUI() {
                 <MessageArea />
             </div>
             <RightPanel />
+
+            {showCall && (
+                <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
+                    <CallComponent initialMeetingId={meetingId} setInitialMeetingId={setMeetingId} />
+                </Modal>
+            )}
+            {showSettings &&
+                <Modal isOpen={showSettings} closeModal={() => setShowSettings(false)}>
+                    <Settings />
+                </Modal>
+            }
         </div>
     );
 }
