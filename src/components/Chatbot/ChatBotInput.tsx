@@ -37,7 +37,7 @@ function ChatBotInput() {
 
     try {
       const response = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
+        import.meta.env.VITE_BOT_URL,
         {
           model: "openai/gpt-4o",
           messages: [{ role: "user", content: message }],
@@ -45,7 +45,7 @@ function ChatBotInput() {
         },
         {
           headers: {
-            Authorization: "Bearer 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",
+            Authorization: `Bearer ${import.meta.env.VITE_BOT_KEY}`,
             "Content-Type": "application/json",
           },
         }
