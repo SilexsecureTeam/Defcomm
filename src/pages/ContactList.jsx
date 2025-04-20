@@ -144,7 +144,7 @@ const ContactList = () => {
                     transition={{ duration: 0.5 }}
                     className="overflow-x-auto"
                 >
-                    <table className="min-w-[700px] w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <table className="min-w-[700px] w-full bg-white text-black border border-gray-200 rounded-lg shadow-sm">
                         <thead>
                             <tr className="bg-gray-50 text-left">
                                 <th className="p-3">Name</th>
