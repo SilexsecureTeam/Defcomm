@@ -25,16 +25,16 @@ function MessageSettings() {
       {/* Setting Items */}
       <div className="space-y-4">
         {[
-          { label: "Drag to read", key: "dragToRead" },
-          { label: "Double Click to Read", key: "doubleClickToRead" },
-          { label: "Press and Hold to Read", key: "pressAndHoldToRead" },
-          { label: "Chat Visibility", key: "visibility" },
-        ].map(({ label, key }) => (
+          { label: "Drag to read", key: "dragToRead", content:"A messaging interactive feature that lets users reveal more content by dragging a handle" },
+          { label: "Double Click to Read", key: "doubleClickToRead", content:"Allows users to access full content or detailed information by double-clicking on a preview" },
+          { label: "Press and Hold to Read", key: "pressAndHoldToRead", content:"Lets users access additional content by long-pressing on an item. It's a quick way to reveal more information" },
+          { label: "Chat Visibility", key: "visibility", content:"Controls who can see your chat conversations and when they appear" },
+        ].map(({ label, key, content }) => (
           <div key={key} className="flex items-center gap-3 justify-between">
             <div>
               <h4 className="text-sm text-gray-800 font-medium">{label}</h4>
               <p className="text-gray-500 text-sm mt-2">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                {content}
               </p>
             </div>
             <ToggleSwitch

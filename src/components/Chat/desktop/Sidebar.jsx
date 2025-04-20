@@ -1,5 +1,5 @@
 import mainLogo from "../../../assets/logo-icon.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BiSolidMessageSquareDetail } from "react-icons/bi";
 import { RiGroup3Line } from "react-icons/ri";
 import { AiOutlineVideoCamera } from "react-icons/ai";
@@ -8,6 +8,7 @@ import { useContext, useState } from "react";
 import { ChatContext } from "../../../context/ChatContext";
 
 export default function Sidebar() {
+    const navigate= useNavigate()
     const [active, setActive] = useState('msg');
     const { setShowSettings, setShowCall } = useContext(ChatContext);
 
@@ -20,7 +21,7 @@ export default function Sidebar() {
                 // your logic for messages
                 break;
             case 'group':
-                console.log("Group clicked");
+                navigate('/dashboard/groups')
                 break;
             case 'video':
                 setShowCall(true);
@@ -29,7 +30,7 @@ export default function Sidebar() {
                 setShowCall(true);
                 break;
             case 'calendar':
-                console.log("Calendar clicked");
+                navigate('/dashboard/file-sharing')
                 break;
             case 'settings':
                 setShowSettings(true);

@@ -7,17 +7,17 @@ const Settings = () => {
     const [setting, setSetting] = useState("message");
 
     const features = [
-        { label: "Profile", key: "profile" },
-        { label: "Notification", key: "notification" },
-        { label: "Set 2FA", key: "2FA" },
-        { label: "Message Reading Pattern", key: "message" },
+        { label: "Profile", key: "profile", content:"View and edit your profile experience and manage their identity across the platform." },
+        { label: "Notification", key: "notification", content:"Let users control how and when they receive alerts from the app." },
+        { label: "Set 2FA", key: "2FA", content:"Adds an extra layer of security to user accounts by requiring a second form of verification in addition to a password." },
+        { label: "Message Reading Pattern", key: "message", content:"Allows users to efine when and how messages are read and decrypted based on a set pattern or schedule." },
     ];
 
     return (
-        <div className="relative w-[90vw] md:w-[700px] lg:w-[1000px] h-[80vh] mx-auto bg-white shadow-md p-3 md:p-6 md:flex overflow-y-auto">
+        <div className="relative w-full lg:w-[1000px] h-[80vh] mx-auto bg-white shadow-md p-3 lg:p-6 lg:flex overflow-y-auto">
             {/* Sidebar */}
-            <div className="w-full md:w-max border-b border-r-0 md:border-r md:border-b-0 p-4 md:sticky md:top-0 overflow-y-auto">
-                <h3 className="text-gray-700 font-semibold mb-4">PROFILE</h3>
+            <div className="w-full lg:w-1/3 border-b border-r-0 lg:border-r lg:border-b-0 p-4 lg:sticky lg:top-0 overflow-y-auto">
+                <h3 className="text-gray-700 font-semibold mb-4">SETTINGS</h3>
                 <div className="space-y-4">
                     {features.map((feature) => (
                         <motion.div
@@ -36,7 +36,7 @@ const Settings = () => {
                             />
                             <div>
                                 <h4 className="text-sm text-gray-800 font-medium">{feature.label}</h4>
-                                <p className="text-gray-500 text-sm mt-1">Lorem ipsum dolor sit amet</p>
+                                <p className="text-gray-500 text-sm mt-1">{feature?.content}</p>
                             </div>
                         </motion.div>
                     ))}
@@ -44,7 +44,7 @@ const Settings = () => {
             </div>
 
             {/* Content Area */}
-            <div className="w-full md:w-2/3 flex-1 p-4 ">
+            <div className="w-full lg:w-2/3 flex-1 p-4 ">
                 <AnimatePresence mode="wait">
                     {setting === "message" ? (
                         <motion.div
