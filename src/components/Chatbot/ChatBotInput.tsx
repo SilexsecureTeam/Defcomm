@@ -126,7 +126,7 @@ function ChatBotInput() {
       </div>
 
       <small className="max-w-[90%] text-[10px] md:text-xs text-gray-600 dark:text-gray-200 text-center font-bold mt-2 md:tracking-[1px] mx-auto">
-        ChatMate can make mistakes. Consider checking important information.
+        Defcomm AI Chatbot: All information provided is sourced from and recorded in the Military Archive.
       </small>
     </div>
   );
