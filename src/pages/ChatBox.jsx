@@ -17,7 +17,7 @@ const ChatBox = () => {
       {/* Header Section */}
       <div className="sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4 text-sm font-medium dark:bg-oliveLight">
         <button className="bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg flex items-center gap-2 px-3 py-2 border border-olive transition-all hover:scale-105">
-          <IoFlash className="text-yellow" /> <span className="hidden md:block">Upgrade to Premium</span>
+          <IoFlash className="text-yellow" /> <span className="hidden md:block">Switch to Advance  AI</span>
         </button>
 
         <p className="px-3 truncate">{activeConversation?.title}</p>
