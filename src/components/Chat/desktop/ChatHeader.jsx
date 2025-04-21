@@ -21,7 +21,7 @@ export default function ChatHeader() {
                     </figure>
                     <div>
                         <div className="font-semibold capitalize">{selectedChatUser?.contact_name}</div>
-                        <div className="text-green-400 text-sm">Typing...</div>
+                        {/* <div className="text-green-400 text-sm">Typing...</div> */}
                     </div>
                 </div> :
                 <p className="font-bold text-lg">Chat</p>}

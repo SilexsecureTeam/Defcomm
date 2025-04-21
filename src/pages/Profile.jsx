@@ -17,7 +17,7 @@ import { FaLock, FaSpinner } from "react-icons/fa";
 import { onFailure } from "../utils/notifications/OnFailure";
 import SEOHelmet from "../engine/SEOHelmet";
 import ToggleSwitch from "../components/ToggleSwitch";
-
+import {maskPhone, maskEmail} from '../utils/formmaters'
 const Profile = () => {
   const { profile, isLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -138,13 +138,6 @@ const Profile = () => {
     if (isEditing) handleEdit();
   }, [isEditing]);
 
-  const maskEmail = (email) => {
-    if (!email) return "";
-    const [name, domain] = email.split("@");
-    return isEditing ? email : `${name.slice(0, 3)}****@${domain}`;
-  };
-
-  const maskPhone = (phone) => phone.replace(/\d(?=\d{4})/g, "*");
 
   return (
     <motion.div className="p-3 md:p-6 w-full rounded-lg mb-5 bg-white" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -209,7 +202,7 @@ const Profile = () => {
           }
         ].map((field, index) => (
           <div key={index}>
-            <motion.div className="relative border-b border-gray-300 py-4 md:py-8 group flex justify-between items-center">
+            <motion.div className="relative border-b border-gray-300 py-4 text-black md:py-8 group flex justify-between items-center">
               <section className="flex-1">
                 <label className="text-gray-600 text-sm px-3 flex items-center gap-3">
                   <LuNotebookText size={18} /> {field.label} {field?.sample}
@@ -233,7 +226,7 @@ const Profile = () => {
 
               <AnimatePresence>
                 {!isEditing && field.name !== "email" && (
-                  <motion.button className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-white flex items-center gap-2 mx-3 rounded-lg px-3 py-2" whileHover={{ scale: 1.1 }} onClick={handleEdit}>
+                  <motion.button className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity bg-olive text-white flex items-center gap-2 mx-3 rounded-lg px-3 py-2" whileHover={{ scale: 1.1 }} onClick={handleEdit}>
                     <MdEdit size={20} /> <span className="hidden md:block">Edit</span>
                   </motion.button>
                 )}

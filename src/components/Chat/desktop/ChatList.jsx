@@ -1,12 +1,13 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import logoIcon from "../../../assets/logo-icon.png";
 import { ChatContext } from "../../../context/ChatContext"; // Import Chat Context
 import useChat from "../../../hooks/useChat";
 import { useQuery } from "@tanstack/react-query";
-
+import {maskPhone} from '../../../utils/formmaters'
 export default function ChatList() {
     const { setSelectedChatUser, selectedChatUser } = useContext(ChatContext); // Use context
     const { fetchContacts } = useChat();
+    const [search, setSearch]= useState("");
     const navigateToChat = (data) => {
         setSelectedChatUser(data); // Save selected user to context
     };
@@ -16,6 +17,9 @@ export default function ChatList() {
         queryFn: fetchContacts,
         staleTime: 0,
     });
+    const filteredContact=contacts?.filter(item=>(
+        item?.contact_name?.toLowerCase().includes(search?.toLowerCase())
+    ))
     const messages = [
         ["Jason Susanto", "Image Sent", ""],
         ["JJ Jinggg", "", "2"],
@@ -32,15 +36,19 @@ export default function ChatList() {
         <div className="w-72 p-4 bg-transparent space-y-4 overflow-y-auto">
             <h2 className="text-2xl font-semibold">Chat</h2>
             <input
-                className="w-full rounded-lg px-4 py-2 bg-green-900 text-white placeholder:text-green-300"
+            value={search}
+            onChange={(e)=>setSearch(e.target.value)}
+                className="w-full rounded-lg px-4 py-2 font-medium text-sm bg-gray-300 text-black placeholder:text-gray-700"
                 placeholder="Search people or message..."
             />
             <div>
                 <h3 className="text-sm text-green-400 mb-2">Online</h3>
-                <div className="flex space-x-2">
-                    {[...Array(5)].map((_, i) => (
-                        <div key={i} className="relative">
-                            <div className="w-10 h-10 bg-gray-300 rounded-full" />
+                <div className="flex space-x-2 overflow-x-auto">
+                    {filteredContact?.map((contact, i) => (
+                        <div key={contact?.id} className="relative">
+                            <div className="w-10 h-10 bg-gray-300 rounded-full text-gray-700 font-medium uppercase flex items-center justify-center text-lg" >
+                               { contact?.contact_name?.slice(0,2)}
+                            </div>
                             <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border-2 border-black" />
                         </div>
                     ))}
@@ -48,7 +56,7 @@ export default function ChatList() {
             </div>
 
             <div className="space-y-4">
-                {contacts?.map((data) => (
+                {filteredContact?.map((data) => (
                     <div
                         key={data?.id}
                         onClick={()=>navigateToChat(data)}
@@ -64,8 +72,8 @@ export default function ChatList() {
                                 } w-3 h-3 absolute bottom-[-2%] right-[5%] rounded-full border-[2px] border-white`}></span>
                         </figure>
                         <div>
-                            <p className="text-sm">{data?.contact_name}</p>
-                            <small className="text-sm">{data?.contact_phone}</small>
+                            <p className="text-sm capitalize">{data?.contact_name}</p>
+                            <small className="text-sm">{maskPhone(data?.contact_phone)}</small>
                         </div>
                         <div className="flex-shrink-0 ml-auto flex flex-col text-[10px]">
                             <span className="text-gray-200">10:42 AM</span>
