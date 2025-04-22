@@ -18,7 +18,8 @@ const ContactList = () => {
         selectedChatUser, setSelectedChatUser,
         showCall, setShowCall,
         showSettings, setShowSettings,
-        meetingId, setMeetingId } = useContext(ChatContext);
+        meetingId, setMeetingId, 
+        setCallType } = useContext(ChatContext);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +33,7 @@ const ContactList = () => {
         staleTime: 0,
     });
 
-    const handleCall = (user) => {
+    const handleCall = (user, call) => {
 
         setSelectedChatUser(
             {
@@ -45,6 +46,7 @@ const ContactList = () => {
             }
         );
         setShowCall(true)
+        setCallType(call)
     }
     function maskContactInfo(contactInfo) {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -178,7 +180,7 @@ const ContactList = () => {
                                             whileTap={{ scale: 0.95 }}
                                             title="Call"
                                             className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
-                                            onClick={() => handleCall(contact)}
+                                            onClick={() => handleCall(contact, "audio")}
                                         >
                                             <FiPhone />
                                         </motion.button>
@@ -187,7 +189,7 @@ const ContactList = () => {
                                             whileTap={{ scale: 0.95 }}
                                             title="Video Call"
                                             className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
-                                            onClick={() => console.log("Video Call", contact)}
+                                            onClick={() => handleCall(contact, "video")}
                                         >
                                             <FiVideo />
                                         </motion.button>

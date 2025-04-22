@@ -7,11 +7,8 @@ import { ChatContext } from "../context/ChatContext";
 import useChat from "../hooks/useChat";
 import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
-import CallComponent from "../components/video-sdk/CallComponent";
-import Modal from "../components/modal/Modal";
 import ChatMessage from "../components/Chat/ChatMessage"; // Import the new Message component
 import { FaCog } from "react-icons/fa";
-import Settings from "./Settings";
 
 const ChatInterface = () => {
     const { 
@@ -95,7 +92,7 @@ const ChatInterface = () => {
             {selectedChatUser && <div className="w-max hidden lg:block"><CallInterface setShowCall={setShowCall} setShowSettings={setShowSettings} /></div>}
 
         </div>
-    );
+    ); 
 };
 
 export default ChatInterface;

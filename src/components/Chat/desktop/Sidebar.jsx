@@ -10,7 +10,7 @@ import { ChatContext } from "../../../context/ChatContext";
 export default function Sidebar() {
     const navigate= useNavigate()
     const [active, setActive] = useState('msg');
-    const { setShowSettings, setShowCall } = useContext(ChatContext);
+    const { setShowSettings, setShowCall, setCallType } = useContext(ChatContext);
 
     const handleClick = (id) => {
         setActive(id);
@@ -25,6 +25,7 @@ export default function Sidebar() {
                 break;
             case 'video':
                 setShowCall(true);
+                setCallType("video")
                 break;
             case 'call':
                 setShowCall(true);

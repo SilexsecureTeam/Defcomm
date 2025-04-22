@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 export default function ChatHeader() {
     const {
         selectedChatUser,
-        setShowCall } = useContext(ChatContext);
+        setShowCall, setCallType } = useContext(ChatContext);
     return (
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
             {selectedChatUser ?
@@ -40,7 +40,7 @@ export default function ChatHeader() {
                     whileTap={{ scale: 0.95 }}
                     title="Video Call"
                     className="p-2 rounded-full hover:bg-oliveGreen/80 transition"
-                    onClick={() => setShowCall(true)}
+                    onClick={() => {setShowCall(true); setCallType("video")}}
                 >
                     <FiVideo />
                 </motion.button>
