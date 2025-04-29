@@ -1,9 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { MdAttachFile, MdOutlineEmojiEmotions } from "react-icons/md";
 import { FaFileAlt, FaPaperPlane, FaSpinner, FaTimes } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "../../services/axios-client";
 import { AuthContext } from "../../context/AuthContext";
+import { ChatContext } from "../../context/ChatContext";
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { parseHtml } from "../../utils/formmaters";
@@ -16,12 +17,16 @@ interface MessageData {
 
 interface SendMessageProps {
   messageData: MessageData;
+  desktop: boolean;
 }
 
-function SendMessage({ messageData }: SendMessageProps) {
+function SendMessage({ messageData, desktop=false }: {SendMessageProps}) {
   const { authDetails } = useContext(AuthContext);
-  const [message, setMessage] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const { 
+    file, setFile,
+    message, setMessage
+   } = useContext(ChatContext);
+ 
   const queryClient = useQueryClient();
   const client = axiosClient(authDetails?.access_token);
 
@@ -33,6 +38,7 @@ function SendMessage({ messageData }: SendMessageProps) {
   const sendMessageMutation = useSendMessageMutation(client, clearMessageInput);
 
   const handleSendMessage = () => {
+    console.log("sending", file)
     sendMessageUtil({
       client,
       message,
@@ -43,15 +49,17 @@ function SendMessage({ messageData }: SendMessageProps) {
       sendMessageMutation,
     });
   };
-
+useEffect(()=>{
+  console.log(desktop, file)
+},[file])
   return (
-    <div className="sticky bottom-0 w-full bg-oliveLight flex flex-col p-4 text-white">
+    <div className={`${desktop ? "bg-white text-black":"bg-oliveLight text-white"} sticky bottom-0 w-full flex flex-col p-4 `}>
       {file && (
-        <div className="flex items-center gap-3 bg-oliveDark p-3 mb-2 rounded-lg shadow-md">
-          <FaFileAlt className="text-oliveGreen" size={20} />
+        <div className={`${desktop ?"bg-oliveGreen":"bg-oliveDark"} flex items-center gap-3 p-3 mb-2 rounded-lg shadow-md`}>
+          <FaFileAlt className={`${desktop ? "text-oliveDark":"text-oliveGreen"}`} size={20} />
           <div className="flex-1">
             <p className="text-sm font-medium w-[90%] truncate">{file.name}</p>
-            <p className="text-xs text-gray-400">{(file.size / 1024).toFixed(2)} KB</p>
+            <p className={`${desktop ? "text-gray-700":"text-gray-400"} text-xs`}>{(file.size / 1024).toFixed(2)} KB</p>
           </div>
           <button onClick={() => setFile(null)} className="text-red-400 hover:text-red-500 transition">
             <FaTimes size={18} />
@@ -76,7 +84,7 @@ function SendMessage({ messageData }: SendMessageProps) {
         />
 
         <button
-          className="bg-oliveDark px-4 py-2 rounded-lg flex items-center justify-center disabled:opacity-50"
+          className="bg-oliveDark text-gray-200 px-4 py-2 rounded-lg flex items-center justify-center disabled:opacity-50"
           onClick={handleSendMessage}
           disabled={sendMessageMutation.isPending}
         >

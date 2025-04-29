@@ -22,7 +22,7 @@ const ProfileDropdown = ({ user }) => {
                         <img
                             src={`${import.meta.env.VITE_BASE_URL}${user.avatar}`}
                             alt="User Avatar"
-                            className="w-8 h-8 rounded-full object-cover"
+                            className="w-8 h-8 rounded-full object-cover bg-gray-100"
                         />
                     ) : (
                         <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">

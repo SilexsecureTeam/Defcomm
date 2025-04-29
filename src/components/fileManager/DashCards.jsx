@@ -7,7 +7,7 @@ const DashCards = ({ files, groups }) => {
   const navigate = useNavigate()
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div onClick={() => navigate('/dashboard/file-manager')} className="cursor-pointer bg-white p-4 min-h-28 flex justify-between items-center gap-2">
+      <div onClick={() => navigate('/dashboard/file-manager')} className="cursor-pointer bg-white text-black p-4 min-h-28 flex justify-between items-center gap-2">
         <div className="flex flex-col justify-between h-full">
           <p className="text-lg font-semibold">Files</p>
           <h2 className="text-3xl font-extrabold">{files?.length ?? 0}</h2>

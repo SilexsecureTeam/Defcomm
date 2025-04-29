@@ -7,17 +7,15 @@ import { ChatContext } from "../context/ChatContext";
 import useChat from "../hooks/useChat";
 import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
-import CallComponent from "../components/video-sdk/CallComponent";
-import Modal from "../components/modal/Modal";
 import ChatMessage from "../components/Chat/ChatMessage"; // Import the new Message component
 import { FaCog } from "react-icons/fa";
-import Settings from "./Settings";
 
 const ChatInterface = () => {
-    const { selectedChatUser, setSelectedChatUser } = useContext(ChatContext);
-    const [showCall, setShowCall] = useState(false);
-    const [showSettings, setShowSettings] = useState(false);
-    const [meetingId, setMeetingId] = useState(false);
+    const { 
+        selectedChatUser, setSelectedChatUser, 
+        setShowCall,
+        setShowSettings,
+        meetingId, setMeetingId } = useContext(ChatContext);
     const { fetchChatMessages } = useChat();
     const messageRef = useRef(null);
 
@@ -53,7 +51,7 @@ const ChatInterface = () => {
 
             {selectedChatUser && (
                 <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
-                    <h2 className="text-lg font-semibold">Chat</h2>
+                    <h2 className="text-lg font-semibold capitalize">{selectedChatUser ? selectedChatUser?.contact_name: "Chat"}</h2>
                     <div className="flex gap-4">
                         <button onClick={() => setShowCall(true)}>
                             <MdCall size={24} />
@@ -93,18 +91,8 @@ const ChatInterface = () => {
 
             {selectedChatUser && <div className="w-max hidden lg:block"><CallInterface setShowCall={setShowCall} setShowSettings={setShowSettings} /></div>}
 
-            {showCall && (
-                <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
-                    <CallComponent initialMeetingId={meetingId} setInitialMeetingId={setMeetingId} />
-                </Modal>
-            )}
-            {showSettings &&
-                <Modal isOpen={showSettings} closeModal={() => setShowSettings(false)}>
-                    <Settings />
-                </Modal>
-            }
         </div>
-    );
+    ); 
 };
 
 export default ChatInterface;

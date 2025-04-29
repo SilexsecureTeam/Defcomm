@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import useGroups from "../../hooks/useGroup";
 import AddContactInterface from "./AddContactInterface";
 import Modal from "../modal/Modal";
+import { Link } from "react-router-dom";
 
 
 function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
@@ -41,7 +42,7 @@ function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
                     >
                         {!isMenuOpen ? <FaBars size={24} /> : <FaTimes size={24} />}
                     </div>
-                    <img src={mainLogo} alt="logo" className="w-14" />
+                    <Link to={"/dashboard/home"}><img src={mainLogo} alt="logo" className="w-14" /></Link>
                 </div>
 
 

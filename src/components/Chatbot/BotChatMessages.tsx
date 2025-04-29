@@ -33,9 +33,9 @@ const BotChatMessages = ({ msg, selectedChatUser }) => {
     const formattedDate = getFormattedDate(msg?.updated_at);
 
     return (
-        <div className={`flex flex-col ${msg?.sender === "self" ? "items-end" : "items-start"} space-y-1`}>
+        <div className={`flex flex-col ${msg?.sender === "user" ? "items-end" : "items-start"} space-y-1`}>
 
-            {msg?.sender === "self" && <section className="flex gap-1 items-center">
+            {msg?.sender === "user" && <section className="flex gap-1 items-center">
                 <strong className="text-xs">You</strong>
                 {/* Message Timestamp */}
             <div className="text-xs text-gray-500">
@@ -49,8 +49,8 @@ const BotChatMessages = ({ msg, selectedChatUser }) => {
             </section>}
             {/* Message Content */}
             <div
-                className={`p-2 max-w-60 rounded-lg text-sm md:max-w-80 break-all transition-all ${
-                    msg?.sender === "self" ? "bg-oliveDark text-white" : "bg-none"
+                className={`p-2 max-w-60 md:w-max md:max-w-[60%] rounded-lg text-sm break-all transition-all ${
+                    msg?.sender === "user" ? "bg-oliveDark text-white text-right" : "bg-none"
                 }`}
             >
                 <AnimatePresence mode="wait">
@@ -63,17 +63,17 @@ const BotChatMessages = ({ msg, selectedChatUser }) => {
                         >
                             {msg?.type === "audio" ? (
                                 <CustomAudioMessage />
-                            ) : msg?.is_file === "yes" && msg?.text ? (
+                            ) : msg?.is_file === "yes" && msg?.content ? (
                                 <ChatFilePreview
                                     isMyChat={msg?.sender}
-                                    fileType={msg?.text?.split(".")[1]}
-                                    fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${msg?.text}`}
+                                    fileType={msg?.content?.split(".")[1]}
+                                    fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${msg?.content}`}
                                     fileName={msg?.file_name}
                                 />
                             ) : (
                                 <div className="flex gap-2">
                                     {msg?.sender === "bot" && <div className="flex-shrink-0 border border-black rounded-full w-10 h-10 flex items-center justify-center"><RiVoiceprintFill size={28} className="w-[80%]" /></div>}
-                                    <p className="flex flex-col"><ReactMarkdown remarkPlugins={[remarkGfm]}>{parseHtml(msg?.text)}</ReactMarkdown></p>
+                                    <p className="flex flex-col"><ReactMarkdown remarkPlugins={[remarkGfm]}>{parseHtml(msg?.content)}</ReactMarkdown></p>
                                     </div>
                             )}
                         </motion.div>

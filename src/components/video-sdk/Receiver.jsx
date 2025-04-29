@@ -1,13 +1,14 @@
 import { useParticipant } from "@videosdk.live/react-sdk";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useContext } from "react";
 import ReactPlayer from "react-player";
 import mainLogoTwo from "../../assets/logo-icon.png";
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
+import { ChatContext } from "../../context/ChatContext";
 
 const Receiver = ({ participant }) => {
   const micRef = useRef(null);
   const { webcamStream, micStream, webcamOn, micOn } = useParticipant(participant?.id);
-
+  const { callType } = useContext(ChatContext);
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
       const mediaStream = new MediaStream();
@@ -34,7 +35,7 @@ const Receiver = ({ participant }) => {
   return (
     <figure className="w-full h-full relative bg-black/80 rounded-[10px] flex justify-center items-center">
       <audio ref={micRef} autoPlay playsInline />
-      {webcamOn ? (
+      {callType == "video" && webcamOn ? (
         <ReactPlayer
           playsinline
           pip={false}
@@ -56,12 +57,12 @@ const Receiver = ({ participant }) => {
       >
         {micOn ? <FaMicrophone size={24} /> : <FaMicrophoneSlash size={24} />}
       </div>
-      <div className={`absolute cursor-pointer hover:scale-105 duration-100 flex items-center justify-center right-2 bottom-2 ${
+      {callType == "video" && <div className={`absolute cursor-pointer hover:scale-105 duration-100 flex items-center justify-center right-2 bottom-2 ${
           webcamOn ? "bg-green" : "bg-red-700"
         } rounded-full h-[20px] w-[20px]`}
       >
         {webcamOn ? <FaVideo size={24} /> : <FaVideoSlash size={24} />}
-      </div>
+      </div>}
     </figure>
   );
 };
