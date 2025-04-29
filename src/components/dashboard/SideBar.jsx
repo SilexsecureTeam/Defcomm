@@ -5,7 +5,7 @@ import mainLogo from "../../assets/logo-icon.png";
 import { MdKey } from "react-icons/md";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
   return (
     <>
@@ -33,8 +33,8 @@ function SideBar({ children, authDetails, toogleIsOpen, isMenuOpen }) {
             <h3 className="font-semibold text-xl flex gap-[10px] items-center p-3 capitalize">
               <MdKey size={24} className="text-[#c0c00e] rotate-90" />
               {authDetails?.user?.email
-                ? authDetails?.user?.email?.slice(0, 3) + 'xxxxxx'
-                : "Anonymous"}
+  ? authDetails?.user?.email?.slice(0, 3) + 'xxxxxx'
+  : "Anonymous"}
             </h3>
           </div>
 

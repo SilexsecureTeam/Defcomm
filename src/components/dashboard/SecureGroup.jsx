@@ -19,7 +19,7 @@ const SecureGroup = ({ groups, isLoading, error }) => {
       {error && <p className="text-red-500">Error: {error?.message || "An Error Occured"}</p>}
 
       {/* Member List */}
-      {!isLoading && !error && groups?.length > 0 ? (
+      {!isLoading && !error && groups.length > 0 ? (
         <div className="flex overflow-x-auto gap-3 md:gap-6">
           {groups.map((group, index) => (
             <motion.div

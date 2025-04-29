@@ -44,8 +44,7 @@ const OtherFileTab = ({ files, onShare }) => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     className="bg-olive px-3 py-2 text-sm flex items-center gap-1"
-                    // onClick={() => navigate(`/dashboard/file-view/${btoa(file?.file)}`, {state:{fileId:file?.file_id}})}
-                    onClick={() => navigate(`/dashboard/view/${file?.file_id}`)}
+                    onClick={() => navigate(`/dashboard/file-view/${btoa(file?.file)}`)}
                   >
                     <span><BsEye /></span>
                   </motion.button>

@@ -161,11 +161,3 @@ export function generateDateRange() {
 
 
 export const FormatTextToUppecase = (text) => text ? `${text[0].toUpperCase()}${text?.slice(1, text.length)}` : 'No Text'
-
-export const maskEmail = (email) => {
-    if (!email) return "";
-    const [name, domain] = email.split("@");
-    return `${name.slice(0, 3)}****@${domain}`;
-  };
-
- export const maskPhone = (phone) => `${phone.substring(0,5)}******`;

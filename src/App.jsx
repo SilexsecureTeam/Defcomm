@@ -14,10 +14,7 @@ import { BotProvider } from "./context/BotContext";
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
 const Dashboard = lazy(() => import("./routes/useDashboardRoute"));
 const DeffViewer = lazy(() => import("./pages/DeffViewer"));
-const SecureChatUI = lazy(() => import("./pages/SecureChatUI"));
-const ChatInterface = lazy(() => import("./pages/ChatInterface"));
 
-const DashboardWrapper = lazy(() => import("./layout/DashboardWrapper"));
 
 const App = () => {
   return (
@@ -32,8 +29,7 @@ const App = () => {
                     <Route path="/login" element={<DefcommLogin />} />
                     <Route path="web" element={<DeffViewer />} />
                     <Route path="/" element={<Navigate to="/login" />} />
-
-                    {/* Using ProtectedRoute as a Component for dashboard */}
+                    {/* Using ProtectedRoute as a Component */}
                     <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
 
                     {/* Catch-all redirect */}

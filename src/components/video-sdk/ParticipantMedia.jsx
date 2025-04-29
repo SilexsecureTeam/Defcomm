@@ -3,7 +3,7 @@ import {
   useMeeting,
   useParticipant,
 } from "@videosdk.live/react-sdk";
-import { useEffect, useMemo, useRef, useState, useContext } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import mainLogoTwo from "../../assets/logo-icon.png";
 import { FaVideo, FaVideoSlash, FaExpand, FaCompress } from "react-icons/fa"; // Added maximize icons
@@ -15,15 +15,14 @@ import {
   AiOutlineAudioMuted,
   AiOutlineAudio,
 } from "react-icons/ai";
-import { ChatContext } from "../../context/ChatContext";
 
-const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isInitiator, participant, isRinging }) => {
+const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isInitiator, participant , isRinging}) => {
   const micRef = useRef(null);
   const { webcamStream, micStream, webcamOn, micOn, isLocal } = useParticipant(participantId);
   const { localMicOn, toggleMic, toggleWebcam } = useMeeting();
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [isMaximized, setIsMaximized] = useState(false); // State for maximizing video
-  const { callType } = useContext(ChatContext);
+
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
       const mediaStream = new MediaStream();
@@ -65,7 +64,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
 
       {/* Call Controls */}
       <div className="hidden w-96 md:flex flex-col items-center bg-white rounded-lg py-10">
-        {isRinging && <p className="text-green-500 text-lg font-semibold"> Ringing...</p>}
+      {isRinging && <p className="text-green-500 text-lg font-semibold"> Ringing...</p>}
         <CallInfo participant={participant?.displayName || "Unknown"} callDuration={callDuration} isInitiator={isInitiator} />
         <CallControls isMuted={!micOn} toggleMute={handleToggleMic} isSpeakerOn={isSpeakerEnabled} />
         <button
@@ -94,7 +93,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
         {/* Main Video */}
         <figure className={`flex items-center justify-center transition-all duration-300 ${isMaximized ? "w-40 h-40 absolute bottom-0 right-0" : "w-full h-full absolute"}`}>
           <audio ref={micRef} autoPlay playsInline />
-          {callType == "video" && webcamOn ? (
+          {webcamOn ? (
             <ReactPlayer
               playsinline
               pip={false}
@@ -111,13 +110,13 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
             <img className="rounded-md" src={mainLogoTwo} alt="User Avatar" />
           )}
           {/* Toggle Camera Button */}
-          {callType == "video" && <div
+          <div
             onClick={handleToggleCam}
             className={`hidden absolute cursor-pointer hover:scale-105 duration-100 md:flex items-center justify-center left-2 bottom-2 ${webcamOn ? "bg-green" : "bg-red-700"
               } rounded-full h-[24px] w-[24px]`}
           >
             {webcamOn ? <FaVideo size={16} /> : <FaVideoSlash size={16} />}
-          </div>}
+          </div>
         </figure>
       </section>
       {/* Mobile Controls */}
@@ -144,7 +143,7 @@ const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isIn
         <button
           onClick={toggleWebcam}
           className={`flex flex-col items-center justify-center gap-1 p-3 rounded-full 
-          ${webcamOn ? "bg-green-600 text-white" : "bg-red-600 text-white"} shadow-lg transition-transform active:scale-95`}
+      ${webcamOn ? "bg-green-600 text-white" : "bg-red-600 text-white"} shadow-lg transition-transform active:scale-95`}
         >
           {webcamOn ? <FaVideo className="text-2xl" /> : <FaVideoSlash className="text-2xl" />}
 

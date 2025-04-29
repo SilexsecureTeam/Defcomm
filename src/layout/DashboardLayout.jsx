@@ -1,9 +1,8 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { Outlet } from 'react-router-dom'
 import DashTabs from '../components/dashboard/DashTabs'
 
 const DashboardLayout = () => {
- 
   return (
     <div className="bg-transparent">
 
@@ -17,8 +16,6 @@ const DashboardLayout = () => {
       {/* Content Area */}
       <main className="flex-1 p-0 py-3 md:p-6">
         <Outlet />
-
-        
       </main>
     </div>
   </div>

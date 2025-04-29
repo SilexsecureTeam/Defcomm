@@ -1,7 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import SEOHelmet from "../engine/SEOHelmet";
-import { FiSearch, FiPhone, FiVideo } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import { IoFilter } from "react-icons/io5";
 import defIcon from "../assets/logo-icon.png";
 import useChat from "../hooks/useChat";
@@ -10,17 +10,9 @@ import { FaPlus } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import AddContactInterface from "../components/dashboard/AddContactInterface";
 import Modal from "../components/modal/Modal";
-import { ChatContext } from "../context/ChatContext";
 
 const ContactList = () => {
     // State for modal and selected group
-    const {
-        selectedChatUser, setSelectedChatUser,
-        showCall, setShowCall,
-        showSettings, setShowSettings,
-        meetingId, setMeetingId, 
-        setCallType } = useContext(ChatContext);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -33,33 +25,18 @@ const ContactList = () => {
         staleTime: 0,
     });
 
-    const handleCall = (user, call) => {
-
-        setSelectedChatUser(
-            {
-                ...user,
-                chat_meta: {
-                    chat_user_type: user?.contact_type || "user",
-                    chat_user_id: user.contact_id,
-                    chat_id: "null",
-                }
-            }
-        );
-        setShowCall(true)
-        setCallType(call)
-    }
     function maskContactInfo(contactInfo) {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(contactInfo) ? contactInfo.replace(/^(.{8}).*?@/g, '$1xxxx@xxx.') : contactInfo.slice(0, -8) + 'X'.repeat(8);
     }
 
     const filteredContacts = Array.isArray(contacts)
-        ? contacts.filter(contact =>
-            contact?.contact_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            contact?.contact_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            contact?.contact_phone?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : [];
+    ? contacts.filter(contact =>
+        contact?.contact_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact?.contact_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact?.contact_phone?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    : [];
 
     return (
         <motion.div
@@ -80,12 +57,12 @@ const ContactList = () => {
                     {/* Search Input */}
                     <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="flex-1 relative max-w-60 text-gray-800"
+                        className="flex-1 relative w-60 text-gray-800"
                     >
                         <input
                             type="text"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e)=> setSearchQuery(e.target.value)}
                             placeholder="Search..."
                             className="text-sm p-2 rounded-lg focus:outline-none w-full pl-10 transition-all duration-300 border border-gray-300 focus:ring-2 focus:ring-oliveHover"
                         />
@@ -146,7 +123,7 @@ const ContactList = () => {
                     transition={{ duration: 0.5 }}
                     className="overflow-x-auto"
                 >
-                    <table className="min-w-[700px] w-full bg-white text-black border border-gray-200 rounded-lg shadow-sm">
+                    <table className="min-w-[700px] w-full bg-white border border-gray-200 rounded-lg shadow-sm">
                         <thead>
                             <tr className="bg-gray-50 text-left">
                                 <th className="p-3">Name</th>
@@ -174,24 +151,13 @@ const ContactList = () => {
                                     <td className="p-3">{maskContactInfo(contact?.contact_phone)}</td>
                                     <td className="p-3">{maskContactInfo(contact?.contact_email)}</td>
                                     {/* <td className="p-3">{contact?.lastLogin || "16 Mar 2022"}</td> */}
-                                    <td className="p-3 flex gap-2">
+                                    <td className="p-3">
                                         <motion.button
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            title="Call"
-                                            className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
-                                            onClick={() => handleCall(contact, "audio")}
+                                            whileHover={{ scale: 1.2 }}
+                                            transition={{ type: "spring", stiffness: 200 }}
+                                            className="text-gray-500 hover:text-gray-700 transition-all duration-200"
                                         >
-                                            <FiPhone />
-                                        </motion.button>
-                                        <motion.button
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            title="Video Call"
-                                            className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700 transition"
-                                            onClick={() => handleCall(contact, "video")}
-                                        >
-                                            <FiVideo />
+                                            <MdMoreHoriz />
                                         </motion.button>
                                     </td>
                                 </motion.tr>

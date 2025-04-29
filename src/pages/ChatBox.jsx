@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { IoFlash } from "react-icons/io5";
 import { BiMoon } from "react-icons/bi";
 import SEOHelmet from "../engine/SEOHelmet";
@@ -8,8 +8,8 @@ import { tasks } from "../utils/dummies"; // Import Bot Context
 import ThemeToggleButton from "../components/ThemeToggleButton";
 import ChatInterface from "../components/Chatbot/ChatInterface"
 const ChatBox = () => {
-  const { selectedBotChat, getActiveConversation } = useContext(BotContext); // Use context
-  const activeConversation = getActiveConversation();
+  const { selectedBotChat } = useContext(BotContext); // Use context
+
   return (
     <div className="relative flex flex-col gap-4 h-full">
       <SEOHelmet title="Defcomm Ai" />
@@ -17,10 +17,10 @@ const ChatBox = () => {
       {/* Header Section */}
       <div className="sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4 text-sm font-medium dark:bg-oliveLight">
         <button className="bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg flex items-center gap-2 px-3 py-2 border border-olive transition-all hover:scale-105">
-          <IoFlash className="text-yellow" /> <span className="hidden md:block">Switch to Advance  AI</span>
+          <IoFlash className="text-yellow" /> <span className="hidden md:block">Upgrade to Premium</span>
         </button>
 
-        <p className="px-3 truncate">{activeConversation?.title}</p>
+        <p className="px-3 truncate">{selectedBotChat}</p>
 
         {/* Dark Mode Toggle Button */}
         <ThemeToggleButton />
@@ -59,7 +59,7 @@ const ChatBox = () => {
           </>
         )}
 
-        <ChatBotInput  />
+        <ChatBotInput />
       </div>
     </div>
   );

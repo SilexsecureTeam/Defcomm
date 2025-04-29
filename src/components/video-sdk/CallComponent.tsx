@@ -1,23 +1,22 @@
 import React, { useState, useContext, useEffect } from "react";
+
 import { createMeeting, getAuthToken } from "./Api";
 import {
   MeetingProvider
 } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
-import { ChatContext } from "../../context/ChatContext";
 import CallComponentContent from './CallComponentContent'
 
 const CallComponent = ({ initialMeetingId, setInitialMeetingId }: { initialMeetingId?: string, setInitialMeetingId: (id: string | null) => void }) => {
   const [meetingId, setMeetingId] = useState<string | null>(initialMeetingId || null);
   const [providerMeetingId, setProviderMeetingId] = useState<string | null>(null);
   const { authDetails } = useContext(AuthContext);
-  const { callType } = useContext(ChatContext);
   useEffect(() => {
-    if (meetingId && !providerMeetingId) { // Only set once 
-      setInitialMeetingId(null)
-      setProviderMeetingId(meetingId);
+    if (meetingId && !providerMeetingId) { // Only set once
+        setInitialMeetingId(null)
+        setProviderMeetingId(meetingId);
     }
-  }, [meetingId]);
+}, [meetingId]);
   return (
     <MeetingProvider
       config={{
@@ -25,7 +24,7 @@ const CallComponent = ({ initialMeetingId, setInitialMeetingId }: { initialMeeti
         name: authDetails?.user?.name || "You",
         participantId: authDetails?.user?.id,
         micEnabled: true,
-        webcamEnabled: callType == "video" ? true : false,
+        webcamEnabled: true,
         mode: "CONFERENCE",
       }}
       token={getAuthToken()}

@@ -75,7 +75,7 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
 
             {/* Message Content */}
             <div
-                className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 break-all transition-all ${msg?.is_my_chat === "yes" ? "bg-oliveDark text-white" : "bg-white text-black"
+                className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 break-all transition-all ${msg?.is_my_chat === "yes" ? "bg-oliveDark text-white" : "bg-white"
                     }`}
             >
                 <AnimatePresence mode="wait">

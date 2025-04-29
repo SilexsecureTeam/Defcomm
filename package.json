@@ -1,5 +1,5 @@
 {
-  "name": "deffcomms",
+  "name": "deffcomm-chat-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "dompurify": "^3.2.4",
     "dotenv": "^16.4.7",
+    "framer-motion": "^12.9.2",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.476.0",
     "motion": "^12.4.3",
