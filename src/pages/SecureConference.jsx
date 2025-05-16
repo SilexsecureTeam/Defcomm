@@ -1,6 +1,6 @@
 import {
   FaPhoneSlash,
-  FaMicrophoneSlash,
+  FaMicrophone,
   FaVideoSlash,
   FaVolumeUp,
   FaCog,
@@ -54,7 +54,7 @@ const SecureConference = () => {
       {/* Control Buttons */}
       <div className="flex justify-center items-center gap-8 text-2xl">
         <button className="text-gray-500 hover:text-white">
-          <FaMicrophoneSlash />
+          <FaMicrophone />
         </button>
         <button className="text-gray-500 hover:text-white">
           <FaVideoSlash />
