@@ -13,6 +13,7 @@ import { RiFolderVideoLine } from 'react-icons/ri';
 import { HiOutlineGlobeAlt } from 'react-icons/hi';
 import { TbHealthRecognition } from 'react-icons/tb';
 import logo from '../assets/logo-icon.png'
+import { ChatContext } from "../context/ChatContext";
 const icons = [
   { icon: <BsTelephoneFill />, active: true },
   { icon: <MdInsertDriveFile /> },
@@ -26,6 +27,12 @@ const icons = [
 ];
 
 const SecureConference = () => {
+  const { 
+        selectedChatUser, setSelectedChatUser, 
+        setShowCall,
+        setShowSettings,
+        meetingId, setMeetingId } = useContext(ChatContext);
+  
   return (
     <div className="flex-1 p-6 text-white min-h-screen">
 
@@ -67,7 +74,7 @@ const SecureConference = () => {
           <FaVolumeUp />
         </button>
         <button className="text-gray-500 hover:text-white">
-          <FaCog />
+          <FaCog onClick={()=> setShowSettings(true)} />
         </button>
       </div>
     </div>
