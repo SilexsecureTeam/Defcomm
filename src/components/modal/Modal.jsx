@@ -10,7 +10,7 @@ const Modal = ({ isOpen, closeModal, children }) => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0 }}
         className="w-screen h-screen fixed inset-0 flex items-center justify-center bg-black/50 z-[1000000]">
-        <div className="relative flex items-center justify-center h-max max-w-[95vw] max-h-[90%] flex-col rounded-lg shadow-lg">
+        <div className="relative flex items-center justify-center h-max max-w-[95vw] max-h-[90%] flex-col rounded-lg shadow-lg my-auto">
         <button
             onClick={closeModal}
             className=" ml-auto sticky top-0 translate-y-1/2 translate-x-[30%] z-10 p-2 rounded-full bg-red-500 hover:bg-red-600 transition"
@@ -18,7 +18,7 @@ const Modal = ({ isOpen, closeModal, children }) => {
           >
             <MdClose className="text-gray-200 hover:text-gray-100" size={24} />
           </button>
-          <section className="overflow-y-auto">
+          <section className="overflow-y-auto my-auto">
             {children}
           </section>
 
