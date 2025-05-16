@@ -44,9 +44,9 @@ const SecureConference = () => {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center"
+            className="aspect-square bg-gray-200 flex items-center justify-center"
           >
-            <img src={logo} alt="Participant" className="w-16 h-16 opacity-60 filter invert" />
+            <img src={logo} alt="Participant" className="w-16 h-16 md:w-32 md:h-32 opacity-90 filter invert" />
           </div>
         ))}
       </div>
