@@ -102,11 +102,11 @@ export const dashboardTabs = [
     route:"/dashboard/home"
   },
   { 
-    type:"SECURE",
-    title: "Secure",
+    type:"CONFERENCE",
+    title: "Conference",
     img: secure, 
-    view: "secure",
-     route:"/dashboard/secure"
+    view: "conference",
+     route:"/dashboard/conference"
   },
   { 
     type:"COMM",
