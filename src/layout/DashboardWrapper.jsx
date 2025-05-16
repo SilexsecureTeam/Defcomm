@@ -24,7 +24,7 @@ const DashboardWrapper = ({children}) => {
      const { 
         setSelectedChatUser, 
         showCall,setShowCall,
-        showSettings,
+        showSettings,setShowSettings,
         meetingId, setMeetingId} = useContext(ChatContext);
     const { state, dispatch } = useContext(DashboardContext);
     const { fetchContacts } = useChat();
