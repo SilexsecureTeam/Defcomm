@@ -26,7 +26,7 @@ const icons = [
 
 const SecureConference = () => {
   return (
-    <div className="flex-1 p-6 text-white bg-gradient-to-b from-[#2C3B17] to-black min-h-screen">
+    <div className="flex-1 p-6 text-white min-h-screen">
 
       {/* Meeting Title & Button */}
       <div className="flex justify-between items-center mb-6">
