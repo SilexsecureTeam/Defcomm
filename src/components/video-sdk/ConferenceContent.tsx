@@ -14,8 +14,8 @@ import { onFailure } from "../../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../../utils/formmaters";
 import logo from "../../assets/logo-icon.png";
 import { createMeeting } from "./Api";
-
-const ParticipantVideo = ({
+import ParticipantVideo from './ParticipantVideo';
+/*const ParticipantVideo = ({
   participantId,
   label,
 }: {
@@ -58,7 +58,7 @@ const ParticipantVideo = ({
       </div>
     </div>
   );
-};
+};*/
 
 const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext(AuthContext);
