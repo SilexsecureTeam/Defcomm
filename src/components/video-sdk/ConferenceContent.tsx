@@ -7,6 +7,7 @@ import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { extractErrorMessage } from '../../utils/formmaters'
 import logo from '../../assets/logo-icon.png';
+import { createMeeting } from "./Api";
 
 const ParticipantVideo = ({ participantId, label }: { participantId: string; label: string }) => {
   const { webcamStream, webcamOn } = useParticipant(participantId);
@@ -44,6 +45,7 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
 const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [joinError, setJoinError] = useState(null);
   const { participants, localParticipant, toggleMic, toggleWebcam, leave, join } = useMeeting();
 
@@ -51,6 +53,21 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     return Object.values(participants).filter((p) => p.id !== localParticipant?.id);
   }, [participants, localParticipant]);
 
+  // Create Meeting
+    const handleCreateMeeting = async () => {
+        setIsCreatingMeeting(true);
+        try {
+            const newMeetingId = await createMeeting();
+            if (!newMeetingId) throw new Error("No meeting ID returned.");
+            setMeetingId(newMeetingId);
+            setIsInitiator(true);
+        } catch (error) {
+            onFailure({ message: "Meeting Creation Failed", error: error.message });
+        } finally {
+            setIsCreatingMeeting(false);
+        }
+    };
+  
   const handleJoinMeeting = async () => {
 
     setJoinError(null); // reset error on retry
@@ -89,13 +106,23 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
           className="text-black px-4 py-2 rounded-md w-full max-w-sm mb-4"
         />
         {joinError && <p className="mb-4 text-red-500">{joinError}</p>}
-        <button
-          onClick={handleJoinMeeting}
-          disabled={isLoading}
-          className="bg-[#5C7C2A] px-6 py-3 rounded-md text-white font-bold hover:bg-[#4e6220] disabled:opacity-50"
-        >
-          {isLoading ? <FaSpinner className="animate-spin mx-auto" /> : "Join Meeting"}
-        </button>
+        <div className="flex gap-4">
+    <button
+      onClick={handleJoinMeeting}
+      disabled={isLoading}
+      className="bg-[#5C7C2A] px-6 py-3 rounded-md text-white font-bold hover:bg-[#4e6220] disabled:opacity-50"
+    >
+      {isLoading ? <FaSpinner className="animate-spin mx-auto" /> : "Join Meeting"}
+    </button>
+
+    <button
+      onClick={handleCreateMeeting}
+      disabled={isCreatingMeeting}
+      className="bg-oliveGreen px-6 py-3 rounded-md text-white font-bold hover:bg-olive disabled:opacity-50"
+    >
+      {isCreatingMeeting ? <FaSpinner className="animate-spin mx-auto" /> : "Start New Conference"}
+    </button>
+  </div>
       </div>
     );
   }
