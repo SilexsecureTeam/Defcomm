@@ -1,15 +1,27 @@
-import React, { useState, useMemo, useContext } from "react";
+import React, { useState, useMemo, useContext, useEffect } from "react";
 import { useMeeting, useParticipant } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
-import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaVideoSlash, FaVolumeUp, FaCog, FaSpinner } from "react-icons/fa";
-import { AuthContext } from "../../context/AuthContext"; // Adjust path as needed
+import {
+  FaPhone,
+  FaMicrophoneSlash,
+  FaVideoSlash,
+  FaVolumeUp,
+  FaCog,
+  FaSpinner,
+} from "react-icons/fa";
+import { AuthContext } from "../../context/AuthContext";
 import { onFailure } from "../../utils/notifications/OnFailure";
-import { onSuccess } from "../../utils/notifications/OnSuccess";
-import { extractErrorMessage } from '../../utils/formmaters'
-import logo from '../../assets/logo-icon.png';
+import { extractErrorMessage } from "../../utils/formmaters";
+import logo from "../../assets/logo-icon.png";
 import { createMeeting } from "./Api";
 
-const ParticipantVideo = ({ participantId, label }: { participantId: string; label: string }) => {
+const ParticipantVideo = ({
+  participantId,
+  label,
+}: {
+  participantId: string;
+  label: string;
+}) => {
   const { webcamStream, webcamOn } = useParticipant(participantId);
 
   const videoStream = useMemo(() => {
@@ -22,7 +34,6 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
   }, [webcamStream, webcamOn]);
 
   return (
-   
     <div className="aspect-square bg-gray-200 flex items-center justify-center relative">
       {videoStream ? (
         <ReactPlayer
@@ -36,55 +47,70 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
           className="rounded-lg object-cover"
         />
       ) : (
-        <img src={logo} alt="Participant" className="w-16 h-16 md:w-32 md:h-32 opacity-90 filter invert" />
+        <img
+          src={logo}
+          alt="Participant"
+          className="w-16 h-16 md:w-32 md:h-32 opacity-90 filter invert"
+        />
       )}
-      <div className="absolute bottom-2 left-2 bg-gray-700 bg-opacity-50 px-2 rounded text-xs">{label}</div>
+      <div className="absolute bottom-2 left-2 bg-gray-700 bg-opacity-50 px-2 rounded text-xs">
+        {label}
+      </div>
     </div>
   );
 };
+
 const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
-  const {authDetails} = useContext(AuthContext)
+  const { authDetails } = useContext(AuthContext);
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
-  const [joinError, setJoinError] = useState(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [me, setMe] = useState<any>(null);
+  const [isInitiator, setIsInitiator] = useState(false);
+
   const { participants, toggleMic, toggleWebcam, leave, join } = useMeeting();
 
-  const getMe = [...participants.values()].find(
-            (current) => Number(current.id) === Number(authDetails?.user?.id)
-        );
   const remoteParticipants = useMemo(() => {
-    return Object.values(participants).filter((current) => Number(current.id) === Number(authDetails?.user?.id));
-  }, [participants);
+    return [...participants.values()].filter(
+      (p) => Number(p.id) !== Number(authDetails?.user?.id)
+    );
+  }, [participants, authDetails?.user?.id]);
 
-  // Create Meeting
-    const handleCreateMeeting = async () => {
-        setIsCreatingMeeting(true);
-        try {
-            const newMeetingId = await createMeeting();
-            if (!newMeetingId) throw new Error("No meeting ID returned.");
-            setMeetingId(newMeetingId);
-            setIsInitiator(true);
-        } catch (error) {
-            onFailure({ message: "Meeting Creation Failed", error: error.message });
-        } finally {
-            setIsCreatingMeeting(false);
-        }
-    };
-  
+  useEffect(() => {
+    if (participants && isJoined) {
+      const currentUser = [...participants.values()].find(
+        (p) => Number(p.id) === Number(authDetails?.user?.id)
+      );
+      setMe(currentUser);
+    }
+  }, [participants, isJoined, authDetails?.user?.id]);
+
+  const handleCreateMeeting = async () => {
+    setIsCreatingMeeting(true);
+    try {
+      const newMeetingId = await createMeeting();
+      if (!newMeetingId) throw new Error("No meeting ID returned.");
+      setMeetingId(newMeetingId);
+      setIsInitiator(true);
+    } catch (error: any) {
+      onFailure({ message: "Meeting Creation Failed", error: error.message });
+    } finally {
+      setIsCreatingMeeting(false);
+    }
+  };
+
   const handleJoinMeeting = async () => {
-
-    setJoinError(null); // reset error on retry
+    setJoinError(null);
     setIsLoading(true);
-
     try {
       await join();
       setIsJoined(true);
-    } catch (error) {
-      setIsJoined(false); // ✅ ensure not joined on error
-      console.error("Failed to join meeting:", error);
-      setJoinError(extractErrorMessage(error) || "Unknown error occurred");
-      onFailure({ message: "Meeting Error", error: extractErrorMessage(error) });
+    } catch (error: any) {
+      setIsJoined(false);
+      const message = extractErrorMessage(error) || "Unknown error occurred";
+      setJoinError(message);
+      onFailure({ message: "Meeting Error", error: message });
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +123,6 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     setJoinError(null);
   };
 
-  // If not joined, or join failed, show join screen
   if (!isJoined) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] bg-transparent text-white p-6">
@@ -111,27 +136,29 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         />
         {joinError && <p className="mb-4 text-red-500">{joinError}</p>}
         <div className="flex gap-4">
-    <button
-      onClick={handleJoinMeeting}
-      disabled={isLoading}
-      className="bg-[#5C7C2A] px-6 py-3 rounded-md text-white font-bold hover:bg-[#4e6220] disabled:opacity-50"
-    >
-      {isLoading ? <FaSpinner className="animate-spin mx-auto" /> : "Join Meeting"}
-    </button>
-
-    <button
-      onClick={handleCreateMeeting}
-      disabled={isCreatingMeeting}
-      className="bg-oliveGreen px-6 py-3 rounded-md text-white font-bold hover:bg-olive disabled:opacity-50"
-    >
-      {isCreatingMeeting ? <FaSpinner className="animate-spin mx-auto" /> : "Start New Conference"}
-    </button>
-  </div>
+          <button
+            onClick={handleJoinMeeting}
+            disabled={isLoading}
+            className="bg-[#5C7C2A] px-6 py-3 rounded-md text-white font-bold hover:bg-[#4e6220] disabled:opacity-50"
+          >
+            {isLoading ? <FaSpinner className="animate-spin mx-auto" /> : "Join Meeting"}
+          </button>
+          <button
+            onClick={handleCreateMeeting}
+            disabled={isCreatingMeeting}
+            className="bg-oliveGreen px-6 py-3 rounded-md text-white font-bold hover:bg-olive disabled:opacity-50"
+          >
+            {isCreatingMeeting ? (
+              <FaSpinner className="animate-spin mx-auto" />
+            ) : (
+              "Start New Conference"
+            )}
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Render conference UI only if joined and no error
   return (
     <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
       {/* Meeting Header */}
@@ -147,8 +174,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 
       {/* Video Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 flex-grow">
-        {getMe && <ParticipantVideo participantId={getMe.id} label="You" />}
-
+        {me && <ParticipantVideo participantId={me.id} label="You" />}
         {remoteParticipants.length > 0 ? (
           remoteParticipants.map((participant) => (
             <ParticipantVideo
@@ -158,21 +184,23 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
             />
           ))
         ) : (
-          <p className="text-center col-span-full text-gray-400">Waiting for participants to join...</p>
+          <p className="text-center col-span-full text-gray-400">
+            Waiting for participants to join...
+          </p>
         )}
       </div>
 
       {/* Controls */}
-      <div className="sticky bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl">
+      <div className="sticky bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl py-4">
         <button
-          className={`text-gray-500 hover:text-white ${localParticipant?.audioEnabled ? "" : "opacity-50"}`}
+          className="text-gray-500 hover:text-white"
           onClick={() => toggleMic()}
           aria-label="Toggle Microphone"
         >
           <FaMicrophoneSlash />
         </button>
         <button
-          className={`text-gray-500 hover:text-white ${localParticipant?.videoEnabled ? "" : "opacity-50"}`}
+          className="text-gray-500 hover:text-white"
           onClick={() => toggleWebcam()}
           aria-label="Toggle Camera"
         >
@@ -185,7 +213,10 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         >
           <FaPhone />
         </button>
-        <button className="text-gray-500 hover:text-white" aria-label="Volume Control">
+        <button
+          className="text-gray-500 hover:text-white"
+          aria-label="Volume Control"
+        >
           <FaVolumeUp />
         </button>
         <button className="text-gray-500 hover:text-white" aria-label="Settings">
@@ -196,5 +227,5 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   );
 };
 
-
 export default ConferenceContent;
+      
