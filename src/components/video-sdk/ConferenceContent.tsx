@@ -6,7 +6,8 @@ import { ChatContext } from "../../context/ChatContext"; // Adjust path as neede
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { extractErrorMessage } from '../../utils/formmaters'
-import logo from '../../assets/logo.png';
+import logo from '../../assets/logo-icon.png';
+
 const ParticipantVideo = ({ participantId, label }: { participantId: string; label: string }) => {
   const { webcamStream, webcamOn } = useParticipant(participantId);
 
@@ -101,7 +102,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 
   // Render conference UI only if joined and no error
   return (
-    <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen">
+    <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
       {/* Meeting Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
@@ -131,7 +132,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
       </div>
 
       {/* Controls */}
-      <div className="flex justify-center items-center gap-8 text-2xl">
+      <div className="sticky bottom-0 flex justify-center items-center gap-8 text-2xl">
         <button
           className={`text-gray-500 hover:text-white ${localParticipant?.audioEnabled ? "" : "opacity-50"}`}
           onClick={() => toggleMic()}
