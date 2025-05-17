@@ -77,7 +77,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   // If not joined, or join failed, show join screen
   if (!isJoined) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#2C3B17] to-black text-white p-6">
+      <div className="flex flex-col items-center justify-center min-h-[70vh] bg-transparent text-white p-6">
         <h2 className="text-2xl font-semibold mb-6">Enter Meeting ID to Join</h2>
         <input
           type="text"
@@ -100,7 +100,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 
   // Render conference UI only if joined and no error
   return (
-    <div className="flex flex-col flex-1 p-6 text-white bg-gradient-to-b from-[#2C3B17] to-black min-h-screen">
+    <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen">
       {/* Meeting Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
