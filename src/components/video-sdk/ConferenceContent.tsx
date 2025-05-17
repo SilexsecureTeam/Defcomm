@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useContext } from "react";
 import { useMeeting, useParticipant } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
-import { FaPhoneSlash, FaMicrophoneSlash, FaVideoSlash, FaVolumeUp, FaCog, FaSpinner } from "react-icons/fa";
+import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaVideoSlash, FaVolumeUp, FaCog, FaSpinner } from "react-icons/fa";
 import { ChatContext } from "../../context/ChatContext"; // Adjust path as needed
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
@@ -20,7 +20,7 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
   }, [webcamStream, webcamOn]);
 
   return (
-    <div className="aspect-square bg-black rounded-lg flex items-center justify-center relative">
+    <div className="aspect-square bg-gray-700 rounded-lg flex items-center justify-center relative">
       {videoStream ? (
         <ReactPlayer
           playing
@@ -35,7 +35,7 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
       ) : (
         <div className="text-white">No Video</div>
       )}
-      <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 rounded text-xs">{label}</div>
+      <div className="absolute bottom-2 left-2 bg-gray-700 bg-opacity-50 px-2 rounded text-xs">{label}</div>
     </div>
   );
 };
@@ -102,7 +102,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   return (
     <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen">
       {/* Meeting Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-2">
         <div>
           <p className="text-lg font-semibold">Nation Security Council Meeting</p>
           <p className="text-sm text-red-500 mt-1">● Recording 00:45:53</p>
@@ -150,7 +150,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
           onClick={handleLeaveMeeting}
           aria-label="Leave Meeting"
         >
-          <FaPhoneSlash />
+          <FaPhone />
         </button>
         <button className="text-gray-500 hover:text-white" aria-label="Volume Control">
           <FaVolumeUp />
