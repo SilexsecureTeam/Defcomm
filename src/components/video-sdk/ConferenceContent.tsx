@@ -2,7 +2,7 @@ import React, { useState, useMemo, useContext } from "react";
 import { useMeeting, useParticipant } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
 import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaVideoSlash, FaVolumeUp, FaCog, FaSpinner } from "react-icons/fa";
-import { ChatContext } from "../../context/ChatContext"; // Adjust path as needed
+import { AuthContext } from "../../context/AuthContext"; // Adjust path as needed
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { extractErrorMessage } from '../../utils/formmaters'
@@ -43,15 +43,19 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
   );
 };
 const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
+  const {authDetails} = useContext(AuthContext)
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [joinError, setJoinError] = useState(null);
-  const { participants, localParticipant, toggleMic, toggleWebcam, leave, join } = useMeeting();
+  const { participants, toggleMic, toggleWebcam, leave, join } = useMeeting();
 
+  const getMe = [...participants.values()].find(
+            (current) => Number(current.id) === Number(authDetails?.user?.id)
+        );
   const remoteParticipants = useMemo(() => {
-    return Object.values(participants).filter((p) => p.id !== localParticipant?.id);
-  }, [participants, localParticipant]);
+    return Object.values(participants).filter((current) => Number(current.id) === Number(authDetails?.user?.id));
+  }, [participants);
 
   // Create Meeting
     const handleCreateMeeting = async () => {
@@ -143,7 +147,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 
       {/* Video Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 flex-grow">
-        {localParticipant && <ParticipantVideo participantId={localParticipant.id} label="You" />}
+        {getMe && <ParticipantVideo participantId={getMe.id} label="You" />}
 
         {remoteParticipants.length > 0 ? (
           remoteParticipants.map((participant) => (
