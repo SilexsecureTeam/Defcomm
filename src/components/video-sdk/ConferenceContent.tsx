@@ -132,7 +132,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
       </div>
 
       {/* Controls */}
-      <div className="sticky bottom-0 flex justify-center items-center gap-8 text-2xl">
+      <div className="sticky bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl">
         <button
           className={`text-gray-500 hover:text-white ${localParticipant?.audioEnabled ? "" : "opacity-50"}`}
           onClick={() => toggleMic()}
