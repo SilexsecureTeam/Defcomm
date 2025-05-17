@@ -6,7 +6,7 @@ import { ChatContext } from "../../context/ChatContext"; // Adjust path as neede
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
 import { extractErrorMessage } from '../../utils/formmaters'
-
+import logo from '../../assets/logo.png';
 const ParticipantVideo = ({ participantId, label }: { participantId: string; label: string }) => {
   const { webcamStream, webcamOn } = useParticipant(participantId);
 
@@ -20,7 +20,8 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
   }, [webcamStream, webcamOn]);
 
   return (
-    <div className="aspect-square bg-gray-700 rounded-lg flex items-center justify-center relative">
+   
+    <div className="aspect-square bg-gray-200 flex items-center justify-center relative">
       {videoStream ? (
         <ReactPlayer
           playing
@@ -33,7 +34,7 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
           className="rounded-lg object-cover"
         />
       ) : (
-        <div className="text-white">No Video</div>
+        <img src={logo} alt="Participant" className="w-16 h-16 md:w-32 md:h-32 opacity-90 filter invert" />
       )}
       <div className="absolute bottom-2 left-2 bg-gray-700 bg-opacity-50 px-2 rounded text-xs">{label}</div>
     </div>
@@ -113,7 +114,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
       </div>
 
       {/* Video Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 flex-grow">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 flex-grow">
         {localParticipant && <ParticipantVideo participantId={localParticipant.id} label="You" />}
 
         {remoteParticipants.length > 0 ? (
