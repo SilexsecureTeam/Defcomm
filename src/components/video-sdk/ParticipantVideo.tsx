@@ -46,7 +46,15 @@ const ParticipantVideo = ({ participantId, label }: { participantId: string; lab
   }, [micOn, micStream, isLocal]);
 
   return (
-    <div className={`relative ${isMaximized ? "w-full h-full" : "aspect-square"} bg-black rounded-lg`}>
+    <div className={`relative bg-gray-700 rounded
+        ${isMaximized ? "col-span-2 row-span-1 w-full h-full" : "aspect-square"}
+        transition-all duration-300 ease-in-out
+      `}
+      style={{
+        // fallback for grid span if tailwind col-span-2 etc. aren't enough in your layout
+        gridColumn: isMaximized ? "span 2 / span 2" : undefined,
+        gridRow: isMaximized ? "span 1 / span 1" : undefined,
+      }}>
       <audio ref={micRef} autoPlay playsInline />
       
       {/* Video or Fallback */}
