@@ -12,7 +12,7 @@ export const ChatProvider = ({ children }) => {
     const [chatVisibility, setChatVisibility] = useState(initialVisibility);
     const [showCall, setShowCall] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
-    const [meetingId, setMeetingId] = useState(false);
+    const [meetingId, setMeetingId] = useState("");
     const [messages, setMessages] = useState(false);
     // Store the boolean value correctly when it changes
     useEffect(() => {
