@@ -56,7 +56,7 @@ const ParticipantVideo = ({
     <motion.div
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`relative bg-gray-700 rounded overflow-hidden
+      className={`relative bg-gray-300 rounded overflow-hidden
         ${isMaximized ? "col-span-2 w-full" : "aspect-square"}
       `}
       style={{
@@ -94,14 +94,15 @@ const ParticipantVideo = ({
       </div>
 
       {/* Controls bottom right */}
-      <div className="absolute bottom-2 right-2 flex gap-2">
-        <button
+      <button
           onClick={() => setIsMaximized((prev) => !prev)}
-          className="p-1 bg-gray-800 text-white rounded"
+          className="absolute bottom-2 right-2 p-1 bg-gray-800 text-white rounded "
           aria-label={isMaximized ? "Minimize" : "Maximize"}
         >
           {isMaximized ? <FaCompress size={14} /> : <FaExpand size={14} />}
         </button>
+      <div className="absolute top-2 right-2 flex gap-2">
+        
         <button
           onClick={toggleWebcam}
           className={`p-1 rounded ${webcamOn ? "bg-green-600" : "bg-red-600"}`}
