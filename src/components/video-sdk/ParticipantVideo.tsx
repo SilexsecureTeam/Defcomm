@@ -17,9 +17,11 @@ import logo from "../../assets/logo-icon.png";
 const ParticipantVideo = ({
   participantId,
   label,
+  key,
 }: {
   participantId: string;
   label: string;
+  key: string;
 }) => {
   const { webcamStream, micStream, webcamOn, micOn, isLocal } =
     useParticipant(participantId);
@@ -56,7 +58,7 @@ const ParticipantVideo = ({
     <motion.div
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`relative bg-gray-300 rounded overflow-hidden
+      className={`relative bg-gray-200 rounded overflow-hidden
         ${isMaximized ? "col-span-2 w-full" : "aspect-square"}
       `}
       style={{
@@ -79,7 +81,7 @@ const ParticipantVideo = ({
           className="rounded-lg object-cover"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-800">
+        <div className="w-full h-full flex items-center justify-center bg-gray-200">
           <img
             src={logo}
             alt="Avatar"
@@ -104,14 +106,12 @@ const ParticipantVideo = ({
       <div className="absolute top-2 right-2 flex gap-2">
         
         <button
-          onClick={toggleWebcam}
           className={`p-1 rounded ${webcamOn ? "bg-green-600" : "bg-red-600"}`}
           aria-label={webcamOn ? "Turn off webcam" : "Turn on webcam"}
         >
           {webcamOn ? <FaVideo size={14} /> : <FaVideoSlash size={14} />}
         </button>
         <button
-          onClick={toggleMic}
           className={`p-1 rounded ${micOn ? "bg-green-600" : "bg-red-600"}`}
           aria-label={micOn ? "Mute mic" : "Unmute mic"}
         >
