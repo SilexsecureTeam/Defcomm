@@ -112,18 +112,18 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
           onChange={(e) => setMeetingId(e.target.value)}
           className="p-3 border border-gray-300 placeholder:text-gray-300 bg-transparent rounded-md w-full max-w-sm mb-4"
         />
-        <div className="flex gap-4">
+        <div className="flex gap-4 text-sm">
           <button
             onClick={handleJoinMeeting}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 bg-[#5C7C2A] px-6 py-3 rounded-md text-white font-bold hover:bg-[#4e6220] disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-[#5C7C2A] p-2 md:px-6 md:py-3 rounded-md text-white font-bold hover:bg-[#4e6220] disabled:opacity-50"
           >
             Join Meeting {isLoading && <FaSpinner className="animate-spin mx-auto" />}
           </button>
           <button
             onClick={handleCreateMeeting}
             disabled={isCreatingMeeting}
-            className="flex items-center justify-center gap-2 bg-oliveGreen px-6 py-3 rounded-md text-white font-bold hover:bg-olive disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-oliveGreen p-2 md:px-6 md:py-3 rounded-md text-white font-bold hover:bg-olive disabled:opacity-50"
           >
             Start New Conference
             {isCreatingMeeting &&
