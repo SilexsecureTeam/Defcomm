@@ -7,7 +7,7 @@ export const ChatProvider = ({ children }) => {
     const initialVisibility = JSON.parse(sessionStorage.getItem("chatVisibility")) ?? false;
     const [message, setMessage] = useState("");
     const [file, setFile] = useState(null);
-    const [callType, setCallType] = useState("audio");
+    const [callType, setCallType] = useState("video");
     const [selectedChatUser, setSelectedChatUser] = useState(null);
     const [chatVisibility, setChatVisibility] = useState(initialVisibility);
     const [showCall, setShowCall] = useState(false);
