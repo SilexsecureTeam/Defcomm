@@ -149,7 +149,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
       </div>
 
       {/* Video Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 flex-grow">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-8 flex-grow">
         {me && <ParticipantVideo key={me.id} participantId={me.id} label="You" />}
         {remoteParticipants.length > 0 ? (
           remoteParticipants.map((participant) => (
