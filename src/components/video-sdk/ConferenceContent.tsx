@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useContext, useEffect } from "react";
-import { useMeeting, useParticipant } from "@videosdk.live/react-sdk";
+import {
+  useMeeting,
+  useParticipant,
+} from "@videosdk.live/react-sdk";
 import {
   FaPhone,
   FaMicrophoneSlash,
@@ -14,7 +17,8 @@ import { AuthContext } from "../../context/AuthContext";
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../../utils/formmaters";
 import { createMeeting } from "./Api";
-import ParticipantVideo from './ParticipantVideo';
+import ParticipantVideo from "./ParticipantVideo";
+import ScreenShareDisplay from "./ScreenShareDisplay";
 import { toast } from "react-toastify";
 
 const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
@@ -25,23 +29,20 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   const [me, setMe] = useState<any>(null);
   const [isInitiator, setIsInitiator] = useState(false);
 
-  const { webcamOn, micOn } =
-    useParticipant(me?.id);
-  const { participants, toggleMic, toggleWebcam, leave, join } = useMeeting({
+  const { webcamOn, micOn } = useParticipant(me?.id);
+
+  const {
+    participants,
+    toggleMic,
+    toggleWebcam,
+    leave,
+    join,
+  } = useMeeting({
     onParticipantJoined: (participant) => {
-      console.log(participant)
-      if (participant.displayName) {
-        toast.success(`${participant.displayName} has joined the meeting`);
-      } else {
-        toast.success(`A participant has joined`);
-      }
+      toast.success(`${participant.displayName || "A participant"} has joined the meeting`);
     },
     onParticipantLeft: (participant) => {
-      if (participant.displayName) {
-        toast.success(`${participant.displayName} just left the meeting`);
-      } else {
-        toast.success(`A participant just left the meeting`);
-      }
+      toast.success(`${participant.displayName || "A participant"} just left the meeting`);
     },
     onError: (error) => {
       onFailure({
@@ -51,12 +52,15 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     },
   });
 
-
   const remoteParticipants = useMemo(() => {
     return [...participants.values()].filter(
       (p) => Number(p.id) !== Number(authDetails?.user?.id)
     );
   }, [participants, authDetails?.user?.id]);
+
+  const screenSharingParticipants = useMemo(() => {
+    return [...participants.values()].filter((p) => p.screenShareEnabled);
+  }, [participants]);
 
   useEffect(() => {
     if (participants && isJoined) {
@@ -126,9 +130,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
             className="flex items-center justify-center gap-2 bg-oliveGreen p-2 md:px-6 md:py-3 rounded-md text-white font-bold hover:bg-olive disabled:opacity-50"
           >
             Start New Conference
-            {isCreatingMeeting &&
-              <FaSpinner className="animate-spin mx-auto" />
-            }
+            {isCreatingMeeting && <FaSpinner className="animate-spin mx-auto" />}
           </button>
         </div>
       </div>
@@ -140,13 +142,24 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
       {/* Meeting Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
-          <p className="text-lg font-semibold">{meetingId || "Nation Security Council Meeting"}</p>
+          <p className="text-lg font-semibold">
+            {meetingId || "Nation Security Council Meeting"}
+          </p>
           <p className="text-sm text-red-500 mt-1">● Recording 00:45:53</p>
         </div>
         <button className="bg-[#5C7C2A] text-white text-sm px-4 py-2 rounded-md">
           + Invite Member
         </button>
       </div>
+
+      {/* Screen Share Display */}
+      {screenSharingParticipants.length > 0 && (
+        <div className="w-full h-[60vh] mb-6 bg-black rounded-md p-2">
+          {screenSharingParticipants.map((p) => (
+            <ScreenShareDisplay key={p.id} participantId={p.id} />
+          ))}
+        </div>
+      )}
 
       {/* Video Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-8 flex-grow">
@@ -169,18 +182,18 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
       {/* Controls */}
       <div className="sticky bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl py-4">
         <button
-          className={`text-gray-500 hover:text-white ${micOn ? "text-white" : "text-gray-500"}`}
+          className={`text-gray-500 hover:text-white ${micOn ? "text-white" : ""}`}
           onClick={() => toggleMic()}
           aria-label="Toggle Microphone"
         >
           {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
         </button>
         <button
-          className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : "text-gray-500"}`}
+          className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : ""}`}
           onClick={() => toggleWebcam()}
           aria-label="Toggle Camera"
         >
-         {webcamOn ? <FaVideo /> : <FaVideoSlash />}
+          {webcamOn ? <FaVideo /> : <FaVideoSlash />}
         </button>
         <button
           className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
@@ -189,10 +202,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         >
           <FaPhone />
         </button>
-        <button
-          className="text-gray-500 hover:text-white"
-          aria-label="Volume Control"
-        >
+        <button className="text-gray-500 hover:text-white" aria-label="Volume Control">
           <FaVolumeUp />
         </button>
         <button className="text-gray-500 hover:text-white" aria-label="Settings">
@@ -204,4 +214,4 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default ConferenceContent;
-
+        
