@@ -41,8 +41,10 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     toggleWebcam,
     leave,
     join,
-    startScreenShare,
-    stopScreenShare,
+    enableScreenShare,
+    disableScreenShare,
+    toggleScreenShare
+    
   } = useMeeting({
     onParticipantJoined: (participant) => {
       toast.success(`${participant.displayName || "A participant"} has joined the meeting`);
@@ -116,18 +118,15 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     setIsScreenSharing(false);
   };
 
-  const toggleScreenShare = async () => {
-    if (!canScreenShare) {
-      onFailure({ message: "Screen Share Error", error: "Screen sharing is not supported in this SDK version." });
-      return;
-    }
+  const handleScreenShare = async () => {
+    
 
     if (isScreenSharing) {
-      await stopScreenShare();
+      await disableScreenShare();
       setIsScreenSharing(false);
     } else {
       try {
-        await startScreenShare();
+        await enableScreenShare();
         setIsScreenSharing(true);
       } catch (error: any) {
         onFailure({ message: "Screen Share Error", error: error.message || "Could not start screen sharing." });
@@ -228,7 +227,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 
         <button
           className={`text-gray-500 hover:text-white ${isScreenSharing ? "text-green-400" : ""}`}
-          onClick={toggleScreenShare}
+          onClick={handleScreenShare}
           aria-label={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
           title={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
         >
