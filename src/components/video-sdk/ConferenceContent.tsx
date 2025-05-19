@@ -42,6 +42,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
     join,
     enableScreenShare,
     disableScreenShare,
+    presenterId
   } = useMeeting({
     onParticipantJoined: (participant) => {
       toast.success(`${participant.displayName || "A participant"} has joined the meeting`);
@@ -68,7 +69,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
   }, [participants, authDetails?.user?.id]);
 
   const screenSharingParticipants = useMemo(() => {
-    return [...participants.values()].filter((p) => p.screenShareEnabled);
+    return [...participants.values()].filter((p) => Number(p.id) == Number(presenterId));
   }, [participants]);
 
   useEffect(() => {
