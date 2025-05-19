@@ -12,6 +12,8 @@ import {
   FaVolumeUp,
   FaCog,
   FaSpinner,
+  FaDesktop,
+  FaStopCircle,
 } from "react-icons/fa";
 import { AuthContext } from "../../context/AuthContext";
 import { onFailure } from "../../utils/notifications/OnFailure";
@@ -32,6 +34,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 
   const { webcamOn, micOn } = useParticipant(me?.id);
 
+  // Destructure startScreenShare and stopScreenShare carefully
   const {
     participants,
     toggleMic,
@@ -55,6 +58,9 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     },
   });
 
+  // Defensive check to ensure screen share functions exist
+  const canScreenShare = typeof startScreenShare === "function" && typeof stopScreenShare === "function";
+
   const remoteParticipants = useMemo(() => {
     return [...participants.values()].filter(
       (p) => Number(p.id) !== Number(authDetails?.user?.id)
@@ -71,8 +77,6 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         (p) => Number(p.id) === Number(authDetails?.user?.id)
       );
       setMe(currentUser);
-
-      // Update local screen sharing state if participant screenShareEnabled changes
       if (currentUser) setIsScreenSharing(currentUser.screenShareEnabled);
     }
   }, [participants, isJoined, authDetails?.user?.id]);
@@ -113,6 +117,11 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   };
 
   const toggleScreenShare = async () => {
+    if (!canScreenShare) {
+      onFailure({ message: "Screen Share Error", error: "Screen sharing is not supported in this SDK version." });
+      return;
+    }
+
     if (isScreenSharing) {
       await stopScreenShare();
       setIsScreenSharing(false);
@@ -221,8 +230,9 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
           className={`text-gray-500 hover:text-white ${isScreenSharing ? "text-green-400" : ""}`}
           onClick={toggleScreenShare}
           aria-label={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
+          title={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
         >
-          {isScreenSharing ? "Stop Screen Share" : "Share Screen"}
+          {isScreenSharing ? <FaStopCircle /> : <FaDesktop />}
         </button>
 
         <button
@@ -244,4 +254,4 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default ConferenceContent;
-        
+            
