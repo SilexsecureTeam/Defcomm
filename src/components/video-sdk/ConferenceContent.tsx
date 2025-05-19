@@ -226,7 +226,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
         </button>
 
         <button
-          className={`text-gray-500 hover:text-white ${isScreenSharing ? "text-green-400" : ""}`}
+          className={`hidden md:block text-gray-500 hover:text-white ${isScreenSharing ? "text-green-400" : ""}`}
           onClick={handleScreenShare}
           aria-label={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
           title={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
