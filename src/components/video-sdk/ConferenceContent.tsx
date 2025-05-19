@@ -63,7 +63,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
 
   const remoteParticipants = useMemo(() => {
     return [...participants.values()].filter(
-      (p) => String(p.id) !== String(authDetails?.user?.id)
+      (p) => Number(p.id) !== Number(authDetails?.user?.id)
     );
   }, [participants, authDetails?.user?.id]);
 
