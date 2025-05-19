@@ -28,6 +28,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [me, setMe] = useState<any>(null);
   const [isInitiator, setIsInitiator] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const { webcamOn, micOn } = useParticipant(me?.id);
 
@@ -37,6 +38,8 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     toggleWebcam,
     leave,
     join,
+    startScreenShare,
+    stopScreenShare,
   } = useMeeting({
     onParticipantJoined: (participant) => {
       toast.success(`${participant.displayName || "A participant"} has joined the meeting`);
@@ -68,6 +71,9 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         (p) => Number(p.id) === Number(authDetails?.user?.id)
       );
       setMe(currentUser);
+
+      // Update local screen sharing state if participant screenShareEnabled changes
+      if (currentUser) setIsScreenSharing(currentUser.screenShareEnabled);
     }
   }, [participants, isJoined, authDetails?.user?.id]);
 
@@ -103,6 +109,21 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     leave();
     setIsJoined(false);
     setMeetingId("");
+    setIsScreenSharing(false);
+  };
+
+  const toggleScreenShare = async () => {
+    if (isScreenSharing) {
+      await stopScreenShare();
+      setIsScreenSharing(false);
+    } else {
+      try {
+        await startScreenShare();
+        setIsScreenSharing(true);
+      } catch (error: any) {
+        onFailure({ message: "Screen Share Error", error: error.message || "Could not start screen sharing." });
+      }
+    }
   };
 
   if (!isJoined) {
@@ -195,6 +216,15 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         >
           {webcamOn ? <FaVideo /> : <FaVideoSlash />}
         </button>
+
+        <button
+          className={`text-gray-500 hover:text-white ${isScreenSharing ? "text-green-400" : ""}`}
+          onClick={toggleScreenShare}
+          aria-label={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
+        >
+          {isScreenSharing ? "Stop Screen Share" : "Share Screen"}
+        </button>
+
         <button
           className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
           onClick={handleLeaveMeeting}
