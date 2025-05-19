@@ -69,7 +69,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
   }, [participants, authDetails?.user?.id]);
 
   const screenSharingParticipants = useMemo(() => {
-    return [...participants.values()].filter((p) => Number(p.id) == Number(presenterId));
+    return [...participants.values()].filter((p) => Number(p.id) === Number(presenterId));
   }, [participants]);
 
   useEffect(() => {
