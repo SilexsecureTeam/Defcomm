@@ -23,7 +23,7 @@ import ParticipantVideo from "./ParticipantVideo";
 import ScreenShareDisplay from "./ScreenShareDisplay";
 import { toast } from "react-toastify";
 
-const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
+const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; setMeetingId: (id: string) => void }) => {
   const { authDetails } = useContext(AuthContext);
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +32,8 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   const [isInitiator, setIsInitiator] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
 
-  const { webcamOn, micOn } = useParticipant(me?.id);
+  const { webcamOn, micOn } = useParticipant(me?.id ?? "", {});
 
-  // Destructure startScreenShare and stopScreenShare carefully
   const {
     participants,
     toggleMic,
@@ -43,8 +42,6 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
     join,
     enableScreenShare,
     disableScreenShare,
-    toggleScreenShare
-    
   } = useMeeting({
     onParticipantJoined: (participant) => {
       toast.success(`${participant.displayName || "A participant"} has joined the meeting`);
@@ -58,14 +55,15 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         error: extractErrorMessage(error) || "An error occurred",
       });
     },
+    onPresenterChanged: (presenter) => {
+      toast.info(`${presenter?.displayName || "A participant"} is presenting`);
+      setIsScreenSharing(!!presenter);
+    },
   });
-
-  // Defensive check to ensure screen share functions exist
-  const canScreenShare = typeof startScreenShare === "function" && typeof stopScreenShare === "function";
 
   const remoteParticipants = useMemo(() => {
     return [...participants.values()].filter(
-      (p) => Number(p.id) !== Number(authDetails?.user?.id)
+      (p) => String(p.id) !== String(authDetails?.user?.id)
     );
   }, [participants, authDetails?.user?.id]);
 
@@ -76,7 +74,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   useEffect(() => {
     if (participants && isJoined) {
       const currentUser = [...participants.values()].find(
-        (p) => Number(p.id) === Number(authDetails?.user?.id)
+        (p) => String(p.id) === String(authDetails?.user?.id)
       );
       setMe(currentUser);
       if (currentUser) setIsScreenSharing(currentUser.screenShareEnabled);
@@ -119,8 +117,6 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
   };
 
   const handleScreenShare = async () => {
-    
-
     if (isScreenSharing) {
       await disableScreenShare();
       setIsScreenSharing(false);
@@ -129,7 +125,10 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
         await enableScreenShare();
         setIsScreenSharing(true);
       } catch (error: any) {
-        onFailure({ message: "Screen Share Error", error: error.message || "Could not start screen sharing." });
+        onFailure({
+          message: "Screen Share Error",
+          error: error.message || "Could not start screen sharing.",
+        });
       }
     }
   };
@@ -253,4 +252,4 @@ const ConferenceContent = ({ meetingId, setMeetingId }: any) => {
 };
 
 export default ConferenceContent;
-            
+        
