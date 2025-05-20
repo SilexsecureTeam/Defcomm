@@ -184,9 +184,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
       {/* Screen Share Display */}
       {screenSharingParticipants.length > 0 && (
         <div className="w-full h-[60vh] mb-6 bg-black rounded-md p-2">
-          {screenSharingParticipants.map((p) => (
-            <ScreenShareDisplay key={p.id} participantId={p.id} />
-          ))}
+            <ScreenShareDisplay key={presenterId} participantId={presenterId} />
         </div>
       )}
 
