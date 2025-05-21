@@ -32,7 +32,6 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
   const navigate = useNavigate();
   const { authDetails } = useContext(AuthContext);
   const {
-    setProviderMeetingId,
     conference, setConference,
     me, setMe, isScreenSharing,
     setIsScreenSharing,
@@ -130,7 +129,6 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
     leave();
     setConference(false);
     setMeetingId("");
-    setProviderMeetingId(null)
     setIsScreenSharing(false);
   };
 
