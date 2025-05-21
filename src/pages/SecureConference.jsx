@@ -7,18 +7,18 @@ import {
   FaCog,
 } from 'react-icons/fa';
 import logo from '../assets/logo-icon.png';
-import { ChatContext } from '../context/ChatContext';
+import { MeetingContext } from '../context/MeetingContext';
 import CallComponent from '../components/video-sdk/CallComponent';
 
 const SecureConference = () => {
-  const { meetingId, setMeetingId } = useContext(ChatContext);
+  const { conferenceId, setConferenceId } = useContext(MeetingContext);
 
 
 
   // Render actual conference UI once meetingId is set
   return (<CallComponent
   initialMeetingId={null}
-  setInitialMeetingId={setMeetingId}
+  setInitialMeetingId={setConferenceId}
   mode="CONFERENCE"
 />
   );
