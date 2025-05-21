@@ -273,7 +273,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
       </div>
     </div>) : (
       <motion.div
-  className="fixed bottom-4 right-4 w-48 h-48 z-[10000] bg-black overflow-hidden shadow-lg group transition-all"
+  className="fixed bottom-4 right-4 w-48 h-48 z-[10000] bg-black rounded-lg overflow-hidden shadow-lg group transition-all"
   initial={{ scale: 0.8, opacity: 0 }}
   animate={{ scale: 1, opacity: 1 }}
   exit={{ scale: 0.8, opacity: 0 }}
