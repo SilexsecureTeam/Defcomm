@@ -35,7 +35,8 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
     setProviderMeetingId,
     conference, setConference,
     me, setMe, isScreenSharing,
-    setIsScreenSharing
+    setIsScreenSharing,
+    showConference
   } = useContext(MeetingContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
@@ -159,7 +160,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
     }
   };
 
-  if (!conference) {
+  if (!conference && showConference) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] bg-transparent text-white p-6">
         <h2 className="text-2xl font-semibold mb-6">Enter Meeting ID to Join</h2>
