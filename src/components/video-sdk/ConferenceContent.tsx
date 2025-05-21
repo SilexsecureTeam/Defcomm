@@ -212,7 +212,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
       )}
 
       {/* Video Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8">
         {me && <ParticipantVideo
           participantId={me.id}
           label="You"
@@ -281,7 +281,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
   transition={{ type: "spring", stiffness: 200, damping: 20 }}
 >
   {/* Mini video display */}
-  <div className="relative flex-1 w-full h-full">
+  <div className="relative flex-1 w-full h-full aspect-square">
     <ParticipantVideo
       participantId={maximizedParticipantId || me?.id}
       label={
@@ -294,7 +294,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
     />
 
     {/* Hover controls */}
-    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-end transition-opacity duration-300 pb-4">
+    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex flex-col gap-3 items-center justify-end transition-opacity duration-300 pb-4">
       <button
         onClick={() => navigate("/dashboard/conference")}
         className="bg-white/80 hover:bg-white text-black p-2 rounded-full shadow"
