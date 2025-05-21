@@ -27,7 +27,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CgMaximizeAlt } from "react-icons/cg";
 
-const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; setMeetingId: (id: string) => void }) => {
+const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string | null; setMeetingId: (id: string) => void }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { authDetails } = useContext(AuthContext);
@@ -165,7 +165,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
         <input
           type="text"
           placeholder="Paste Meeting ID here"
-          value={meetingId}
+          value={meetingId || ""}
           onChange={(e) => setMeetingId(e.target.value)}
           className="p-3 border border-gray-300 placeholder:text-gray-300 bg-transparent rounded-md w-full max-w-sm mb-4"
         />
@@ -315,12 +315,10 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
   <div style={{ display: "none" }}>
     {[me, ...remoteParticipants].map((participant) => (
       <ParticipantVideo
-        key={participant.id}
-        participantId={participant.id}
+        participantId={participant?.id}
         label=""
         isMaximized={false}
         onToggleMaximize={() => {}}
-        audioOnly
       />
     ))}
   </div>
