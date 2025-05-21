@@ -22,7 +22,7 @@ import PictureInPicture from '../components/video-sdk/PictureInPicture'
 
 const DashboardWrapper = ({ children }) => {
     const { authDetails } = useContext(AuthContext);
-    const { conference } = useContext(MeetingContext);
+    const { showConference, setShowConference } = useContext(MeetingContext);
     const {
         setSelectedChatUser,
         showCall, setShowCall,
@@ -67,6 +67,10 @@ const DashboardWrapper = ({ children }) => {
         const matchedOption = [...dashboardOptions, ...utilOptions, ...dashboardTabs].find((opt) => pathname === opt.route);
         if (matchedOption) dispatch(matchedOption);
         if (!matchedOption || matchedOption?.type !== "CHAT") setSelectedChatUser(null);
+
+        if(pathname !== "/dashboard/conference" && showConference){
+            setShowConference(false)
+        }
     }, [pathname]);
 
     if (authDetails?.user?.role !== "user") return null;
