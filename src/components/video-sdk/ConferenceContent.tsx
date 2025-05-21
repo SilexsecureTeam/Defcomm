@@ -24,7 +24,9 @@ import ParticipantVideo from "./ParticipantVideo";
 import ScreenShareDisplay from "./ScreenShareDisplay";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
-import PictureInPicture from './PictureInPicture'
+import { motion } from "framer-motion";
+import { CgMaximizeAlt } from "react-icons/cg";
+
 const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; setMeetingId: (id: string) => void }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -270,8 +272,13 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
         </button>
       </div>
     </div>) : (
-      <div
+      <motion.div
   className="fixed bottom-4 right-4 w-48 h-48 z-[10000] bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 group transition-all"
+  initial={{ scale: 0.8, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  exit={{ scale: 0.8, opacity: 0 }}
+  whileHover={{ scale: 1.02 }}
+  transition={{ type: "spring", stiffness: 200, damping: 20 }}
 >
   {/* Mini video display */}
   <div className="relative flex-1 w-full h-full">
@@ -286,31 +293,26 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
       onToggleMaximize={() => {}}
     />
 
-    {/* Hover controls (centered) */}
-    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-end justify-center transition-opacity duration-300">
-      <div className="flex flex-col items-center gap-2 pb-3">
-        {/* Maximize */}
-        <button
-          onClick={() => navigate("/dashboard/conference")}
-          className="bg-white/80 hover:bg-white text-black p-2 rounded-full shadow"
-          title="Back to full view"
-        >
-          <FaDesktop size={18} />
-        </button>
-
-        {/* End call */}
-        <button
-          onClick={handleLeaveMeeting}
-          className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-md text-lg"
-          title="End Call"
-        >
-          <FaPhone size={20} />
-        </button>
-      </div>
+    {/* Hover controls */}
+    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-end transition-opacity duration-300 pb-4">
+      <button
+        onClick={() => navigate("/dashboard/conference")}
+        className="bg-white/80 hover:bg-white text-black p-2 rounded-full shadow"
+        title="Back to full view"
+      >
+        <CgMaximizeAlt size={18} />
+      </button>
+      <button
+        onClick={handleLeaveMeeting}
+        className="mt-3 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-md text-lg"
+        title="End Call"
+      >
+        <FaPhone size={20} />
+      </button>
     </div>
   </div>
 
-  {/* Mount all audio elements hidden (for participant mic) */}
+  {/* Hidden audio */}
   <div style={{ display: "none" }}>
     {[me, ...remoteParticipants].map((participant) => (
       <ParticipantVideo
@@ -323,8 +325,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
       />
     ))}
   </div>
-</div>
-
+</motion.div>
     )
 
   );
