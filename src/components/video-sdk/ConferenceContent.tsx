@@ -243,10 +243,10 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string; set
 
       {/* Controls */}
       <div className="sticky bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl py-4 z-10">
-        <button onClick={toggleMic} aria-label="Toggle Microphone" className={`text-gray-500 hover:text-white ${micOn ? "text-white" : ""}`}>
+        <button onClick={()=>toggleMic()} aria-label="Toggle Microphone" className={`text-gray-500 hover:text-white ${micOn ? "text-white" : ""}`}>
           {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
         </button>
-        <button onClick={toggleWebcam} aria-label="Toggle Camera" className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : ""}`}>
+        <button onClick={()=>toggleWebcam()} aria-label="Toggle Camera" className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : ""}`}>
           {webcamOn ? <FaVideo /> : <FaVideoSlash />}
         </button>
 
