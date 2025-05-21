@@ -1,9 +1,12 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { Outlet } from 'react-router-dom'
 import DashTabs from '../components/dashboard/DashTabs'
+import { MeetingContext } from '../context/MeetingContext'
+import SecureConference from '../pages/SecureConference'
 
 const DashboardLayout = () => {
- 
+  const { showConference, setShowConference } = useContext(MeetingContext);
+
   return (
     <div className="bg-transparent">
 
@@ -18,7 +21,7 @@ const DashboardLayout = () => {
       <main className="flex-1 p-0 py-3 md:p-6">
         <Outlet />
 
-        
+        {showConference && <SecureConference />}
       </main>
     </div>
   </div>

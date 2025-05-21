@@ -24,7 +24,7 @@ const FileDashboard = lazy(() => import("../pages/FileDashboard"));
 const Profile = lazy(() => import("../pages/Profile"));
 const Groups = lazy(() => import("../pages/Groups"));
 const SecureChatUI = lazy(() => import("../pages/SecureChatUI"));
-const SecureConference = lazy(() => import("../pages/SecureConference"));
+const ShowConferenceRoute = lazy(() => import("../pages/ShowConferenceRoute"));
 
 function useDashBoardRoute() {
   const { authDetails } = useContext(AuthContext);
@@ -66,7 +66,7 @@ function useDashBoardRoute() {
             <Route path="/isurvive/voice" element={<ChatBoxTwo />} />
             <Route path="/settings" element={<Settings />} />
 
-            <Route path="/conference" element={<SecureConference />} />
+            <Route path="/conference" element={<ShowConferenceRoute />} />
 
             <Route path="/*" element={<ComingSoon />} />
           </Route>

@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import logo from "../../assets/logo.png";
 import CallSummary from "../Chat/CallSummary";
-
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
 import { onFailure } from "../../utils/notifications/OnFailure";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
@@ -10,10 +9,12 @@ import { FaSpinner } from "react-icons/fa";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
+import { MeetingContext } from "../../context/MeetingContext";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { axiosClient } from "../../services/axios-client";
 import ParticipantMedia from "./ParticipantMedia";
 import audioController from "../../utils/audioController";
+
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isMeetingActive, setIsMeetingActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [me, setMe] = useState(null);
     const { authDetails } = useContext(AuthContext);
     const { selectedChatUser } = useContext(ChatContext);
+    const { setProviderMeetingId } = useContext(MeetingContext);
+    
     const messageData = selectedChatUser?.chat_meta;
     const client = axiosClient(authDetails?.access_token);
     const sendMessageMutation = useSendMessageMutation(client);
@@ -90,6 +93,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         leave();
         setIsMeetingActive(false);
         setMeetingId(null);
+        setProviderMeetingId(null);
         audioController.stopRingtone();
         setShowSummary(true);
     };

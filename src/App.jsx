@@ -8,6 +8,7 @@ import FallBack from "./components/Fallback";
 import { DashboardContextProvider } from "./context/DashboardContext";
 import { queryClient } from "./services/query-client";
 import { ChatProvider } from "./context/ChatContext";
+import { MeetingProvider } from "./context/MeetingContext";
 import { BotProvider } from "./context/BotContext";
 
 // Lazy load components
@@ -24,26 +25,28 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ChatProvider>
-          <BotProvider>
-            <DashboardContextProvider>
-              <Suspense fallback={<FallBack />}>
-                <Router>
-                  <Routes>
-                    <Route path="/login" element={<DefcommLogin />} />
-                    <Route path="web" element={<DeffViewer />} />
-                    <Route path="/" element={<Navigate to="/login" />} />
+          <MeetingProvider>
+            <BotProvider>
+              <DashboardContextProvider>
+                <Suspense fallback={<FallBack />}>
+                  <Router>
+                    <Routes>
+                      <Route path="/login" element={<DefcommLogin />} />
+                      <Route path="web" element={<DeffViewer />} />
+                      <Route path="/" element={<Navigate to="/login" />} />
 
-                    {/* Using ProtectedRoute as a Component for dashboard */}
-                    <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
+                      {/* Using ProtectedRoute as a Component for dashboard */}
+                      <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
 
-                    {/* Catch-all redirect */}
-                    <Route path="*" element={<Navigate to="/" />} />
-                  </Routes>
-                </Router>
-              </Suspense>
-              <ToastContainer autoClose={2000} draggable className="z-[100000000000] mt-2" />
-            </DashboardContextProvider>
-          </BotProvider>
+                      {/* Catch-all redirect */}
+                      <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                  </Router>
+                </Suspense>
+                <ToastContainer autoClose={2000} draggable className="z-[100000000000] mt-2" />
+              </DashboardContextProvider>
+            </BotProvider>
+          </MeetingProvider>
         </ChatProvider>
       </AuthProvider>
 

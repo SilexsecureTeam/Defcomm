@@ -17,18 +17,18 @@ import logo from "../../assets/logo-icon.png";
 const ParticipantVideo = ({
   participantId,
   label,
-  key,
+  isMaximized,
+  onToggleMaximize,
 }: {
   participantId: string;
   label: string;
-  key: string;
+  isMaximized: boolean;
+  onToggleMaximize: () => void;
 }) => {
   const { webcamStream, micStream, webcamOn, micOn, isLocal } =
     useParticipant(participantId);
   const { toggleMic, toggleWebcam } = useMeeting();
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const [isMaximized, setIsMaximized] = useState(false);
-
   const micRef = useRef<HTMLAudioElement | null>(null);
 
   const videoStream = useMemo(() => {
@@ -58,17 +58,13 @@ const ParticipantVideo = ({
     <motion.div
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`relative bg-gray-200 rounded overflow-hidden
-        ${isMaximized ? "col-span-2 w-full" : "aspect-square"}
-      `}
-      style={{
-        gridColumn: isMaximized ? "span 2 / span 2" : undefined,
-        gridRow: isMaximized ? "span 2 / span 2" : undefined, // double row span
-      }}
+      className={`relative bg-gray-200 rounded overflow-hidden ${
+        isMaximized ? "col-span-full row-span-full w-full h-[60vh]" : "aspect-square"
+      }`}
     >
       <audio ref={micRef} autoPlay playsInline />
 
-      {/* Video or Fallback */}
+      {/* Video or fallback avatar */}
       {videoStream ? (
         <ReactPlayer
           playing
@@ -90,21 +86,22 @@ const ParticipantVideo = ({
         </div>
       )}
 
-      {/* Overlay Controls */}
+      {/* Name label */}
       <div className="absolute bottom-2 left-2 text-xs px-2 py-1 bg-gray-700 bg-opacity-50 rounded text-white">
         {label}
       </div>
 
-      {/* Controls bottom right */}
+      {/* Maximize / Minimize */}
       <button
-          onClick={() => setIsMaximized((prev) => !prev)}
-          className="absolute bottom-2 right-2 p-1 bg-gray-800 text-white rounded "
-          aria-label={isMaximized ? "Minimize" : "Maximize"}
-        >
-          {isMaximized ? <FaCompress size={14} /> : <FaExpand size={14} />}
-        </button>
+        onClick={onToggleMaximize}
+        className="absolute bottom-2 right-2 p-1 bg-gray-800 text-white rounded"
+        aria-label={isMaximized ? "Minimize" : "Maximize"}
+      >
+        {isMaximized ? <FaCompress size={14} /> : <FaExpand size={14} />}
+      </button>
+
+      {/* Mic & Cam Controls (UI Only) */}
       <div className="absolute top-2 right-2 flex gap-2">
-        
         <button
           className={`p-1 rounded ${webcamOn ? "bg-green-600" : "bg-red-600"}`}
           aria-label={webcamOn ? "Turn off webcam" : "Turn on webcam"}
