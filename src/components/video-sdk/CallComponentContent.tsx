@@ -9,7 +9,6 @@ import { FaSpinner } from "react-icons/fa";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
-import { MeetingContext } from "../../context/MeetingContext";
 import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
 import { axiosClient } from "../../services/axios-client";
 import ParticipantMedia from "./ParticipantMedia";
@@ -27,7 +26,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [me, setMe] = useState(null);
     const { authDetails } = useContext(AuthContext);
     const { selectedChatUser } = useContext(ChatContext);
-    const { setProviderMeetingId } = useContext(MeetingContext);
     
     const messageData = selectedChatUser?.chat_meta;
     const client = axiosClient(authDetails?.access_token);
@@ -93,7 +91,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         leave();
         setIsMeetingActive(false);
         setMeetingId(null);
-        setProviderMeetingId(null);
         audioController.stopRingtone();
         setShowSummary(true);
     };
