@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from "react";
 import { createMeeting, getAuthToken } from "./Api";
 import { MeetingProvider } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../context/AuthContext";
-import { MeetingContext } from "../../context/MeetingContext";
 import { ChatContext } from "../../context/ChatContext";
 import CallComponentContent from './CallComponentContent';
 import ConferenceContent from './ConferenceContent';
@@ -19,8 +18,8 @@ const CallComponent = ({
   mode = "CALL", // default to direct call
 }: Props) => {
   const [meetingId, setMeetingId] = useState(initialMeetingId || null);
+  const [providerMeetingId, setProviderMeetingId] = useState(null);
   const { authDetails } = useContext(AuthContext);
-  const { setProviderMeetingId, providerMeetingId } = useContext(MeetingContext);
   const { callType } = useContext(ChatContext);
 
   useEffect(() => {
