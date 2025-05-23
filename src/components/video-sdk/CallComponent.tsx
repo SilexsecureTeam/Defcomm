@@ -38,6 +38,8 @@ const CallComponent = ({
         micEnabled: true,
         webcamEnabled: callType === "video",
         mode: "SEND_AND_RECV",
+        chatEnabled: true,
+        raiseHandEnabled: true,
         debugMode: true // ✅ Required field — set to true for development
       }}
       token={getAuthToken()}
