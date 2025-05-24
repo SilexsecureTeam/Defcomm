@@ -1,8 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { createMeeting, getAuthToken } from "./Api";
-import { MeetingProvider } from "@videosdk.live/react-sdk";
-import { AuthContext } from "../../context/AuthContext";
-import { ChatContext } from "../../context/ChatContext";
+import { MeetingContext } from "../../context/MeetingContext";
 import CallComponentContent from './CallComponentContent';
 import ConferenceContent from './ConferenceContent';
 
@@ -18,9 +15,7 @@ const CallComponent = ({
   mode = "CALL", // default to direct call
 }: Props) => {
   const [meetingId, setMeetingId] = useState(initialMeetingId || null);
-  const [providerMeetingId, setProviderMeetingId] = useState(null);
-  const { authDetails } = useContext(AuthContext);
-  const { callType } = useContext(ChatContext);
+   const { providerMeetingId, setProviderMeetingId } = useContext(MeetingContext);
 
   useEffect(() => {
     if (meetingId && !providerMeetingId) {
@@ -30,26 +25,11 @@ const CallComponent = ({
   }, [meetingId]);
 
   return (
-    <MeetingProvider
-      config={{
-        meetingId: providerMeetingId!,
-        name: authDetails?.user?.name || "You",
-        participantId: authDetails?.user?.id,
-        micEnabled: true,
-        webcamEnabled: callType === "video",
-        mode: "SEND_AND_RECV",
-        chatEnabled: true,
-        raiseHandEnabled: true,
-        debugMode: true // ✅ Required field — set to true for development
-      }}
-      token={getAuthToken()}
-    >
-      {mode === "CONFERENCE" ? (
+    mode === "CONFERENCE" ? (
         <ConferenceContent meetingId={meetingId} setMeetingId={setMeetingId} />
       ) : (
         <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
-      )}
-    </MeetingProvider>
+      )
   );
 };
 

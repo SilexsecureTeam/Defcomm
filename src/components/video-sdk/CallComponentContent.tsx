@@ -31,7 +31,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const client = axiosClient(authDetails?.access_token);
     const sendMessageMutation = useSendMessageMutation(client);
 
-    const callTimer = useRef<NodeJS.Timeout | null>(null);
+    const callTimer = useRef(null);
 
     const { join, participants, localMicOn, toggleMic, leave } = useMeeting({
         onMeetingJoined: () => {
@@ -39,7 +39,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             setIsMeetingActive(true);
             setShowSummary(false);
             onSuccess({ message: "Call Started", success: "You have successfully joined the call" });
-
             if (!localMicOn) toggleMic();
         },
         onMeetingLeft: () => {
@@ -168,7 +167,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     useEffect(() => {
         const participantCount = [...participants.values()].length;
-        console.log("Participants Count:", participantCount);
         setIsRinging(participantCount < 2);
     }, [participants]);
 

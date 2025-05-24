@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParticipant, useMeeting } from "@videosdk.live/react-sdk";
+import { useParticipant, useMeeting, usePubSub } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
 import {
   FaVideo,
@@ -12,7 +12,9 @@ import {
   AiOutlineAudio,
 } from "react-icons/ai";
 import { motion } from "framer-motion";
+//@ts-ignore
 import logo from "../../assets/logo-icon.png";
+import { FaHandPaper } from "react-icons/fa";
 
 const ParticipantVideo = ({
   participantId,
@@ -28,8 +30,12 @@ const ParticipantVideo = ({
   const { webcamStream, micStream, webcamOn, micOn, isLocal } =
     useParticipant(participantId);
   const { toggleMic, toggleWebcam } = useMeeting();
+  const { messages } = usePubSub("HAND_RAISE");
+  const [handRaised, setHandRaised] = useState(false);
+
+
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const micRef = useRef<HTMLAudioElement | null>(null);
+  const micRef = useRef(null);
 
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
@@ -53,14 +59,19 @@ const ParticipantVideo = ({
       }
     }
   }, [micOn, micStream, isLocal]);
+  useEffect(() => {
+    const latestMessage = messages[messages.length - 1];
+    if (latestMessage?.message?.id === participantId) {
+      setHandRaised(!!latestMessage.message.raised);
+    }
+  }, [messages, participantId]);
 
   return (
     <motion.div
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`relative bg-gray-200 rounded overflow-hidden ${
-        isMaximized ? "col-span-full row-span-full w-full h-[60vh]" : "aspect-square"
-      }`}
+      className={`relative bg-gray-200 rounded overflow-hidden ${isMaximized ? "col-span-full row-span-full w-full h-[60vh]" : "aspect-square"
+        }`}
     >
       <audio ref={micRef} autoPlay playsInline />
 
@@ -99,6 +110,18 @@ const ParticipantVideo = ({
       >
         {isMaximized ? <FaCompress size={14} /> : <FaExpand size={14} />}
       </button>
+
+      {handRaised && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          exit={{ scale: 0 }}
+          className="absolute top-2 left-2 p-1 bg-yellow text-black rounded-full shadow"
+        >
+          <FaHandPaper size={24} title="Hand Raised" />
+        </motion.div>
+      )}
+
 
       {/* Mic & Cam Controls (UI Only) */}
       <div className="absolute top-2 right-2 flex gap-2">
