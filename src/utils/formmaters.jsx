@@ -12,6 +12,22 @@ export const parseHtml = (inputString) => {
   // Preserve line breaks (`\n`) by replacing them with `<br />`
   return sanitizedString.replace(/\n/g, "  \n"); // Markdown uses "  \n" for new line
 };
+export const getTimeAgo = (timestamp) => {
+  const diff = Math.floor((Date.now() - new Date(timestamp)) / 1000); // in seconds
+
+  if (diff < 5) return "just now";
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) {
+    const mins = Math.floor(diff / 60);
+    return `${mins}min${mins !== 1 ? "s" : ""} ago`;
+  }
+  if (diff < 86400) {
+    const hrs = Math.floor(diff / 3600);
+    return `${hrs}hr${hrs !== 1 ? "s" : ""} ago`;
+  }
+  const days = Math.floor(diff / 86400);
+  return `${days}d ago`;
+};
 
 
 export const extractErrorMessage = (error) => {
