@@ -4,12 +4,12 @@ import GroupSlide from "../GroupSlide";
 import { FaSpinner } from "react-icons/fa6";
 import useGroups from "../../hooks/useGroup";
 
-const GroupSelectorModal = ({ onSelectGroup, onClose }) => {
+const GroupSelectorModal = ({ isOpen, onSelectGroup, onClose }) => {
   const { useFetchGroups } = useGroups();
   const { data: groups, isLoading } = useFetchGroups();
 
   return (
-    <Modal onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-5 w-[80vw] md:w-[600px] bg-oliveDark text-white min-h-40 max-h-[80vh]">
         <h2 className="text-xl font-bold mb-4">Select a Group</h2>
         {isLoading ? (
