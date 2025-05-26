@@ -11,7 +11,7 @@ import { createMeeting } from "../Api";
 import HeaderBar from "./HeaderBar";
 import JoinMeetingForm from "./JoinMeetingForm";
 import CreateMeetingForm from "./CreateMeetingForm";
-import GroupSelectorModal from "./GroupSelectorModal"; // Add this
+import GroupSelectorModal from "../../dashboard/GroupSelectorModal"; // Add this
 
 const InitConference = ({ meetingId, setMeetingId }) => {
   const { setConference } = useContext(MeetingContext);
