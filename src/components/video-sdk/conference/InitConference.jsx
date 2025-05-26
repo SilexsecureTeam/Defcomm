@@ -12,6 +12,7 @@ import HeaderBar from "./HeaderBar";
 import JoinMeetingForm from "./JoinMeetingForm";
 import CreateMeetingForm from "./CreateMeetingForm";
 import GroupSelectorModal from "../../dashboard/GroupSelectorModal"; // Add this
+import MyMeetingsSlider from "./MyMeetingsSlider";
 
 const InitConference = ({ meetingId, setMeetingId }) => {
   const { setConference } = useContext(MeetingContext);
@@ -172,6 +173,10 @@ const InitConference = ({ meetingId, setMeetingId }) => {
           openGroupSelector={() => setIsGroupModalOpen(true)}
         />
       )}
+
+{mode === null && !meetingLoading && myMeetings?.length > 0 && (
+  <MyMeetingsSlider meetings={myMeetings} />
+)}
 
       
         <GroupSelectorModal
