@@ -28,7 +28,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   const { createMeetingMutation, getMyMeetingsQuery } = useConference();
   const {data:myMeetings, isLoading:meetingLoading}= getMyMeetingsQuery;
   const { join } = useMeeting();
-
+  const now = new Date();
   const upcomingMeetings = myMeetings?.filter(meeting =>
     new Date(meeting.startdatetime) > now
   );
