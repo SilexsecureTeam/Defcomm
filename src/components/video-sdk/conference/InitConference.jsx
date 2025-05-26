@@ -176,7 +176,28 @@ const InitConference = ({ meetingId, setMeetingId }) => {
       )}
 
 {mode === null && !meetingLoading && myMeetings?.length > 0 && (
-  <MyMeetingsSlider meetings={myMeetings} />
+  <div>
+      {meetingLoading ? (
+        <p>Loading meetings...</p>
+      ) : (
+        <>
+          {upcomingMeetings?.length > 0 && (
+            <MyMeetingsSlider
+              title="Upcoming Meetings"
+              meetings={upcomingMeetings}
+              showCountdown={true}
+            />
+          )}
+          {recentMeetings?.length > 0 && (
+            <MyMeetingsSlider
+              title="Recent Meetings"
+              meetings={recentMeetings}
+              showCountdown={false}
+            />
+          )}
+        </>
+      )}
+    </div>
 )}
 
       
