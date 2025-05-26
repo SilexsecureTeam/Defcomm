@@ -9,7 +9,7 @@ const GroupSelectorModal = ({ isOpen, onSelectGroup, onClose }) => {
   const { data: groups, isLoading } = useFetchGroups();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} closeModal={onClose}>
       <div className="p-5 w-[80vw] md:w-[600px] bg-oliveDark text-white min-h-40 max-h-[80vh]">
         <h2 className="text-xl font-bold mb-4">Select a Group</h2>
         {isLoading ? (
