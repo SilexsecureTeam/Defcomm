@@ -1,9 +1,9 @@
 import { useParticipant } from "@videosdk.live/react-sdk";
 import { useEffect, useMemo, useRef, useContext } from "react";
 import ReactPlayer from "react-player";
-import mainLogoTwo from "../../assets/logo-icon.png";
+import mainLogoTwo from "../../../assets/logo-icon.png";
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
-import { ChatContext } from "../../context/ChatContext";
+import { ChatContext } from "../../../context/ChatContext";
 
 const Receiver = ({ participant }) => {
   const micRef = useRef(null);

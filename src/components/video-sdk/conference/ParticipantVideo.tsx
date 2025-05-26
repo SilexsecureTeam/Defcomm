@@ -13,7 +13,7 @@ import {
 } from "react-icons/ai";
 import { motion } from "framer-motion";
 //@ts-ignore
-import logo from "../../assets/logo-icon.png";
+import logo from "../../../assets/logo-icon.png";
 import { FaHandPaper } from "react-icons/fa";
 
 const ParticipantVideo = ({

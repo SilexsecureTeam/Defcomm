@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState, useContext } from "react";
 import { usePubSub } from "@videosdk.live/react-sdk";
-import { AuthContext } from "../../context/AuthContext";
-import { getTimeAgo } from "../../utils/formmaters";
+import { AuthContext } from "../../../context/AuthContext";
+import { getTimeAgo } from "../../../utils/formmaters";
 import { FiSend } from "react-icons/fi";
 
 const CallMessagingModal = ({ isOpen, onClose }) => {

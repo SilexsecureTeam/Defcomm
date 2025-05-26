@@ -18,7 +18,7 @@ import NavBar from "../components/dashboard/NavBar";
 import Modal from '../components/modal/Modal'
 import CallComponent from '../components/video-sdk/CallComponent'
 import Settings from '../pages/Settings'
-import PictureInPicture from '../components/video-sdk/PictureInPicture'
+import PictureInPicture from '../components/video-sdk/conference/PictureInPicture'
 
 const DashboardWrapper = ({ children }) => {
     const { authDetails } = useContext(AuthContext);

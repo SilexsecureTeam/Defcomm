@@ -1,18 +1,18 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import logo from "../../assets/logo.png";
-import CallSummary from "../Chat/CallSummary";
-import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
-import { onFailure } from "../../utils/notifications/OnFailure";
-import { onSuccess } from "../../utils/notifications/OnSuccess";
-import { createMeeting } from "./Api";
+import logo from "../../../assets/logo.png";
+import CallSummary from "../../Chat/CallSummary";
+import { sendMessageUtil } from "../../../utils/chat/sendMessageUtil";
+import { onFailure } from "../../../utils/notifications/OnFailure";
+import { onSuccess } from "../../../utils/notifications/OnSuccess";
+import { createMeeting } from "../Api";
 import { FaSpinner } from "react-icons/fa";
 import { useMeeting } from "@videosdk.live/react-sdk";
-import { AuthContext } from "../../context/AuthContext";
-import { ChatContext } from "../../context/ChatContext";
-import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
-import { axiosClient } from "../../services/axios-client";
+import { AuthContext } from "../../../context/AuthContext";
+import { ChatContext } from "../../../context/ChatContext";
+import { useSendMessageMutation } from "../../../hooks/useSendMessageMutation";
+import { axiosClient } from "../../../services/axios-client";
 import ParticipantMedia from "./ParticipantMedia";
-import audioController from "../../utils/audioController";
+import audioController from "../../../utils/audioController";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     const [isMeetingActive, setIsMeetingActive] = useState(false);

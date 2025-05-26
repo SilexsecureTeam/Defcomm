@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { MeetingContext } from "../../context/MeetingContext";
-import CallComponentContent from './CallComponentContent';
-import ConferenceContent from './ConferenceContent';
+import CallComponentContent from './call/CallComponentContent';
+import ConferenceContent from './conference/ConferenceContent';
 
 type Props = {
   initialMeetingId?: string;

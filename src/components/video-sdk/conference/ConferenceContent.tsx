@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useContext, useEffect } from "react";
 import { useMeeting } from "@videosdk.live/react-sdk";
-import { AuthContext } from "../../context/AuthContext";
-import { MeetingContext } from "../../context/MeetingContext";
-import { onFailure } from "../../utils/notifications/OnFailure";
-import { extractErrorMessage } from "../../utils/formmaters";
+import { AuthContext } from "../../../context/AuthContext";
+import { MeetingContext } from "../../../context/MeetingContext";
+import { onFailure } from "../../../utils/notifications/OnFailure";
+import { extractErrorMessage } from "../../../utils/formmaters";
 import ParticipantVideo from "./ParticipantVideo";
 import ScreenShareDisplay from "./ScreenShareDisplay";
 import { toast } from "react-toastify";

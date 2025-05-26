@@ -5,17 +5,18 @@ import {
 } from "@videosdk.live/react-sdk";
 import { useEffect, useMemo, useRef, useState, useContext } from "react";
 import ReactPlayer from "react-player";
-import mainLogoTwo from "../../assets/logo-icon.png";
+import mainLogoTwo from "../../../assets/logo-icon.png";
 import { FaVideo, FaVideoSlash, FaExpand, FaCompress } from "react-icons/fa"; // Added maximize icons
 import { MdCallEnd } from "react-icons/md";
-import CallInfo from "../Chat/CallInfo";
-import CallControls from "../Chat/CallControls";
+import CallInfo from "../../Chat/CallInfo";
+import CallControls from "../../Chat/CallControls";
+
 import Receiver from "./Receiver";
 import {
   AiOutlineAudioMuted,
   AiOutlineAudio,
 } from "react-icons/ai";
-import { ChatContext } from "../../context/ChatContext";
+import { ChatContext } from "../../../context/ChatContext";
 
 const ParticipantMedia = ({ participantId, auth, callDuration, handleLeave, isInitiator, participant, isRinging }) => {
   const micRef = useRef(null);

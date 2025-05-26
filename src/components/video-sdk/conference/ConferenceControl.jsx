@@ -5,8 +5,8 @@ import {
   FaRegHandPaper, FaCommentDots
 } from "react-icons/fa";
 import { useMeeting, useParticipant, usePubSub } from "@videosdk.live/react-sdk";
-import { AuthContext } from "../../context/AuthContext";
-import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../../context/AuthContext";
+import { ChatContext } from "../../../context/ChatContext";
 import { toast } from 'react-toastify';
 
 import CallMessagingModal from "./CallMessagingModal";
