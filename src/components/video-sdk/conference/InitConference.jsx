@@ -194,6 +194,10 @@ const InitConference = ({ meetingId, setMeetingId }) => {
               title="Upcoming Meetings"
               meetings={upcomingMeetings}
               showCountdown={true}
+              onMeetingClick={(meeting) => {
+    setMeetingId(meeting.meeting_id);
+    setMode('join');
+  }}
             />
           )}
           {recentMeetings?.length > 0 && (
@@ -201,6 +205,10 @@ const InitConference = ({ meetingId, setMeetingId }) => {
               title="Recent Meetings"
               meetings={recentMeetings}
               showCountdown={false}
+              onMeetingClick={(meeting) => {
+    setMeetingId(meeting.meeting_id);
+    setMode('join');
+  }}
             />
           )}
         </>
