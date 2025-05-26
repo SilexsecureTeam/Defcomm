@@ -24,7 +24,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
 
-  const { createMeetingMutation } = useConference();
+  const { createMeetingMutation, getMyMeetingsQuery } = useConference();
+  const {data:myMeetings, isLoading:meetingLoading}= getMyMeetingsQuery()
   const { join } = useMeeting();
 
   const {
