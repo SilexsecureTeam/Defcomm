@@ -118,7 +118,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
 
   const onJoinMeeting = async (data) => {
     setIsLoading(true);
-    setMeetingId(data.meetingId);
+    setMeetingId(data.meeting_id);
 
     try {
       await join();
