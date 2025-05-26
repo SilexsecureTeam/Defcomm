@@ -9,9 +9,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/secure': {
-        target: 'https://dash.defcomm.ng',
+        target: 'https://backend.defcomm.ng',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/secure/, '/secure'),
+        rewrite: (path) => path.replace(/^\/secure/, '/api'),
       },
     },
   },

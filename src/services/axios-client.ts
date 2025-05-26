@@ -19,7 +19,7 @@ export const axiosClient = (token: string | null, multiMedia: boolean = false): 
 
   
   const client = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_MODE === "development" ? "/secure" : import.meta.env.VITE_API_URL,
     headers,
     timeout: 60000,
     withCredentials: false,

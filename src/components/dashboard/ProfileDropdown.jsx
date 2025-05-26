@@ -3,10 +3,12 @@ import { IoIosArrowDown } from "react-icons/io";
 import { MdAccountCircle } from "react-icons/md"; // Bolder avatar icon
 import { FiUser, FiSettings, FiLogOut } from "react-icons/fi"; 
 import useAuth from "../../hooks/useAuth";
+import { useNavigate } from 'react-router-dom'
 
 const ProfileDropdown = ({ user }) => {
     const [isOpen, setIsOpen] = useState(false);
     const { logout } = useAuth();
+    const navigate= useNavigate();
 
     return (
         <div className="relative">
@@ -41,7 +43,7 @@ const ProfileDropdown = ({ user }) => {
             {isOpen && (
                 <div className="absolute z-[1000] right-0 mt-2 w-44 bg-white font-medium border rounded-md shadow-md">
                     <ul className="py-2 text-sm text-gray-700">
-                        <li className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
+                        <li onClick={() => {navigate('/dashboard/profile'); setIsOpen(false)}} className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
                             <FiUser size={16} /> Profile
                         </li>
                         <li className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
