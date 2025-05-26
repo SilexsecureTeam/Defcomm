@@ -1,4 +1,3 @@
-// InitConference.jsx
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaArrowLeft, FaSpinner } from "react-icons/fa";
@@ -12,13 +11,18 @@ import { createMeeting } from "../Api";
 import HeaderBar from "./HeaderBar";
 import JoinMeetingForm from "./JoinMeetingForm";
 import CreateMeetingForm from "./CreateMeetingForm";
+import GroupSelectorModal from "./GroupSelectorModal"; // Add this
 
 const InitConference = ({ meetingId, setMeetingId }) => {
   const { setConference } = useContext(MeetingContext);
-  const [mode, setMode] = useState(null); // null | "join" | "create"
+  const [mode, setMode] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isGeneratingId, setIsGeneratingId] = useState(false);
+
+  // Group selection modal state
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   const { createMeetingMutation } = useConference();
   const { join } = useMeeting();
@@ -37,6 +41,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
       title: "ok",
       agenda: "in let",
       startdatetime: "",
+      group_user_id: "", // New hidden input
     },
   });
 
@@ -73,8 +78,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
 
     const payload = {
       ...data,
-      meeting_link: "https://mail.google.com/",
-      group_user_id:'',
+      meeting_link: "https://mail.google.com/", // replace with real link
+      group_user_id: selectedGroup?.group_id || "", // assign selected group
       group_user: "group",
       startdatetime: formatDateTimeForBackend(data.startdatetime),
     };
@@ -85,6 +90,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
         if (newMeetingId) {
           setMeetingId(newMeetingId);
           reset();
+          setSelectedGroup(null);
           setMode("join");
         }
         setIsCreatingMeeting(false);
@@ -118,6 +124,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   return (
     <div className="max-w-lg mx-auto p-6 bg-transparent rounded-md text-white min-h-[60vh] flex flex-col">
       {mode && <HeaderBar onBack={() => setMode(null)} />}
+
       {!mode && (
         <div className="flex flex-col items-center justify-center text-center flex-grow">
           <h1 className="text-3xl font-bold mb-6">Welcome to the Conference Room</h1>
@@ -160,6 +167,18 @@ const InitConference = ({ meetingId, setMeetingId }) => {
           isCreatingMeeting={isCreatingMeeting}
           generateMeetingId={generateMeetingId}
           isGeneratingId={isGeneratingId}
+          selectedGroup={selectedGroup}
+          openGroupSelector={() => setIsGroupModalOpen(true)}
+        />
+      )}
+
+      {isGroupModalOpen && (
+        <GroupSelectorModal
+          onSelectGroup={(group) => {
+            setSelectedGroup(group);
+            setValue("group_user_id", group.group_id); // set hidden form value
+          }}
+          onClose={() => setIsGroupModalOpen(false)}
         />
       )}
     </div>
