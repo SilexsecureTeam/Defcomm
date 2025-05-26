@@ -74,6 +74,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     const payload = {
       ...data,
       meeting_link: "https://mail.google.com/",
+      group_user_id:'',
+      group_user: "group",
       startdatetime: formatDateTimeForBackend(data.startdatetime),
     };
 
