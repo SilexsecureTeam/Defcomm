@@ -32,7 +32,6 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     watch,
   } = useForm({
     defaultValues: {
-      meeting_link: "https://mail.google.com/",
       meeting_id: "",
       subject: "new meeting",
       title: "ok",
@@ -74,6 +73,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
 
     const payload = {
       ...data,
+      meeting_link: "https://mail.google.com/",
       startdatetime: formatDateTimeForBackend(data.startdatetime),
     };
 
