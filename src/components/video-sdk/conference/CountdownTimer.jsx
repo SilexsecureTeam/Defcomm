@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 const CountdownTimer = ({ startTime }) => {
   const [timeLeft, setTimeLeft] = useState('');
+  const [statusColor, setStatusColor] = useState('text-green-400');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -11,6 +12,7 @@ const CountdownTimer = ({ startTime }) => {
 
       if (diff <= 0) {
         setTimeLeft('Starting soon...');
+        setStatusColor('text-yellow-400 font-semibold');
         clearInterval(interval);
         return;
       }
@@ -19,13 +21,24 @@ const CountdownTimer = ({ startTime }) => {
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
       const seconds = Math.floor((diff / 1000) % 60);
 
-      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      let newColor = 'text-green-400';
+      if (hours === 0 && minutes <= 5) newColor = 'text-red-400 font-bold';
+      else if (hours === 0) newColor = 'text-yellow-300';
+
+      setStatusColor(newColor);
+      setTimeLeft(
+        `${hours > 0 ? `${hours}h ` : ''}${minutes}m ${seconds}s`
+      );
     }, 1000);
 
     return () => clearInterval(interval);
   }, [startTime]);
 
-  return <p className="text-sm text-yellow-300 mt-2">Starts in: {timeLeft}</p>;
+  return (
+    <p className={`text-sm mt-2 ${statusColor}`}>
+      Starts in: {timeLeft}
+    </p>
+  );
 };
 
 export default CountdownTimer;
