@@ -195,9 +195,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
               meetings={upcomingMeetings}
               showCountdown={true}
               onMeetingClick={(meeting) => {
-    onJoinMeeting(meeting);
-   // setMode('join');
-  }}
+  onJoinMeeting({ meeting_id: meeting.meeting_id });
+}}
+
             />
           )}
           {recentMeetings?.length > 0 && (
@@ -206,9 +206,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
               meetings={recentMeetings}
               showCountdown={false}
               onMeetingClick={(meeting) => {
-    onJoinMeeting(meeting);
-   // setMode('join');
-  }}
+  onJoinMeeting({ meeting_id: meeting.meeting_id });
+}}
+
             />
           )}
         </>
