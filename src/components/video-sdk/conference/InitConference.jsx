@@ -195,8 +195,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
               meetings={upcomingMeetings}
               showCountdown={true}
               onMeetingClick={(meeting) => {
-    setMeetingId(meeting.meeting_id);
-    setMode('join');
+    onJoinMeeting(meeting);
+   // setMode('join');
   }}
             />
           )}
@@ -206,8 +206,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
               meetings={recentMeetings}
               showCountdown={false}
               onMeetingClick={(meeting) => {
-    setMeetingId(meeting.meeting_id);
-    setMode('join');
+    onJoinMeeting(meeting);
+   // setMode('join');
   }}
             />
           )}
