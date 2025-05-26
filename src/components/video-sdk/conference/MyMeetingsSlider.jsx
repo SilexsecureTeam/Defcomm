@@ -11,6 +11,8 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
+  const sliderId = title.toLowerCase().replace(/\s+/g, '-'); // e.g., "upcoming-meetings"
+
   return (
     <div className="relative w-full mb-8">
       <h2 className="text-xl font-bold mb-4">{title}</h2>
@@ -18,8 +20,8 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
       <Swiper
         spaceBetween={15}
         navigation={{
-          nextEl: '.next-meeting-btn',
-          prevEl: '.prev-meeting-btn',
+          nextEl: `.next-btn-${sliderId}`,
+          prevEl: `.prev-btn-${sliderId}`,
         }}
         modules={[Navigation]}
         onSlideChange={(swiper) => {
@@ -58,7 +60,7 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
       {/* Navigation Buttons */}
       <div className="flex justify-end gap-4 mt-4">
         <button
-          className={`prev-meeting-btn p-2 border border-white rounded-full transition-all duration-300 ${
+          className={`prev-btn-${sliderId} p-2 border border-white rounded-full transition-all duration-300 ${
             isBeginning ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-black'
           }`}
           disabled={isBeginning}
@@ -66,7 +68,7 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
           <AiOutlineLeft size={20} />
         </button>
         <button
-          className={`next-meeting-btn p-2 border border-white rounded-full transition-all duration-300 ${
+          className={`next-btn-${sliderId} p-2 border border-white rounded-full transition-all duration-300 ${
             isEnd ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-black'
           }`}
           disabled={isEnd}
