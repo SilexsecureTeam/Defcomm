@@ -121,7 +121,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     setMeetingId(data.meeting_id);
 
     try {
-      await join();
+      await join({ meetingId: data.meeting_id });
       setConference(true);
     } catch (error) {
       setConference(false);
