@@ -89,11 +89,12 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     createMeetingMutation.mutate(payload, {
       onSuccess: (response) => {
         const newMeetingId = response?.data?.meeting_id;
-        if (newMeetingId) {
-          setMeetingId(newMeetingId);
+        if (response) {
+          //setMeetingId(newMeetingId);
           reset();
           setSelectedGroup(null);
-          setMode("join");
+          //setMode("join");
+          setMode(null);
         }
         setIsCreatingMeeting(false);
       },
