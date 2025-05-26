@@ -26,6 +26,19 @@ const useConference = () => {
     refetchOnWindowFocus: true,
   });
 
+  const getMyMeetingsQuery = useQuery({
+    queryKey: ["myMeetings"],
+    queryFn: async () => {
+      const { data } = await client.get(`/user/getmeeting`);
+      console.log(data);
+      return data?.data || [];
+    },
+    enabled: !!authDetails,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
   // Create Meeting Mutation
   const createMeetingMutation = useMutation({
     mutationFn: (payload) =>
@@ -41,6 +54,7 @@ const useConference = () => {
 
   return {
     getAllMeetingsQuery,
+    getMyMeetingsQuery,
     createMeetingMutation,
   };
 };
