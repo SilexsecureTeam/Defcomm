@@ -29,6 +29,14 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   const {data:myMeetings, isLoading:meetingLoading}= getMyMeetingsQuery;
   const { join } = useMeeting();
 
+  const upcomingMeetings = myMeetings?.filter(meeting =>
+    new Date(meeting.startdatetime) > now
+  );
+
+  const recentMeetings = myMeetings?.filter(meeting =>
+    new Date(meeting.startdatetime) <= now
+  );
+  
   const {
     register,
     handleSubmit,
