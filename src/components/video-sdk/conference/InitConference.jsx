@@ -172,15 +172,16 @@ const InitConference = ({ meetingId, setMeetingId }) => {
         />
       )}
 
-      {isGroupModalOpen && (
+      
         <GroupSelectorModal
           onSelectGroup={(group) => {
             setSelectedGroup(group);
             setValue("group_user_id", group.group_id); // set hidden form value
           }}
+          isOpen={isGroupModalOpen}
           onClose={() => setIsGroupModalOpen(false)}
         />
-      )}
+      
     </div>
   );
 };
