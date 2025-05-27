@@ -6,6 +6,7 @@ import 'swiper/css/navigation';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { motion } from 'framer-motion';
 import CountdownTimer from './CountdownTimer';
+import { FaVideo } from "react-icons/fa";
 
 const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingClick }) => {
   const [isBeginning, setIsBeginning] = useState(true);
@@ -41,10 +42,13 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              onClick={() => onMeetingClick?.(meeting)}
+              onClick={() => onMeetingClick(meeting)}
               className="bg-oliveLight/50 hover:bg-oliveLight p-4 rounded-lg shadow-md cursor-pointer transition-all duration-200"
             >
+              <div className="flex items-center gap-2">
+              <FaVideo className="text-green-400 text-2xl" />
               <p className="font-semibold text-lg mb-1">{meeting.title}</p>
+              </div>
               <p className="text-sm text-gray-400 mb-1">{meeting.agenda}</p>
               <p className="text-sm text-white mb-1">
                 {new Date(meeting.startdatetime).toLocaleString()}
