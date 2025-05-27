@@ -17,17 +17,22 @@ const CountdownTimer = ({ startTime }) => {
         return;
       }
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+      const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 7);
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
       const seconds = Math.floor((diff / 1000) % 60);
 
       let newColor = 'text-green-400';
-      if (hours === 0 && minutes <= 5) newColor = 'text-red-400 font-bold';
-      else if (hours === 0) newColor = 'text-yellow-300';
+      if (weeks === 0 && days === 0 && hours === 0 && minutes <= 5) {
+        newColor = 'text-red-400 font-bold';
+      } else if (weeks === 0 && days === 0 && hours === 0) {
+        newColor = 'text-yellow-300';
+      }
 
       setStatusColor(newColor);
       setTimeLeft(
-        `${hours > 0 ? `${hours}h ` : ''}${minutes}m ${seconds}s`
+        `${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s`
       );
     }, 1000);
 
