@@ -30,10 +30,15 @@ const CountdownTimer = ({ startTime }) => {
         newColor = 'text-yellow-300';
       }
 
+      const parts = [];
+      if (weeks > 0) parts.push(`${weeks}w`);
+      if (days > 0) parts.push(`${days}d`);
+      if (hours > 0) parts.push(`${hours}h`);
+      if (minutes > 0) parts.push(`${minutes}m`);
+      if (seconds > 0) parts.push(`${seconds}s`);
+
       setStatusColor(newColor);
-      setTimeLeft(
-        `${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s`
-      );
+      setTimeLeft(parts.join(' '));
     }, 1000);
 
     return () => clearInterval(interval);
