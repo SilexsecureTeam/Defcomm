@@ -224,8 +224,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                   onClick={() => setShowJoinForm(prev => !prev)}
                 >
                   {showJoinForm
-                    ? "Join Using Meeting ID"
-                    : "Back to My Meetings"}
+                    ? "Back to My Meetings"
+                    : "Join Using Meeting ID"}
                 </button>
               </div>
 
