@@ -37,8 +37,12 @@ const App = () => {
                       <Route path="/" element={<Navigate to="/login" />} />
 
                       {/* Using ProtectedRoute as a Component for dashboard */}
-                      <Route path="/dashboard/*" element={<SecureRoute />}>
-  <Route path="" element={<Dashboard />} />
+                      <Route path="/dashboard" element={<SecureRoute />}>
+  <Route
+  path="/*"
+  element={<ProtectedRoute Component={Dashboard} />}
+/>
+
 </Route>
 
 
