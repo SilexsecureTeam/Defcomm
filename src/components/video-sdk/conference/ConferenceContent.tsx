@@ -112,7 +112,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }: { meetingId: string | nu
       <InitConference meetingId={meetingId} setMeetingId={setMeetingId} />
     );
   }
-
+console.log(meetingId, conference)
   return (
     pathname === "/dashboard/conference" ? (
       <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
