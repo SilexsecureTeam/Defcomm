@@ -121,9 +121,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     }
     setIsLoading(true);
     try {
-      setMeetingId(waitingScreen.meeting_id);
+      //setMeetingId(waitingScreen.meeting_id);
       setConference(waitingScreen)
-      await join({ meetingId: waitingScreen.meeting_id });
+      await join();
     } catch (error) {
       onFailure({
         message: "Meeting Error",
