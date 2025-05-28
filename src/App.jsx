@@ -18,7 +18,8 @@ const DeffViewer = lazy(() => import("./pages/DeffViewer"));
 const SecureChatUI = lazy(() => import("./pages/SecureChatUI"));
 const ChatInterface = lazy(() => import("./pages/ChatInterface"));
 
-const DashboardWrapper = lazy(() => import("./layout/DashboardWrapper"));
+//const DashboardWrapper = lazy(() => import("./layout/DashboardWrapper"));
+const SecureRoute = lazy(() => import("./routes/SecureRoute"));
 
 const App = () => {
   return (
@@ -36,7 +37,10 @@ const App = () => {
                       <Route path="/" element={<Navigate to="/login" />} />
 
                       {/* Using ProtectedRoute as a Component for dashboard */}
-                      <Route path="/dashboard/*" element={<ProtectedRoute Component={Dashboard} />} />
+                      <Route path="/dashboard/*" element={<SecureRoute />}>
+  <Route path="" element={<Dashboard />} />
+</Route>
+
 
                       {/* Catch-all redirect */}
                       <Route path="*" element={<Navigate to="/" />} />
