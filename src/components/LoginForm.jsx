@@ -4,8 +4,13 @@ import OtpInput from "react-otp-input";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import useAuth from "../hooks/useAuth";
 import { onFailure } from "../utils/notifications/OnFailure";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const LoginForm = ({ version }) => {
+    const location = useLocation();
+const navigate = useNavigate();
+
+const from = location.state?.from?.pathname || "/dashboard";
     const { register, handleSubmit, formState: { errors } } = useForm({
         mode: "onChange", // Validates as the user types
     });
