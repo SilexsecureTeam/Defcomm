@@ -83,16 +83,16 @@ const useAuth = () => {
 
   // ✅ OTP Verify
   const verifyOtpMutation = useMutation({
-    mutationFn: async (otpData) => {
+    mutationFn: async ({...otpData, from}) => {
       const { data } = await client.post("/loginWithPhone", otpData);
       if (data?.status !== 200) throw new Error("Invalid response: User data not found");
       return data.data;
     },
-    onSuccess: (userData) => {
-      updateAuth(userData);
-      navigate("/dashboard/home");
-      onSuccess({ message: "OTP Verified!", success: "Continuing to dashboard" });
-    },
+    onSuccess: (userData, variables) => {
+  updateAuth(userData);
+  navigate(variables?.from || "/dashboard/home");
+  onSuccess({ message: "OTP Verified!", success: "Continuing to dashboard" });
+},
     onError: (err) => {
       onFailure({ message: "OTP Verification Failed", error: extractErrorMessage(err) });
     },
