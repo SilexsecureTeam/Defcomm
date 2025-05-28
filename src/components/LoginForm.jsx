@@ -10,7 +10,7 @@ const LoginForm = ({ version }) => {
     const location = useLocation();
 const navigate = useNavigate();
 
-const from = location.state?.from?.pathname || "/dashboard/home";
+const from = location.state?.fromLogout ?"/dashboard/home" : location.state?.from?.pathname || "/dashboard/home";
     const { register, handleSubmit, formState: { errors } } = useForm({
         mode: "onChange", // Validates as the user types
     });
