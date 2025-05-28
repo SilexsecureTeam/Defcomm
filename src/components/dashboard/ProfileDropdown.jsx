@@ -46,7 +46,7 @@ const ProfileDropdown = ({ user }) => {
                         <li onClick={() => {navigate('/dashboard/profile'); setIsOpen(false)}} className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
                             <FiUser size={16} /> Profile
                         </li>
-                        <li className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
+                        <li onClick={() => {navigate('/dashboard/profile'); setIsOpen(false)}} className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 cursor-pointer">
                             <FiSettings size={16} /> Settings
                         </li>
                         <li
