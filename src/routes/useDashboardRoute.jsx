@@ -1,10 +1,10 @@
 import { lazy, Suspense, useContext } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Fallback from "../components/Fallback";
 import { ThemeProvider } from "../context/ThemeContext";
 
-// Pages
+// Lazy-loaded pages
 const DashboardWrapper = lazy(() => import("../layout/DashboardWrapper"));
 const Home = lazy(() => import("../pages/Dashboard"));
 const ChatInterface = lazy(() => import("../pages/ChatInterface"));
@@ -26,57 +26,56 @@ const Groups = lazy(() => import("../pages/Groups"));
 const SecureChatUI = lazy(() => import("../pages/SecureChatUI"));
 const ShowConferenceRoute = lazy(() => import("../pages/ShowConferenceRoute"));
 
-function useDashBoardRoute() {
+const DashboardRoutes = () => {
   const { authDetails } = useContext(AuthContext);
 
-  return authDetails?.user?.role === "user" ? (
+  if (authDetails?.user?.role !== "user") {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
     <ThemeProvider>
       <Suspense fallback={<Fallback />}>
         <Routes>
-          <Route path="/chat" element={
-            <>
-              {/* For Mobile: Render ChatInterface inside DashboardWrapper */}
-              <div className="block lg:hidden">
-                <DashboardWrapper>
-                  <ChatInterface />
-                </DashboardWrapper>
-              </div>
-
-              {/* For Desktop: Render ChatBoxTwo outside DashboardWrapper */}
-              <div className="hidden lg:block">
-                <SecureChatUI />
-              </div>
-            </>
-          } />
+          <Route
+            path="chat"
+            element={
+              <>
+                <div className="block lg:hidden">
+                  <DashboardWrapper>
+                    <ChatInterface />
+                  </DashboardWrapper>
+                </div>
+                <div className="hidden lg:block">
+                  <SecureChatUI />
+                </div>
+              </>
+            }
+          />
           <Route path="/" element={<DashboardWrapper />}>
-            <Route path="/home" element={<Home />} />
-            <Route path="/new-file" element={<DeffViewer />} />
-            <Route path="/view/:fileId" element={<PDFViewer />} />
-            <Route path="/file-view/:fileUrl" element={<DeffViewer />} />
-            <Route path="/contacts" element={<ContactPage />} />
-            <Route path="/file-manager" element={<FileManager />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/file-sharing" element={<FileDashboard />} />
-            <Route path="/groups" element={<Groups />} />
-            <Route path="/comm" element={<WalkieTalkie />} />
-            <Route path="/drive" element={<MyDrive />} />
-            <Route path="/drive/:id" element={<DriveContent />} />
-            <Route path="/isurvive" element={<DefcommAi />} />
-            <Route path="/isurvive/chat" element={<ChatBox />} />
-            <Route path="/isurvive/voice" element={<ChatBoxTwo />} />
-            <Route path="/settings" element={<Settings />} />
-
-            <Route path="/conference" element={<ShowConferenceRoute />} />
-
-            <Route path="/*" element={<ComingSoon />} />
+            <Route path="home" element={<Home />} />
+            <Route path="new-file" element={<DeffViewer />} />
+            <Route path="view/:fileId" element={<PDFViewer />} />
+            <Route path="file-view/:fileUrl" element={<DeffViewer />} />
+            <Route path="contacts" element={<ContactPage />} />
+            <Route path="file-manager" element={<FileManager />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="file-sharing" element={<FileDashboard />} />
+            <Route path="groups" element={<Groups />} />
+            <Route path="comm" element={<WalkieTalkie />} />
+            <Route path="drive" element={<MyDrive />} />
+            <Route path="drive/:id" element={<DriveContent />} />
+            <Route path="isurvive" element={<DefcommAi />} />
+            <Route path="isurvive/chat" element={<ChatBox />} />
+            <Route path="isurvive/voice" element={<ChatBoxTwo />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="conference" element={<ShowConferenceRoute />} />
+            <Route path="*" element={<ComingSoon />} />
           </Route>
         </Routes>
       </Suspense>
     </ThemeProvider>
-
-  ) : (
-    <Navigate to="/login" replace />
   );
-}
+};
 
-export default useDashBoardRoute;
+export default DashboardRoutes;
