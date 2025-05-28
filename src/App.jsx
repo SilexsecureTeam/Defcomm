@@ -13,12 +13,11 @@ import { BotProvider } from "./context/BotContext";
 
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
-const Dashboard = lazy(() => import("./routes/useDashboardRoute"));
+const Dashboard = lazy(() => import("./routes/DashboardRoutes"));
 const DeffViewer = lazy(() => import("./pages/DeffViewer"));
 const SecureChatUI = lazy(() => import("./pages/SecureChatUI"));
 const ChatInterface = lazy(() => import("./pages/ChatInterface"));
 
-//const DashboardWrapper = lazy(() => import("./layout/DashboardWrapper"));
 const SecureRoute = lazy(() => import("./routes/SecureRoute"));
 
 const App = () => {
@@ -39,7 +38,7 @@ const App = () => {
                       {/* Using ProtectedRoute as a Component for dashboard */}
                       <Route path="/dashboard/*" element={<SecureRoute />}>
   <Route
-  path=""
+  path="*"
   element={<ProtectedRoute Component={Dashboard} />}
 />
 
