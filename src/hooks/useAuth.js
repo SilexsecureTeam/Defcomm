@@ -105,7 +105,7 @@ const useAuth = () => {
     },
     onSuccess: () => {
       updateAuth(null);
-      navigate("/", { replace: true });
+      navigate("/login", { state: { fromLogout: true }, replace: true });
       onSuccess({
         message: "Logout successful",
         success: "You have been logged out.",
