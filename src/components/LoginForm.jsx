@@ -10,7 +10,7 @@ const LoginForm = ({ version }) => {
     const location = useLocation();
 const navigate = useNavigate();
 
-const from = location.state?.from?.pathname || "/dashboard";
+const from = location.state?.from?.pathname || "/dashboard/home";
     const { register, handleSubmit, formState: { errors } } = useForm({
         mode: "onChange", // Validates as the user types
     });
@@ -47,7 +47,7 @@ const from = location.state?.from?.pathname || "/dashboard";
 
     const handleVerifyOtp = async () => {
         if (otp.length === 4 && userData) {
-            await verifyOtp({ ...userData, otp });
+            await verifyOtp({ ...userData, otp, from});
         }
     };
 
