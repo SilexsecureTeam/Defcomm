@@ -49,7 +49,7 @@ const WaitingScreen = ({
 
   return (
     <div className="h-screen bg-gray-900 text-white flex items-center justify-center z-50">
-      <div className="bg-[#1F2937] p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5 border border-gray-700">
+      <div className="bg-[#1F2937] p-8 rounded-2xl shadow-2xl max-w-md w-[90%] text-center space-y-5 border border-gray-700">
         <div className="text-sm text-gray-400 mb-2">Meeting ID: {waitingScreen.meeting_id}</div>
         <h2 className="text-3xl font-bold">{waitingScreen.title}</h2>
         {waitingScreen.agenda && (

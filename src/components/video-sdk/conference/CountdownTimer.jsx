@@ -12,7 +12,7 @@ const CountdownTimer = ({ startTime }) => {
 
       if (diff <= 0) {
         setTimeLeft('Starting soon...');
-        setStatusColor('text-yellow-400 font-semibold');
+        setStatusColor('text-yellow font-semibold');
         clearInterval(interval);
         return;
       }
@@ -27,7 +27,7 @@ const CountdownTimer = ({ startTime }) => {
       if (weeks === 0 && days === 0 && hours === 0 && minutes <= 5) {
         newColor = 'text-red-400 font-bold';
       } else if (weeks === 0 && days === 0 && hours === 0) {
-        newColor = 'text-yellow-300';
+        newColor = 'text-yellow/80';
       }
 
       const parts = [];

@@ -1,10 +1,10 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Modal from "../modal/Modal";
 import GroupSlide from "../GroupSlide";
 import { FaSpinner } from "react-icons/fa6";
 import useGroups from "../../hooks/useGroup";
 
-const GroupSelectorModal = ({ isOpen, onSelectGroup, onClose }) => {
+const GroupSelectorModal = ({ isOpen, onSelectGroup, onClose, selectedGroup }) => {
   const { useFetchGroups } = useGroups();
   const { data: groups, isLoading } = useFetchGroups();
 
@@ -23,6 +23,7 @@ const GroupSelectorModal = ({ isOpen, onSelectGroup, onClose }) => {
               onSelectGroup(group);
               onClose();
             }}
+            selectedGroup={selectedGroup}
             forceSingleView={true}
           />
         ) : (

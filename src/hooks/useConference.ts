@@ -44,7 +44,7 @@ const useConference = () => {
     mutationFn: (payload) =>
       client.post("/user/meeting/create", payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(["meetings"]);
+      queryClient.invalidateQueries(["myMeetings"]);
       onSuccess({ message: "Meeting successfully created!", success: "New meeting added" });
     },
     onError: (err) => {
@@ -52,10 +52,24 @@ const useConference = () => {
     }
   });
 
+  // Create Meeting Mutation
+  const updateMeetingMutation = useMutation({
+    mutationFn: (payload) =>
+      client.post("/user/meeting/update", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["myMeetings"]);
+      onSuccess({ message: "Meeting updated successfully!", success: "Meeting updated" });
+    },
+    onError: (err) => {
+      onFailure({ message: "Failed to update meeting", error: extractErrorMessage(err) });
+    }
+  });
+
   return {
     getMeetingInviteQuery,
     getMyMeetingsQuery,
     createMeetingMutation,
+    updateMeetingMutation
   };
 };
 

@@ -1,4 +1,4 @@
-import { useContext, useState, useMemo } from "react";
+import { useContext, useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MeetingContext } from "../../../context/MeetingContext";
 import useConference from "../../../hooks/useConference";
@@ -25,9 +25,12 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [waitingScreen, setWaitingScreen] = useState(null);
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState(null);
+
   const {
     createMeetingMutation,
     getMyMeetingsQuery,
+    updateMeetingMutation,
     getMeetingInviteQuery
   } = useConference();
   const { data: createdMeetings = [], isLoading: loadingCreated } = getMyMeetingsQuery;
@@ -40,7 +43,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   const upcomingMeetings = useMemo(() => {
     const now = new Date();
     return [
-      ...labelMeetings(createdMeetings.filter(m => new Date(m.startdatetime) > now), "Created"),
+      ...labelMeetings(createdMeetings.filter(m => new Date(m.startdatetime) > now), "You"),
       ...labelMeetings(invitedMeetings.filter(m => new Date(m.startdatetime) > now), "Invited")
     ].sort((a, b) => new Date(a.startdatetime) - new Date(b.startdatetime));
   }, [createdMeetings, invitedMeetings]);
@@ -52,6 +55,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     formState: { errors },
     reset,
     setValue,
+    watch
   } = useForm({
     defaultValues: {
       meeting_id: "",
@@ -89,7 +93,10 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   };
   const onCreateMeeting = (data) => {
     setIsCreatingMeeting(true);
-    const payload = {
+    const payload = editingMeeting ? {
+       ...data,
+       startdatetime: formatDateTimeForBackend(data.startdatetime)
+    }:{
       ...data,
       meeting_link: "https://cloud.defcomm.ng",
       group_user_id: selectedGroup?.group_id || "",
@@ -97,16 +104,21 @@ const InitConference = ({ meetingId, setMeetingId }) => {
       startdatetime: formatDateTimeForBackend(data.startdatetime),
     };
 
-    createMeetingMutation.mutate(payload, {
+    const mutation = editingMeeting
+      ? updateMeetingMutation.mutate // You'll need to implement update logic
+      : createMeetingMutation.mutate;
+
+    mutation(payload, {
       onSuccess: () => {
         reset();
         setSelectedGroup(null);
+        setEditingMeeting(null);
         setMode(null);
         setIsCreatingMeeting(false);
       },
       onError: (error) => {
         onFailure({
-          message: "Meeting Creation Failed",
+          message: editingMeeting ? "Update Failed" : "Creation Failed",
           error: extractErrorMessage(error),
         });
         setIsCreatingMeeting(false);
@@ -138,6 +150,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     setMeetingId(null);
     setConference(null);
   };
+  useEffect(()=>{
+    setSelectedGroup(editingMeeting ? {group_id: editingMeeting?.id}: null)
+  },[editingMeeting])
   return (
     <div className="min-h-screen p-6 text-white bg-transparent">
       {/* Full View Meeting Detail (Zoom-style) */}
@@ -150,7 +165,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
         <>
           {mode && <HeaderBar onBack={() => setMode(null)} />}
           {/* Show meeting sliders and actions if no meeting selected */}
-          {mode === null && !conference && !loading && (
+          {mode === null && (
             <div className="space-y-8">
               {upcomingMeetings.length > 0 && (
                 <MyMeetingsSlider
@@ -161,6 +176,16 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                     setWaitingScreen(meeting);
                     setMeetingId(meeting.meeting_id);
                   }}
+
+                  onEditMeeting={(meeting) => {
+                    setEditingMeeting(meeting);
+                    setMode("create");
+                    reset({
+                      ...meeting,
+                      startdatetime: new Date(meeting.startdatetime).toISOString().slice(0, 16),
+                    });
+                  }}
+                  loading={loading}
                   showSource={true}
                 />
               )}
@@ -168,8 +193,8 @@ const InitConference = ({ meetingId, setMeetingId }) => {
           )}
           {mode === null &&
             <div className="max-w-lg mx-auto flex flex-col items-center justify-center text-center">
-              <h1 className="text-3xl font-bold mb-4">Welcome to the Conference Room</h1>
-              <p className="mb-6 text-gray-300">
+              <h1 className="text-4xl font-extrabold mb-2 text-center tracking-tight">Welcome to the Conference Room</h1>
+              <p className="mb-6 text-gray-300 max-w-xl mx-auto leading-relaxed text-center">
                 Connect, collaborate, and create with ease. Here you can view your upcoming sessions,
                 join a meeting using an ID, or host a new one tailored to your needs.
               </p>
@@ -178,11 +203,11 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                   className="flex-1 bg-[#5C7C2A] p-4 rounded-md font-semibold hover:bg-[#4e6220]"
                   onClick={() => setMode("join")}
                 >
-                  Enter a Meeting
+                  View My Meetings
                 </button>
                 <button
                   className="flex-1 bg-oliveGreen p-4 rounded-md font-semibold hover:bg-olive"
-                  onClick={() => setMode("create")}
+                  onClick={() => {setMode("create"); setEditingMeeting(null); setSelectedGroup(null)}}
                 >
                   Create Meeting
                 </button>
@@ -198,7 +223,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                   className="font-medium text-sm text-oliveDark bg-slate-100 hover:bg-slate-200 hover:underline p-2 rounded-lg"
                   onClick={() => setShowJoinForm(prev => !prev)}
                 >
-                  {showJoinForm ? "Show Meetings" : "Join by Meeting ID"}
+                  {showJoinForm
+                    ? "Join Using Meeting ID"
+                    : "Back to My Meetings"}
                 </button>
               </div>
 
@@ -210,6 +237,14 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                   setWaitingScreen(meeting);
                   setMeetingId(meeting.meeting_id);
                 }}
+                onEditMeeting={(meeting) => {
+                    setEditingMeeting(meeting);
+                    setMode("create");
+                    reset({
+                      ...meeting,
+                      startdatetime: new Date(meeting.startdatetime).toISOString().slice(0, 16),
+                    });
+                  }}
                 showSource={true}
               /> : (
                 <div className="mt-6 max-w-lg mx-auto">
@@ -234,23 +269,27 @@ const InitConference = ({ meetingId, setMeetingId }) => {
           )}
 
           {mode === "create" && (
-            <CreateMeetingForm
-              register={register}
-              errors={errors}
-              handleSubmit={handleSubmit}
-              onSubmit={onCreateMeeting}
-              isCreatingMeeting={isCreatingMeeting}
-              generateMeetingId={generateMeetingId}
-              isGeneratingId={isGeneratingId}
-              selectedGroup={selectedGroup}
-              openGroupSelector={() => setIsGroupModalOpen(true)}
-            />
+            <div className="mt-6 max-w-lg mx-auto">
+              <CreateMeetingForm
+                register={register}
+                errors={errors}
+                handleSubmit={handleSubmit}
+                onSubmit={onCreateMeeting}
+                isCreatingMeeting={isCreatingMeeting}
+                generateMeetingId={generateMeetingId}
+                isGeneratingId={isGeneratingId}
+                selectedGroup={selectedGroup}
+                openGroupSelector={() => setIsGroupModalOpen(true)}
+                isEditing={!!editingMeeting}
+              />
+            </div>
           )}
 
           <GroupSelectorModal
+            selectedGroup={selectedGroup}
             onSelectGroup={(group) => {
               setSelectedGroup(group);
-              setValue("group_user_id", group.group_id);
+              setValue("group_user_id", group?.group_id, { shouldValidate: true });
             }}
             isOpen={isGroupModalOpen}
             onClose={() => setIsGroupModalOpen(false)}

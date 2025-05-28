@@ -119,9 +119,8 @@ console.log(meetingId, conference)
         {/* Header */}
         <div className="flex justify-between items-center mb-6 gap-2">
           <div>
-            <p className="text-lg font-semibold">{conference?.title}</p>
+            <p className="text-lg font-semibold">{conference?.title || "Conference"}</p>
             <p className="text-sm text-red-500 mt-1">● Recording 00:45:53</p>
-            <p className="text-xs text-red-500 mt-1">{meetingId}</p>
           </div>
           <button className="bg-[#5C7C2A] text-white text-sm px-4 py-2 rounded-md">
             + Invite Member
