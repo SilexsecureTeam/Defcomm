@@ -83,7 +83,7 @@ const useAuth = () => {
 
   // ✅ OTP Verify
   const verifyOtpMutation = useMutation({
-    mutationFn: async ({...otpData, from}) => {
+    mutationFn: async (otpData) => {
       const { data } = await client.post("/loginWithPhone", otpData);
       if (data?.status !== 200) throw new Error("Invalid response: User data not found");
       return data.data;
