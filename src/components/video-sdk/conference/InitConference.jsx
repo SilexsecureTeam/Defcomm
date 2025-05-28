@@ -1,6 +1,5 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { MeetingContext } from "../../../context/MeetingContext";
 import useConference from "../../../hooks/useConference";
 import { useMeeting } from "@videosdk.live/react-sdk";
@@ -11,50 +10,58 @@ import { createMeeting } from "../Api";
 import HeaderBar from "./HeaderBar";
 import JoinMeetingForm from "./JoinMeetingForm";
 import CreateMeetingForm from "./CreateMeetingForm";
-import GroupSelectorModal from "../../dashboard/GroupSelectorModal"; // Add this
+import GroupSelectorModal from "../../dashboard/GroupSelectorModal";
 import MyMeetingsSlider from "./MyMeetingsSlider";
+import WaitingScreen from "./WaitingScreen";
+import MeetingList from "./MeetingList";
 
 const InitConference = ({ meetingId, setMeetingId }) => {
-  const { setConference } = useContext(MeetingContext);
+  const { conference, setConference } = useContext(MeetingContext);
   const [mode, setMode] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isGeneratingId, setIsGeneratingId] = useState(false);
-
-  // Group selection modal state
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
-
-  const { createMeetingMutation, getMyMeetingsQuery } = useConference();
-  const {data:myMeetings, isLoading:meetingLoading}= getMyMeetingsQuery;
+  const [waitingScreen, setWaitingScreen] = useState(null);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const {
+    createMeetingMutation,
+    getMyMeetingsQuery,
+    getMeetingInviteQuery
+  } = useConference();
+  const { data: createdMeetings = [], isLoading: loadingCreated } = getMyMeetingsQuery;
+  const { data: invitedMeetings = [], isLoading: loadingInvited } = getMeetingInviteQuery;
   const { join } = useMeeting();
   const now = new Date();
-  const upcomingMeetings = myMeetings?.filter(meeting =>
-    new Date(meeting.startdatetime) > now
-  );
+  const labelMeetings = (meetings, source) =>
+    meetings.map(m => ({ ...m, _source: source }));
 
-  const recentMeetings = myMeetings?.filter(meeting =>
-    new Date(meeting.startdatetime) <= now
-  );
-  
+  const upcomingMeetings = useMemo(() => {
+    const now = new Date();
+    return [
+      ...labelMeetings(createdMeetings.filter(m => new Date(m.startdatetime) > now), "Created"),
+      ...labelMeetings(invitedMeetings.filter(m => new Date(m.startdatetime) > now), "Invited")
+    ].sort((a, b) => new Date(a.startdatetime) - new Date(b.startdatetime));
+  }, [createdMeetings, invitedMeetings]);
+
+  const loading = loadingCreated || loadingInvited;
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm({
     defaultValues: {
       meeting_id: "",
-      subject: "new meeting",
-      title: "ok",
-      agenda: "in let",
+      subject: "",
+      title: "",
+      agenda: "",
       startdatetime: "",
-      group_user_id: "", // New hidden input
+      group_user_id: "",
     },
   });
-
   const {
     register: registerJoin,
     handleSubmit: handleSubmitJoin,
@@ -64,13 +71,11 @@ const InitConference = ({ meetingId, setMeetingId }) => {
       meetingId: meetingId || "",
     },
   });
-
   const formatDateTimeForBackend = (datetimeLocal) => {
     if (!datetimeLocal) return "";
     const dateObj = new Date(datetimeLocal);
     return dateObj.toISOString().slice(0, 19).replace("T", " ");
   };
-
   const generateMeetingId = async () => {
     setIsGeneratingId(true);
     try {
@@ -82,28 +87,21 @@ const InitConference = ({ meetingId, setMeetingId }) => {
       setIsGeneratingId(false);
     }
   };
-
   const onCreateMeeting = (data) => {
     setIsCreatingMeeting(true);
-
     const payload = {
       ...data,
-      meeting_link: "https://mail.google.com/", // replace with real link
-      group_user_id: selectedGroup?.group_id || "", // assign selected group
+      meeting_link: "https://cloud.defcomm.ng",
+      group_user_id: selectedGroup?.group_id || "",
       group_user: "group",
       startdatetime: formatDateTimeForBackend(data.startdatetime),
     };
 
     createMeetingMutation.mutate(payload, {
-      onSuccess: (response) => {
-        const newMeetingId = response?.data?.meeting_id;
-        if (response) {
-          //setMeetingId(newMeetingId);
-          reset();
-          setSelectedGroup(null);
-          //setMode("join");
-          setMode(null);
-        }
+      onSuccess: () => {
+        reset();
+        setSelectedGroup(null);
+        setMode(null);
         setIsCreatingMeeting(false);
       },
       onError: (error) => {
@@ -116,116 +114,149 @@ const InitConference = ({ meetingId, setMeetingId }) => {
     });
   };
 
-  const onJoinMeeting = async (data) => {
+  const confirmJoinMeeting = async () => {
+    if (!waitingScreen?.meeting_id) {
+      onFailure({ message: "Meeting ID is missing" });
+      return;
+    }
     setIsLoading(true);
-    setMeetingId(data.meeting_id);
-
     try {
-      await join({ meetingId: data.meeting_id });
-      setConference(true);
+      setMeetingId(waitingScreen.meeting_id);
+      setConference(waitingScreen)
+      await join({ meetingId: waitingScreen.meeting_id });
     } catch (error) {
-      setConference(false);
-      const message = extractErrorMessage(error) || "Unknown error occurred";
-      onFailure({ message: "Meeting Error", error: message });
+      onFailure({
+        message: "Meeting Error",
+        error: extractErrorMessage(error) || "Unknown error occurred",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
+  const handleCancel = () => {
+    setWaitingScreen(null);
+    setMeetingId(null);
+    setConference(null);
+  };
   return (
-    <div className="max-w-lg mx-auto p-6 bg-transparent rounded-md text-white min-h-[60vh] flex flex-col">
-      {mode && <HeaderBar onBack={() => setMode(null)} />}
+    <div className="min-h-screen p-6 text-white bg-transparent">
+      {/* Full View Meeting Detail (Zoom-style) */}
+      {waitingScreen ? (
+        <WaitingScreen
+          waitingScreen={waitingScreen}
+          onJoin={() => confirmJoinMeeting(waitingScreen)}
+          onCancel={handleCancel} />
+      ) : (
+        <>
+          {mode && <HeaderBar onBack={() => setMode(null)} />}
+          {/* Show meeting sliders and actions if no meeting selected */}
+          {mode === null && !conference && !loading && (
+            <div className="space-y-8">
+              {upcomingMeetings.length > 0 && (
+                <MyMeetingsSlider
+                  title="Upcoming Meetings"
+                  meetings={upcomingMeetings}
+                  showCountdown={true}
+                  onMeetingClick={(meeting) => {
+                    setWaitingScreen(meeting);
+                    setMeetingId(meeting.meeting_id);
+                  }}
+                  showSource={true}
+                />
+              )}
+            </div>
+          )}
+          {mode === null &&
+            <div className="max-w-lg mx-auto flex flex-col items-center justify-center text-center">
+              <h1 className="text-3xl font-bold mb-4">Welcome to the Conference Room</h1>
+              <p className="mb-6 text-gray-300">
+                Connect, collaborate, and create with ease. Here you can view your upcoming sessions,
+                join a meeting using an ID, or host a new one tailored to your needs.
+              </p>
+              <div className="flex gap-6 w-full max-w-md">
+                <button
+                  className="flex-1 bg-[#5C7C2A] p-4 rounded-md font-semibold hover:bg-[#4e6220]"
+                  onClick={() => setMode("join")}
+                >
+                  Enter a Meeting
+                </button>
+                <button
+                  className="flex-1 bg-oliveGreen p-4 rounded-md font-semibold hover:bg-olive"
+                  onClick={() => setMode("create")}
+                >
+                  Create Meeting
+                </button>
+              </div>
+            </div>
+          }
 
-      {!mode && (
-        <div className="flex flex-col items-center justify-center text-center flex-grow">
-          <h1 className="text-3xl font-bold mb-6">Welcome to the Conference Room</h1>
-          <p className="mb-8 text-gray-300">
-            Join an existing meeting with a Meeting ID or create a new conference to start collaborating.
-          </p>
-          <div className="flex gap-6 w-full">
-            <button
-              className="flex-grow bg-[#5C7C2A] p-4 rounded-md font-semibold hover:bg-[#4e6220]"
-              onClick={() => setMode("join")}
-            >
-              Join Meeting
-            </button>
-            <button
-              className="flex-grow bg-oliveGreen p-4 rounded-md font-semibold hover:bg-olive"
-              onClick={() => setMode("create")}
-            >
-              Create Meeting
-            </button>
-          </div>
-        </div>
+          {mode === "join" && (
+            <div className="space-y-6 max-w-3xl mx-auto">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Upcoming Meetings</h2>
+                <button
+                  className="font-medium text-sm text-oliveDark bg-slate-100 hover:bg-slate-200 hover:underline p-2 rounded-lg"
+                  onClick={() => setShowJoinForm(prev => !prev)}
+                >
+                  {showJoinForm ? "Show Meetings" : "Join by Meeting ID"}
+                </button>
+              </div>
+
+              {/* Upcoming Meeting List */}
+              {!showJoinForm ? <MeetingList
+                meetings={upcomingMeetings}
+                showCountdown={true}
+                onMeetingClick={(meeting) => {
+                  setWaitingScreen(meeting);
+                  setMeetingId(meeting.meeting_id);
+                }}
+                showSource={true}
+              /> : (
+                <div className="mt-6 max-w-lg mx-auto">
+                  <JoinMeetingForm
+                    register={registerJoin}
+                    errors={errorsJoin}
+                    handleSubmit={handleSubmitJoin}
+                    onSubmit={(data) => {
+                      setConference({ meeting_id: data.meetingId });
+                      setWaitingScreen({
+                        meeting_id: data.meetingId,
+                        title: "Joining...",
+                        agenda: "",
+                        startdatetime: new Date().toISOString(),
+                      });
+                    }}
+                    isLoading={isLoading}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {mode === "create" && (
+            <CreateMeetingForm
+              register={register}
+              errors={errors}
+              handleSubmit={handleSubmit}
+              onSubmit={onCreateMeeting}
+              isCreatingMeeting={isCreatingMeeting}
+              generateMeetingId={generateMeetingId}
+              isGeneratingId={isGeneratingId}
+              selectedGroup={selectedGroup}
+              openGroupSelector={() => setIsGroupModalOpen(true)}
+            />
+          )}
+
+          <GroupSelectorModal
+            onSelectGroup={(group) => {
+              setSelectedGroup(group);
+              setValue("group_user_id", group.group_id);
+            }}
+            isOpen={isGroupModalOpen}
+            onClose={() => setIsGroupModalOpen(false)}
+          />
+        </>
       )}
-
-      {mode === "join" && (
-        <JoinMeetingForm
-          register={registerJoin}
-          errors={errorsJoin}
-          handleSubmit={handleSubmitJoin}
-          onSubmit={onJoinMeeting}
-          isLoading={isLoading}
-        />
-      )}
-
-      {mode === "create" && (
-        <CreateMeetingForm
-          register={register}
-          errors={errors}
-          handleSubmit={handleSubmit}
-          onSubmit={onCreateMeeting}
-          isCreatingMeeting={isCreatingMeeting}
-          generateMeetingId={generateMeetingId}
-          isGeneratingId={isGeneratingId}
-          selectedGroup={selectedGroup}
-          openGroupSelector={() => setIsGroupModalOpen(true)}
-        />
-      )}
-
-{mode === null && !meetingLoading && myMeetings?.length > 0 && (
-  <div>
-      {meetingLoading ? (
-        <p>Loading meetings...</p>
-      ) : (
-        <>
-          {upcomingMeetings?.length > 0 && (
-            <MyMeetingsSlider
-              title="Upcoming Meetings"
-              meetings={upcomingMeetings}
-              showCountdown={true}
-              onMeetingClick={(meeting) => {
-  onJoinMeeting({ meeting_id: meeting.meeting_id });
-}}
-
-            />
-          )}
-          {recentMeetings?.length > 0 && (
-            <MyMeetingsSlider
-              title="Recent Meetings"
-              meetings={recentMeetings}
-              showCountdown={false}
-              onMeetingClick={(meeting) => {
-  onJoinMeeting({ meeting_id: meeting.meeting_id });
-}}
-
-            />
-          )}
-        </>
-      )}
-    </div>
-)}
-
-      
-        <GroupSelectorModal
-          onSelectGroup={(group) => {
-            setSelectedGroup(group);
-            setValue("group_user_id", group.group_id); // set hidden form value
-          }}
-          isOpen={isGroupModalOpen}
-          onClose={() => setIsGroupModalOpen(false)}
-        />
-      
     </div>
   );
 };

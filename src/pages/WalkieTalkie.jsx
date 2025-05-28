@@ -27,12 +27,11 @@ const WalkieTalkie = () => {
             {/* SEO Content */}
             <SEOHelmet title="Walkie Talkie" />
             {/* Header Section */}
-            <div className="sticky top-0 z-50 flex lg:hidden justify-between items-center bg-oliveDark text-white p-4 text-sm font-medium dark:bg-oliveLight">
-                <button className="bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg flex items-center gap-2 px-3 py-2 border border-olive transition-all hover:scale-105">
+            <div className="sticky top-0 z-50 flex xl:hidden justify-between items-center bg-oliveDark text-white p-4 text-sm font-medium dark:bg-oliveLight">
+                <button aria-label="Upgrade to Premium" className="bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg flex items-center gap-2 px-3 py-2 border border-olive transition-all hover:scale-105">
                     <IoFlash className="text-yellow" /> <span className="hidden md:block">Upgrade to Premium</span>
                 </button>
-
-                <FaBarsStaggered size={24} className="cursor-pointer" onClick={() => setIsOpen(true)} />
+                <FaBarsStaggered aria-label="Open Communication Panel" size={24} className="cursor-pointer" onClick={() => setIsOpen(true)} />
             </div>
 
             <div className="text-white">
@@ -41,7 +40,7 @@ const WalkieTalkie = () => {
                         <Broadcast />
                         <RecentCalls />
                     </div>
-                    <div className="md:w-1/3 hidden lg:block">
+                    <div className="md:w-1/3 hidden xl:block">
                         <CommInterface />
                     </div>
                 </div>

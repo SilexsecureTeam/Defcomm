@@ -15,7 +15,7 @@ import { motion } from "framer-motion";
 import mainLogo from "../assets/logo-icon.png";
 
 
-const GroupSlide = ({ groups, setSelectedGroup, forceSingleView=false }) => {
+const GroupSlide = ({ groups, setSelectedGroup, forceSingleView = false }) => {
     const [isBeginning, setIsBeginning] = useState(true);
     const [isEnd, setIsEnd] = useState(false);
 
@@ -37,27 +37,29 @@ const GroupSlide = ({ groups, setSelectedGroup, forceSingleView=false }) => {
                 breakpoints={
                     forceSingleView
                         ? {
-                              320: { slidesPerView: 1 }, // Mobile always 1
-                              640: { slidesPerView: 2 },
-                              }
-                              : {
-                              320: { slidesPerView: 1 }, // Mobile always 1
-                              640: { slidesPerView: 2 },
-                              1024: { slidesPerView: 3 },
-                              
-                          }
-                        
+                            320: { slidesPerView: 1 }, // Mobile always 1
+                            640: { slidesPerView: 2 },
+                        }
+                        : {
+                            320: { slidesPerView: 1 },
+                            640: { slidesPerView: 2 },
+                            750: { slidesPerView: 1 },
+                            900: { slidesPerView: 2 },
+                            1200: { slidesPerView: 3 },
+
+                        }
+
                 }
                 className="p-3"
             >
                 {groups?.map((group, index) => (
-                    <SwiperSlide key={group.id}  onClick={() => setSelectedGroup(group)} className="w-[80%] md:min-w-60">
+                    <SwiperSlide key={group.id} onClick={() => setSelectedGroup(group)} className="w-[80%] md:min-w-60">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             className="flex items-center gap-4 p-3 rounded-lg shadow-md my-2 bg-oliveLight/50 hover:bg-oliveLight cursor-pointer"
-                           
+
                         >
                             <figure className="w-14 h-14 bg-gray-600 rounded-full overflow-hidden">
                                 <img src={group.image || mainLogo} alt="Group" className="w-full h-full object-cover" />

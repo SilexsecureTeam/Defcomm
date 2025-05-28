@@ -13,10 +13,10 @@ const useConference = () => {
   const queryClient = useQueryClient();
 
   // Fetch Conferences
-  const getAllMeetingsQuery = useQuery({
-    queryKey: ["meetings"],
+  const getMeetingInviteQuery = useQuery({
+    queryKey: ["meetingInvitations"],
     queryFn: async () => {
-      const { data } = await client.get(`/user/getmeetingid/${authDetails?.user_enid}/user`);
+      const { data } = await client.get("/user/meetingInvitationlist");
       console.log(data);
       return data?.data || [];
     },
@@ -53,7 +53,7 @@ const useConference = () => {
   });
 
   return {
-    getAllMeetingsQuery,
+    getMeetingInviteQuery,
     getMyMeetingsQuery,
     createMeetingMutation,
   };

@@ -10,13 +10,11 @@ export const MeetingProvider = ({ children }) => {
   const { authDetails } = useContext(AuthContext);
   const { callType } = useContext(ChatContext);
 
-  const [conference, setConference] = useState(false);
+  const [conference, setConference] = useState(null);
   const [me, setMe] = useState(null);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [providerMeetingId, setProviderMeetingId] = useState(null);
   const [showConference, setShowConference] = useState(false);
-  const [conferenceId, setConferenceId] = useState(null);
-
   return (
     <MeetingContext.Provider
       value={{
@@ -30,8 +28,6 @@ export const MeetingProvider = ({ children }) => {
         setProviderMeetingId,
         showConference,
         setShowConference,
-        conferenceId,
-        setConferenceId,
       }}
     >
         <SDKMeetingProvide

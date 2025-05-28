@@ -8,14 +8,14 @@ import { motion } from 'framer-motion';
 import CountdownTimer from './CountdownTimer';
 import { FaVideo } from "react-icons/fa";
 
-const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingClick }) => {
+const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingClick, showSource = false }) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
-  const sliderId = title.toLowerCase().replace(/\s+/g, '-'); // e.g., "upcoming-meetings"
+  const sliderId = title.toLowerCase().replace(/\s+/g, '-');
 
   return (
-    <div className="relative w-full mb-8">
+    <div className="relative w-full mb-8 text-white">
       <h2 className="text-xl font-bold mb-4">{title}</h2>
 
       <Swiper
@@ -32,27 +32,38 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
         breakpoints={{
           320: { slidesPerView: 1 },
           640: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
+          750: { slidesPerView: 1 },
+          900: { slidesPerView: 2 },
+          1200: { slidesPerView: 3 },
         }}
         className="p-3"
       >
         {meetings.map((meeting, index) => (
-          <SwiperSlide key={meeting.id} className="w-full md:min-w-60">
+          <SwiperSlide key={meeting.id || meeting.meeting_id} className="w-full md:min-w-60">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               onClick={() => onMeetingClick(meeting)}
-              className="bg-oliveLight/50 hover:bg-oliveLight p-4 rounded-lg shadow-md cursor-pointer transition-all duration-200"
+              className="relative bg-oliveLight/50 hover:bg-oliveLight p-4 rounded-lg shadow-md cursor-pointer transition-all duration-200"
             >
-              <div className="flex items-center gap-2">
-              <FaVideo className="text-green-400 text-2xl" />
-              <p className="font-semibold text-lg mb-1">{meeting.title}</p>
+              {/* Top-Right Source Label */}
+              {showSource && meeting._source && (
+                <div className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs border font-bold border-oliveHover text-oliveHover">
+                  {meeting._source}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 mb-1">
+                <FaVideo className="text-green-400 text-2xl" />
+                <p className="font-semibold text-lg">{meeting.title}</p>
               </div>
+
               <p className="text-sm text-gray-400 mb-1">{meeting.agenda}</p>
               <p className="text-sm text-white mb-1">
                 {new Date(meeting.startdatetime).toLocaleString()}
               </p>
+
               {showCountdown && (
                 <CountdownTimer startTime={meeting.startdatetime} />
               )}
