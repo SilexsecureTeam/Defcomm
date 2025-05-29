@@ -3,16 +3,25 @@ import useDrive from "../../hooks/useDrive";
 
 const CreateFolderForm = ({ onClose, folder }) => {
   const [form, setForm] = useState(folder ? folder :{ name: "", description: "" });
-  const { createFolderMutation } = useDrive();
+  const { createFolderMutation, updateFolderMutation } = useDrive();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createFolderMutation.mutate(form, {
+    if(folder){
+    updateFolderMutation.mutate(form, {
       onSuccess: () => {
         onClose();
         setForm({ name: "", description: "" });
       }
     });
+    }else{
+createFolderMutation.mutate(form, {
+      onSuccess: () => {
+        onClose();
+        setForm({ name: "", description: "" });
+      }
+    });
+    }
   };
 
   return (
