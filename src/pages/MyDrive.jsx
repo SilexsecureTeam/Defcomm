@@ -69,8 +69,8 @@ const MyDrive = () => {
       {/* Folders Section */}
 <div className="min-h-[160px]">
   {isLoading ? (
-    <div className="flex flex-col items-center justify-center py-20 text-white">
-    <FaSpinner className="animate-spin text-4xl text-blue-400" />
+    <div className="flex flex-col items-center justify-center py-20 text-oliveGreen">
+    <FaSpinner className="animate-spin text-4xl text-oliveHover" />
     <p className="mt-4 text-sm">Loading your folders...</p>
   </div>
   ) : error ? (
