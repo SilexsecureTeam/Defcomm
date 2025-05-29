@@ -1,8 +1,8 @@
 import { useState } from "react";
 import useDrive from "../../hooks/useDrive";
 
-const CreateFolderForm = ({ onClose }) => {
-  const [form, setForm] = useState({ name: "", description: "" });
+const CreateFolderForm = ({ onClose, folder }) => {
+  const [form, setForm] = useState(folder ? folder :{ name: "", description: "" });
   const { createFolderMutation } = useDrive();
 
   const handleSubmit = (e) => {
