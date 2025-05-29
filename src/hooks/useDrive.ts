@@ -38,11 +38,23 @@ const useDrive = () => {
             onFailure({ message: "Failed to create folder", error: extractErrorMessage(err) });
         }
     });
+    const updateFolderMutation = useMutation({
+        mutationFn: (payload) =>
+            client.post("/user/folderUpdate", payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["folders"]);
+            onSuccess({ message: "Folder successfully updated!", success: "Folder updated" });
+        },
+        onError: (err) => {
+            onFailure({ message: "Failed to update folder", error: extractErrorMessage(err) });
+        }
+    });
 
 
     return {
         getFoldersQuery,
-        createFolderMutation
+        createFolderMutation,
+        updateFolderMutation
     };
 };
 
