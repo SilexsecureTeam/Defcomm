@@ -48,7 +48,7 @@ const MyDrive = () => {
       {/* Modal */}
       <Modal isOpen={showModal} closeModal={() => setShowModal(false)}>
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-    <div className="bg-white p-6 rounded-lg w-full max-w-md text-black">
+    <div className="bg-white p-6 rounded-lg w-[90%] max-w-md text-black">
       <h2 className="text-lg font-bold mb-4">Create New Folder</h2>
       <CreateFolderForm onClose={() => setShowModal(false)} />
     </div>
