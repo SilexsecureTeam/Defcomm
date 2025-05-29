@@ -52,7 +52,7 @@ const useDrive = () => {
 
     const deleteFolderMutation = useMutation({
     mutationFn: (id) =>
-      client.delete(`/user/folderDel/${id}`),
+      client.get(`/user/folderDel/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries(["folders"]);
       onSuccess({
