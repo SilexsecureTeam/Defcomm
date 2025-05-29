@@ -37,7 +37,7 @@ const MyDrive = () => {
   const [showModal, setShowModal] = useState(false);
   const [folderForm, setFolderForm] = useState(null); // null means new folder
 
-  const { getFoldersQuery } = useDrive();
+  const { getFoldersQuery, deleteFolderMutation } = useDrive();
   const { data: folders, isLoading, error } = getFoldersQuery;
 
   const toggleOptions = (index) => {
@@ -46,7 +46,11 @@ const MyDrive = () => {
 
   const handleDelete = (folderId) => {
     console.log("Delete folder:", folderId);
+    try{
+      deleteFolderMutation(folderId)
+    }finally{
     setShowMore(null);
+    }
     // TODO: trigger mutation to delete
   };
 
