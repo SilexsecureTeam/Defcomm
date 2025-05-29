@@ -5,7 +5,7 @@ import { SiMega, SiNextcloud } from "react-icons/si";
 import { IoIosMore } from "react-icons/io";
 import { FiPlus, FiSend } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import useDrive from '../hooks/useDrive'
+import useDrive from "../hooks/useDrive";
 
 const storageServices = [
   { name: "Dropbox", used: 120, total: 200, color: "bg-blue-500", iconColor: "text-blue-500", bgOpacity: "bg-blue-500/30", icon: <FaDropbox /> },
@@ -22,28 +22,90 @@ const recentFiles = [
 ];
 
 const MyDrive = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [showMore, setShowMore] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [folderForm, setFolderForm] = useState({ name: "", description: "" });
 
   const { getFoldersQuery, createFolderMutation } = useDrive();
-  const {data: folders}= getFoldersQuery;
+  const { data: folders } = getFoldersQuery;
+
   const toggleOptions = (index) => {
     setShowMore(showMore === index ? null : index);
   };
 
+  const handleCreateFolder = (e) => {
+    e.preventDefault();
+    createFolderMutation.mutate(folderForm, {
+      onSuccess: () => {
+        setShowModal(false);
+        setFolderForm({ name: "", description: "" });
+      }
+    });
+  };
+
   return (
     <div className="p-6 bg-transparent">
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-lg font-bold mb-4">Create New Folder</h2>
+            <form onSubmit={handleCreateFolder} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  required
+                  value={folderForm.name}
+                  onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  value={folderForm.description}
+                  onChange={(e) => setFolderForm({ ...folderForm, description: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                >
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* My Drive Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-white text-xl font-semibold">My Drive</h2>
-        <button className="bg-white text-black px-4 py-2 rounded-lg shadow-md hover:bg-gray-200">+ Add New</button>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-white text-black px-4 py-2 rounded-lg shadow-md hover:bg-gray-200"
+        >
+          + Add New
+        </button>
       </div>
 
       {/* Storage Services */}
       <div className="grid grid-cols-responsive-sm gap-6">
         {storageServices.map((service, index) => (
           <motion.div
-          onClick={()=>navigate(`/dashboard/drive/${service?.name?.toLowerCase()}`)}
+            onClick={() => navigate(`/dashboard/drive/${service?.name?.toLowerCase()}`)}
             key={service.name}
             className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
             initial={{ opacity: 0, y: 20 }}
@@ -51,7 +113,6 @@ const MyDrive = () => {
             transition={{ delay: index * 0.1, duration: 0.4 }}
           >
             <div className="flex items-center space-x-3">
-              {/* Animated Icon */}
               <motion.figure
                 whileHover={{ scale: 1.1 }}
                 className={`p-3 rounded-lg ${service.bgOpacity} flex items-center justify-center`}
@@ -90,7 +151,6 @@ const MyDrive = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
             >
-              {/* File Icon and Name */}
               <div className="flex items-center space-x-3">
                 <motion.div
                   whileHover={{ scale: 1.1 }}
@@ -101,7 +161,6 @@ const MyDrive = () => {
                 <h3 className="text-lg font-medium text-gray-900">{file.name}</h3>
               </div>
 
-              {/* File Details (shown when more is clicked) */}
               <section
                 className={`${
                   index === showMore ? "flex" : "hidden"
@@ -112,7 +171,6 @@ const MyDrive = () => {
                 <p className="text-gray-500 text-sm">{file.size}</p>
               </section>
 
-              {/* Animated Action Icons */}
               <div className="flex space-x-4 text-gray-500 min-[800px]:order-1">
                 <motion.div whileHover={{ scale: 1.2 }}>
                   <FiPlus className="cursor-pointer hover:text-black" />
