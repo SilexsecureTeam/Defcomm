@@ -38,7 +38,7 @@ const MyDrive = () => {
   const [folderForm, setFolderForm] = useState({ name: "", description: "" });
 
   const { getFoldersQuery } = useDrive();
-  const { data: folders } = getFoldersQuery;
+  const { data: folders, isLoading, error } = getFoldersQuery;
 
   const toggleOptions = (index) => {
     setShowMore(showMore === index ? null : index);
@@ -66,56 +66,66 @@ const MyDrive = () => {
         </button>
       </div>
 
-      {/* Folders (Replaces Storage Services) */}
-<div className="grid grid-cols-responsive-sm gap-6">
-  {folders?.map((folder, index) => {
-    const { bg, text } = getColorByIndex(index);
-    const used = 120; // Dummy value
-    const total = 200; // Dummy value
-    const percentUsed = (used / total) * 100;
+      {/* Folders Section */}
+<div className="min-h-[160px]">
+  {isLoading ? (
+    <div className="text-white text-center py-8">Loading folders...</div>
+  ) : error ? (
+    <div className="text-red-500 text-center py-8">Failed to load folders. Please try again.</div>
+  ) : (
+    <div className="grid grid-cols-responsive-sm gap-6">
+      {folders?.length > 0 ? (
+        folders.map((folder, index) => {
+          const { bg, text } = getColorByIndex(index);
+          const used = 120; // Dummy value
+          const total = 200;
+          const percentUsed = (used / total) * 100;
 
-    return (
-      <motion.div
-        onClick={() => navigate(`/dashboard/drive/${folder?.id}`)}
-        key={folder.id || index}
-        className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1, duration: 0.4 }}
-      >
-        <div className="flex items-center space-x-3">
-          <motion.figure
-            whileHover={{ scale: 1.1 }}
-            className={`p-3 rounded-lg ${bg} flex items-center justify-center`}
-          >
-            <div className={`text-2xl ${text}`}>
-              <FaFileAlt />
-            </div>
-          </motion.figure>
-          <h3 className="text-lg font-medium text-gray-900">{folder.name}</h3>
-        </div>
+          return (
+            <motion.div
+              onClick={() => navigate(`/dashboard/drive/${folder?.id}`)}
+              key={folder.id || index}
+              className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
+            >
+              <div className="flex items-center space-x-3">
+                <motion.figure
+                  whileHover={{ scale: 1.1 }}
+                  className={`p-3 rounded-lg ${bg} flex items-center justify-center`}
+                >
+                  <div className={`text-2xl ${text}`}>
+                    <FaFileAlt />
+                  </div>
+                </motion.figure>
+                <h3 className="text-lg font-medium text-gray-900">{folder.name}</h3>
+              </div>
 
-        <div className="mt-2 text-sm text-gray-600">
-          {folder.description || "No description"}
-        </div>
+              <div className="mt-2 text-sm text-gray-600">
+                {folder.description || "No description"}
+              </div>
 
-        {/* Storage Progress */}
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className={`${text} h-2 rounded-full`}
-              style={{ width: `${percentUsed}%` }}
-            ></div>
-          </div>
-          <p className="text-sm text-gray-600 mt-2 flex justify-between">
-            {total}GB &nbsp; <span className="text-gray-400">{used}GB used</span>
-          </p>
-        </div>
-      </motion.div>
-    );
-  })}
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`${text} h-2 rounded-full`}
+                    style={{ width: `${percentUsed}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2 flex justify-between">
+                  {total}GB &nbsp; <span className="text-gray-400">{used}GB used</span>
+                </p>
+              </div>
+            </motion.div>
+          );
+        })
+      ) : (
+        <p className="text-white text-center">No folders found.</p>
+      )}
+    </div>
+  )}
 </div>
-      
 
       {/* Recent Files Section */}
       <div className="mt-8">
