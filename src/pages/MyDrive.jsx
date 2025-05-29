@@ -144,7 +144,7 @@ const MyDrive = () => {
                         />
                         {showMore === index && (
                           <div
-                            className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10"
+                            className="absolute right-0 mt-2 w-max bg-white border rounded-lg shadow-lg z-10"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
