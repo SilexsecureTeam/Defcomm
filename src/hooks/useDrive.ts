@@ -50,11 +50,30 @@ const useDrive = () => {
         }
     });
 
+    const deleteFolderMutation = useMutation({
+    mutationFn: (id) =>
+      client.post(`/user/folderDel/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["folders"]);
+      onSuccess({
+        message: "Folder successfully deleted!",
+        success: "Folder deleted",
+      });
+    },
+    onError: (err) => {
+      onFailure({
+        message: "Failed to delete folder",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
 
     return {
         getFoldersQuery,
         createFolderMutation,
-        updateFolderMutation
+        updateFolderMutation,
+        deleteFolderMutation
     };
 };
 
