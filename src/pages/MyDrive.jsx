@@ -9,13 +9,21 @@ import useDrive from "../hooks/useDrive";
 import Modal from "../components/modal/Modal";
 import CreateFolderForm from "../components/drive/CreateFolderForm";
 
-const storageServices = [
-  { name: "Dropbox", used: 120, total: 200, color: "bg-blue-500", iconColor: "text-blue-500", bgOpacity: "bg-blue-500/30", icon: <FaDropbox /> },
-  { name: "Noysi", used: 120, total: 200, color: "bg-green-500", iconColor: "text-green-500", bgOpacity: "bg-green-500/30", icon: <SiNextcloud /> },
-  { name: "Mega", used: 120, total: 200, color: "bg-red-500", iconColor: "text-red-500", bgOpacity: "bg-red-500/30", icon: <SiMega /> },
-  { name: "AppVeyor", used: 120, total: 200, color: "bg-blue-400", iconColor: "text-blue-400", bgOpacity: "bg-blue-400/30", icon: <FaAppStoreIos /> },
+const pastelColors = [
+  "bg-pink-200", "bg-green-200", "bg-blue-200", "bg-yellow-200",
+  "bg-purple-200", "bg-red-200", "bg-indigo-200", "bg-teal-200"
+];
+const textColors = [
+  "text-pink-500", "text-green-500", "text-blue-500", "text-yellow-500",
+  "text-purple-500", "text-red-500", "text-indigo-500", "text-teal-500"
 ];
 
+function getColorByIndex(index) {
+  return {
+    bg: pastelColors[index % pastelColors.length],
+    text: textColors[index % textColors.length]
+  };
+}
 const recentFiles = [
   { name: "Avala Project", owner: "Carter Mango", date: "Sun, 10 May 2022", size: "3MB", color: "bg-blue-500" },
   { name: "Design Sprint", owner: "Carter Mango", date: "Sun, 10 May 2022", size: "5MB", color: "bg-green-500" },
