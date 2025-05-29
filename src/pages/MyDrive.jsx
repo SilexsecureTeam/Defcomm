@@ -5,6 +5,7 @@ import { SiMega, SiNextcloud } from "react-icons/si";
 import { IoIosMore } from "react-icons/io";
 import { FiPlus, FiSend } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import useDrive from '../hooks/useDrive'
 
 const storageServices = [
   { name: "Dropbox", used: 120, total: 200, color: "bg-blue-500", iconColor: "text-blue-500", bgOpacity: "bg-blue-500/30", icon: <FaDropbox /> },
@@ -24,6 +25,8 @@ const MyDrive = () => {
   const navigate=useNavigate();
   const [showMore, setShowMore] = useState(null);
 
+  const { getFoldersQuery, createFolderMutation } = useDrive();
+  const {data: folders}= getFoldersQuery;
   const toggleOptions = (index) => {
     setShowMore(showMore === index ? null : index);
   };

@@ -1,0 +1,49 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { axiosClient } from "../services/axios-client";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { onFailure } from "../utils/notifications/OnFailure";
+import { onSuccess } from "../utils/notifications/OnSuccess";
+import { extractErrorMessage } from "../utils/formmaters";
+
+const useDrive = () => {
+    const { authDetails } = useContext(AuthContext);
+    const token = authDetails?.access_token;
+    const client = axiosClient(token);
+    const queryClient = useQueryClient();
+
+    // ✅ Fetch Folders
+    const getFoldersQuery = useQuery({
+        queryKey: ["folders"],
+        queryFn: async () => {
+            const { data } = await client.get("/user/folder");
+            console.log(data);
+            return data?.data || [];
+        },
+        enabled: !!authDetails,
+        staleTime: 0,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+    });
+
+    // ✅ Create Folder Mutation
+    const createFolderMutation = useMutation({
+        mutationFn: (payload) =>
+            client.post("/user/folder/create", payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["folders"]);
+            onSuccess({ message: "Folder successfully created!", success: "New folder added" });
+        },
+        onError: (err) => {
+            onFailure({ message: "Failed to create folder", error: extractErrorMessage(err) });
+        }
+    });
+
+
+    return {
+        getFoldersQuery,
+        createFolderMutation
+    };
+};
+
+export default useDrive;
