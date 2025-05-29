@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { FaDropbox, FaAppStoreIos, FaFileAlt } from "react-icons/fa";
+import { FaSpinner, FaDropbox, FaAppStoreIos, FaFileAlt } from "react-icons/fa";
 import { SiMega, SiNextcloud } from "react-icons/si";
 import { IoIosMore } from "react-icons/io";
 import { FiPlus, FiSend } from "react-icons/fi";
@@ -69,7 +69,10 @@ const MyDrive = () => {
       {/* Folders Section */}
 <div className="min-h-[160px]">
   {isLoading ? (
-    <div className="text-white text-center py-8">Loading folders...</div>
+    <div className="flex flex-col items-center justify-center py-20 text-white">
+    <FaSpinner className="animate-spin text-4xl text-blue-400" />
+    <p className="mt-4 text-sm">Loading your folders...</p>
+  </div>
   ) : error ? (
     <div className="text-red-500 text-center py-8">Failed to load folders. Please try again.</div>
   ) : (
