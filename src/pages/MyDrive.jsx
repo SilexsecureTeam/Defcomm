@@ -7,6 +7,7 @@ import { FiPlus, FiSend } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import useDrive from "../hooks/useDrive";
 import Modal from "../components/modal/Modal";
+import CreateFolderForm from "../components/drive/CreateFolderForm";
 
 const storageServices = [
   { name: "Dropbox", used: 120, total: 200, color: "bg-blue-500", iconColor: "text-blue-500", bgOpacity: "bg-blue-500/30", icon: <FaDropbox /> },
@@ -28,68 +29,23 @@ const MyDrive = () => {
   const [showModal, setShowModal] = useState(false);
   const [folderForm, setFolderForm] = useState({ name: "", description: "" });
 
-  const { getFoldersQuery, createFolderMutation } = useDrive();
+  const { getFoldersQuery } = useDrive();
   const { data: folders } = getFoldersQuery;
 
   const toggleOptions = (index) => {
     setShowMore(showMore === index ? null : index);
   };
-
-  const handleCreateFolder = (e) => {
-    e.preventDefault();
-    createFolderMutation.mutate(folderForm, {
-      onSuccess: () => {
-        setShowModal(false);
-        setFolderForm({ name: "", description: "" });
-      }
-    });
-  };
-
   return (
     <div className="p-6 bg-transparent">
       {/* Modal */}
       <Modal isOpen={showModal} closeModal={() => setShowModal(false)}>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md text-black">
-            <h2 className="text-lg font-bold mb-4">Create New Folder</h2>
-            <form onSubmit={handleCreateFolder} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  required
-                  value={folderForm.name}
-                  onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <textarea
-                  value={folderForm.description}
-                  onChange={(e) => setFolderForm({ ...folderForm, description: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </Modal>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="bg-white p-6 rounded-lg w-full max-w-md text-black">
+      <h2 className="text-lg font-bold mb-4">Create New Folder</h2>
+      <CreateFolderForm onClose={() => setShowModal(false)} />
+    </div>
+  </div>
+</Modal>
 
       {/* My Drive Header */}
       <div className="flex justify-between items-center mb-4">
@@ -190,5 +146,4 @@ const MyDrive = () => {
     </div>
   );
 };
-
 export default MyDrive;
