@@ -58,40 +58,56 @@ const MyDrive = () => {
         </button>
       </div>
 
-      {/* Storage Services */}
-      <div className="grid grid-cols-responsive-sm gap-6">
-        {storageServices.map((service, index) => (
-          <motion.div
-            onClick={() => navigate(`/dashboard/drive/${service?.name?.toLowerCase()}`)}
-            key={service.name}
-            className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.4 }}
+      {/* Folders (Replaces Storage Services) */}
+<div className="grid grid-cols-responsive-sm gap-6">
+  {folders?.map((folder, index) => {
+    const { bg, text } = getColorByIndex(index);
+    const used = 120; // Dummy value
+    const total = 200; // Dummy value
+    const percentUsed = (used / total) * 100;
+
+    return (
+      <motion.div
+        onClick={() => navigate(`/dashboard/drive/${folder?.id}`)}
+        key={folder.id || index}
+        className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1, duration: 0.4 }}
+      >
+        <div className="flex items-center space-x-3">
+          <motion.figure
+            whileHover={{ scale: 1.1 }}
+            className={`p-3 rounded-lg ${bg} flex items-center justify-center`}
           >
-            <div className="flex items-center space-x-3">
-              <motion.figure
-                whileHover={{ scale: 1.1 }}
-                className={`p-3 rounded-lg ${service.bgOpacity} flex items-center justify-center`}
-              >
-                <div className={`text-2xl ${service.iconColor}`}>{service.icon}</div>
-              </motion.figure>
-              <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
+            <div className={`text-2xl ${text}`}>
+              <FaFileAlt />
             </div>
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className={`${service.color} h-2 rounded-full`}
-                  style={{ width: `${(service.used / service.total) * 100}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-gray-600 mt-2 flex justify-between">
-                {service.total}GB &nbsp; <span className="text-gray-400">{service.used}GB</span>
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+          </motion.figure>
+          <h3 className="text-lg font-medium text-gray-900">{folder.name}</h3>
+        </div>
+
+        <div className="mt-2 text-sm text-gray-600">
+          {folder.description || "No description"}
+        </div>
+
+        {/* Storage Progress */}
+        <div className="mt-4">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={`${text} h-2 rounded-full`}
+              style={{ width: `${percentUsed}%` }}
+            ></div>
+          </div>
+          <p className="text-sm text-gray-600 mt-2 flex justify-between">
+            {total}GB &nbsp; <span className="text-gray-400">{used}GB used</span>
+          </p>
+        </div>
+      </motion.div>
+    );
+  })}
+</div>
+      
 
       {/* Recent Files Section */}
       <div className="mt-8">
