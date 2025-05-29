@@ -6,6 +6,7 @@ import { IoIosMore } from "react-icons/io";
 import { FiPlus, FiSend } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import useDrive from "../hooks/useDrive";
+import Modal from "../components/modal/Modal";
 
 const storageServices = [
   { name: "Dropbox", used: 120, total: 200, color: "bg-blue-500", iconColor: "text-blue-500", bgOpacity: "bg-blue-500/30", icon: <FaDropbox /> },
@@ -47,8 +48,8 @@ const MyDrive = () => {
   return (
     <div className="p-6 bg-transparent">
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <Modal isOpen={showModal} closeModal={() => setShowModal(false)}>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-white p-6 rounded-lg w-full max-w-md">
             <h2 className="text-lg font-bold mb-4">Create New Folder</h2>
             <form onSubmit={handleCreateFolder} className="space-y-4">
@@ -88,7 +89,7 @@ const MyDrive = () => {
             </form>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* My Drive Header */}
       <div className="flex justify-between items-center mb-4">
