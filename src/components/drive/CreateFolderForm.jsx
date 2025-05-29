@@ -45,10 +45,10 @@ const CreateFolderForm = ({ onClose }) => {
         </button>
         <button
           type="submit"
-          disabled={createFolderMutation.isLoading}
+          disabled={createFolderMutation.isPending}
           className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createFolderMutation.isLoading ? "Creating..." : "Create"}
+          {createFolderMutation.isPending ? "Creating..." : "Create"}
         </button>
       </div>
     </form>
