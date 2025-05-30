@@ -118,7 +118,7 @@ const MyDrive = () => {
                   <motion.div
                     onClick={() => navigate(`/dashboard/drive/${folder?.id}`)}
                     key={folder.id || index}
-                    className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-40 flex flex-col justify-between relative"
+                    className="cursor-pointer bg-white rounded-lg p-4 shadow-md w-full min-h-48 flex flex-col justify-between relative"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.4 }}
