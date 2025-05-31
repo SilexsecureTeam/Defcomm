@@ -28,7 +28,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
       wsHost: import.meta.env.VITE_PUSHER_HOST,
       wsPort: 443,
       wssPort: 443,
-      forceTLS: true,
+      forceTLS: false,
       encrypted: true,
       disableStats: true,
       enabledTransports: ["ws", "wss"],
