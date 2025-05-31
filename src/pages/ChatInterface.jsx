@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext, useState } from "react";
+import React, { useRef, useEffect, useContext } from "react";
 import { MdCall } from "react-icons/md";
 import { FaSpinner } from "react-icons/fa6";
 import { FaCog } from "react-icons/fa";
@@ -29,29 +29,12 @@ const ChatInterface = () => {
   const queryClient = useQueryClient();
   const messageRef = useRef(null);
 
-  const [chatMessages, setChatMessages] = useState([]);
-
   const { data: messages, isLoading, error } = useQuery({
     queryKey: ["chatMessages", selectedChatUser?.contact_id],
     queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
     enabled: !!selectedChatUser?.contact_id,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      setChatMessages(data?.data || []);
-
-      if (data?.chat_meta && selectedChatUser) {
-        setSelectedChatUser((prev) => ({
-          ...prev,
-          chat_meta: data.chat_meta,
-        }));
-      }
-
-      // Scroll to bottom on initial load
-      setTimeout(() => {
-        messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    },
   });
 
   // Real-time listener
@@ -62,26 +45,31 @@ const ChatInterface = () => {
       const senderId = newMessage?.sender_id;
       if (!senderId) return;
 
-      // Update local state if message is for current chat
-      if (senderId === selectedChatUser?.contact_id) {
-        setChatMessages((old) => {
-          const exists = old.some((msg) => msg.id === newMessage.id);
-          return exists ? old : [...old, newMessage];
-        });
-
-        // Scroll to bottom
-        setTimeout(() => {
-          messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
-
-      // Keep cache in sync (optional)
+      // Update messages in cache
       queryClient.setQueryData(["chatMessages", senderId], (old = []) => {
         const exists = old.some((msg) => msg.id === newMessage.id);
         return exists ? old : [...old, newMessage];
       });
+
+      // If message is from the current user being chatted with
+      if (senderId === selectedChatUser?.contact_id) {
+        messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+      }
     },
   });
+
+  useEffect(() => {
+    if (messages?.chat_meta && selectedChatUser) {
+      setSelectedChatUser((prev) => ({
+        ...prev,
+        chat_meta: messages.chat_meta,
+      }));
+    }
+
+    if (messages?.data && messageRef.current) {
+      messageRef.current?.lastElementChild?.scrollIntoView();
+    }
+  }, [messages]);
 
   const handleAcceptCall = (msg) => {
     setMeetingId(msg?.message?.slice("CALL_INVITE:".length));
@@ -122,8 +110,8 @@ const ChatInterface = () => {
               <p className="text-red-500 text-center">
                 Failed to load messages. Please try again.
               </p>
-            ) : chatMessages.length > 0 ? (
-              chatMessages.map((msg) => (
+            ) : messages?.data?.length > 0 ? (
+              messages.data.map((msg) => (
                 <ChatMessage
                   key={msg?.id}
                   msg={msg}
@@ -156,4 +144,4 @@ const ChatInterface = () => {
   );
 };
 
-export default ChatInterface; 
+export default ChatInterface;
