@@ -33,7 +33,7 @@ export const sendMessageUtil = ({
     formData.append("is_file", "no");
   }
 
-  formData.append("current_chat_user_type", chat_user_type);
+  formData.append("current_chat_user_type", chat_user_type );
   formData.append("current_chat_user", chat_user_id);
   formData.append("chat_id", chat_id);
 

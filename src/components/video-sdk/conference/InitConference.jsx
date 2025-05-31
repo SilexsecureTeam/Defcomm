@@ -40,6 +40,14 @@ const InitConference = ({ meetingId, setMeetingId }) => {
   const labelMeetings = (meetings, source) =>
     meetings.map(m => ({ ...m, _source: source }));
 
+  const allMeetings = useMemo(() => {
+  return [
+    ...labelMeetings(createdMeetings, "You"),
+    ...labelMeetings(invitedMeetings, "Invited")
+  ].sort((a, b) => new Date(b.startdatetime) - new Date(a.startdatetime)); // sort with latest first
+}, [createdMeetings, invitedMeetings]);
+
+
   const upcomingMeetings = useMemo(() => {
     const now = new Date();
     return [
@@ -98,7 +106,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
        startdatetime: formatDateTimeForBackend(data.startdatetime)
     }:{
       ...data,
-      meeting_link: "https://cloud.defcomm.ng",
+      meeting_link: "https://cloud.defcomm.ng/dashboard/conference",
       group_user_id: selectedGroup?.group_id || "",
       group_user: "group",
       startdatetime: formatDateTimeForBackend(data.startdatetime),
@@ -231,7 +239,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
 
               {/* Upcoming Meeting List */}
               {!showJoinForm ? <MeetingList
-                meetings={upcomingMeetings}
+                meetings={allMeetings}
                 showCountdown={true}
                 onMeetingClick={(meeting) => {
                   setWaitingScreen(meeting);

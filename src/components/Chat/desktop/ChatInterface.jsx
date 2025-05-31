@@ -17,16 +17,28 @@ const ChatInterface = () => {
         setShowCall,
         setMessages,
         setMeetingId } = useContext(ChatContext);
-    const { fetchChatMessages } = useChat();
+    const { fetchChatMessages, usePusherChat } = useChat();
     const messageRef = useRef(null);
 
     // Fetch messages
+    // Fetch messages for the selected user
     const { data: messages, isLoading, error } = useQuery({
         queryKey: ["chatMessages", selectedChatUser?.contact_id],
         queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
-        refetchOnWindowFocus: true,
-        refetchInterval: 5000,
-        enabled: !!selectedChatUser?.contact_id,
+        staleTime: Infinity,        // 👈 Never mark data as stale
+        refetchOnWindowFocus: false, // 👈 Prevent refetch when tab becomes active
+    });
+
+    // Setup real-time Pusher listener
+    usePusherChat((newMessage) => {
+        if (!selectedChatUser?.contact_id) return;
+
+        const senderId = newMessage?.sender_id;
+
+        // If the new message is from the user we're chatting with, scroll down
+        if (senderId === selectedChatUser?.contact_id) {
+            messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+        }
     });
 
     useEffect(() => {
