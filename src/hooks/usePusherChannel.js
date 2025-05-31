@@ -24,7 +24,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
     }
 
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
-      cluster: "MY_Cluster",
+      cluster: "mt1",
       wsHost: import.meta.env.VITE_PUSHER_HOST,
       wsPort: 443,
       wssPort: 443,
