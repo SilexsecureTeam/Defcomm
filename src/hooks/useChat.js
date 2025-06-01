@@ -2,7 +2,6 @@ import { useContext, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "../services/axios-client";
 import { AuthContext } from "../context/AuthContext";
-import Pusher from "pusher-js";
 
 const useChat = () => {
     const { authDetails } = useContext(AuthContext);
@@ -48,70 +47,13 @@ const useChat = () => {
         return data || [];
     };
 
-    const usePusherChat = (onNewMessage) => {
-        const pusherRef = useRef(null);
-
-        useEffect(() => {
-            if (!userId || !token || pusherRef.current) return;
-
-            const pusher = new Pusher("l4ewjdxj5hilgin4smsv", {
-                wsHost: "backend.defcomm.ng",
-                cluster: "MY_CLUSTER",
-                wsPort: 443,
-                wssPort: 443,
-                forceTLS: true,
-                encrypted: true,
-                disableStats: true,
-                enabledTransports: ["ws", "wss"],
-                authEndpoint: "https://backend.defcomm.ng/api/broadcasting/auth",
-                auth: {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            });
-
-            pusherRef.current = pusher;
-
-            const channel = pusher.subscribe(`private-chat.${userId}`);
-
-            channel.bind("private.message.sent", (data) => {
-                const newMessage = data.message;
-                const senderId = newMessage?.sender_id;
-
-                console.log("Private message received:", newMessage);
-
-                // Optional callback for UI updates
-                onNewMessage?.(newMessage);
-
-                // Update cached messages manually
-                queryClient.setQueryData(["chatMessages", senderId], (old = []) => {
-                    // Avoid duplicates
-                    const alreadyExists = old.some((msg) => msg.id === newMessage.id);
-                    return alreadyExists ? old : [...old, newMessage];
-                });
-            });
-
-
-            channel.bind("pusher:subscription_error", (status) => {
-                console.error("Pusher subscription error:", status);
-            });
-
-            return () => {
-                channel.unbind_all();
-                channel.unsubscribe();
-                pusher.disconnect();
-                pusherRef.current = null; // clear reference
-            };
-        }, [userId, token]);
-    };
+    
 
     return {
         fetchContacts,
         fetchChatHistory,
         fetchGroupMembers,
         fetchChatMessages,
-        usePusherChat,
     };
 };
 
