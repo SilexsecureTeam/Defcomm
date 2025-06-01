@@ -11,7 +11,7 @@ import Modal from "../../modal/Modal";
 import ChatMessage from "../ChatMessage"; // Import the new Message component
 import { FaCog } from "react-icons/fa";
 import Settings from "../../../pages/Settings";
-import usePusherChannel from "../hooks/usePusherChannel";
+import usePusherChannel from "../../../hooks/usePusherChannel";
 
 const ChatInterface = () => {
     const {
