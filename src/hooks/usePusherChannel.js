@@ -29,15 +29,17 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
     }
 
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
-      cluster: "mt1", // Required by Pusher lib, even if using wsHost
-      wsHost: import.meta.env.VITE_PUSHER_HOST,
-      enabledTransports: ["ws", "wss"],
-      authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT,
-      auth: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
+      cluster: "mt1",
+  wsHost: import.meta.env.VITE_PUSHER_HOST, // e.g. backend.defcomm.ng
+  forceTLS: true, // Enforces wss://
+  disableStats: true,
+  enabledTransports: ["ws", "wss"],
+  authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT,
+  auth: {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  },
     });
 
     pusherRef.current = pusher;
