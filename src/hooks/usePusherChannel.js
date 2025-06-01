@@ -31,11 +31,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
       cluster: "mt1", // Required by Pusher lib, even if using wsHost
       wsHost: import.meta.env.VITE_PUSHER_HOST,
-      wsPort: 443,
-      wssPort: 443,
-      forceTLS: false,
-      disableStats: true,
-      enabledTransports: ["ws", "wss"],
+      enabledTransports: ["ws", "flash"],
       authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT,
       auth: {
         headers: {
