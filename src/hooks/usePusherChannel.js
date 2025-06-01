@@ -49,10 +49,11 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
 
     channel.bind("private.message.sent", (data) => {
       const newMessage = data?.message;
-      if (!newMessage?.id || !newMessage?.sender_id) {
+      console.log(data)
+      /*if (!newMessage?.id || !newMessage?.sender_id) {
         console.warn("Invalid message format from Pusher:", data);
         return;
-      }
+      }*/
 
       console.log("New Pusher message received:", newMessage);
       onNewMessage?.(newMessage);
