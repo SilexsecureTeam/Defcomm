@@ -63,16 +63,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
       console.error("Pusher subscription error:", status);
     });
 
-    return () => {
-      try {
-        channel.unbind_all();
-        channel.unsubscribe();
-        pusher.disconnect();
-      } catch (e) {
-        console.warn("Pusher cleanup error:", e);
-      }
-      pusherRef.current = null;
-    };
+    
   }, [userId, token, onNewMessage]);
 };
 
