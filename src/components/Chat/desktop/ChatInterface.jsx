@@ -4,6 +4,7 @@ import { FaSpinner } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import SEOHelmet from "../../../engine/SEOHelmet";
 import { ChatContext } from "../../../context/ChatContext";
+import { AuthContext } from "../../../context/AuthContext";
 import useChat from "../../../hooks/useChat";
 import CallComponent from "../../video-sdk/CallComponent";
 import Modal from "../../modal/Modal";
@@ -20,7 +21,7 @@ const ChatInterface = () => {
         setMeetingId } = useContext(ChatContext);
     const { fetchChatMessages } = useChat();
     const messageRef = useRef(null);
-
+    const {authDetails}= useContext(AuthContext)
     // Fetch messages
     const { data: messages, isLoading, error } = useQuery({
     queryKey: ["chatMessages", selectedChatUser?.contact_id],
