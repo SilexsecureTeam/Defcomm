@@ -23,11 +23,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
       return;
     }
 
-    // Optional: Enable logging in development
-    if (import.meta.env.DEV) {
-      Pusher.logToConsole = true;
-    }
-
+  
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
       cluster: "mt1",
   wsHost: import.meta.env.VITE_PUSHER_HOST, // e.g. backend.defcomm.ng
@@ -67,7 +63,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
       pusher.disconnect();
       pusherRef.current = null;
     };
-  }, [userId, token, onNewMessage]);
+  }, [userId, token]);
 };
 
 export default usePusherChannel;
