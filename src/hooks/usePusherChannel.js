@@ -64,7 +64,7 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
     });
 
     
-  }, [userId, token, onNewMessage]);
+  }, [userId, token]);
 };
 
 export default usePusherChannel;
