@@ -42,6 +42,7 @@ const ChatInterface = () => {
     userId: selectedChatUser?.contact_id,
     token: authDetails?.access_token,
     onNewMessage: (newMessage) => {
+      console.log("message", newMessage)
       const senderId = newMessage?.sender_id;
       if (!senderId) return;
 
