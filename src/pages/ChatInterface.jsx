@@ -39,7 +39,7 @@ const ChatInterface = () => {
 
   // Real-time listener
   usePusherChannel({
-    userId: authDetails?.user?.id,
+    userId: selectedChatUser?.contact_id,
     token: authDetails?.access_token,
     onNewMessage: (newMessage) => {
       const senderId = newMessage?.sender_id;
