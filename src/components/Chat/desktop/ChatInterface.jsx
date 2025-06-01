@@ -10,6 +10,7 @@ import Modal from "../../modal/Modal";
 import ChatMessage from "../ChatMessage"; // Import the new Message component
 import { FaCog } from "react-icons/fa";
 import Settings from "../../../pages/Settings";
+import usePusherChannel from "../hooks/usePusherChannel";
 
 const ChatInterface = () => {
     const {
@@ -17,29 +18,38 @@ const ChatInterface = () => {
         setShowCall,
         setMessages,
         setMeetingId } = useContext(ChatContext);
-    const { fetchChatMessages, usePusherChat } = useChat();
+    const { fetchChatMessages } = useChat();
     const messageRef = useRef(null);
 
     // Fetch messages
-    // Fetch messages for the selected user
     const { data: messages, isLoading, error } = useQuery({
-        queryKey: ["chatMessages", selectedChatUser?.contact_id],
-        queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
-        staleTime: Infinity,        // 👈 Never mark data as stale
-        refetchOnWindowFocus: false, // 👈 Prevent refetch when tab becomes active
-    });
+    queryKey: ["chatMessages", selectedChatUser?.contact_id],
+    queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
+    enabled: !!selectedChatUser?.contact_id,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
 
-    // Setup real-time Pusher listener
-    usePusherChat((newMessage) => {
-        if (!selectedChatUser?.contact_id) return;
+  // Real-time listener
+  usePusherChannel({
+    userId: selectedChatUser?.contact_id,
+    token: authDetails?.access_token,
+    onNewMessage: (newMessage) => {
+      const senderId = newMessage?.sender_id;
+      if (!senderId) return;
 
-        const senderId = newMessage?.sender_id;
+      // Update messages in cache
+      queryClient.setQueryData(["chatMessages", senderId], (old = []) => {
+        const exists = old.some((msg) => msg.id === newMessage.id);
+        return exists ? old : [...old, newMessage];
+      });
 
-        // If the new message is from the user we're chatting with, scroll down
-        if (senderId === selectedChatUser?.contact_id) {
-            messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-        }
-    });
+      // If message is from the current user being chatted with
+      if (senderId === selectedChatUser?.contact_id) {
+        messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+      }
+    },
+  });
 
     useEffect(() => {
         setMessages(messages)
