@@ -42,8 +42,7 @@ function SendMessage({ messageData, desktop=false }: {SendMessageProps}) {
 
     // Send is_typing: true
     typingMutation.mutate({
-      chat_id: messageData.chat_id,
-      chat_user_id: messageData.chat_user_id,
+      current_chat_user: messageData.chat_user_id,
       typing: "is_typing",
     });
 
