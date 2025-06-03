@@ -8,12 +8,12 @@ import SEOHelmet from "../engine/SEOHelmet";
 import { ChatContext } from "../context/ChatContext";
 import { AuthContext } from "../context/AuthContext";
 import useChat from "../hooks/useChat";
-import usePusherChannel from "../hooks/usePusherChannel";
 
 import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
 import ChatMessage from "../components/Chat/ChatMessage";
-import {getFormattedDate} from "../utils/formmaters"
+import { getFormattedDate } from "../utils/formmaters";
+
 const ChatInterface = () => {
   const {
     selectedChatUser,
@@ -55,17 +55,48 @@ const ChatInterface = () => {
     setShowCall(true);
   };
 
+  const renderMessages = () => {
+    if (!messages?.data?.length) return <p className="text-gray-500 text-center">No messages yet.</p>;
+
+    let lastDate = null;
+
+    return messages.data.map((msg) => {
+      const formattedDate = getFormattedDate(msg.updated_at);
+      const showDateHeader = lastDate !== formattedDate;
+      lastDate = formattedDate;
+
+      return (
+        <React.Fragment key={msg.id}>
+          {showDateHeader && (
+            <div className="flex items-center justify-center gap-2 my-4 text-gray-500 text-sm font-medium">
+              <div className="flex-1 border-t border-gray-400"></div>
+              <span>{formattedDate}</span>
+              <div className="flex-1 border-t border-gray-400"></div>
+            </div>
+          )}
+          <ChatMessage
+            msg={msg}
+            selectedChatUser={selectedChatUser}
+            handleAcceptCall={handleAcceptCall}
+          />
+        </React.Fragment>
+      );
+    });
+  };
   return (
     <div className="relative flex flex-col lg:flex-row gap-4 h-full">
       <SEOHelmet title="Secure Chat" />
 
       {selectedChatUser && (
         <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
-          <h2 className="text-lg font-semibold capitalize">
-            {selectedChatUser?.contact_name || "Chat"}
-            {selectedChatUser?.is_typing && <div className="text-green-400 text-sm">Typing...</div>}
-            
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold capitalize">
+              {selectedChatUser.contact_name || "Chat"}
+            </h2>
+            {selectedChatUser?.is_typing && (
+              <div className="text-green-400 text-sm">Typing...</div>
+            )}
+          </div>
           <div className="flex gap-4">
             <button onClick={() => setShowCall(true)}>
               <MdCall size={24} />
@@ -91,29 +122,8 @@ const ChatInterface = () => {
               <p className="text-red-500 text-center">
                 Failed to load messages. Please try again.
               </p>
-            ) : messages?.data?.length > 0 ? (
-              let lastDate=null;
-              messages.data.map((msg) => (
-                const formattedDate = getFormattedDate(msg?.updated_at);
-                const showDateHeader = lastDate !== formattedDate;
-                lastDate = formattedDate;
-                {showDateHeader && (
-                  <div className="flex items-center justify-center gap-2 my-4 text-gray-500 text-sm font-medium">
-                      <div className="flex-1 border-t border-gray-400"></div>
-                            <span>{formattedDate}</span>
-                      <div className="flex-1 border-t border-gray-400"></div>
-                  </div>
-                      
-              )}
-                <ChatMessage
-                  key={msg?.id}
-                  msg={msg}
-                  selectedChatUser={selectedChatUser}
-                  handleAcceptCall={handleAcceptCall}
-                />
-              ))
             ) : (
-              <p className="text-gray-500 text-center">No messages yet.</p>
+              renderMessages()
             )
           ) : (
             <p className="text-oliveDark text-center text-lg font-bold mt-10">
@@ -121,10 +131,8 @@ const ChatInterface = () => {
             </p>
           )}
         </div>
-
         {selectedChatUser && <SendMessage messageData={messages?.chat_meta} />}
       </div>
-
       {selectedChatUser && (
         <div className="w-max hidden lg:block">
           <CallInterface
@@ -136,5 +144,4 @@ const ChatInterface = () => {
     </div>
   );
 };
-
 export default ChatInterface;
