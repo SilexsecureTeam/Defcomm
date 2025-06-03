@@ -1,10 +1,10 @@
 const audioController = {
     audio: null as HTMLAudioElement | null,
 
-    playRingtone(ringtone: string) {
+    playRingtone(ringtone: string, repeat: boolean) {
         if (!this.audio) {
             this.audio = new Audio(ringtone);
-            this.audio.loop = true;
+            this.audio.loop = repeat ? true : false;
         }
         this.audio.play();
     },
