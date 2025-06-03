@@ -50,6 +50,10 @@ const DashboardWrapper = ({ children }) => {
         token: authDetails?.access_token,
         onNewMessage: (newMessage) => {
             const senderId = newMessage?.data?.user_id;
+            if (newMessage?.state === "is_typing") {
+              setSelectedChatUser(prev => ({ ...prev, is_typing: true }));
+            }
+            
             if (!senderId) return;
 
             const existingData = queryClient.getQueryData(["chatMessages", senderId]);
