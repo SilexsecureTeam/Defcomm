@@ -22,16 +22,21 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
     showConference
   } = useContext(MeetingContext);
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
-
+const [recordingStartedAt, setRecordingStartedAt] = useState(null);
+  const [recordingTimer, setRecordingTimer] = useState("00:00");
+  
   const onRecordingStateChanged = ({ status }) => {
     if (status === Constants.recordingEvents.RECORDING_STARTING) {
       toast.info("Recording is starting...");
     } else if (status === Constants.recordingEvents.RECORDING_STARTED) {
       toast.success("Recording started.");
+      setRecordingStartedAt(Date.now());
     } else if (status === Constants.recordingEvents.RECORDING_STOPPING) {
       toast.info("Recording is stopping...");
     } else if (status === Constants.recordingEvents.RECORDING_STOPPED) {
       toast.success("Recording stopped.");
+      setRecordingStartedAt(null);
+      setRecordingTimer("00:00");
     }
   };
 
@@ -113,35 +118,42 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
     }
   };
 
-  const handleStartRecording = () => {
-    const config = {
-      layout: {
-        type: "GRID",
-        priority: "SPEAKER",
-        gridSize: 4,
-      },
-      theme: "DARK",
-      mode: "video-and-audio",
-      quality: "high",
-      orientation: "landscape",
-    };
-
-    const transcription = {
-      enabled: true,
-      summary: {
+  const toggleRecording = () => {
+    if (recordingState === "RECORDING") {
+      stopRecording();
+    } else {
+      const config = {
+        layout: { type: "GRID", priority: "SPEAKER", gridSize: 4 },
+        theme: "DARK",
+        mode: "video-and-audio",
+        quality: "high",
+        orientation: "landscape",
+      };
+      const transcription = {
         enabled: true,
-        prompt:
-          "Write summary in sections like Title, Agenda, Speakers, Action Items, Outlines, Notes and Summary",
-      },
-    };
-
-    // You can replace null with actual webhook URL and AWS path if needed
-    startRecording(null, null, config, transcription);
+        summary: {
+          enabled: true,
+          prompt:
+            "Write summary in sections like Title, Agenda, Speakers, Action Items, Outlines, Notes and Summary",
+        },
+        };
+      startRecording(null, null, config, transcription);
+    }
   };
-
-  const handleStopRecording = () => {
-    stopRecording();
-  };
+  useEffect(() => {
+  let interval;
+  if (recordingStartedAt) {
+    interval = setInterval(() => {
+      const elapsedMs = Date.now() - recordingStartedAt;
+      const totalSeconds = Math.floor(elapsedMs / 1000);
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      setRecordingTimer(`${minutes}:${seconds}`);
+    }, 1000);
+  }
+  return () => clearInterval(interval);
+}, [recordingStartedAt]);
+  
 
   if (!conference && showConference) {
     return <InitConference meetingId={meetingId} setMeetingId={setMeetingId} />;
@@ -154,15 +166,17 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
         <div>
           <p className="text-lg font-semibold">{conference?.title || "Conference"}</p>
           {recordingState === "RECORDING" && (
-            <p className="text-sm text-red-500 mt-1">● Recording in progress</p>
+            <p className="text-sm text-red-500 mt-1">● Recording... ({recordingTimer})</p>
           )}
         </div>
         <div className="flex gap-2">
-          <button onClick={handleStartRecording} className="bg-green-700 text-white px-3 py-1 rounded">
-            Start Recording
-          </button>
-          <button onClick={handleStopRecording} className="bg-red-600 text-white px-3 py-1 rounded">
-            Stop Recording
+          <button
+            onClick={toggleRecording}
+            className={`${
+              recordingState === "RECORDING" ? "bg-red-600" : "bg-green-700"
+            } text-white px-3 py-1 rounded`}
+          >
+            {recordingState === "RECORDING" ? "Stop Recording" : "Start Recording"}
           </button>
           <button className="bg-[#5C7C2A] text-white text-sm px-4 py-2 rounded-md">
             + Invite Member
