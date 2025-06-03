@@ -13,7 +13,7 @@ import usePusherChannel from "../hooks/usePusherChannel";
 import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
 import ChatMessage from "../components/Chat/ChatMessage";
-
+import {getFormattedDate} from "../utils/formmaters"
 const ChatInterface = () => {
   const {
     selectedChatUser,
@@ -92,7 +92,19 @@ const ChatInterface = () => {
                 Failed to load messages. Please try again.
               </p>
             ) : messages?.data?.length > 0 ? (
+              let lastDate=null;
               messages.data.map((msg) => (
+                const formattedDate = getFormattedDate(msg?.updated_at);
+                const showDateHeader = lastDate !== formattedDate;
+                lastDate = formattedDate;
+                {showDateHeader && (
+                  <div className="flex items-center justify-center gap-2 my-4 text-gray-500 text-sm font-medium">
+                      <div className="flex-1 border-t border-gray-400"></div>
+                            <span>{formattedDate}</span>
+                      <div className="flex-1 border-t border-gray-400"></div>
+                  </div>
+                      
+              )}
                 <ChatMessage
                   key={msg?.id}
                   msg={msg}
