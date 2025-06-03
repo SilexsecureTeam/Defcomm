@@ -39,7 +39,9 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
       console.log(data)
-      if (showToast && (data?.state !== "not_typing" || data?.state !== "is_typing")) onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
+      if (showToast &&
+  data?.state !== "not_typing" &&
+  data?.state !== "is_typing") onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
       onNewMessage?.(newMessage);
     });
 
