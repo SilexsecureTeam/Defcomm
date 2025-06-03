@@ -6,7 +6,7 @@ import { axiosClient } from "../../services/axios-client";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import { sendMessageUtil } from "../../utils/chat/sendMessageUtil";
-import { useSendMessageMutation } from "../../hooks/useSendMessageMutation";
+import { useSendMessageMutation, useTypingStatus } from "../../hooks/useSendMessageMutation";
 import { parseHtml } from "../../utils/formmaters";
 
 interface MessageData {
@@ -19,7 +19,7 @@ interface SendMessageProps {
   messageData: MessageData;
   desktop: boolean;
 }
-
+let typingTimeout: NodeJS.Timeout;
 function SendMessage({ messageData, desktop=false }: {SendMessageProps}) {
   const { authDetails } = useContext(AuthContext);
   const { 
@@ -29,7 +29,7 @@ function SendMessage({ messageData, desktop=false }: {SendMessageProps}) {
  
   const queryClient = useQueryClient();
   const client = axiosClient(authDetails?.access_token);
-
+  const typingMutation = useTypingStatus(client);
   const clearMessageInput = () => {
     setMessage("");  // Clears the input field
     setFile(null);   // Clears the file selection
@@ -37,6 +37,27 @@ function SendMessage({ messageData, desktop=false }: {SendMessageProps}) {
   
   const sendMessageMutation = useSendMessageMutation(client, clearMessageInput);
 
+  const handleTyping = (text: string) => {
+    setMessage(text);
+
+    // Send is_typing: true
+    typingMutation.mutate({
+      chat_id: messageData.chat_id,
+      chat_user_id: messageData.chat_user_id,
+      typing: "is_typing",
+    });
+
+    // Clear previous timeout
+    if (typingTimeout) clearTimeout(typingTimeout);
+    // Set timeout to send is_typing: false after user stops typing
+    typingTimeout = setTimeout(() => {
+      typingMutation.mutate({
+        current_chat_user: messageData.chat_user_id,
+        typing: "not_typing",
+      });
+    }, 2000); // 2 seconds after last keypress
+  };
+  
   const handleSendMessage = () => {
     console.log("sending", file)
     sendMessageUtil({
@@ -79,7 +100,7 @@ useEffect(()=>{
           placeholder="Write a message..."
           className="flex-1 p-2 bg-transparent border-none outline-none resize-none leading-none text-base"
           value={parseHtml(message)}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => handleTyping(e.target.value)}
           rows={1}
         />
 
