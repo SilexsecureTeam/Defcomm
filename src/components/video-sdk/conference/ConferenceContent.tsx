@@ -171,7 +171,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
         <div>
           <p className="text-lg font-semibold">{conference?.title || "Conference"}</p>
           {recordingStartedAt && (
-            <p className="text-sm text-red-500 mt-1">● Recording... ({recordingTimer})</p>
+            <p className="text-sm text-red-500 mt-1">● Recording {recordingTimer}</p>
           )}
         </div>
         <div className="flex flex-col gap-2">
@@ -181,13 +181,13 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
               recordingState === Constants.recordingEvents.RECORDING_STARTED
                 ? "bg-red-600"
                 : "bg-green-700"
-            } text-white px-3 py-1 rounded`}
+            } text-white px-2 md:px-4 py-1 rounded text-sm`}
           >
             {recordingState === Constants.recordingEvents.RECORDING_STARTED
               ? "Stop Recording"
               : "Start Recording"}
           </button>
-          <button className="bg-[#5C7C2A] text-white text-sm px-4 py-2 rounded-md">
+          <button className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md">
             + Invite Member
           </button>
         </div>
