@@ -39,11 +39,11 @@ const ChatInterface = () => {
 
   // Real-time listener
   usePusherChannel({
-    userId: selectedChatUser?.contact_id,
+    userId: authDetails?.user?.id,
     token: authDetails?.access_token,
     onNewMessage: (newMessage) => {
       console.log("message", newMessage)
-      const senderId = newMessage?.sender_id;
+      const senderId = newMessage?.user_id;
       if (!senderId) return;
 
       // Update messages in cache
