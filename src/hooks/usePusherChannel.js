@@ -45,7 +45,7 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
   data?.state !== "not_typing" &&
   data?.state !== "is_typing" &&
          data?.data?.user_id !== userId) {
-        audioController.playRingingTone(notificationSound)
+        audioController.playRingtone(notificationSound)
         onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
       }
       onNewMessage?.(newMessage);
