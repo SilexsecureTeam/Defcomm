@@ -35,3 +35,14 @@ export const useSendMessageMutation = (
     },
   });
 };
+
+export const useTypingStatus = (client: AxiosInstance) => {
+  return useMutation({
+    mutationFn: ({ chat_id, chat_user_id, is_typing }: any) =>
+      client.post("/user/messages/typing", {
+        chat_id,
+        chat_user_id,
+        is_typing,
+      }),
+  });
+};
