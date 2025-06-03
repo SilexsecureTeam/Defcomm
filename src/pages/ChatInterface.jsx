@@ -63,6 +63,8 @@ const ChatInterface = () => {
         <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
           <h2 className="text-lg font-semibold capitalize">
             {selectedChatUser?.contact_name || "Chat"}
+            {selectedChatUser?.is_typing && <div className="text-green-400 text-sm">Typing...</div>}
+            
           </h2>
           <div className="flex gap-4">
             <button onClick={() => setShowCall(true)}>
