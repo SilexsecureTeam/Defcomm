@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { onNewMessageToast } from "../utils/notifications/onNewMessageToast";
 import notificationSound from "../assets/audio/bell.mp3";
 import audioController from "../utils/audioController"; // Import the shared audio controller
+import receiverTone from "../../assets/audio/receiver.mp3";
 
 import Pusher from "pusher-js";
 const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => {
@@ -39,18 +40,30 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
     const channel = pusher.subscribe(`private-chat.${userId}`);
 
     channel.bind("private.message.sent", ({ data }) => {
-      const newMessage = data;
-      console.log(data)
-      if (showToast &&
-  data?.state !== "not_typing" &&
-  data?.state !== "is_typing" &&
-         data?.data?.user_id !== userId) {
-        audioController.playRingtone(notificationSound)
-        onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
-      }
-      onNewMessage?.(newMessage);
-    });
+  const newMessage = data;
 
+  const isCall = data?.message?.startsWith("CALL_INVITE");
+
+  if (isCall) {
+    audioController.playRingtone(receiverTone, true);
+    return; // prevent further toast/audio
+  }
+
+  const shouldToast =
+    showToast &&
+    data?.state !== "not_typing" &&
+    data?.state !== "is_typing" &&
+    data?.data?.user_id !== userId;
+
+  if (shouldToast) {
+    audioController.playRingtone(notificationSound);
+    onNewMessageToast({
+      message: newMessage?.message,
+      senderName:
+        newMessage?.data?.sender_name || `User ${newMessage?.data?.user_id}`,
+    });
+  }
+});
     channel.bind("pusher:subscription_error", (status) => {
       console.error("Pusher subscription error:", status);
     });
