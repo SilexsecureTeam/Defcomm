@@ -15,7 +15,7 @@ function ChatCallInvite({ isMyChat, onAcceptCall, status, caller }: ChatCallInvi
     useEffect(() => {
         if (status === "Ringing...") {
             const ringtone = isMyChat ? callerTone : receiverTone;
-            audioController.playRingtone(ringtone);
+            audioController.playRingtone(ringtone, true);
         } else {
             audioController.stopRingtone();
         }
