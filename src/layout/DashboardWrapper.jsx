@@ -52,6 +52,8 @@ const DashboardWrapper = ({ children }) => {
             const senderId = newMessage?.data?.user_id;
             if (newMessage?.state === "is_typing") {
               setSelectedChatUser(prev => ({ ...prev, is_typing: true }));
+            }else if (newMessage?.state === "not_typing") {
+              setSelectedChatUser(prev => ({ ...prev, is_typing: false }));
             }
             
             if (!senderId) return;
