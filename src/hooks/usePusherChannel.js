@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { onNewMessageToast } from "../utils/notifications/onNewMessageToast";
 import notificationSound from "../assets/audio/bell.mp3";
 import audioController from "../utils/audioController"; // Import the shared audio controller
-import receiverTone from "../../assets/audio/receiver.mp3";
+import receiverTone from "../assets/audio/receiver.mp3";
 
 import Pusher from "pusher-js";
 const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => {
