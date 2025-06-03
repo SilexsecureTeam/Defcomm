@@ -42,7 +42,7 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
       if (showToast &&
   data?.state !== "not_typing" &&
   data?.state !== "is_typing" &&
-         data?.data?.user_id !=== userId) onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
+         data?.data?.user_id !== userId) onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
       onNewMessage?.(newMessage);
     });
 
