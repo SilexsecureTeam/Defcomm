@@ -174,7 +174,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
             <p className="text-sm text-red-500 mt-1">● Recording... ({recordingTimer})</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <button
             onClick={toggleRecording}
             className={`${
