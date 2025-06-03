@@ -6,12 +6,7 @@ import SEOHelmet from "../../../engine/SEOHelmet";
 import { ChatContext } from "../../../context/ChatContext";
 import { AuthContext } from "../../../context/AuthContext";
 import useChat from "../../../hooks/useChat";
-import CallComponent from "../../video-sdk/CallComponent";
-import Modal from "../../modal/Modal";
 import ChatMessage from "../ChatMessage"; // Import the new Message component
-import { FaCog } from "react-icons/fa";
-import Settings from "../../../pages/Settings";
-import usePusherChannel from "../../../hooks/usePusherChannel";
 
 const ChatInterface = () => {
     const {
@@ -29,27 +24,6 @@ const ChatInterface = () => {
     enabled: !!selectedChatUser?.contact_id,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
-  });
-
-  // Real-time listener
-  usePusherChannel({
-    userId: selectedChatUser?.contact_id,
-    token: authDetails?.access_token,
-    onNewMessage: (newMessage) => {
-      const senderId = newMessage?.sender_id;
-      if (!senderId) return;
-
-      // Update messages in cache
-      queryClient.setQueryData(["chatMessages", senderId], (old = []) => {
-        const exists = old.some((msg) => msg.id === newMessage.id);
-        return exists ? old : [...old, newMessage];
-      });
-
-      // If message is from the current user being chatted with
-      if (senderId === selectedChatUser?.contact_id) {
-        messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-      }
-    },
   });
 
     useEffect(() => {

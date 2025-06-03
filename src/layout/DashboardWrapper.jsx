@@ -1,6 +1,6 @@
 import { useContext, useMemo, useLayoutEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { utilOptions, dashboardOptions, dashboardTabs } from "../utils/constants";
 import { AuthContext } from "../context/AuthContext";
 import { DashboardContext } from "../context/DashboardContext";
@@ -19,8 +19,11 @@ import Modal from '../components/modal/Modal'
 import CallComponent from '../components/video-sdk/CallComponent'
 import Settings from '../pages/Settings'
 import PictureInPicture from '../components/video-sdk/conference/PictureInPicture'
+import usePusherChannel from "../hooks/usePusherChannel";
+import { toast } from "react-toastify";
 
 const DashboardWrapper = ({ children }) => {
+    const queryClient = useQueryClient();
     const { authDetails } = useContext(AuthContext);
     const { conference, showConference, setShowConference } = useContext(MeetingContext);
     const {
@@ -40,6 +43,41 @@ const DashboardWrapper = ({ children }) => {
         enabled: state?.type === "CHAT",
         staleTime: 0,
     });
+
+    // Real-time listener
+    usePusherChannel({
+        userId: authDetails?.user?.id,
+        token: authDetails?.access_token,
+        onNewMessage: (newMessage) => {
+            const senderId = newMessage?.data?.user_id;
+            if (!senderId) return;
+
+            const existingData = queryClient.getQueryData(["chatMessages", senderId]);
+
+            if (!existingData) {
+                // No data cached yet — trigger a refetch so UI is populated
+                queryClient.invalidateQueries(["chatMessages", senderId]);
+                return;
+            }
+
+            // If already fetched, append new message to existing messages
+            queryClient.setQueryData(["chatMessages", senderId], (old) => {
+                if (!old || !Array.isArray(old.data)) return old;
+
+                const exists = old.data.some((msg) => msg.id === newMessage.data.id);
+
+                return exists
+                    ? old
+                    : {
+                        ...old,
+                        data: [...old.data, {...newMessage.data, message:newMessage.message}].sort(
+                            (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                        ),
+                    };
+            });
+        },
+    });
+
 
     const toggleIsOpen = () => setIsOpen((prev) => !prev);
 
@@ -68,16 +106,14 @@ const DashboardWrapper = ({ children }) => {
         if (matchedOption) dispatch(matchedOption);
         if (!matchedOption || matchedOption?.type !== "CHAT") setSelectedChatUser(null);
 
-        if(pathname !== "/dashboard/conference" && showConference && !conference){
+        if (pathname !== "/dashboard/conference" && showConference && !conference) {
             setShowConference(false)
         }
     }, [pathname]);
 
     if (authDetails?.user?.role !== "user") return null;
 
-
     return (
-
         <main
             className="h-screen w-screen relative flex overflow-hidden"
             style={{

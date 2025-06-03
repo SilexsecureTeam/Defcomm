@@ -37,28 +37,6 @@ const ChatInterface = () => {
     refetchOnWindowFocus: false,
   });
 
-  // Real-time listener
-  usePusherChannel({
-    userId: authDetails?.user?.id,
-    token: authDetails?.access_token,
-    onNewMessage: (newMessage) => {
-      console.log("message", newMessage)
-      const senderId = newMessage?.user_id;
-      if (!senderId) return;
-
-      // Update messages in cache
-      queryClient.setQueryData(["chatMessages", senderId], (old = []) => {
-        const exists = old.some((msg) => msg.id === newMessage.id);
-        return exists ? old : [...old, newMessage];
-      });
-
-      // If message is from the current user being chatted with
-      if (senderId === selectedChatUser?.contact_id) {
-        messageRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-      }
-    },
-  });
-
   useEffect(() => {
     if (messages?.chat_meta && selectedChatUser) {
       setSelectedChatUser((prev) => ({

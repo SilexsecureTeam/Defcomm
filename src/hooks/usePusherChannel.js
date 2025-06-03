@@ -1,21 +1,14 @@
 import { useEffect, useRef } from "react";
-import Pusher from "pusher-js";
+import { toast } from "react-toastify";
+import { onNewMessageToast } from "../utils/notifications/onNewMessageToast";
 
-/**
- * Custom hook to subscribe to a Pusher private channel and receive messages.
- *
- * @param {Object} params
- * @param {string | number} params.userId - The authenticated user's ID
- * @param {string} params.token - Bearer token for auth
- * @param {(message: any) => void} params.onNewMessage - Callback when a new message is received
- */
-const usePusherChannel = ({ userId, token, onNewMessage }) => {
+import Pusher from "pusher-js";
+const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => {
   const pusherRef = useRef(null);
 
   useEffect(() => {
     if (!userId || !token) return;
 
-    // 🔁 Always clean up previous instance
     if (pusherRef.current) {
       try {
         pusherRef.current.disconnect();
@@ -23,10 +16,6 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
         console.warn("Pusher disconnect error:", e);
       }
       pusherRef.current = null;
-    }
-
-    if (import.meta.env.DEV) {
-      Pusher.logToConsole = true;
     }
 
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
@@ -47,15 +36,10 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
 
     const channel = pusher.subscribe(`private-chat.${userId}`);
 
-    channel.bind("private.message.sent", (data) => {
-      const newMessage = data?.message;
+    channel.bind("private.message.sent", ({ data }) => {
+      const newMessage = data;
       console.log(data)
-      /*if (!newMessage?.id || !newMessage?.sender_id) {
-        console.warn("Invalid message format from Pusher:", data);
-        return;
-      }*/
-
-      console.log("New Pusher message received:", newMessage);
+      if (showToast) onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
       onNewMessage?.(newMessage);
     });
 
@@ -63,8 +47,15 @@ const usePusherChannel = ({ userId, token, onNewMessage }) => {
       console.error("Pusher subscription error:", status);
     });
 
-    
+    return () => {
+      try {
+        pusher.disconnect();
+      } catch (e) {
+        console.warn("Cleanup error:", e);
+      }
+    };
   }, [userId, token]);
 };
+
 
 export default usePusherChannel;
