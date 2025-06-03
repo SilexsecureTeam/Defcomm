@@ -141,6 +141,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
                 chat_user_type: messageData.chat_user_type,
                 chat_user_id: messageData.chat_user_id,
                 chat_id: messageData.chat_id,
+                mss_type: "call",
                 sendMessageMutation,
             });
 
@@ -205,18 +206,12 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             ) : (
                 <>
                     <div className="flex flex-col gap-2 items-center">
-
                         {me && <ParticipantMedia participantId={me?.id} auth={authDetails} isRinging={isRinging} callDuration={callDuration} handleLeave={handleLeave} participant={other} isInitiator={isInitiator} />}
-
-
                     </div>
-
                 </>
             )}
-
             <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />
         </div>
     );
 };
-
 export default CallComponentContent;
