@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { onNewMessageToast } from "../utils/notifications/onNewMessageToast";
+import notificationSound from "../assets/audio/bell.mp3";
+import audioController from "../utils/audioController"; // Import the shared audio controller
 
 import Pusher from "pusher-js";
 const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => {
@@ -42,7 +44,10 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
       if (showToast &&
   data?.state !== "not_typing" &&
   data?.state !== "is_typing" &&
-         data?.data?.user_id !== userId) onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
+         data?.data?.user_id !== userId) {
+        audioController.playRingingTone(notificationSound)
+        onNewMessageToast({message:newMessage?.message, senderName: newMessage?.data?.sender_name ||`User ${newMessage?.data?.user_id}`});
+      }
       onNewMessage?.(newMessage);
     });
 
