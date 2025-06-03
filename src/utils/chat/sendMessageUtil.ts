@@ -9,6 +9,7 @@ interface SendMessageParams {
   chat_user_type: string;
   chat_user_id: string;
   chat_id: string;
+  mss_type: string;
   sendMessageMutation: UseMutationResult<any, unknown, FormData, unknown>;
 }
 
@@ -20,6 +21,7 @@ export const sendMessageUtil = ({
   chat_user_id,
   chat_id,
   sendMessageMutation,
+  mss_type= "text"
 }: SendMessageParams) => {
   if (!message.trim() && !file) return; // Prevent empty message submission
 
@@ -36,6 +38,7 @@ export const sendMessageUtil = ({
   formData.append("current_chat_user_type", chat_user_type );
   formData.append("current_chat_user", chat_user_id);
   formData.append("chat_id", chat_id);
+  formData.append("mss_type", mss_type);
 
   sendMessageMutation.mutate(formData);
 };
