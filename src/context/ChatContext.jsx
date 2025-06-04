@@ -14,6 +14,7 @@ export const ChatProvider = ({ children }) => {
     const [showSettings, setShowSettings] = useState(false);
     const [meetingId, setMeetingId] = useState("");
     const [messages, setMessages] = useState(false);
+    const [typingUsers, setTypingUsers] = useState({}); // key = userId, value = true/false
     // Store the boolean value correctly when it changes
     useEffect(() => {
         sessionStorage.setItem("chatVisibility", JSON.stringify(chatVisibility));
@@ -36,7 +37,8 @@ export const ChatProvider = ({ children }) => {
             messages, setMessages,
             file, setFile,
             message, setMessage,
-            callType, setCallType
+            callType, setCallType,
+            typingUsers, setTypingUsers
 
         }}>
             {children}
