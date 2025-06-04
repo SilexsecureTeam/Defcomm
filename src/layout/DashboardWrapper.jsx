@@ -28,6 +28,7 @@ const DashboardWrapper = ({ children }) => {
     const { conference, showConference, setShowConference } = useContext(MeetingContext);
     const {
         setSelectedChatUser,
+        setTypingUsers,
         showCall, setShowCall,
         showSettings, setShowSettings,
         meetingId, setMeetingId } = useContext(ChatContext);
@@ -50,6 +51,7 @@ const DashboardWrapper = ({ children }) => {
         token: authDetails?.access_token,
         onNewMessage: (newMessage) => {
             const senderId = newMessage?.data?.user_id;
+            
             if (newMessage?.state === "is_typing") {
     setTypingUsers((prev) => ({ ...prev, [newMessage?.user]: true }));
                 return;
