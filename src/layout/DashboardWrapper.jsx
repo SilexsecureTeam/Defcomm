@@ -51,9 +51,15 @@ const DashboardWrapper = ({ children }) => {
         onNewMessage: (newMessage) => {
             const senderId = newMessage?.data?.user_id;
             if (newMessage?.state === "is_typing") {
-              setSelectedChatUser(prev => ({ ...prev, is_typing: true }));
-            }else if (newMessage?.state === "not_typing") {
-              setSelectedChatUser(prev => ({ ...prev, is_typing: false }));
+    setTypingUsers((prev) => ({ ...prev, [newMessage?.user]: true }));
+                return;
+  } else if (newMessage?.state === "not_typing") {
+    setTypingUsers((prev) => {
+      const updated = { ...prev };
+      delete updated[newMessage?.user];
+      return updated;
+    });
+                return;
             }
             
             if (!senderId) return;
