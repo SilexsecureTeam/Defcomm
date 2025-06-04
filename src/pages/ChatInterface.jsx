@@ -25,8 +25,6 @@ const ChatInterface = () => {
     typingUsers
   } = useContext(ChatContext);
 
-  console.log(typingUsers)
-
   const { authDetails } = useContext(AuthContext);
   const { fetchChatMessages } = useChat();
   const queryClient = useQueryClient();
@@ -96,7 +94,7 @@ const ChatInterface = () => {
             <h2 className="text-lg font-semibold capitalize">
               {selectedChatUser.contact_name || "Chat"}
             </h2>
-            {typingUsers[selectedChatUser?.contact_id_encrypt]?.is_typing && (
+            {typingUsers[selectedChatUser?.contact_id_encrypt] && (
               <div className="text-green-400 text-sm">Typing...</div>
             )}
           </div>
