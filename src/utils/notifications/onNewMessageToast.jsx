@@ -1,10 +1,13 @@
-// utils/toastNotifications.js
 import { toast } from "react-toastify";
 import { FaCommentDots } from "react-icons/fa";
 
-export const onNewMessageToast = ({ senderName, message }) => {
+export const onNewMessageToast = ({
+  senderName,
+  message,
+  onClick = () => {},
+}) => {
   const toastComponent = (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-3 cursor-pointer">
       <FaCommentDots className="text-2xl text-oliveDark mt-1" />
       <div>
         <p className="font-semibold text-sm text-oliveDark">
@@ -24,5 +27,6 @@ export const onNewMessageToast = ({ senderName, message }) => {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
+    onClick,
   });
 };
