@@ -241,7 +241,10 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
         isScreenSharing={isScreenSharing}
         me={me}
       />
-      <RecordingControlButton />
+      <RecordingControlButton 
+        toggleRecording={toggleRecording}
+  recordingState={recordingState}
+  recordingTimer={recordingTimer}/>
     </div>
   ) : (
     <PictureInPicture
