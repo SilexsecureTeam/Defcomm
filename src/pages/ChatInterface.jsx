@@ -22,6 +22,7 @@ const ChatInterface = () => {
     setShowSettings,
     meetingId,
     setMeetingId,
+    typingUsers
   } = useContext(ChatContext);
 
   const { authDetails } = useContext(AuthContext);
@@ -93,7 +94,7 @@ const ChatInterface = () => {
             <h2 className="text-lg font-semibold capitalize">
               {selectedChatUser.contact_name || "Chat"}
             </h2>
-            {selectedChatUser?.is_typing && (
+            {typingUsers[selectedChatUser?.contact_id_encrypt]?.is_typing && (
               <div className="text-green-400 text-sm">Typing...</div>
             )}
           </div>
