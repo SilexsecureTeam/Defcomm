@@ -41,9 +41,9 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
 
     channel.bind("private.message.sent", ({ data }) => {
   const newMessage = data;
-
+  
   const isCall = data?.message?.startsWith("CALL_INVITE");
-
+   onNewMessage(newMessage);
   if (isCall) {
     audioController.playRingtone(receiverTone, true);
     return; // prevent further toast/audio
@@ -62,7 +62,6 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
       senderName:
         newMessage?.data?.sender_name || `User ${newMessage?.data?.user_id}`,
     });
-  }
 });
     channel.bind("pusher:subscription_error", (status) => {
       console.error("Pusher subscription error:", status);
