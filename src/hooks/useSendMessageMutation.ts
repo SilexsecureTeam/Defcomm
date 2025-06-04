@@ -6,7 +6,7 @@ import { extractErrorMessage } from "../utils/formmaters";
 
 export const useSendMessageMutation = (
   client: AxiosInstance,
-  clearMessageInput?: () => void
+  clearMessageInput?: ) => void = () => {}
 ): UseMutationResult<any, unknown, FormData, unknown> => {
   return useMutation({
     mutationFn: async (formData: FormData) => {
