@@ -62,6 +62,7 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
       senderName:
         newMessage?.data?.sender_name || `User ${newMessage?.data?.user_id}`,
     });
+    }
 });
     channel.bind("pusher:subscription_error", (status) => {
       console.error("Pusher subscription error:", status);
