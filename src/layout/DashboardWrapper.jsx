@@ -50,6 +50,7 @@ const DashboardWrapper = ({ children }) => {
         userId: authDetails?.user?.id,
         token: authDetails?.access_token,
         onNewMessage: (newMessage) => {
+            console.log(newMessage)
             const senderId = newMessage?.data?.user_id;
             
             if (newMessage?.state === "is_typing") {
