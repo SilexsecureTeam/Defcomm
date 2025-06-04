@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom";
 import InitConference from "./InitConference";
 import PictureInPicture from "./PictureInPicture";
 import ConferenceControl from "./ConferenceControl";
+import RecordingControlButton from "./RecordingControlButton";
 
 const ConferenceContent = ({ meetingId, setMeetingId }) => {
   const { pathname } = useLocation();
@@ -166,6 +167,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
 
   return pathname === "/dashboard/conference" ? (
     <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
+      <RecordingControlButton />
       {/* Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
@@ -175,7 +177,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <button
+          {/*<button
             onClick={toggleRecording}
             className={`${
               recordingState === Constants.recordingEvents.RECORDING_STARTED
@@ -186,7 +188,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
             {recordingState === Constants.recordingEvents.RECORDING_STARTED
               ? "Stop Recording"
               : "Start Recording"}
-          </button>
+          </button>*/}
           <button className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md">
             + Invite Member
           </button>
