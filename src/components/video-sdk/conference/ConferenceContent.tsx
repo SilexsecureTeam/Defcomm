@@ -167,7 +167,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
 
   return pathname === "/dashboard/conference" ? (
     <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
-      <RecordingControlButton />
+      
       {/* Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
@@ -241,6 +241,7 @@ const ConferenceContent = ({ meetingId, setMeetingId }) => {
         isScreenSharing={isScreenSharing}
         me={me}
       />
+      <RecordingControlButton />
     </div>
   ) : (
     <PictureInPicture
