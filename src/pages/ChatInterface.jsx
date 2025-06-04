@@ -25,6 +25,8 @@ const ChatInterface = () => {
     typingUsers
   } = useContext(ChatContext);
 
+  console.log(typingUsers)
+
   const { authDetails } = useContext(AuthContext);
   const { fetchChatMessages } = useChat();
   const queryClient = useQueryClient();
