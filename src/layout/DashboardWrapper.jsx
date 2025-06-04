@@ -28,6 +28,7 @@ const DashboardWrapper = ({ children }) => {
     const { conference, showConference, setShowConference } = useContext(MeetingContext);
     const {
         setSelectedChatUser,
+        selectedChatUser,
         setTypingUsers,
         showCall, setShowCall,
         showSettings, setShowSettings,
@@ -51,19 +52,21 @@ const DashboardWrapper = ({ children }) => {
         token: authDetails?.access_token,
         onNewMessage: (newMessage) => {
             const senderId = newMessage?.data?.user_id;
-            
+
             if (newMessage?.state === "is_typing") {
-    setTypingUsers((prev) => ({ ...prev, [newMessage?.user]: true }));
+                setTypingUsers((prev) => ({ ...prev, [newMessage?.user]: true }));
+                setSelectedChatUser((prev) => ({ ...prev, is_typing: true }))
                 return;
-  } else if (newMessage?.state === "not_typing") {
-    setTypingUsers((prev) => {
-      const updated = { ...prev };
-      delete updated[newMessage?.user];
-      return updated;
-    });
+            } else if (newMessage?.state === "not_typing") {
+                setTypingUsers((prev) => {
+                    const updated = { ...prev };
+                    delete updated[newMessage?.user];
+                    return updated;
+                });
+                setSelectedChatUser((prev) => ({ ...prev, is_typing: false }))
                 return;
             }
-            
+
             if (!senderId) return;
 
             const existingData = queryClient.getQueryData(["chatMessages", senderId]);
@@ -77,14 +80,13 @@ const DashboardWrapper = ({ children }) => {
             // If already fetched, append new message to existing messages
             queryClient.setQueryData(["chatMessages", senderId], (old) => {
                 if (!old || !Array.isArray(old.data)) return old;
-
                 const exists = old.data.some((msg) => msg.id === newMessage.data.id);
 
                 return exists
                     ? old
                     : {
                         ...old,
-                        data: [...old.data, {...newMessage.data, message:newMessage.message}].sort(
+                        data: [...old.data, { ...newMessage.data, message: newMessage.message }].sort(
                             (a, b) => new Date(a.created_at) - new Date(b.created_at)
                         ),
                     };

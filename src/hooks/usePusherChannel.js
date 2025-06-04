@@ -1,14 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useContext } from "react";
 import { toast } from "react-toastify";
 import { onNewMessageToast } from "../utils/notifications/onNewMessageToast";
 import notificationSound from "../assets/audio/bell.mp3";
 import audioController from "../utils/audioController"; // Import the shared audio controller
 import receiverTone from "../assets/audio/receiver.mp3";
-
+import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
+
+import { ChatContext } from "../context/ChatContext";
 const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => {
   const pusherRef = useRef(null);
-
+  const navigate= useNavigate()
+  const {setSelectedChatUser} = useContext(ChatContext)
   useEffect(() => {
     if (!userId || !token) return;
 
@@ -41,7 +44,7 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
 
     channel.bind("private.message.sent", ({ data }) => {
   const newMessage = data;
-  
+  console.log(data)
   const isCall = data?.message?.startsWith("CALL_INVITE");
    onNewMessage(newMessage);
   if (isCall) {
@@ -61,6 +64,14 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
       message: newMessage?.message,
       senderName:
         newMessage?.data?.sender_name || `User ${newMessage?.data?.user_id}`,
+      onClick: () => {
+        setSelectedChatUser({
+          contact_id: newMessage?.data?.user_id,
+          contact_name: newMessage?.data?.name || `User ${newMessage?.data?.user_id}`,
+          contact_phone: newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
+        });
+        navigate('/dashboard/chat')
+      }
     });
     }
 });

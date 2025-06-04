@@ -2,6 +2,7 @@ import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
 import { queryClient } from "../services/query-client";
 import { onFailure } from "../utils/notifications/OnFailure";
+import { extractErrorMessage } from "../utils/formmaters";
 
 export const useSendMessageMutation = (
   client: AxiosInstance,
@@ -16,21 +17,18 @@ export const useSendMessageMutation = (
       });
       return data;
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries([
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries([
         "chatMessages",
         variables.get("current_chat_user"), // Use dynamic ID from formData
       ]);
-      if (clearMessageInput) clearMessageInput(); // Only call if defined
+     clearMessageInput();
     },
     onError: (err) => {
       console.error("Failed to send message:", err);
       onFailure({
         message: "Message not sent",
-        error:
-          err?.response?.data?.message ||
-          err?.message ||
-          "Failed to send message. Please try again.",
+        error: extractErrorMessage(err) || "Failed to send message. Please try again.",
       });
     },
   });
