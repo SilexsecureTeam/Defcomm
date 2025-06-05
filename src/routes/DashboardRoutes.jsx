@@ -25,7 +25,7 @@ const Profile = lazy(() => import("../pages/Profile"));
 const Groups = lazy(() => import("../pages/Groups"));
 const SecureChatUI = lazy(() => import("../pages/SecureChatUI"));
 const ShowConferenceRoute = lazy(() => import("../pages/ShowConferenceRoute"));
-
+const WaitingScreen = lazy(() => import("../components/video-sdk/conference/WaitingScreen"));
 const DashboardRoutes = () => {
   const { authDetails } = useContext(AuthContext);
 
@@ -70,6 +70,7 @@ const DashboardRoutes = () => {
             <Route path="isurvive/voice" element={<ChatBoxTwo />} />
             <Route path="settings" element={<Settings />} />
             <Route path="conference" element={<ShowConferenceRoute />} />
+            <Route path="/conference/waiting/:meetingId" element={<WaitingScreen />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
         </Routes>
