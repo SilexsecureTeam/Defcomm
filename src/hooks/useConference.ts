@@ -38,6 +38,20 @@ const useConference = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
+  const getMeetingByIdQuery = (id) =>
+  useQuery({
+    queryKey: ["meeting", id],
+    queryFn: async () => {
+      const { data } = await client.get(`/user/getmeeting/${id}`);
+      console.log("Fetched meeting:", data);
+      return data?.data || null;
+    },
+    enabled: !!id && !!authDetails, // only fetch if ID and auth exist
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
 
   // Create Meeting Mutation
   const createMeetingMutation = useMutation({
@@ -67,6 +81,7 @@ const useConference = () => {
 
   return {
     getMeetingInviteQuery,
+    getMeetingByIdQuery,
     getMyMeetingsQuery,
     createMeetingMutation,
     updateMeetingMutation
