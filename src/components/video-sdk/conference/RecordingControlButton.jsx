@@ -14,7 +14,7 @@ const RecordingControlButton = ({ toggleRecording, recordingState, recordingTime
         dragMomentum={false}
         dragElastic={0.2}
         dragConstraints={constraintsRef}
-        className="absolute bottom-10 right-6 flex flex-col items-end space-y-2 cursor-grab active:cursor-grabbing pointer-events-auto"
+        className="absolute bottom-20 right-6 flex flex-col items-end space-y-2 cursor-grab active:cursor-grabbing pointer-events-auto"
       >
         {isRecording && (
           <motion.div
