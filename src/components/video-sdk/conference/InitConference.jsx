@@ -6,6 +6,7 @@ import { useMeeting } from "@videosdk.live/react-sdk";
 import { onFailure } from "../../../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../../../utils/formmaters";
 import { createMeeting } from "../Api";
+import { useNavigate } from 'react-router-dom'
 
 import HeaderBar from "./HeaderBar";
 import JoinMeetingForm from "./JoinMeetingForm";
@@ -17,6 +18,7 @@ import MeetingList from "./MeetingList";
 
 const InitConference = ({ meetingId, setMeetingId }) => {
   const { conference, setConference } = useContext(MeetingContext);
+  const navigate= useNavigate();
   const [mode, setMode] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
@@ -261,13 +263,14 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                     errors={errorsJoin}
                     handleSubmit={handleSubmitJoin}
                     onSubmit={(data) => {
-                      setConference({ meeting_id: data.meetingId });
+                      /*setConference({ meeting_id: data.meetingId });
                       setWaitingScreen({
                         meeting_id: data.meetingId,
                         title: "Joining...",
                         agenda: "",
                         startdatetime: new Date().toISOString(),
-                      });
+                      });*/
+                      navigate(`dashboard/conference/waiting/${data?.id}`);
                     }}
                     isLoading={isLoading}
                   />
