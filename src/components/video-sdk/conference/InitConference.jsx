@@ -183,8 +183,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                   meetings={upcomingMeetings}
                   showCountdown={true}
                   onMeetingClick={(meeting) => {
-                    setWaitingScreen(meeting);
-                    setMeetingId(meeting.meeting_id);
+                    /*setWaitingScreen(meeting);
+                    setMeetingId(meeting.meeting_id);*/
+                    navigate(`dashboard/conference/waiting/${meeting?.id}`)
                   }}
 
                   onEditMeeting={(meeting) => {
@@ -244,8 +245,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                 meetings={allMeetings}
                 showCountdown={true}
                 onMeetingClick={(meeting) => {
-                  setWaitingScreen(meeting);
-                  setMeetingId(meeting.meeting_id);
+                  /*setWaitingScreen(meeting);
+                  setMeetingId(meeting.meeting_id);*/
+                  navigate(`dashboard/conference/waiting/${meeting?.id}`)
                 }}
                 onEditMeeting={(meeting) => {
                     setEditingMeeting(meeting);
