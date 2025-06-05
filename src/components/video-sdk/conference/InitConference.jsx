@@ -247,7 +247,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                 onMeetingClick={(meeting) => {
                   /*setWaitingScreen(meeting);
                   setMeetingId(meeting.meeting_id);*/
-                  navigate(`dashboard/conference/waiting/${meeting?.id}`)
+                  navigate(`/dashboard/conference/waiting/${meeting?.id}`)
                 }}
                 onEditMeeting={(meeting) => {
                     setEditingMeeting(meeting);
@@ -272,7 +272,7 @@ const InitConference = ({ meetingId, setMeetingId }) => {
                         agenda: "",
                         startdatetime: new Date().toISOString(),
                       });*/
-                      navigate(`dashboard/conference/waiting/${data?.id}`);
+                      navigate(`/dashboard/conference/waiting/${data?.id}`);
                     }}
                     isLoading={isLoading}
                   />
