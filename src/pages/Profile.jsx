@@ -250,7 +250,7 @@ const Profile = () => {
               </label>
               <input
                 type="text"
-                className="w-full p-3 rounded-lg bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-white"
+                className="w-full p-3 rounded-lg bg-transparent text-xl md:text-2xl font-bold focus:outline-none text-black"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 readOnly={!isEditing}
