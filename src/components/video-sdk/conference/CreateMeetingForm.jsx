@@ -94,7 +94,7 @@ const CreateMeetingForm = () => {
         }
       : {
           ...data,
-          meeting_link: "https://cloud.defcomm.ng/dashboard/conference",
+          meeting_link: "https://cloud.defcomm.ng/dashboard/conference/waiting",
           group_user_id: selectedGroup?.group_id || "",
           group_user: "group",
           startdatetime: formatDateTimeForBackend(data.startdatetime),
