@@ -4,7 +4,7 @@ import PictureInPicture from "../components/video-sdk/conference/PictureInPictur
 import ConferenceControl from "../components/video-sdk/conference/ConferenceControl";
 import RecordingControlButton from "../components/video-sdk/conference/RecordingControlButton";
 import { useLocation } from "react-router-dom";
-import { useState, useMemo, useContext, useEffect } from "react";
+import { useState, useMemo, useContext, useEffect, useRef } from "react";
 import { useMeeting, Constants } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../context/AuthContext";
 import { MeetingContext } from "../context/MeetingContext";
@@ -17,6 +17,8 @@ import { toast } from "react-toastify";
 const ConferenceRoom = () => {
   const { authDetails } = useContext(AuthContext);
   const navigate = useNavigate();
+  // Track who we've already welcomed
+const joinedParticipantsRef = useRef(new Set());
   const { pathname } = useLocation();
   const {
     conference, setConference,
@@ -56,8 +58,12 @@ const ConferenceRoom = () => {
     recordingState,
   } = useMeeting({
     onParticipantJoined: (participant) => {
-      toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
-    },
+  const id = participant.id;
+  if (!joinedParticipantsRef.current.has(id)) {
+    joinedParticipantsRef.current.add(id);
+    toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
+  }
+},
     onParticipantLeft: (participant) => {
       toast.info(`${participant.displayName || "A participant"} just left the meeting`);
     },
