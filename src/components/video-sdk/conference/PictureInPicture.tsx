@@ -44,7 +44,7 @@ const PictureInPicture = ({
           {/* Hover controls */}
           <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex flex-col gap-3 items-center justify-end transition-opacity duration-300 pb-4">
             <button
-              onClick={() => navigate("/dashboard/conference")}
+              onClick={() => navigate("/dashboard/conference/room")}
               className="bg-white/80 hover:bg-white text-black p-2 rounded-full shadow"
               title="Back to full view"
             >

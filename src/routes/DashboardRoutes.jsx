@@ -24,8 +24,12 @@ const FileDashboard = lazy(() => import("../pages/FileDashboard"));
 const Profile = lazy(() => import("../pages/Profile"));
 const Groups = lazy(() => import("../pages/Groups"));
 const SecureChatUI = lazy(() => import("../pages/SecureChatUI"));
+const InitConference = lazy(() => import("../components/video-sdk/conference/InitConference"));
 const ShowConferenceRoute = lazy(() => import("../pages/ShowConferenceRoute"));
 const WaitingPage = lazy(() => import("../pages/WaitingPage"));
+const MyMeetings = lazy(() => import("../pages/MyMeetings"));
+const CreateMeetingForm = lazy(() => import("../components/video-sdk/conference/CreateMeetingForm"));
+
 const DashboardRoutes = () => {
   const { authDetails } = useContext(AuthContext);
 
@@ -69,8 +73,11 @@ const DashboardRoutes = () => {
             <Route path="isurvive/chat" element={<ChatBox />} />
             <Route path="isurvive/voice" element={<ChatBoxTwo />} />
             <Route path="settings" element={<Settings />} />
-            <Route path="conference" element={<ShowConferenceRoute />} />
+            <Route path="conference" element={<InitConference />} />
+            <Route path="conference/room" element={<ShowConferenceRoute />} />
             <Route path="/conference/waiting/:meetingId" element={<WaitingPage />} />
+            <Route path="/conference/my-meetings" element={<MyMeetings />} />
+            <Route path="/conference/create" element={<CreateMeetingForm />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
         </Routes>

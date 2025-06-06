@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { MeetingContext } from "../../context/MeetingContext";
 import CallComponentContent from './call/CallComponentContent';
-import ConferenceContent from './conference/ConferenceContent';
+import ConferenceRoom from '../../pages/ConferenceRoom';
 
 type Props = {
   initialMeetingId?: string;
@@ -28,7 +28,7 @@ const CallComponent = ({
 
   return (
     mode === "CONFERENCE" ? (
-      <ConferenceContent meetingId={meetingId} setMeetingId={setMeetingId} />
+      <ConferenceRoom meetingId={meetingId} setMeetingId={setMeetingId} />
     ) : (
       <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
     )

@@ -17,7 +17,6 @@ const useConference = () => {
     queryKey: ["meetingInvitations"],
     queryFn: async () => {
       const { data } = await client.get("/user/meetingInvitationlist");
-      console.log(data);
       return data?.data || [];
     },
     enabled: !!authDetails?.user_enid,
@@ -30,7 +29,6 @@ const useConference = () => {
     queryKey: ["myMeetings"],
     queryFn: async () => {
       const { data } = await client.get(`/user/getmeeting`);
-      console.log(data);
       return data?.data || [];
     },
     enabled: !!authDetails,
@@ -38,12 +36,11 @@ const useConference = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
-  const getMeetingByIdQuery = (id) =>
-  useQuery({
+  const getMeetingByIdQuery = (id) =>{
+  return useQuery({
     queryKey: ["meeting", id],
     queryFn: async () => {
       const { data } = await client.get(`/user/getmeeting/${id}`);
-      console.log("Fetched meeting:", data);
       return data?.data || null;
     },
     enabled: !!id && !!authDetails, // only fetch if ID and auth exist
@@ -51,7 +48,7 @@ const useConference = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
-
+}
 
   // Create Meeting Mutation
   const createMeetingMutation = useMutation({

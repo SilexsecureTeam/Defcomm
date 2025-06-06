@@ -30,30 +30,29 @@ const MeetingList = ({
 
         return (
           <div
-            key={meeting.meeting_id}
+            key={meeting?.id}
             onClick={() => onMeetingClick(meeting)}
             onMouseLeave={()=>setDropdownOpenId(null)}
             className="relative cursor-pointer bg-gray-800 hover:bg-gray-700 hover:scale-[1.01] transition-all duration-200 rounded-xl p-5 shadow-md"
           >
-            {meeting._source !== "Invited" && <div className="absolute top-1 right-2 z-[100]">
+            {meeting?._source !== "Invited" && <div className="absolute top-1 right-2 z-[100]">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleDropdown(meeting.id || meeting.meeting_id);
+                  toggleDropdown(meeting?.id || meeting?.meeting_id);
                 }}
                 className="p-1 hover:bg-white/10 rounded-full"
               >
                 <BsThreeDotsVertical size={18} />
               </button>
               {/* Dropdown menu */}
-              {dropdownOpenId === (meeting.id || meeting.meeting_id) && (
+              {dropdownOpenId === (meeting?.id || meeting?.meeting_id) && (
                 <div
                   onClick={(e) => { e.stopPropagation(); onEditMeeting(meeting); setDropdownOpenId(null) }}
                   className="absolute right-0 w-36 bg-white text-sm text-black rounded-md shadow-lg z-20"
                 >
                   <button
                     onClick={() => {
-                      console.log("Update meeting:", meeting);
                       setDropdownOpenId(null);
                     }}
                     className="w-full px-4 py-2 text-left hover:bg-gray-200 rounded-md"
@@ -62,7 +61,6 @@ const MeetingList = ({
                   </button>
                   <button
                     onClick={() => {
-                      console.log("Delete meeting:", meeting);
                       setDropdownOpenId(null);
                     }}
                     className="w-full px-4 py-2 text-left hover:bg-gray-200 text-red-600 rounded-md"
@@ -75,12 +73,12 @@ const MeetingList = ({
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-1 flex gap-2 items-center">
-                  <FaVideo className="text-green-400 text-2xl" /> {meeting.title || "Untitled Meeting"}
+                  <FaVideo className="text-green-400 text-2xl" /> {meeting?.title || "Untitled Meeting"}
                 </h3>
                 <p className="text-sm text-gray-400">
                   {formattedDate}
-                  {showSource && meeting._source && (
-                    <span className="text-gray-500"> · {meeting._source}</span>
+                  {showSource && meeting?._source && (
+                    <span className="text-gray-500"> · {meeting?._source}</span>
                   )}
                 </p>
               </div>

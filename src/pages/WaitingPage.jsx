@@ -6,38 +6,42 @@ import { useMeeting } from "@videosdk.live/react-sdk";
 import { onFailure } from "../utils/notifications/OnFailure";
 import WaitingScreen from "../components/video-sdk/conference/WaitingScreen";
 import { extractErrorMessage } from "../utils/formmaters";
+import { FaSpinner } from "react-icons/fa"; // <- React icon for loader
 
 const WaitingPage = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
-  const { setConference } = useContext(MeetingContext);
+  const { setConference, setProviderMeetingId } = useContext(MeetingContext);
   const { join } = useMeeting();
-  const { getMeetingByIdQuery } = useConference(); // <-- Make sure this exists in your hook
-  const [meeting, setMeeting] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { getMeetingByIdQuery } = useConference();
+
   const [isJoining, setIsJoining] = useState(false);
 
-  useEffect(() => {
-    if (meetingId) {
-      getMeetingByIdQuery(meetingId)
-        .then((data) => {
-          setMeeting(data);
-          setConference(data); // important: sets global context
-        })
-        .catch(() => {
-          onFailure({ message: "Invalid or expired meeting ID" });
-          navigate("/dashboard/conference"); // or fallback route
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [meetingId]);
+  const {
+    data: meeting,
+    isLoading,
+    isError,
+    error,
+  } = getMeetingByIdQuery(meetingId);
 
-  const handleJoin = async () => {
-    setIsJoining(true);
+  useEffect(() => {
+    if (meeting) {
+      setProviderMeetingId(meeting?.meeting_id);
+    }
+  }, [meeting]);
+
+  const confirmJoinMeeting = async () => {
+    if (!meeting?.meeting_id) {
+      onFailure({ message: "Meeting ID is missing" });
+      return;
+    }
+
     try {
-      await join();
-    } catch (error) {
-      onFailure({ message: "Join failed", error: extractErrorMessage(error) });
+      setIsJoining(true);
+      setConference(meeting);
+      navigate("/dashboard/conference/room");
+    } catch (err) {
+      onFailure({ message: extractErrorMessage(err) });
     } finally {
       setIsJoining(false);
     }
@@ -47,12 +51,33 @@ const WaitingPage = () => {
     navigate("/dashboard/conference");
   };
 
-  if (loading || !meeting) return <div className="text-center text-white mt-10">Loading meeting...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-80 text-white">
+        <FaSpinner className="animate-spin text-5xl text-oliveHover mb-4" />
+        <p className="text-lg">Fetching meeting details...</p>
+      </div>
+    );
+  }
 
+  if (isError || !meeting) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-80 text-red-400 text-center px-4">
+        <h2 className="text-2xl font-semibold mb-2">Unable to load meeting</h2>
+        <p className="mb-4">{extractErrorMessage(error) || "Meeting not found or an unexpected error occurred."}</p>
+        <button
+          onClick={handleCancel}
+          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
   return (
     <WaitingScreen
       waitingScreen={meeting}
-      onJoin={handleJoin}
+      onJoin={confirmJoinMeeting}
       onCancel={handleCancel}
       isJoining={isJoining}
     />
