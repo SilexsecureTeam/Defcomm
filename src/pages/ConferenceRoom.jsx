@@ -67,12 +67,19 @@ const ConferenceRoom = () => {
         error: extractErrorMessage(error) || "An error occurred",
       });
     },
-    onPresenterChanged: (presenterId) => {
-      const presenter = participants.get(presenterId);
-      const isSelf = Number(presenter?.id) === Number(me?.id);
-      toast.info(isSelf ? "You started sharing your screen." : `${presenter?.displayName || "A participant"} started sharing their screen.`);
-      setIsScreenSharing(!!presenterId);
-    },
+    onPresenterChanged: (newPresenterId) => {
+  const presenter = participants.get(newPresenterId);
+
+  if (!newPresenterId) {
+    toast.info("Screen sharing has stopped.");
+    setIsScreenSharing(false);
+    return;
+  }
+
+  const isSelf = Number(newPresenterId) === Number(me?.id);
+  toast.info(isSelf ? "You started sharing your screen." : `${presenter?.displayName || "A participant"} started sharing their screen.`);
+  setIsScreenSharing(true);
+},
     onRecordingStateChanged,
   });
 
