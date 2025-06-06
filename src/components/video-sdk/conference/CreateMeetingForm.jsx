@@ -66,10 +66,12 @@ const CreateMeetingForm = () => {
   }, [isEditing, editData, reset]);
 
   const formatDateTimeForBackend = (datetimeLocal) => {
-    if (!datetimeLocal) return "";
-    const dateObj = new Date(datetimeLocal);
-    return dateObj.toISOString().slice(0, 19).replace("T", " ");
-  };
+  if (!datetimeLocal) return "";
+  // Manually format the local datetime without timezone shift
+  const [date, time] = datetimeLocal.split("T");
+  return `${date} ${time}:00`; // e.g., "2025-06-06 16:30:00"
+};
+
 
   const generateMeetingId = async () => {
     setIsGeneratingId(true);
