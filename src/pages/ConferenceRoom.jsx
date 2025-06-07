@@ -1,4 +1,3 @@
-
 import ParticipantVideo from "../components/video-sdk/conference/ParticipantVideo";
 import ScreenShareDisplay from "../components/video-sdk/conference/ScreenShareDisplay";
 import PictureInPicture from "../components/video-sdk/conference/PictureInPicture";
@@ -12,6 +11,8 @@ import { MeetingContext } from "../context/MeetingContext";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import { useNavigate } from "react-router-dom";
+import audioController from "../utils/audioController"; // Import the shared audio controller
+import joinSound from "../assets/audio/join.mp3";
 
 import { toast } from "react-toastify";
 
@@ -59,6 +60,7 @@ const joinedParticipantsRef = useRef(new Set());
     recordingState,
   } = useMeeting({
     onParticipantJoined: (participant) => {
+      audioController.playRingtone(joinSound);
   const id = participant.id;
   if (!joinedParticipantsRef.current.has(id)) {
     joinedParticipantsRef.current.add(id);
