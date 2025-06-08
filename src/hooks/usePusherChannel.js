@@ -63,11 +63,11 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
     onNewMessageToast({
       message: newMessage?.message,
       senderName:
-        newMessage?.data?.sender_name || `User ${newMessage?.data?.user_id}`,
+        newMessage?.name?.split(" ")[0] || `User ${newMessage?.data?.user_id}`,
       onClick: () => {
         setSelectedChatUser({
           contact_id: newMessage?.data?.user_id,
-          contact_name: newMessage?.data?.name || `User ${newMessage?.data?.user_id}`,
+          contact_name: newMessage?.name || `User ${newMessage?.data?.user_id}`,
           contact_phone: newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
         });
         navigate('/dashboard/chat')

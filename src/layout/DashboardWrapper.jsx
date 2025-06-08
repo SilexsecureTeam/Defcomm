@@ -29,7 +29,7 @@ const DashboardWrapper = ({ children }) => {
     const {
         setSelectedChatUser,
         selectedChatUser,
-        setTypingUsers,
+        setTypingUsers, typingUsers,
         showCall, setShowCall,
         showSettings, setShowSettings,
         meetingId, setMeetingId } = useContext(ChatContext);
@@ -52,18 +52,26 @@ const DashboardWrapper = ({ children }) => {
         token: authDetails?.access_token,
         onNewMessage: (newMessage) => {
             const senderId = newMessage?.data?.user_id;
-
+            console.log(typingUsers)
             if (newMessage?.state === "is_typing") {
-                setTypingUsers((prev) => ({ ...prev, [newMessage?.user]: true }));
-                setSelectedChatUser((prev) => ({ ...prev, is_typing: true }))
+                setTypingUsers((prev) => {
+                    if (prev[newMessage.user]) return prev; // already typing
+                    return { ...prev, [newMessage.user]: true };
+                });
+                setSelectedChatUser((prev) => {
+                    if (prev?.is_typing) return prev;
+                    return { ...prev, is_typing: true };
+                });
                 return;
             } else if (newMessage?.state === "not_typing") {
                 setTypingUsers((prev) => {
-                    const updated = { ...prev };
-                    delete updated[newMessage?.user];
-                    return updated;
+                    if (!prev[newMessage.user]) return prev; // already not typing
+                    return { ...prev, [newMessage.user]: false };
                 });
-                setSelectedChatUser((prev) => ({ ...prev, is_typing: false }))
+                setSelectedChatUser((prev) => {
+                    if (!prev?.is_typing) return prev;
+                    return { ...prev, is_typing: false };
+                });
                 return;
             }
 
