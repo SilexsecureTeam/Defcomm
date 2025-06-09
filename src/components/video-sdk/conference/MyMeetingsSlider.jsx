@@ -72,21 +72,17 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
                     {/* Dropdown menu */}
                     {dropdownOpenId === (meeting.id || meeting.meeting_id) && (
                       <div
-                        onClick={(e) =>{e.stopPropagation(); onEditMeeting(meeting); setDropdownOpenId(null)}}
-                        className="absolute right-0 mt-2 w-36 bg-white text-black rounded-md shadow-lg z-20"
+                        className="absolute right-0 mt-2 w-36 bg-white text-black rounded-md shadow-lg z-20 font-medium text-sm"
                       >
                         <button
-                          onClick={() => {
-                            console.log("Update meeting:", meeting);
-                            setDropdownOpenId(null);
-                          }}
+                          onClick={(e) =>{e.stopPropagation(); onEditMeeting(meeting); setDropdownOpenId(null)}}
                           className="w-full px-4 py-2 text-left hover:bg-gray-100 rounded-md"
                         >
                           Update
                         </button>
                         <button
-                          onClick={() => {
-                            console.log("Delete meeting:", meeting);
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setDropdownOpenId(null);
                           }}
                           className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600 rounded-md"

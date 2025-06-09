@@ -48,21 +48,16 @@ const MeetingList = ({
               {/* Dropdown menu */}
               {dropdownOpenId === (meeting?.id || meeting?.meeting_id) && (
                 <div
-                  onClick={(e) => { e.stopPropagation(); onEditMeeting(meeting); setDropdownOpenId(null) }}
                   className="absolute right-0 w-36 bg-white text-sm text-black rounded-md shadow-lg z-20"
                 >
                   <button
-                    onClick={() => {
-                      setDropdownOpenId(null);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); onEditMeeting(meeting); setDropdownOpenId(null) }}
                     className="w-full px-4 py-2 text-left hover:bg-gray-200 rounded-md"
                   >
                     Update
                   </button>
                   <button
-                    onClick={() => {
-                      setDropdownOpenId(null);
-                    }}
+                    onClick={(e)=>{e.stopPropagation(); setDropdownOpenId(null)}}
                     className="w-full px-4 py-2 text-left hover:bg-gray-200 text-red-600 rounded-md"
                   >
                     Delete

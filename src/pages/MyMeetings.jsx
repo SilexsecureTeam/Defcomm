@@ -1,18 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useContext, useMemo } from "react";
-import { MeetingContext } from "../context/MeetingContext";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import useConference from "../hooks/useConference";
-import { useMeeting } from "@videosdk.live/react-sdk";
-import { extractErrorMessage } from "../utils/formmaters";
 import JoinMeetingForm from "../components/video-sdk/conference/JoinMeetingForm";
 import MeetingList from "../components/video-sdk/conference/MeetingList";
 import HeaderBar from "../components/video-sdk/conference/HeaderBar";
 const MyMeetings = () => {
     const { meetingId } = useParams();
     const navigate = useNavigate();
-    const { setConference, setProviderMeetingId } = useContext(MeetingContext);
-    const { join } = useMeeting();
     const { getMeetingByIdQuery, getMyMeetingsQuery, getMeetingInviteQuery } = useConference(); // <-- Make sure this exists in your hook
     const [showJoinForm, setShowJoinForm] = useState(false);
     const {
@@ -42,7 +37,7 @@ const MyMeetings = () => {
         <div className="space-y-6 max-w-3xl mx-auto text-white">
             <HeaderBar />
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Upcoming Meetings</h2>
+                <h2 className="text-xl font-bold">Meetings</h2>
                 <button
                     className="font-medium text-sm text-oliveDark bg-slate-100 hover:bg-slate-200 hover:underline p-2 rounded-lg"
                     onClick={() => setShowJoinForm(prev => !prev)}
