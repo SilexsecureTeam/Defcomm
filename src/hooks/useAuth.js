@@ -74,7 +74,7 @@ const useAuth = () => {
       return data;
     },
     onSuccess: (data) => {
-      onSuccess({ message: "OTP Requested!", success: `Here is your OTP - ${data?.otp || data?.message}` });
+      onSuccess({ message: "OTP Requested!", success: "OTP sent to your registered mobile number/email" });
     },
     onError: (err) => {
       onFailure({ message: "OTP Request Failed", error: extractErrorMessage(err) });
