@@ -38,7 +38,6 @@ const from = location.state?.fromLogout ?"/dashboard/home" : location.state?.fro
     const onSubmit = async (data) => {
         const response = await requestOtp(data);
         if (response) {
-            console.log(response);
             setUserData(data);
             setOtpRequested(true);
             setTimer(60); // Reset timer when OTP is requested
