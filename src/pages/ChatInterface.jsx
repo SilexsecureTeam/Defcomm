@@ -49,10 +49,7 @@ const ChatInterface = () => {
     }
   }, [messages]);
 
-  const handleAcceptCall = (msg) => {
-    setMeetingId(msg?.message?.slice("CALL_INVITE:".length));
-    setShowCall(true);
-  };
+  
 
   const renderMessages = () => {
     if (!messages?.data?.length) return <p className="text-gray-500 text-center">No messages yet.</p>;
@@ -76,7 +73,6 @@ const ChatInterface = () => {
           <ChatMessage
             msg={msg}
             selectedChatUser={selectedChatUser}
-            handleAcceptCall={handleAcceptCall}
           />
         </React.Fragment>
       );

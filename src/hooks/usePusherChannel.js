@@ -1,6 +1,6 @@
 import { useEffect, useRef, useContext } from "react";
 import { toast } from "react-toastify";
-import { onNewMessageToast } from "../utils/notifications/onNewMessageToast";
+import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
 import notificationSound from "../assets/audio/bell.mp3";
 import audioController from "../utils/audioController"; // Import the shared audio controller
 import receiverTone from "../assets/audio/receiver.mp3";
@@ -8,10 +8,15 @@ import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
 
 import { ChatContext } from "../context/ChatContext";
-const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => {
+const usePusherChannel = ({
+  userId,
+  token,
+  onNewMessage,
+  showToast = true,
+}) => {
   const pusherRef = useRef(null);
-  const navigate= useNavigate()
-  const {setSelectedChatUser} = useContext(ChatContext)
+  const navigate = useNavigate();
+  const { setSelectedChatUser } = useContext(ChatContext);
   useEffect(() => {
     if (!userId || !token) return;
 
@@ -24,7 +29,7 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
       pusherRef.current = null;
     }
 
-    const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
+    const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
       cluster: "mt1",
       wsHost: import.meta.env.VITE_PUSHER_HOST,
       forceTLS: true,
@@ -43,38 +48,58 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
     const channel = pusher.subscribe(`private-chat.${userId}`);
 
     channel.bind("private.message.sent", ({ data }) => {
-  const newMessage = data;
-  console.log(data)
-  const isCall = data?.message?.startsWith("CALL_INVITE");
-   onNewMessage(newMessage);
-  if (isCall) {
-    audioController.playRingtone(receiverTone, true);
-    return; // prevent further toast/audio
-  }
-
-  const shouldToast =
-    showToast &&
-    data?.state !== "not_typing" &&
-    data?.state !== "is_typing" &&
-    data?.data?.user_id !== userId;
-
-  if (shouldToast) {
-    audioController.playRingtone(notificationSound);
-    onNewMessageToast({
-      message: newMessage?.message,
-      senderName:
-        newMessage?.name?.split(" ")[0] || `User ${newMessage?.data?.user_id}`,
-      onClick: () => {
-        setSelectedChatUser({
-          contact_id: newMessage?.data?.user_id,
-          contact_name: newMessage?.name || `User ${newMessage?.data?.user_id}`,
-          contact_phone: newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
+      const newMessage = data;
+      console.log(data);
+      const isCall = data?.message?.startsWith("CALL_INVITE");
+      onNewMessage(newMessage);
+      if (isCall) {
+        audioController.playRingtone(receiverTone, true);
+        onNewNotificationToast({
+          message: newMessage?.message,
+          senderName:
+            newMessage?.name?.split(" ")[0] ||
+            `User ${newMessage?.data?.user_id}`,
+          type: "call",
+          onClick: () => {
+            setSelectedChatUser({
+              contact_id: newMessage?.data?.user_id,
+              contact_name:
+                newMessage?.name || `User ${newMessage?.data?.user_id}`,
+              contact_phone:
+                newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
+            });
+            navigate("/dashboard/chat");
+          },
         });
-        navigate('/dashboard/chat')
+        return; // prevent further toast/audio
+      }
+
+      const shouldToast =
+        showToast &&
+        data?.state !== "not_typing" &&
+        data?.state !== "is_typing" &&
+        data?.data?.user_id !== userId;
+
+      if (shouldToast) {
+        audioController.playRingtone(notificationSound);
+        onNewNotificationToast({
+          message: newMessage?.message,
+          senderName:
+            newMessage?.name?.split(" ")[0] ||
+            `User ${newMessage?.data?.user_id}`,
+          onClick: () => {
+            setSelectedChatUser({
+              contact_id: newMessage?.data?.user_id,
+              contact_name:
+                newMessage?.name || `User ${newMessage?.data?.user_id}`,
+              contact_phone:
+                newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
+            });
+            navigate("/dashboard/chat");
+          },
+        });
       }
     });
-    }
-});
     channel.bind("pusher:subscription_error", (status) => {
       console.error("Pusher subscription error:", status);
     });
@@ -88,6 +113,5 @@ const usePusherChannel = ({ userId, token, onNewMessage, showToast = true }) => 
     };
   }, [userId, token]);
 };
-
 
 export default usePusherChannel;

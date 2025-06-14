@@ -20,14 +20,17 @@ const ConferenceRoom = () => {
   const { authDetails } = useContext(AuthContext);
   const navigate = useNavigate();
   // Track who we've already welcomed
-const joinedParticipantsRef = useRef(new Set());
+  const joinedParticipantsRef = useRef(new Set());
   const { pathname } = useLocation();
   const {
-    conference, setConference,
-    me, setMe, isScreenSharing,
+    conference,
+    setConference,
+    me,
+    setMe,
+    isScreenSharing,
     setIsScreenSharing,
     setShowConference,
-    providerMeetingId
+    providerMeetingId,
   } = useContext(MeetingContext);
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
 
@@ -61,14 +64,18 @@ const joinedParticipantsRef = useRef(new Set());
   } = useMeeting({
     onParticipantJoined: (participant) => {
       audioController.playRingtone(joinSound);
-  const id = participant.id;
-  if (!joinedParticipantsRef.current.has(id)) {
-    joinedParticipantsRef.current.add(id);
-    toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
-  }
-},
+      const id = participant.id;
+      if (!joinedParticipantsRef.current.has(id)) {
+        joinedParticipantsRef.current.add(id);
+        toast.info(
+          `${participant.displayName || "A participant"} has joined the meeting`
+        );
+      }
+    },
     onParticipantLeft: (participant) => {
-      toast.info(`${participant.displayName || "A participant"} just left the meeting`);
+      toast.info(
+        `${participant.displayName || "A participant"} just left the meeting`
+      );
     },
     onError: (error) => {
       onFailure({
@@ -77,28 +84,34 @@ const joinedParticipantsRef = useRef(new Set());
       });
     },
     onPresenterChanged: (newPresenterId) => {
-  const presenter = participants.get(newPresenterId);
+      const presenter = participants.get(newPresenterId);
 
-  if (!newPresenterId) {
-    toast.info("Screen sharing has stopped.");
-    setIsScreenSharing(false);
-    return;
-  }
+      if (!newPresenterId) {
+        toast.info("Screen sharing has stopped.");
+        setIsScreenSharing(false);
+        return;
+      }
 
-  const isSelf = Number(newPresenterId) === Number(me?.id);
-  toast.info(isSelf ? "You started sharing your screen." : `${presenter?.displayName || "A participant"} started sharing their screen.`);
-  setIsScreenSharing(true);
-},
+      const isSelf = Number(newPresenterId) === Number(me?.id);
+      toast.info(
+        isSelf
+          ? "You started sharing your screen."
+          : `${
+              presenter?.displayName || "A participant"
+            } started sharing their screen.`
+      );
+      setIsScreenSharing(true);
+    },
     onRecordingStateChanged,
   });
 
   useEffect(() => {
     if (conference && providerMeetingId) {
       join();
-    }else{
-      navigate('/dashboard/conference')
+    } else {
+      navigate("/dashboard/conference");
     }
-  }, [conference])
+  }, [conference]);
 
   const remoteParticipants = useMemo(() => {
     return [...participants.values()].filter(
@@ -118,9 +131,9 @@ const joinedParticipantsRef = useRef(new Set());
   const handleLeaveMeeting = async () => {
     await leave();
     setConference(null);
-    setShowConference(false)
+    setShowConference(false);
     setIsScreenSharing(false);
-    navigate('/dashboard/conference')
+    navigate("/dashboard/conference");
   };
 
   const handleScreenShare = async () => {
@@ -128,7 +141,11 @@ const joinedParticipantsRef = useRef(new Set());
 
     if (presenterId && presenterId !== me.id) {
       const presenter = participants.get(presenterId);
-      toast.info(`${presenter?.displayName || "Another participant"} is currently sharing.`);
+      toast.info(
+        `${
+          presenter?.displayName || "Another participant"
+        } is currently sharing.`
+      );
       return;
     }
 
@@ -149,7 +166,8 @@ const joinedParticipantsRef = useRef(new Set());
   };
 
   const toggleRecording = () => {
-    const isRecording = recordingState === Constants.recordingEvents.RECORDING_STARTED;
+    const isRecording =
+      recordingState === Constants.recordingEvents.RECORDING_STARTED;
 
     const config = {
       layout: { type: "GRID", priority: "SPEAKER", gridSize: 4 },
@@ -193,13 +211,16 @@ const joinedParticipantsRef = useRef(new Set());
     <>
       {pathname === "/dashboard/conference/room" ? (
         <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
-
           {/* Header */}
           <div className="flex justify-between items-center mb-6 gap-2">
             <div>
-              <p className="text-lg font-semibold">{conference?.title || "Conference"}</p>
+              <p className="text-lg font-semibold">
+                {conference?.title || "Conference"}
+              </p>
               {recordingStartedAt && (
-                <p className="text-sm text-red-500 mt-1">● Recording {recordingTimer}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  ● Recording {recordingTimer}
+                </p>
               )}
             </div>
             <div className="flex flex-col gap-2">
@@ -224,7 +245,10 @@ const joinedParticipantsRef = useRef(new Set());
           {/* Screen Share */}
           {presenterId && (
             <div className="w-full h-[60vh] mb-6 bg-black rounded-md p-2">
-              <ScreenShareDisplay participantId={presenterId} isUser={Number(me?.id) === Number(presenterId)} />
+              <ScreenShareDisplay
+                participantId={presenterId}
+                isUser={Number(me?.id) === Number(presenterId)}
+              />
             </div>
           )}
 
@@ -236,7 +260,9 @@ const joinedParticipantsRef = useRef(new Set());
                 label="You"
                 isMaximized={maximizedParticipantId === me.id}
                 onToggleMaximize={() =>
-                  setMaximizedParticipantId((prev) => (prev === me.id ? null : me.id))
+                  setMaximizedParticipantId((prev) =>
+                    prev === me.id ? null : me.id
+                  )
                 }
               />
             )}
@@ -270,19 +296,22 @@ const joinedParticipantsRef = useRef(new Set());
           <RecordingControlButton
             toggleRecording={toggleRecording}
             recordingState={recordingState}
-            recordingTimer={recordingTimer} />
+            recordingTimer={recordingTimer}
+          />
         </div>
       ) : (
-        <PictureInPicture
-          maximizedParticipantId={maximizedParticipantId}
-          me={me}
-          remoteParticipants={remoteParticipants}
-          handleLeaveMeeting={handleLeaveMeeting}
-        />
+        conference &&
+        providerMeetingId && (
+          <PictureInPicture
+            maximizedParticipantId={maximizedParticipantId}
+            me={me}
+            remoteParticipants={remoteParticipants}
+            handleLeaveMeeting={handleLeaveMeeting}
+          />
+        )
       )}
     </>
   );
-
-}
+};
 
 export default ConferenceRoom;

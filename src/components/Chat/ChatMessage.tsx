@@ -4,10 +4,12 @@ import CustomAudioMessage from "./CustomAudioMessage";
 import ChatFilePreview from "./ChatFilePreview";
 import ChatCallInvite from "./ChatCallInvite";
 import { ChatContext } from "../../context/ChatContext";
+import { MeetingContext } from "../../context/MeetingContext";
 import { parseHtml } from "../../utils/formmaters";
 
-const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
-    const { chatVisibility } = useContext(ChatContext);
+const ChatMessage = ({ msg, selectedChatUser }) => {
+    const { chatVisibility, setShowCall } = useContext(ChatContext);
+    const { setProviderMeetingId } = useContext(MeetingContext);
     const [isVisible, setIsVisible] = useState(chatVisibility || false);
     const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
     const [isExpanded, setIsExpanded] = useState(false);
@@ -23,6 +25,11 @@ const ChatMessage = ({ msg, selectedChatUser, handleAcceptCall }) => {
             setIsVisible(chatVisibility);
         }
     }, [chatVisibility]);
+
+    const handleAcceptCall = (msg) => {
+    setProviderMeetingId(msg?.message?.slice("CALL_INVITE:".length));
+    setShowCall(true);
+  };
 
 
     // Format message date

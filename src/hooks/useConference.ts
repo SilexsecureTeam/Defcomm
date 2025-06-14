@@ -50,6 +50,11 @@ const useConference = () => {
   });
 }
 
+const joinMeeting = async (id) => {
+  const { data } = await client.get(`/user/meetingInvitationJoin/${id}`);
+  return data || null;
+};
+
   // Create Meeting Mutation
   const createMeetingMutation = useMutation({
     mutationFn: (payload) =>
@@ -79,6 +84,7 @@ const useConference = () => {
   return {
     getMeetingInviteQuery,
     getMeetingByIdQuery,
+    joinMeeting,
     getMyMeetingsQuery,
     createMeetingMutation,
     updateMeetingMutation

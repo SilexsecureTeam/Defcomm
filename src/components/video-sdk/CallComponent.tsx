@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { MeetingContext } from "../../context/MeetingContext";
-import CallComponentContent from './call/CallComponentContent';
-import ConferenceRoom from '../../pages/ConferenceRoom';
+import CallComponentContent from "./call/CallComponentContent";
+import ConferenceRoom from "../../pages/ConferenceRoom";
 
 type Props = {
   initialMeetingId?: string;
@@ -9,13 +9,10 @@ type Props = {
   mode?: "CALL" | "CONFERENCE";
 };
 
-const CallComponent = ({
-  initialMeetingId,
-  setInitialMeetingId,
-  mode = "CALL", // default to direct call
-}: Props) => {
+const CallComponent = ({ initialMeetingId, setInitialMeetingId }: Props) => {
   const [meetingId, setMeetingId] = useState(initialMeetingId || null);
-  const { providerMeetingId, setProviderMeetingId } = useContext(MeetingContext);
+  const { providerMeetingId, setProviderMeetingId } =
+    useContext(MeetingContext);
 
   useEffect(() => {
     if (meetingId && !providerMeetingId) {
@@ -27,11 +24,7 @@ const CallComponent = ({
   }, [meetingId]);
 
   return (
-    mode === "CONFERENCE" ? (
-      <ConferenceRoom meetingId={meetingId} setMeetingId={setMeetingId} />
-    ) : (
-      <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
-    )
+    <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
   );
 };
 

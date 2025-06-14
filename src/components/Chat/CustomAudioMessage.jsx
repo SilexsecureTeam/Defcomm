@@ -1,6 +1,6 @@
 import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
 import {useState, useRef} from 'react'
-const CustomAudioMessage = ({ audioSrc }) => {
+const CustomAudioMessage = ({ audioSrc="" }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 

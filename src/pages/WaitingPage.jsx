@@ -13,7 +13,7 @@ const WaitingPage = () => {
   const navigate = useNavigate();
   const { setConference, setProviderMeetingId } = useContext(MeetingContext);
   const { join } = useMeeting();
-  const { getMeetingByIdQuery } = useConference();
+  const { getMeetingByIdQuery, joinMeeting } = useConference();
 
   const [isJoining, setIsJoining] = useState(false);
 
@@ -38,6 +38,7 @@ const WaitingPage = () => {
 
     try {
       setIsJoining(true);
+      await joinMeeting(meeting?.id);
       setConference(meeting);
       navigate("/dashboard/conference/room");
     } catch (err) {

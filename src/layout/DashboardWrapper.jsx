@@ -18,9 +18,7 @@ import NavBar from "../components/dashboard/NavBar";
 import Modal from '../components/modal/Modal'
 import CallComponent from '../components/video-sdk/CallComponent'
 import Settings from '../pages/Settings'
-import PictureInPicture from '../components/video-sdk/conference/PictureInPicture'
 import usePusherChannel from "../hooks/usePusherChannel";
-import { toast } from "react-toastify";
 
 const DashboardWrapper = ({ children }) => {
     const queryClient = useQueryClient();
@@ -28,7 +26,6 @@ const DashboardWrapper = ({ children }) => {
     const { conference, showConference, setShowConference } = useContext(MeetingContext);
     const {
         setSelectedChatUser,
-        selectedChatUser,
         setTypingUsers, typingUsers,
         showCall, setShowCall,
         showSettings, setShowSettings,

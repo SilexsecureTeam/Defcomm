@@ -62,9 +62,9 @@ const PictureInPicture = ({
 
         {/* Hidden audio tracks */}
         <div style={{ display: "none" }}>
-          {[me, ...remoteParticipants].map((participant) => (
+          {[me, ...remoteParticipants].map((participant, idx) => (
             <ParticipantVideo
-              key={participant?.id}
+              key={participant?.id || idx}
               participantId={participant?.id}
               label=""
               isMaximized={false}

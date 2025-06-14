@@ -1,16 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParticipant, useMeeting, usePubSub } from "@videosdk.live/react-sdk";
+import {
+  useParticipant,
+  useMeeting,
+  usePubSub,
+} from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
-import {
-  FaVideo,
-  FaVideoSlash,
-  FaExpand,
-  FaCompress,
-} from "react-icons/fa";
-import {
-  AiOutlineAudioMuted,
-  AiOutlineAudio,
-} from "react-icons/ai";
+import { FaVideo, FaVideoSlash, FaExpand, FaCompress } from "react-icons/fa";
+import { AiOutlineAudioMuted, AiOutlineAudio } from "react-icons/ai";
 import { motion } from "framer-motion";
 //@ts-ignore
 import logo from "../../../assets/logo-icon.png";
@@ -21,10 +17,12 @@ const ParticipantVideo = ({
   label,
   isMaximized,
   onToggleMaximize,
+  key=0,
 }: {
   participantId: string;
   label: string;
   isMaximized: boolean;
+  key?: number | string;
   onToggleMaximize: () => void;
 }) => {
   const { webcamStream, micStream, webcamOn, micOn, isLocal } =
@@ -32,7 +30,6 @@ const ParticipantVideo = ({
   const { toggleMic, toggleWebcam } = useMeeting();
   const { messages } = usePubSub("HAND_RAISE");
   const [handRaised, setHandRaised] = useState(false);
-
 
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const micRef = useRef(null);
@@ -53,7 +50,9 @@ const ParticipantVideo = ({
         mediaStream.addTrack(micStream.track);
         micRef.current.srcObject = mediaStream;
         micRef.current.muted = isLocal;
-        micRef.current.play().catch((err) => console.error("Mic play error", err));
+        micRef.current
+          .play()
+          .catch((err) => console.error("Mic play error", err));
       } else {
         micRef.current.srcObject = null;
       }
@@ -62,16 +61,20 @@ const ParticipantVideo = ({
   useEffect(() => {
     const latestMessage = messages[messages.length - 1];
     if (latestMessage?.message?.id === participantId) {
-      setHandRaised(!!latestMessage.message.raised);
+      setHandRaised(!!latestMessage?.message?.raised);
     }
   }, [messages, participantId]);
 
   return (
     <motion.div
+      key={key}
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`relative bg-gray-200 rounded overflow-hidden ${isMaximized ? "col-span-full row-span-full w-full h-[60vh]" : "aspect-square"
-        }`}
+      className={`relative bg-gray-200 rounded overflow-hidden ${
+        isMaximized
+          ? "col-span-full row-span-full w-full h-[60vh]"
+          : "aspect-square"
+      }`}
     >
       <audio ref={micRef} autoPlay playsInline />
 
@@ -122,7 +125,6 @@ const ParticipantVideo = ({
         </motion.div>
       )}
 
-
       {/* Mic & Cam Controls (UI Only) */}
       <div className="absolute top-2 right-2 flex gap-2">
         <button
@@ -135,7 +137,11 @@ const ParticipantVideo = ({
           className={`p-1 rounded ${micOn ? "bg-green-600" : "bg-red-600"}`}
           aria-label={micOn ? "Mute mic" : "Unmute mic"}
         >
-          {micOn ? <AiOutlineAudio size={14} /> : <AiOutlineAudioMuted size={14} />}
+          {micOn ? (
+            <AiOutlineAudio size={14} />
+          ) : (
+            <AiOutlineAudioMuted size={14} />
+          )}
         </button>
       </div>
     </motion.div>
