@@ -26,9 +26,8 @@ const ParticipantVideo = ({
   key?: number | string;
   onToggleMaximize: () => void;
 }) => {
-  const { webcamStream, micStream, webcamOn, micOn, isLocal } =
+  const { webcamStream, micStream, disableMic, webcamOn, micOn, isLocal } =
     useParticipant(participantId);
-  const { toggleMic, toggleWebcam } = useMeeting();
   const { messages } = usePubSub("HAND_RAISE");
   const [handRaised, setHandRaised] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -139,12 +138,12 @@ const ParticipantVideo = ({
               <div className="absolute z-10 mt-1 bg-white text-black rounded shadow">
                 <button
                   onClick={() => {
-                    toggleMic(); // Mutes the specific participant
+                    disableMic(); // Mutes the specific participant
                     setShowMenu(false);
                   }}
-                  className="block w-full px-4 py-2 text-sm hover:bg-gray-100"
+                  className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
                 >
-                  Mute Participant
+                  Mute {label?.split(" ")[0]}
                 </button>
               </div>
             )}
