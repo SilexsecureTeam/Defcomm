@@ -76,6 +76,10 @@ const ConferenceRoom = () => {
       toast.info(
         `${participant.displayName || "A participant"} just left the meeting`
       );
+      setConference(null);
+      setShowConference(false);
+      setIsScreenSharing(false);
+      navigate("/dashboard/conference");
     },
     onError: (error) => {
       onFailure({
@@ -96,9 +100,8 @@ const ConferenceRoom = () => {
       toast.info(
         isSelf
           ? "You started sharing your screen."
-          : `${
-              presenter?.displayName || "A participant"
-            } started sharing their screen.`
+          : `${presenter?.displayName || "A participant"
+          } started sharing their screen.`
       );
       setIsScreenSharing(true);
     },
@@ -130,10 +133,6 @@ const ConferenceRoom = () => {
 
   const handleLeaveMeeting = async () => {
     await leave();
-    setConference(null);
-    setShowConference(false);
-    setIsScreenSharing(false);
-    navigate("/dashboard/conference");
   };
 
   const handleScreenShare = async () => {
@@ -142,8 +141,7 @@ const ConferenceRoom = () => {
     if (presenterId && presenterId !== me.id) {
       const presenter = participants.get(presenterId);
       toast.info(
-        `${
-          presenter?.displayName || "Another participant"
+        `${presenter?.displayName || "Another participant"
         } is currently sharing.`
       );
       return;

@@ -26,7 +26,7 @@ const ParticipantVideo = ({
   key?: number | string;
   onToggleMaximize: () => void;
 }) => {
-  const { webcamStream, micStream, disableMic, webcamOn, micOn, isLocal } =
+  const { webcamStream, micStream, remove, disableMic, webcamOn, micOn, isLocal } =
     useParticipant(participantId);
   const { messages } = usePubSub("HAND_RAISE");
   const [handRaised, setHandRaised] = useState(false);
@@ -144,6 +144,15 @@ const ParticipantVideo = ({
                   className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
                 >
                   Mute {label?.split(" ")[0]}
+                </button>
+                <button
+                  onClick={() => {
+                    remove(); // Mutes the specific participant
+                    setShowMenu(false);
+                  }}
+                  className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
+                >
+                  Remove {label?.split(" ")[0]}
                 </button>
               </div>
             )}
