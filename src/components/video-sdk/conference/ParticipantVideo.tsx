@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 //@ts-ignore
 import logo from "../../../assets/logo-icon.png";
 import { FaHandPaper } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const ParticipantVideo = ({
   participantId,
@@ -19,12 +20,14 @@ const ParticipantVideo = ({
   isMaximized,
   onToggleMaximize,
   key = 0,
+  removedParticipantsRef
 }: {
   participantId: string;
   label: string;
   isMaximized: boolean;
   key?: number | string;
   onToggleMaximize: () => void;
+  removedParticipantsRef: any;
 }) => {
   const { webcamStream, micStream, remove, disableMic, webcamOn, micOn, isLocal } =
     useParticipant(participantId);
@@ -148,6 +151,7 @@ const ParticipantVideo = ({
                 <button
                   onClick={() => {
                     remove(); // Mutes the specific participant
+                    removedParticipantsRef.current.add(participantId);
                     setShowMenu(false);
                   }}
                   className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"

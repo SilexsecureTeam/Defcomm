@@ -3,25 +3,22 @@ import ScreenShareDisplay from "../components/video-sdk/conference/ScreenShareDi
 import PictureInPicture from "../components/video-sdk/conference/PictureInPicture";
 import ConferenceControl from "../components/video-sdk/conference/ConferenceControl";
 import RecordingControlButton from "../components/video-sdk/conference/RecordingControlButton";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useMemo, useContext, useEffect, useRef } from "react";
 import { useMeeting, Constants } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../context/AuthContext";
 import { MeetingContext } from "../context/MeetingContext";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
-import { useNavigate } from "react-router-dom";
-import audioController from "../utils/audioController"; // Import the shared audio controller
+import audioController from "../utils/audioController";
 import joinSound from "../assets/audio/join.mp3";
-
 import { toast } from "react-toastify";
 
 const ConferenceRoom = () => {
   const { authDetails } = useContext(AuthContext);
   const navigate = useNavigate();
-  // Track who we've already welcomed
-  const joinedParticipantsRef = useRef(new Set());
   const { pathname } = useLocation();
+
   const {
     conference,
     setConference,
@@ -32,10 +29,14 @@ const ConferenceRoom = () => {
     setShowConference,
     providerMeetingId,
   } = useContext(MeetingContext);
-  const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
 
+  const joinedParticipantsRef = useRef(new Set());
+  const removedParticipantsRef = useRef(new Set());
+
+  const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
   const [recordingStartedAt, setRecordingStartedAt] = useState(null);
   const [recordingTimer, setRecordingTimer] = useState("00:00");
+  const [isJoining, setIsJoining] = useState(true);
 
   const onRecordingStateChanged = ({ status }) => {
     if (status === Constants.recordingEvents.RECORDING_STARTING) {
@@ -51,6 +52,7 @@ const ConferenceRoom = () => {
       setRecordingTimer("00:00");
     }
   };
+
   const {
     participants,
     leave,
@@ -63,25 +65,32 @@ const ConferenceRoom = () => {
     recordingState,
   } = useMeeting({
     onMeetingLeft: () => {
+      joinedParticipantsRef.current.clear();
+      removedParticipantsRef.current.clear();
       setConference(null);
       setShowConference(false);
       setIsScreenSharing(false);
+      setMe(null);
       navigate("/dashboard/conference");
     },
     onParticipantJoined: (participant) => {
-      audioController.playRingtone(joinSound);
       const id = participant.id;
+
+      if (isJoining && joinedParticipantsRef.current.has(id)) return;
+
       if (!joinedParticipantsRef.current.has(id)) {
         joinedParticipantsRef.current.add(id);
-        toast.info(
-          `${participant.displayName || "A participant"} has joined the meeting`
-        );
+        audioController.playRingtone(joinSound);
+        toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
       }
     },
     onParticipantLeft: (participant) => {
-      toast.info(
-        `${participant.displayName || "A participant"} just left the meeting`
-      );
+      if (removedParticipantsRef.current.has(participant.id)) {
+        toast.info(`${participant.displayName || "A participant"} was removed from the meeting`);
+        removedParticipantsRef.current.delete(participant.id);
+      } else {
+        toast.info(`${participant.displayName || "A participant"} just left the meeting`);
+      }
     },
     onError: (error) => {
       onFailure({
@@ -91,19 +100,16 @@ const ConferenceRoom = () => {
     },
     onPresenterChanged: (newPresenterId) => {
       const presenter = participants.get(newPresenterId);
-
       if (!newPresenterId) {
         toast.info("Screen sharing has stopped.");
         setIsScreenSharing(false);
         return;
       }
-
       const isSelf = Number(newPresenterId) === Number(me?.id);
       toast.info(
         isSelf
           ? "You started sharing your screen."
-          : `${presenter?.displayName || "A participant"
-          } started sharing their screen.`
+          : `${presenter?.displayName || "A participant"} started sharing their screen.`
       );
       setIsScreenSharing(true);
     },
@@ -112,7 +118,22 @@ const ConferenceRoom = () => {
 
   useEffect(() => {
     if (conference && providerMeetingId) {
-      join();
+      setIsJoining(true);
+      (async () => {
+        try {
+          await join();
+
+          if (participants) {
+            participants.forEach((p) => {
+              joinedParticipantsRef.current.add(p.id);
+            });
+          }
+        } catch (err) {
+          onFailure({ message: "Failed to join", error: extractErrorMessage(err) });
+        } finally {
+          setIsJoining(false);
+        }
+      })();
     } else {
       navigate("/dashboard/conference");
     }
@@ -134,21 +155,26 @@ const ConferenceRoom = () => {
   }, [participants, conference, authDetails?.user?.id]);
 
   const handleLeaveMeeting = async () => {
-    await leave();
+    try {
+      await leave();
+    } finally {
+      joinedParticipantsRef.current.clear();
+      removedParticipantsRef.current.clear();
+      setMe(null);
+      setConference(null);
+      setIsScreenSharing(false);
+      setShowConference(false);
+      navigate("/dashboard/conference");
+    }
   };
 
   const handleScreenShare = async () => {
     if (!me?.id) return;
-
     if (presenterId && presenterId !== me.id) {
       const presenter = participants.get(presenterId);
-      toast.info(
-        `${presenter?.displayName || "Another participant"
-        } is currently sharing.`
-      );
+      toast.info(`${presenter?.displayName || "Another participant"} is currently sharing.`);
       return;
     }
-
     try {
       if (isScreenSharing && presenterId === me.id) {
         await disableScreenShare();
@@ -166,8 +192,7 @@ const ConferenceRoom = () => {
   };
 
   const toggleRecording = () => {
-    const isRecording =
-      recordingState === Constants.recordingEvents.RECORDING_STARTED;
+    const isRecording = recordingState === Constants.recordingEvents.RECORDING_STARTED;
 
     const config = {
       layout: { type: "GRID", priority: "SPEAKER", gridSize: 4 },
@@ -211,7 +236,6 @@ const ConferenceRoom = () => {
     <>
       {pathname === "/dashboard/conference/room" ? (
         <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
-          {/* Header */}
           <div className="flex justify-between items-center mb-6 gap-2">
             <div>
               <p className="text-lg font-semibold">
@@ -224,25 +248,12 @@ const ConferenceRoom = () => {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              {/*<button
-                onClick={toggleRecording}
-                className={`${
-                  recordingState === Constants.recordingEvents.RECORDING_STARTED
-                    ? "bg-red-600"
-                    : "bg-green-700"
-                } text-white px-2 md:px-4 py-1 rounded text-sm`}
-              >
-                {recordingState === Constants.recordingEvents.RECORDING_STARTED
-                  ? "Stop Recording"
-                  : "Start Recording"}
-              </button>*/}
               <button className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md">
                 + Invite Member
               </button>
             </div>
           </div>
 
-          {/* Screen Share */}
           {presenterId && (
             <div className="w-full h-[60vh] mb-6 bg-black rounded-md p-2">
               <ScreenShareDisplay
@@ -252,7 +263,6 @@ const ConferenceRoom = () => {
             </div>
           )}
 
-          {/* Video Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8">
             {me && (
               <ParticipantVideo
@@ -269,6 +279,7 @@ const ConferenceRoom = () => {
             {remoteParticipants.length > 0 ? (
               remoteParticipants.map((participant) => (
                 <ParticipantVideo
+                  removedParticipantsRef={removedParticipantsRef}
                   key={participant.id}
                   participantId={participant.id}
                   label={participant.displayName || "Guest"}
