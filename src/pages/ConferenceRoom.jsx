@@ -3,6 +3,7 @@ import ScreenShareDisplay from "../components/video-sdk/conference/ScreenShareDi
 import PictureInPicture from "../components/video-sdk/conference/PictureInPicture";
 import ConferenceControl from "../components/video-sdk/conference/ConferenceControl";
 import RecordingControlButton from "../components/video-sdk/conference/RecordingControlButton";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useMemo, useContext, useEffect, useRef } from "react";
 import { useMeeting, Constants } from "@videosdk.live/react-sdk";
@@ -30,28 +31,12 @@ const ConferenceRoom = () => {
     providerMeetingId,
   } = useContext(MeetingContext);
 
-  const joinedParticipantsRef = useRef(new Set());
-  const removedParticipantsRef = useRef(new Set());
-
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
   const [recordingStartedAt, setRecordingStartedAt] = useState(null);
   const [recordingTimer, setRecordingTimer] = useState("00:00");
-  const [isJoining, setIsJoining] = useState(false);
 
-  const onRecordingStateChanged = ({ status }) => {
-    if (status === Constants.recordingEvents.RECORDING_STARTING) {
-      toast.info("Recording is starting...");
-    } else if (status === Constants.recordingEvents.RECORDING_STARTED) {
-      toast.success("Recording started.");
-      setRecordingStartedAt(Date.now());
-    } else if (status === Constants.recordingEvents.RECORDING_STOPPING) {
-      toast.info("Recording is stopping...");
-    } else if (status === Constants.recordingEvents.RECORDING_STOPPED) {
-      toast.success("Recording stopped.");
-      setRecordingStartedAt(null);
-      setRecordingTimer("00:00");
-    }
-  };
+  const joinedParticipantsRef = useRef(new Set());
+  const removedParticipantsRef = useRef(new Set());
 
   const {
     participants,
@@ -68,14 +53,20 @@ const ConferenceRoom = () => {
       setConference(null);
       setShowConference(false);
       setIsScreenSharing(false);
+      setMe(null);
+      joinedParticipantsRef.current.clear();
+      removedParticipantsRef.current.clear();
       navigate("/dashboard/conference");
     },
     onParticipantJoined: (participant) => {
       const id = participant.id;
-      if (isJoining || joinedParticipantsRef.current.has(id)) return;
-      joinedParticipantsRef.current.add(id);
-      audioController.playRingtone(joinSound);
-      toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
+      if (!joinedParticipantsRef.current.has(id)) {
+        joinedParticipantsRef.current.add(id);
+        audioController.playRingtone(joinSound);
+        toast.info(
+          `${participant.displayName || "A participant"} has joined the meeting`
+        );
+      }
     },
     onParticipantLeft: (participant) => {
       if (removedParticipantsRef.current.has(participant.id)) {
@@ -106,55 +97,42 @@ const ConferenceRoom = () => {
       );
       setIsScreenSharing(true);
     },
-    onRecordingStateChanged,
+    onRecordingStateChanged: ({ status }) => {
+      if (status === Constants.recordingEvents.RECORDING_STARTING) {
+        toast.info("Recording is starting...");
+      } else if (status === Constants.recordingEvents.RECORDING_STARTED) {
+        toast.success("Recording started.");
+        setRecordingStartedAt(Date.now());
+      } else if (status === Constants.recordingEvents.RECORDING_STOPPING) {
+        toast.info("Recording is stopping...");
+      } else if (status === Constants.recordingEvents.RECORDING_STOPPED) {
+        toast.success("Recording stopped.");
+        setRecordingStartedAt(null);
+        setRecordingTimer("00:00");
+      }
+    },
   });
 
-  // SAFELY LEAVE AND JOIN MEETING
   useEffect(() => {
-    let isMounted = true;
-
-    const safelyJoinMeeting = async () => {
-      if (!conference || !providerMeetingId) {
-        navigate("/dashboard/conference");
-        return;
-      }
-
-      try {
-        setIsJoining(true);
-
-        // Full clean leave before join
-        await leave();
-
-        // Clean state
-        joinedParticipantsRef.current.clear();
-        removedParticipantsRef.current.clear();
-        setMe(null);
-        setIsScreenSharing(false);
-
-        await join();
-
+    if (conference && providerMeetingId) {
+      join();
+      // Register already-joined participants after join
+      setTimeout(() => {
         if (participants) {
           participants.forEach((p) => joinedParticipantsRef.current.add(p.id));
         }
-      } catch (err) {
-        if (isMounted) {
-          onFailure({
-            message: "Join Error",
-            error: extractErrorMessage(err),
-          });
-        }
-      } finally {
-        if (isMounted) setIsJoining(false);
-      }
-    };
+      }, 500);
+    } else {
+      navigate("/dashboard/conference");
+    }
+  }, [conference]);
 
-    safelyJoinMeeting();
-    return () => {
-      isMounted = false;
-    };
-  }, [conference, providerMeetingId]);
+  const remoteParticipants = useMemo(() => {
+    return [...participants.values()].filter(
+      (p) => String(p.id) !== String(authDetails?.user?.id)
+    );
+  }, [participants, authDetails?.user?.id]);
 
-  // Clean participant state
   useEffect(() => {
     if (participants && conference) {
       const currentUser = [...participants.values()].find(
@@ -164,24 +142,13 @@ const ConferenceRoom = () => {
     }
   }, [participants, conference, authDetails?.user?.id]);
 
-  const remoteParticipants = useMemo(() => {
-    return [...participants.values()].filter(
-      (p) => String(p.id) !== String(authDetails?.user?.id)
-    );
-  }, [participants, authDetails?.user?.id]);
-
   const handleLeaveMeeting = async () => {
     try {
       await leave();
-      joinedParticipantsRef.current.clear();
-      removedParticipantsRef.current.clear();
-      setMe(null);
-      setConference(null);
-      setShowConference(false);
     } catch (error) {
       onFailure({
-        message: "Leave Failed",
-        error: extractErrorMessage(error),
+        message: "Leave Error",
+        error: error.message || "Could not leave the meeting.",
       });
     }
   };
@@ -190,10 +157,11 @@ const ConferenceRoom = () => {
     if (!me?.id) return;
     if (presenterId && presenterId !== me.id) {
       const presenter = participants.get(presenterId);
-      toast.info(`${presenter?.displayName || "Another participant"} is currently sharing.`);
+      toast.info(
+        `${presenter?.displayName || "Another participant"} is currently sharing.`
+      );
       return;
     }
-
     try {
       if (isScreenSharing && presenterId === me.id) {
         await disableScreenShare();
@@ -205,7 +173,7 @@ const ConferenceRoom = () => {
     } catch (error) {
       onFailure({
         message: "Screen Share Error",
-        error: extractErrorMessage(error),
+        error: error.message || "Could not start screen sharing.",
       });
     }
   };
@@ -213,7 +181,6 @@ const ConferenceRoom = () => {
   const toggleRecording = () => {
     const isRecording =
       recordingState === Constants.recordingEvents.RECORDING_STARTED;
-
     const config = {
       layout: { type: "GRID", priority: "SPEAKER", gridSize: 4 },
       theme: "DARK",
@@ -221,7 +188,6 @@ const ConferenceRoom = () => {
       quality: "high",
       orientation: "landscape",
     };
-
     const transcription = {
       enabled: true,
       summary: {
@@ -230,12 +196,7 @@ const ConferenceRoom = () => {
           "Write summary in sections like Title, Agenda, Speakers, Action Items, Outlines, Notes and Summary",
       },
     };
-
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording(null, null, config, transcription);
-    }
+    isRecording ? stopRecording() : startRecording(null, null, config, transcription);
   };
 
   useEffect(() => {
@@ -256,6 +217,7 @@ const ConferenceRoom = () => {
     <>
       {pathname === "/dashboard/conference/room" ? (
         <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
+          {/* Header */}
           <div className="flex justify-between items-center mb-6 gap-2">
             <div>
               <p className="text-lg font-semibold">
@@ -267,13 +229,12 @@ const ConferenceRoom = () => {
                 </p>
               )}
             </div>
-            <div className="flex flex-col gap-2">
-              <button className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md">
-                + Invite Member
-              </button>
-            </div>
+            <button className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md">
+              + Invite Member
+            </button>
           </div>
 
+          {/* Screen Share */}
           {presenterId && (
             <div className="w-full h-[60vh] mb-6 bg-black rounded-md p-2">
               <ScreenShareDisplay
@@ -283,6 +244,7 @@ const ConferenceRoom = () => {
             </div>
           )}
 
+          {/* Participant Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8">
             {me && (
               <ParticipantVideo
