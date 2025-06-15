@@ -36,7 +36,7 @@ const ConferenceRoom = () => {
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
   const [recordingStartedAt, setRecordingStartedAt] = useState(null);
   const [recordingTimer, setRecordingTimer] = useState("00:00");
-  const [isJoining, setIsJoining] = useState(true);
+  const [isJoining, setIsJoining] = useState(false);
 
   const onRecordingStateChanged = ({ status }) => {
     if (status === Constants.recordingEvents.RECORDING_STARTING) {
@@ -65,24 +65,17 @@ const ConferenceRoom = () => {
     recordingState,
   } = useMeeting({
     onMeetingLeft: () => {
-      joinedParticipantsRef.current.clear();
-      removedParticipantsRef.current.clear();
       setConference(null);
       setShowConference(false);
       setIsScreenSharing(false);
-      setMe(null);
       navigate("/dashboard/conference");
     },
     onParticipantJoined: (participant) => {
       const id = participant.id;
-
-      if (isJoining && joinedParticipantsRef.current.has(id)) return;
-
-      if (!joinedParticipantsRef.current.has(id)) {
-        joinedParticipantsRef.current.add(id);
-        audioController.playRingtone(joinSound);
-        toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
-      }
+      if (isJoining || joinedParticipantsRef.current.has(id)) return;
+      joinedParticipantsRef.current.add(id);
+      audioController.playRingtone(joinSound);
+      toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
     },
     onParticipantLeft: (participant) => {
       if (removedParticipantsRef.current.has(participant.id)) {
@@ -116,35 +109,52 @@ const ConferenceRoom = () => {
     onRecordingStateChanged,
   });
 
+  // SAFELY LEAVE AND JOIN MEETING
   useEffect(() => {
-    if (conference && providerMeetingId) {
-      setIsJoining(true);
-      (async () => {
-        try {
-          await join();
+    let isMounted = true;
 
-          if (participants) {
-            participants.forEach((p) => {
-              joinedParticipantsRef.current.add(p.id);
-            });
-          }
-        } catch (err) {
-          onFailure({ message: "Failed to join", error: extractErrorMessage(err) });
-        } finally {
-          setIsJoining(false);
+    const safelyJoinMeeting = async () => {
+      if (!conference || !providerMeetingId) {
+        navigate("/dashboard/conference");
+        return;
+      }
+
+      try {
+        setIsJoining(true);
+
+        // Full clean leave before join
+        await leave();
+
+        // Clean state
+        joinedParticipantsRef.current.clear();
+        removedParticipantsRef.current.clear();
+        setMe(null);
+        setIsScreenSharing(false);
+
+        await join();
+
+        if (participants) {
+          participants.forEach((p) => joinedParticipantsRef.current.add(p.id));
         }
-      })();
-    } else {
-      navigate("/dashboard/conference");
-    }
-  }, [conference]);
+      } catch (err) {
+        if (isMounted) {
+          onFailure({
+            message: "Join Error",
+            error: extractErrorMessage(err),
+          });
+        }
+      } finally {
+        if (isMounted) setIsJoining(false);
+      }
+    };
 
-  const remoteParticipants = useMemo(() => {
-    return [...participants.values()].filter(
-      (p) => String(p.id) !== String(authDetails?.user?.id)
-    );
-  }, [participants, authDetails?.user?.id]);
+    safelyJoinMeeting();
+    return () => {
+      isMounted = false;
+    };
+  }, [conference, providerMeetingId]);
 
+  // Clean participant state
   useEffect(() => {
     if (participants && conference) {
       const currentUser = [...participants.values()].find(
@@ -154,17 +164,25 @@ const ConferenceRoom = () => {
     }
   }, [participants, conference, authDetails?.user?.id]);
 
+  const remoteParticipants = useMemo(() => {
+    return [...participants.values()].filter(
+      (p) => String(p.id) !== String(authDetails?.user?.id)
+    );
+  }, [participants, authDetails?.user?.id]);
+
   const handleLeaveMeeting = async () => {
     try {
       await leave();
-    } finally {
       joinedParticipantsRef.current.clear();
       removedParticipantsRef.current.clear();
       setMe(null);
       setConference(null);
-      setIsScreenSharing(false);
       setShowConference(false);
-      navigate("/dashboard/conference");
+    } catch (error) {
+      onFailure({
+        message: "Leave Failed",
+        error: extractErrorMessage(error),
+      });
     }
   };
 
@@ -175,6 +193,7 @@ const ConferenceRoom = () => {
       toast.info(`${presenter?.displayName || "Another participant"} is currently sharing.`);
       return;
     }
+
     try {
       if (isScreenSharing && presenterId === me.id) {
         await disableScreenShare();
@@ -186,13 +205,14 @@ const ConferenceRoom = () => {
     } catch (error) {
       onFailure({
         message: "Screen Share Error",
-        error: error.message || "Could not start screen sharing.",
+        error: extractErrorMessage(error),
       });
     }
   };
 
   const toggleRecording = () => {
-    const isRecording = recordingState === Constants.recordingEvents.RECORDING_STARTED;
+    const isRecording =
+      recordingState === Constants.recordingEvents.RECORDING_STARTED;
 
     const config = {
       layout: { type: "GRID", priority: "SPEAKER", gridSize: 4 },
