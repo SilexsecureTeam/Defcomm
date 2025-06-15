@@ -8,7 +8,6 @@ import { useMeeting, useParticipant, usePubSub } from "@videosdk.live/react-sdk"
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
 import { toast } from 'react-toastify';
-
 import CallMessagingModal from "./CallMessagingModal";
 
 const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenSharing, me }) => {
@@ -48,6 +47,7 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
         setHandRaised(raised);
       } else if (raised) {
         toast.info(`${name || "Someone"} raised their hand ✋`);
+        audioController.playRingtone(notificationSound);
       }
     }
   }, [handMessages, myId]);
@@ -61,6 +61,7 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
       latestChatMessage.id !== lastSeenMessageId
     ) {
       setHasNewMessage(true);
+      audioController.playRingtone(notificationSound);
     }
   }, [chatMessages, showChatModal, myId, lastSeenMessageId, latestChatMessage]);
 

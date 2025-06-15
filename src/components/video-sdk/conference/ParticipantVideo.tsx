@@ -103,7 +103,7 @@ const ParticipantVideo = ({
       )}
 
       {/* Name label */}
-      <div className="absolute bottom-2 left-2 text-xs px-2 py-1 bg-gray-700 bg-opacity-50 rounded text-white">
+      <div title={label} className="truncate max-w-[70%] absolute bottom-2 left-2 text-xs px-2 py-1 bg-gray-700 bg-opacity-50 rounded text-white">
         {label}
       </div>
 

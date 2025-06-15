@@ -4,7 +4,6 @@ import ScreenShareDisplay from "../components/video-sdk/conference/ScreenShareDi
 import PictureInPicture from "../components/video-sdk/conference/PictureInPicture";
 import ConferenceControl from "../components/video-sdk/conference/ConferenceControl";
 import RecordingControlButton from "../components/video-sdk/conference/RecordingControlButton";
-
 import { useLocation } from "react-router-dom";
 import { useContext, useState } from "react";
 import { Constants } from "@videosdk.live/react-sdk";

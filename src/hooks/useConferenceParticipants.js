@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useContext, useState } from "react";
 import { useMeeting, Constants } from "@videosdk.live/react-sdk";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import { AuthContext } from "../context/AuthContext";
 import { MeetingContext } from "../context/MeetingContext";
 import { onFailure } from "../utils/notifications/OnFailure";
@@ -80,6 +79,7 @@ export default function useConferenceParticipants() {
           ? "You started sharing your screen."
           : `${presenter?.displayName || "A participant"} started sharing their screen.`
       );
+      audioController.playRingtone(joinSound);
       setIsScreenSharing(true);
     },
     onRecordingStateChanged: ({ status }) => {
