@@ -50,6 +50,18 @@ const useConference = () => {
   });
 }
 
+const getCallLogs = useQuery({
+    queryKey: ["callLogs"],
+    queryFn: async () => {
+      const { data } = await client.get(`/user/chat/callLog`);
+      return data?.data || [];
+    },
+    enabled: !!authDetails,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
 const joinMeeting = async (id) => {
   const { data } = await client.get(`/user/meetingInvitationJoin/${id}`);
   return data || null;
@@ -84,10 +96,11 @@ const joinMeeting = async (id) => {
   return {
     getMeetingInviteQuery,
     getMeetingByIdQuery,
+    getCallLogs,
     joinMeeting,
     getMyMeetingsQuery,
     createMeetingMutation,
-    updateMeetingMutation
+    updateMeetingMutation,
   };
 };
 

@@ -7,6 +7,7 @@ import {
 import ReactPlayer from "react-player";
 import { FaVideo, FaVideoSlash, FaExpand, FaCompress } from "react-icons/fa";
 import { AiOutlineAudioMuted, AiOutlineAudio } from "react-icons/ai";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { motion } from "framer-motion";
 //@ts-ignore
 import logo from "../../../assets/logo-icon.png";
@@ -17,7 +18,7 @@ const ParticipantVideo = ({
   label,
   isMaximized,
   onToggleMaximize,
-  key=0,
+  key = 0,
 }: {
   participantId: string;
   label: string;
@@ -30,7 +31,7 @@ const ParticipantVideo = ({
   const { toggleMic, toggleWebcam } = useMeeting();
   const { messages } = usePubSub("HAND_RAISE");
   const [handRaised, setHandRaised] = useState(false);
-
+  const [showMenu, setShowMenu] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const micRef = useRef(null);
 
@@ -70,11 +71,10 @@ const ParticipantVideo = ({
       key={key}
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`relative bg-gray-200 rounded overflow-hidden ${
-        isMaximized
+      className={`relative bg-gray-200 rounded overflow-hidden ${isMaximized
           ? "col-span-full row-span-full w-full h-[60vh]"
           : "aspect-square"
-      }`}
+        }`}
     >
       <audio ref={micRef} autoPlay playsInline />
 
@@ -124,6 +124,34 @@ const ParticipantVideo = ({
           <FaHandPaper size={24} title="Hand Raised" />
         </motion.div>
       )}
+      {/* Participant Options Menu */}
+      {!isLocal && (
+        <div className="absolute top-2 left-2">
+          <div className="relative">
+            <button
+              className="p-1 bg-gray-800 text-white rounded hover:bg-gray-700"
+              onClick={() => setShowMenu((prev) => !prev)}
+            >
+              <BsThreeDotsVertical size={16} />
+            </button>
+
+            {showMenu && (
+              <div className="absolute z-10 mt-1 bg-white text-black rounded shadow">
+                <button
+                  onClick={() => {
+                    toggleMic(); // Mutes the specific participant
+                    setShowMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  Mute Participant
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
 
       {/* Mic & Cam Controls (UI Only) */}
       <div className="absolute top-2 right-2 flex gap-2">

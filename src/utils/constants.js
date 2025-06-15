@@ -1,6 +1,6 @@
 //Dashboard icons import
-import { FaHome, FaRegUserCircle, FaCog, FaRobot } from "react-icons/fa";
-import { MdGroups, MdOutlineCall, MdOutlineFolderShared } from "react-icons/md";
+import { FaRegUserCircle, FaCog, FaRobot, FaFileAlt } from "react-icons/fa";
+import { MdGroups, MdOutlineCall, MdOutlineFolderShared, MdPhoneMissed } from "react-icons/md";
 import { IoIosChatboxes, IoMdWifi } from "react-icons/io";
 import { BiCategoryAlt } from "react-icons/bi";
 
@@ -14,6 +14,7 @@ import sharing from "../assets/device.png";
 import drive from "../assets/drive.png";
 import military from "../assets/military.png";
 import talkie from "../assets/walkie-talkie.png";
+import { FaWalkieTalkie } from "react-icons/fa6";
 
 export const dashboardOptions = [
   {
@@ -85,74 +86,74 @@ export const utilOptions = [
 ];
 
 export const dashboardTabs = [
-  { 
-    type:"CALL",
+  {
+    type: "CALL",
     title: "Call",
-    img: call, 
+    img: call,
     view: "chat",
     type: "CHAT",
-    route:"/dashboard/chat"
+    route: "/dashboard/chat"
   },
-  { 
-    type:"CONNECT",
+  {
+    type: "CONNECT",
     title: "Discover",
-    img: connect, 
+    img: connect,
     view: "connect",
-    type: "CONNECT", 
-    route:"/dashboard/home"
+    type: "CONNECT",
+    route: "/dashboard/home"
   },
-  { 
-    type:"CONFERENCE",
+  {
+    type: "CONFERENCE",
     title: "Conference",
-    img: secure, 
+    img: secure,
     view: "conference",
-     route:"/dashboard/conference"
+    route: "/dashboard/conference"
   },
-  { 
-    type:"COMM",
+  {
+    type: "COMM",
     title: "Walkie talkie",
-    img: talkie, 
+    img: talkie,
     view: "comm",
-    route:"/dashboard/comm", 
+    route: "/dashboard/comm",
   },
-  { 
-    type:"DRIVE",
+  {
+    type: "DRIVE",
     title: "Drive",
-    img: drive, 
+    img: drive,
     view: "drive",
-    route:"/dashboard/drive", 
+    route: "/dashboard/drive",
   },
-  { 
-    type:"MAIL",
+  {
+    type: "MAIL",
     title: "Mail",
-    img: mail, 
+    img: mail,
     view: "email",
-    route:"/dashboard/mail", 
+    route: "/dashboard/mail",
   },
-  { 
-    type:"CONTACT",
+  {
+    type: "CONTACT",
     title: "Contact",
-    img: contact, 
+    img: contact,
     view: "contact",
-    route:"/dashboard/contacts", 
+    route: "/dashboard/contacts",
   },
-  { 
-    type:"FILE-SHARING",
+  {
+    type: "FILE-SHARING",
     title: "File Sharing",
-    img: sharing, 
+    img: sharing,
     view: "sharing",
-    route:"/dashboard/file-sharing", 
+    route: "/dashboard/file-sharing",
   },
-  { 
-    type:"MILITARY",
+  {
+    type: "MILITARY",
     title: "Military",
-    img: military, 
+    img: military,
     view: "military",
-    route:"/dashboard/isurvive",  
+    route: "/dashboard/isurvive",
   }
 ]
 
-export const contactList=[
+export const contactList = [
   {
     "id": 1,
     "name": "Michael Johnson",
@@ -185,19 +186,26 @@ export const contactList=[
   }
 ]
 
-export const chatUtilOptions=[
+export const chatUtilOptions = [
   {
     "id": 6,
     "name": "William Martinez",
-    "message":"GG Bro, 2nd place is great thanks",
+    "message": "GG Bro, 2nd place is great thanks",
     "image": "/images/users/william-martinez.png",
     "status": "Away",
   },
   {
     "id": 7,
     "name": "William Martinez",
-    "message":"Well played, bro!",
+    "message": "Well played, bro!",
     "image": "/images/users/william-martinez.png",
     "status": "Away",
   }
 ]
+
+export const categories = [
+  { title: "Miss Calls", key:"missedCalls", count: 2, icon: MdPhoneMissed, bg: "bg-green-600", ref: "contacts" },
+  { title: "Messages", key:"messages", count: 5, icon: IoIosChatboxes, bg: "bg-gray-700", ref: "chat" },
+  { title: "Signal Comms", key:"signalComms", count: 8, icon: FaWalkieTalkie, bg: "bg-gray-700", ref: "comm" },
+  { title: "File Sharing", key:"fileSharing", count: 6, icon: FaFileAlt, bg: "bg-gray-700", ref: "file-sharing" },
+];
