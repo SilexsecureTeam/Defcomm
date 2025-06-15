@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Constants } from "@videosdk.live/react-sdk";
 import { FaCircle, FaStopCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -7,6 +7,22 @@ const RecordingControlButton = ({ toggleRecording, recordingState, recordingTime
   const isRecording = recordingState === Constants.recordingEvents.RECORDING_STARTED;
   const constraintsRef = useRef(null);
 
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    // Use a short timeout to avoid triggering click immediately after drag ends
+    setTimeout(() => setIsDragging(false), 100);
+  };
+
+  const handleClick = () => {
+    if (isDragging) return; // Prevent accidental toggle
+    toggleRecording();
+  };
+
   return (
     <div ref={constraintsRef} className="fixed inset-0 z-50 pointer-events-none">
       <motion.div
@@ -14,6 +30,8 @@ const RecordingControlButton = ({ toggleRecording, recordingState, recordingTime
         dragMomentum={false}
         dragElastic={0.2}
         dragConstraints={constraintsRef}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         className="absolute bottom-20 right-6 flex flex-col items-end space-y-2 cursor-grab active:cursor-grabbing pointer-events-auto"
       >
         {isRecording && (
@@ -27,22 +45,16 @@ const RecordingControlButton = ({ toggleRecording, recordingState, recordingTime
         )}
 
         <motion.button
-          onClick={toggleRecording}
+          onClick={handleClick}
           whileTap={{ scale: 0.95 }}
-          animate={
-            isRecording
-              ? { scale: [1, 1.1, 1] }
-              : { scale: 1 }
-          }
+          animate={isRecording ? { scale: [1, 1.1, 1] } : { scale: 1 }}
           transition={
             isRecording
               ? { repeat: Infinity, duration: 1.2, ease: "easeInOut" }
               : { duration: 0.2 }
           }
           className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors duration-300 shadow-xl border-2 ${
-            isRecording
-              ? "bg-red-600 border-red-400"
-              : "bg-green-600 border-green-400"
+            isRecording ? "bg-red-600 border-red-400" : "bg-green-600 border-green-400"
           } hover:brightness-110 active:scale-95`}
           title={isRecording ? "Stop Recording" : "Start Recording"}
         >
@@ -58,4 +70,3 @@ const RecordingControlButton = ({ toggleRecording, recordingState, recordingTime
 };
 
 export default RecordingControlButton;
-                      
