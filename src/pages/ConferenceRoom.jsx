@@ -62,6 +62,12 @@ const ConferenceRoom = () => {
     stopRecording,
     recordingState,
   } = useMeeting({
+    onMeetingLeft: () => {
+      setConference(null);
+      setShowConference(false);
+      setIsScreenSharing(false);
+      navigate("/dashboard/conference");
+    },
     onParticipantJoined: (participant) => {
       audioController.playRingtone(joinSound);
       const id = participant.id;
@@ -76,10 +82,6 @@ const ConferenceRoom = () => {
       toast.info(
         `${participant.displayName || "A participant"} just left the meeting`
       );
-      setConference(null);
-      setShowConference(false);
-      setIsScreenSharing(false);
-      navigate("/dashboard/conference");
     },
     onError: (error) => {
       onFailure({
