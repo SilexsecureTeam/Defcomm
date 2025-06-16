@@ -54,7 +54,7 @@ const RecentFiles = () => {
                             >
                                 <FaFileAlt className={`${getColorByIndex(index)?.text || "text-black"} text-lg`} />
                             </motion.div>
-                            <h3 className="text-sm font-medium text-gray-900 w-1/2 max-w-40 truncate">{file.name}</h3>
+                            <h3 className="text-sm font-medium text-gray-900 w-[40%] max-w-40 truncate">{file.name}</h3>
                         </div>
 
                         <section
