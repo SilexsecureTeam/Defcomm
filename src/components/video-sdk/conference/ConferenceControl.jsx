@@ -105,7 +105,7 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
         <button onClick={() => setShowChatModal(true)} className="relative text-gray-500 hover:text-white">
           <FaCommentDots />
           {hasNewMessage && (
-            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full animate-ping" />
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full" />
           )}
         </button>
       </div>
