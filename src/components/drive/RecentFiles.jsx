@@ -49,11 +49,11 @@ const RecentFiles = () => {
                         <div className="flex items-center space-x-3">
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
-                                className={`p-2 rounded-lg ${file.color}/30`}
+                                className={`p-2 rounded-lg ${file.color || "text-black"}/30`}
                             >
-                                <FaFileAlt className={`${file.color} text-lg`} />
+                                <FaFileAlt className={`${file.color || "text-black"} text-lg`} />
                             </motion.div>
-                            <h3 className="text-sm font-medium text-gray-900 max-w-40 truncate">{file.name}</h3>
+                            <h3 className="text-sm font-medium text-gray-900 w-1/2 max-w-40 truncate">{file.name}</h3>
                         </div>
 
                         <section
