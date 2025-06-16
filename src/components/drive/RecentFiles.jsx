@@ -3,7 +3,8 @@ import useFileManager from '../../hooks/useFileManager';
 import ShareFileModal from '../fileManager/shareFileModal/ShareFileModal';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaFileAlt } from 'react-icons/fa';
-import { formatDate, getColorByIndex } from '../../utils/formmaters';
+import { formatDate } from '../../utils/formmaters';
+import { getColorByIndex } from '../../utils/constants';
 import { FiPlus, FiSend } from 'react-icons/fi';
 import { IoIosMore } from 'react-icons/io';
 
