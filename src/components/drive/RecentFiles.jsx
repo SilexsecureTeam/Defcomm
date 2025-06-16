@@ -49,7 +49,7 @@ const RecentFiles = () => {
                         <div className="flex items-center space-x-3">
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
-                                className={`p-2 rounded-lg ${getColorByIndex(index)?.bg || "bg-black/30"}`}
+                                className={`p-2 rounded-lg ${getColorByIndex(index)?.bg || "bg-black/60"}`}
                             >
                                 <FaFileAlt className={`${getColorByIndex(index)?.text || "text-black"} text-lg`} />
                             </motion.div>
