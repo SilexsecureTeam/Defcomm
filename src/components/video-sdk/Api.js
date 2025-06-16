@@ -23,10 +23,10 @@ export const createMeeting = async () => {
       body: JSON.stringify({}),
     });
 
-    if (!res.ok) {
-      const errorData = await res.json();
+    //if (!res.ok) {
+     // const errorData = await res.json();
       //onFailure({ message: "Failed to generate meeting ID."Failed to create meeting. Please try again later." });
-    }
+    //}
 
     const { roomId } = await res.json();
     return roomId;
