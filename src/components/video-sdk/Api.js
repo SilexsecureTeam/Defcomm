@@ -25,14 +25,13 @@ export const createMeeting = async () => {
 
     if (!res.ok) {
       const errorData = await res.json();
-      onFailure({ message: "Failed to generate meeting ID.", error: extractErrorMessage(errorData) || "Failed to create meeting. Please try again later." });
-      throw new Error(errorMessage);
+      //onFailure({ message: "Failed to generate meeting ID."Failed to create meeting. Please try again later." });
     }
 
     const { roomId } = await res.json();
     return roomId;
   } catch (error) {
-    onFailure({ message: "An error occurred while creating the meeting.", error: error.message });
+    onFailure({ message: "An error occurred while creating the meeting.", error:extractErrorMessage(error) });
     console.error("Error in createMeeting:", error);
     throw error;
   }
