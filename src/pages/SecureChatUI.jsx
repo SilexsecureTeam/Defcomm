@@ -28,17 +28,6 @@ export default function SecureChatUI() {
                 <MessageArea />
             </div>
             <RightPanel />
-
-            {showCall && (
-                <Modal isOpen={showCall} closeModal={() => setShowCall(false)}>
-                    <CallComponent initialMeetingId={meetingId} setInitialMeetingId={setMeetingId} />
-                </Modal>
-            )}
-            {showSettings &&
-                <Modal isOpen={showSettings} closeModal={() => setShowSettings(false)}>
-                    <Settings />
-                </Modal>
-            }
         </div>
     );
 }

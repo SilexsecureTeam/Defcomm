@@ -41,23 +41,21 @@ const DashboardRoutes = () => {
     <ThemeProvider>
       <Suspense fallback={<Fallback />}>
         <Routes>
-          <Route
-            path="chat"
-            element={
-              <>
+
+          <Route path="/" element={<DashboardWrapper />}>
+            <Route path="home" element={<Home />} />
+
+            <Route path="chat" element={
+              <div className="w-full h-full">
                 <div className="block lg:hidden">
-                  <DashboardWrapper>
-                    <ChatInterface />
-                  </DashboardWrapper>
+                  <ChatInterface />
                 </div>
                 <div className="hidden lg:block">
                   <SecureChatUI />
                 </div>
-              </>
-            }
-          />
-          <Route path="/" element={<DashboardWrapper />}>
-            <Route path="home" element={<Home />} />
+              </div>
+            } />
+
             <Route path="new-file" element={<DeffViewer />} />
             <Route path="view/:fileId" element={<PDFViewer />} />
             <Route path="file-view/:fileUrl" element={<DeffViewer />} />

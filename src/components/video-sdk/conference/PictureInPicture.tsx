@@ -10,6 +10,7 @@ const PictureInPicture = ({
   me,
   remoteParticipants,
   handleLeaveMeeting,
+  removedParticipantsRef
 }) => {
   const navigate = useNavigate();
   const dragConstraintsRef = useRef(null);
@@ -31,6 +32,8 @@ const PictureInPicture = ({
         {/* Mini video display */}
         <div className="relative flex-1 w-full h-full aspect-square">
           <ParticipantVideo
+            key={me?.id || "me"}
+            removedParticipantsRef={removedParticipantsRef}
             participantId={maximizedParticipantId || me?.id}
             label={
               maximizedParticipantId === me?.id || !maximizedParticipantId
@@ -38,7 +41,7 @@ const PictureInPicture = ({
                 : remoteParticipants.find((p) => p.id === maximizedParticipantId)?.displayName || "Participant"
             }
             isMaximized
-            onToggleMaximize={() => {}}
+            onToggleMaximize={() => { }}
           />
 
           {/* Hover controls */}
@@ -64,11 +67,12 @@ const PictureInPicture = ({
         <div style={{ display: "none" }}>
           {[me, ...remoteParticipants].map((participant, idx) => (
             <ParticipantVideo
+              removedParticipantsRef={removedParticipantsRef}
               key={participant?.id || idx}
               participantId={participant?.id}
               label=""
               isMaximized={false}
-              onToggleMaximize={() => {}}
+              onToggleMaximize={() => { }}
             />
           ))}
         </div>

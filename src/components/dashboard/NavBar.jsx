@@ -1,18 +1,19 @@
 import React, { useState, memo } from "react";
 import { FaBars, FaSearch, FaTimes } from "react-icons/fa";
 import { IoBarbellOutline, IoChatbubbleEllipsesSharp, IoSettings } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PiBellLight } from "react-icons/pi";
 import ProfileDropdown from "./ProfileDropdown";
 
 function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
   const navigate = useNavigate();
-
+  const {pathname} = useLocation();
+  const isChatPage = pathname.includes('/dashboard/chat');
   const navigateToCart = () => navigate('/dashboard/cart');
   const navigateToInstantChat = () => navigate('/dashboard/instant_chat');
 
   return (
-    <nav className="p-2 flex items-center justify-between gap-2 bg-transparent h-20">
+    <nav className={`${isChatPage ? "lg:hidden":"lg:flex"} p-2 flex items-center justify-between gap-2 bg-transparent h-20`}>
       {/* Title */}
       <div
         onClick={toogleIsOpen}

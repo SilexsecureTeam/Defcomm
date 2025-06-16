@@ -52,7 +52,7 @@ const OtherFileTab = ({ files, onShare }) => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     className="bg-oliveDark px-3 py-2 text-sm flex items-center gap-1"
-                    onClick={() => onShare(file?.file_id)}
+                    onClick={() => onShare({file_id: file?.file_id, file_name: file?.file_name})}
                   >
                     <span><BsShare /></span>
                   </motion.button>

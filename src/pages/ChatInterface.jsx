@@ -49,7 +49,6 @@ const ChatInterface = () => {
     }
   }, [messages]);
 
-  
 
   const renderMessages = () => {
     if (!messages?.data?.length) return <p className="text-gray-500 text-center">No messages yet.</p>;

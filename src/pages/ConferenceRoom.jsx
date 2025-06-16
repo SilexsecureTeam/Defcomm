@@ -22,7 +22,6 @@ const ConferenceRoom = () => {
     isScreenSharing,
     recordingStartedAt,
     recordingTimer,
-    join,
     leave,
     enableScreenShare,
     disableScreenShare,
@@ -110,6 +109,7 @@ const ConferenceRoom = () => {
         {me && (
           <ParticipantVideo
             participantId={me.id}
+            key={me?.id}
             label="You"
             isMaximized={maximizedParticipantId === me.id}
             onToggleMaximize={() =>
@@ -120,10 +120,10 @@ const ConferenceRoom = () => {
           />
         )}
         {remoteParticipants.length > 0 ? (
-          remoteParticipants.map((p) => (
+          remoteParticipants.map((p, idx) => (
             <ParticipantVideo
               removedParticipantsRef={removedParticipantsRef}
-              key={p.id}
+              key={p.id || idx}
               participantId={p.id}
               label={p.displayName || "Guest"}
               isMaximized={maximizedParticipantId === p.id}
@@ -157,6 +157,7 @@ const ConferenceRoom = () => {
     </div>
   ) : (
     <PictureInPicture
+      removedParticipantsRef={removedParticipantsRef}
       maximizedParticipantId={maximizedParticipantId}
       me={me}
       remoteParticipants={remoteParticipants}

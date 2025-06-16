@@ -70,6 +70,15 @@ export const extractErrorMessage = (error) => {
   return getString(error?.message || "An unknown error occurred");
 };
 
+export const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export const maskEmail = (email) => {
     if (!email) return "";
     const [name, domain] = email.split("@");

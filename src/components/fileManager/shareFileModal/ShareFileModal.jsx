@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import useFileManager from "../../../hooks/useFileManager";
 import Modal from '../../modal/Modal';
 
-export default function ShareFileModal({ isOpen, onClose, fileId }) {
+export default function ShareFileModal({ isOpen, onClose, file }) {
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [expiryDate, setExpiryDate] = useState("");
@@ -46,7 +46,7 @@ export default function ShareFileModal({ isOpen, onClose, fileId }) {
     }
 
     try {
-      await shareFile({ fileId, selectedContacts, expiryDate });
+      await shareFile({ fileId:file?.file_id, selectedContacts, expiryDate });
       setSelectedContacts([]);
       setExpiryDate("");
       onClose();
@@ -60,7 +60,7 @@ export default function ShareFileModal({ isOpen, onClose, fileId }) {
     <Modal isOpen={isOpen} closeModal={onClose}>
       <div className="w-[90vw] md:w-[700px] bg-white text-black p-6 rounded-lg">
         <h2 className="text-lg font-semibold mb-4">
-          Share File
+          Share {file?.file_name || "File"}
         </h2>
 
         <label className="text-sm text-gray-600">

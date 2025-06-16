@@ -113,6 +113,7 @@ export default function useConferenceParticipants() {
     } else {
       navigate("/dashboard/conference");
     }
+    console.log(conference, providerMeetingId);
   }, [conference]);
 
   const remoteParticipants = useMemo(() => {

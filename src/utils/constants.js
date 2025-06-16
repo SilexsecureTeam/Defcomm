@@ -209,3 +209,20 @@ export const categories = [
   { title: "Signal Comms", key:"signalComms", count: 8, icon: FaWalkieTalkie, bg: "bg-gray-700", ref: "comm" },
   { title: "File Sharing", key:"fileSharing", count: 6, icon: FaFileAlt, bg: "bg-gray-700", ref: "file-sharing" },
 ];
+
+
+const pastelColors = [
+  "bg-pink-200", "bg-green-200", "bg-blue-200", "bg-yellow/20",
+  "bg-purple-200", "bg-red-200", "bg-indigo-200", "bg-teal-200"
+];
+const textColors = [
+  "text-pink-500", "text-green-500", "text-blue-500", "text-yellow",
+  "text-purple-500", "text-red-500", "text-indigo-500", "text-teal-500"
+];
+
+export function getColorByIndex(index) {
+  return {
+    bg: pastelColors[index % pastelColors.length],
+    text: textColors[index % textColors.length]
+  };
+}

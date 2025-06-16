@@ -5,17 +5,18 @@ import useDrive from "../../hooks/useDrive";
 // Helper to sanitize input
 const sanitize = (value) => DOMPurify.sanitize(value.trim());
 
-const CreateFolderForm = ({ onClose, folder }) => {
-  const [form, setForm] = useState({ name: "", description: "" });
+const CreateFolderForm = ({ onClose, folder, folderRel="" }) => {
+  const [form, setForm] = useState({ name: "", description: "", rel: folderRel });
   const [errors, setErrors] = useState({});
   const { createFolderMutation, updateFolderMutation } = useDrive();
 
   useEffect(() => {
     if (folder) {
-      setForm({
+      setForm(prev => ({
+        ...prev,
         name: folder.name || "",
         description: folder.description || "",
-      });
+      }));
     }
   }, [folder]);
 
@@ -42,6 +43,7 @@ const CreateFolderForm = ({ onClose, folder }) => {
     if (!validate()) return;
 
     const sanitizedForm = {
+      rel: form.rel,
       name: sanitize(form.name),
       description: sanitize(form.description),
     };

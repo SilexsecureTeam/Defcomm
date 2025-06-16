@@ -1,19 +1,22 @@
 import React, { useState, useContext } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { axiosClient } from "../../../services/axios-client";
 import { AuthContext } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 import useFileManager from "../../../hooks/useFileManager";
+import { queryClient } from "../../../services/query-client";
+import { useParams } from "react-router-dom";
 
-const UploadFileModal = ({ isOpen, onClose }) => {
+const UploadFileModal = ({ isOpen, onClose, folderRel = "" }) => {
     const { authDetails } = useContext(AuthContext);
     const client = axiosClient(authDetails?.access_token);
-
-    const { refetchMyFiles } = useFileManager();
+    const { id } = useParams();
 
     const [form, setForm] = useState({
         fileLabel: "",
         description: "",
         file: null,
+        rel: folderRel,
     });
 
     const resetForm = () => {
@@ -21,6 +24,7 @@ const UploadFileModal = ({ isOpen, onClose }) => {
             fileLabel: "",
             description: "",
             file: null,
+            rel: folderRel,
         });
     };
 
@@ -29,53 +33,63 @@ const UploadFileModal = ({ isOpen, onClose }) => {
     };
 
     const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
-        if (selectedFile) {
-            if (selectedFile.size > MAX_FILE_SIZE) {
-                toast.error("File size exceeds 2MB. Please select a smaller file.");
-                return;
-            }
-            setForm({ ...form, file: selectedFile });
+        if (selectedFile && selectedFile.size > MAX_FILE_SIZE) {
+            toast.error("File size exceeds 2MB. Please select a smaller file.");
+            return;
         }
+        setForm({ ...form, file: selectedFile });
     };
 
-    const [loading, setLoading] = useState(false);
+    const uploadFileMutation = useMutation({
+        mutationFn: async (payload) => {
+            const formData = new FormData();
+            formData.append("name", payload.fileLabel);
+            formData.append("description", payload.description);
+            formData.append("file", payload.file);
 
-    const handleSubmit = async () => {
+            const res = await client.post("/user/file/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            return res.data;
+        },
+        onMutate: () => {
+            return toast.loading("Uploading...");
+        },
+        onSuccess: async (_data, _variables, contextId) => {
+            toast.update(contextId, {
+                render: _data.message || "File uploaded successfully!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+            });
+            if (folderRel) {
+                queryClient.invalidateQueries(["folder", folderRel]);
+            } else {
+                queryClient.invalidateQueries(["myFiles"]);
+            }
+            resetForm();
+            onClose();
+        },
+        onError: (err, _vars, contextId) => {
+            toast.update(contextId, {
+                render: err?.response?.data?.message || "Failed to upload file. Please try again.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+            });
+        },
+    });
+
+    const handleSubmit = () => {
         if (!form.file || !form.fileLabel) {
             toast.error("File and File Label are required!");
             return;
         }
-
-        setLoading(true);
-        const toastId = toast.loading("Uploading...");
-        const formData = new FormData();
-        formData.append("name", form.fileLabel);
-        formData.append("description", form.description);
-        formData.append("file", form.file);
-
-        try {
-            const response = await client.post("/user/file/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            toast.success(response.data.message || "File uploaded successfully!", {
-                id: toastId,
-            });
-
-            resetForm();
-            onClose();
-            await refetchMyFiles(); // Refresh file list
-        } catch (error) {
-            console.error("Upload failed:", error);
-            toast.error(error.response?.data?.message || "Failed to upload file. Please try again.", {
-                id: toastId,
-            });
-        } finally {
-            setLoading(false);
-            toast.dismiss(toastId);
-        }
+        uploadFileMutation.mutate(form);
     };
 
     if (!isOpen) return null;
@@ -90,7 +104,7 @@ const UploadFileModal = ({ isOpen, onClose }) => {
                 onClick={(event) => event.stopPropagation()}
             >
                 <div className="-mx-6 px-6 mb-10 border-b border-b-[rgb(241,241,244)]">
-                    <h2 className="text-lg font-semibold mb-4">Upload File</h2>
+                    <h2 className="text-lg font-semibold mb-4">Upload File {folderRel && `to ${id}`}</h2>
                 </div>
 
                 <div className="mb-4">
@@ -151,16 +165,16 @@ const UploadFileModal = ({ isOpen, onClose }) => {
                             resetForm();
                             onClose();
                         }}
-                        disabled={loading}
+                        disabled={uploadFileMutation.isLoading}
                     >
                         Discard
                     </button>
                     <button
                         className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800 disabled:opacity-50"
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={uploadFileMutation.isLoading}
                     >
-                        {loading ? "Uploading..." : "Submit"}
+                        {uploadFileMutation.isLoading ? "Uploading..." : "Submit"}
                     </button>
                 </div>
             </div>

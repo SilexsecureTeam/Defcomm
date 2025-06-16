@@ -20,18 +20,7 @@ export default function ChatList() {
     const filteredContact=contacts?.filter(item=>(
         item?.contact_name?.toLowerCase().includes(search?.toLowerCase())
     ))
-    const messages = [
-        ["Jason Susanto", "Image Sent", ""],
-        ["JJ Jinggg", "", "2"],
-        ["Benkaii", "Ben r u in GH?", ""],
-        ["Asterisk", "Yea let’s play 5 stacks", ""],
-        ["Aleck", "COME SCRIM HERE!!!", "2"],
-        ["Tyson", "Thanks, let’s meet at Cha...", ""],
-        ["Kyedae", "W GAMING!!!", ""],
-        ["PAPER REX", "GG BRO, 2nd place is great...", "12"],
-        ["Nats", "Well played, bro!", ""],
-    ];
-
+    
     return (
         <div className="w-72 p-4 bg-transparent space-y-4 overflow-y-auto">
             <h2 className="text-2xl font-semibold">Chat</h2>
@@ -45,7 +34,7 @@ export default function ChatList() {
                 <h3 className="text-sm text-green-400 mb-2">Online</h3>
                 <div className="flex space-x-2 overflow-x-auto">
                     {filteredContact?.map((contact, i) => (
-                        <div key={contact?.id} className="relative">
+                        <div key={contact?.id} className="relative cursor-pointer group" onClick={() => navigateToChat(contact)}>
                             <div className="w-10 h-10 bg-gray-300 rounded-full text-gray-700 font-medium uppercase flex items-center justify-center text-lg" >
                                { contact?.contact_name?.slice(0,2)}
                             </div>

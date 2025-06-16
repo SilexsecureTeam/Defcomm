@@ -17,21 +17,36 @@ const useDrive = () => {
         queryKey: ["folders"],
         queryFn: async () => {
             const { data } = await client.get("/user/folder");
-            console.log(data);
             return data?.data || [];
         },
         enabled: !!authDetails,
+        refetchOnMount: true,
+        staleTime: 0,
+    });
+    const getFolderByIdQuery = (id)=>{
+      return useQuery({
+        queryKey: ["folder", id],
+        queryFn: async () => {
+            const { data } = await client.get(`/user/folder/${id}`);
+            return data?.data || [];
+        },
+        enabled: !!authDetails && !!id,
         staleTime: 0,
         refetchOnMount: true,
-        refetchOnWindowFocus: true,
     });
+  }
 
     // ✅ Create Folder Mutation
     const createFolderMutation = useMutation({
         mutationFn: (payload) =>
             client.post("/user/folder/create", payload),
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
+          if(variables?.rel === "") {
             queryClient.invalidateQueries(["folders"]);
+          }
+          else {
+            queryClient.invalidateQueries(["folder", variables?.rel]);
+          }
             onSuccess({ message: "Folder successfully created!", success: "New folder added" });
         },
         onError: (err) => {
@@ -71,6 +86,7 @@ const useDrive = () => {
 
     return {
         getFoldersQuery,
+        getFolderByIdQuery,
         createFolderMutation,
         updateFolderMutation,
         deleteFolderMutation

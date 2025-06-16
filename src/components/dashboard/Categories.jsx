@@ -40,7 +40,7 @@ function Categories() {
             onClick={() => navigate(`/dashboard/${cat?.ref}`)}
             className={`${index > 0 ? "bg-[#1a2b12]" : "bg-green-600"} hover:bg-green-600/60 cursor-pointer px-4 py-2 flex flex-col items-center justify-center gap-2 text-center`}
           >
-            <span className="text-white text-xl rounded-full">{cat.icon}</span>
+            <span className="text-white text-xl rounded-full">{<cat.icon />}</span>
             <div>
               <p className="text-sm">{cat.title}</p>
               <h3 className="text-sm font-semibold">{counts[cat.key] || 0}</h3>

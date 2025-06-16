@@ -101,7 +101,7 @@ const DashboardWrapper = ({ children }) => {
 
 
     const toggleIsOpen = () => setIsOpen((prev) => !prev);
-
+    const isChatPage = pathname.includes("/dashboard/chat");
     // Setup sidebar based on route/type
     const { SidebarComponent, SidebarItemComponent, optionList } = useMemo(() => {
         let Sidebar = SideBar;
@@ -112,7 +112,7 @@ const DashboardWrapper = ({ children }) => {
             Sidebar = AiSideBar;
             SidebarItem = null;
             option = [];
-        } else if (state?.type === "CHAT") {
+        } else if (isChatPage) {
             Sidebar = SideBarTwo;
             SidebarItem = SideBarItemTwo;
             option = contacts || [];
@@ -127,7 +127,7 @@ const DashboardWrapper = ({ children }) => {
         if (matchedOption) dispatch(matchedOption);
         if (!matchedOption || matchedOption?.type !== "CHAT") setSelectedChatUser(null);
 
-        if (pathname !== "/dashboard/conference" && showConference && !conference) {
+        if (pathname !== "/dashboard/conference/room" && showConference && !conference) {
             setShowConference(false)
         }
     }, [pathname]);
@@ -187,7 +187,7 @@ const DashboardWrapper = ({ children }) => {
             {/* Main content */}
             <div className="flex-1 w-2/3 relative flex bg-transparent flex-col h-full">
                 <NavBar title={state?.title} toogleIsOpen={toggleIsOpen} isMenuOpen={isOpen} user={authDetails?.user} />
-                <div className="w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent">
+                <div className={`${isChatPage ? "lg:!px-0 h-full": "lg:px-4"} w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent`}>
                     <DashboardLayout >
                         <Outlet />
                     </DashboardLayout>

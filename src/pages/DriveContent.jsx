@@ -1,40 +1,69 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { FaFolder, FaRegFileAlt, FaRegFolderOpen, FaTh, FaList } from "react-icons/fa";
-import ToggleSwitch from "../components/ToggleSwitch"; // Importing the reusable ToggleSwitch component
-import { initialFiles, folders } from "../utils/dummies";
-import { IoMdAdd } from "react-icons/io";
+import { FaFolder, FaRegFileAlt, FaRegFolderOpen, FaTh, FaList, FaSpinner } from "react-icons/fa";
+import { IoMdAdd, IoMdMore } from "react-icons/io";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
-import { useNavigate } from "react-router-dom";
-
+import { useLocation, useParams } from "react-router-dom";
+import useDrive from "../hooks/useDrive";
+import Modal from "../components/modal/Modal";
+import CreateFolderForm from "../components/drive/CreateFolderForm";
+import FolderFiles from "../components/drive/FolderFiles";
+import UploadFileModal from "../components/fileManager/uploadFileModal/UploadFileModal";
 
 
 const DriveContent = () => {
-    const navigate= useNavigate();
+    const location = useLocation();
+    const { folderId } = location.state
     const [view, setView] = useState("timeline");
-    const [files, setFiles] = useState(initialFiles);
-    const [selectedFiles, setSelectedFiles] = useState([]); // Track selected files
-    const [isGrid, setIsGrid] = useState(true);
 
-    const toggleImportant = (index) => {
-        setFiles((prevFiles) => {
-            const updatedFiles = [...prevFiles];
-            updatedFiles[index] = { ...updatedFiles[index], important: !updatedFiles[index].important };
-            return updatedFiles;
+    const [isGrid, setIsGrid] = useState(true);
+    const [folderForm, setFolderForm] = useState(null); // null means new folder
+    const [showModal, setShowModal] = useState(false);
+    const [showUpload, setShowUpload] = useState(false);
+    const [showMore, setShowMore] = useState(null);
+    const toggleOptions = (index) => {
+        setShowMore(showMore === index ? null : index);
+    };
+    const { getFolderByIdQuery, deleteFolderMutation } = useDrive();
+    const { data, isLoading, error } = getFolderByIdQuery(folderId);
+
+    const handleAddNew = () => {
+        setFolderForm(null); // clear form for new
+        setShowModal(true);
+    };
+    const handleDelete = (folderId) => {
+        //console.log("Delete folder:", folderId);
+        deleteFolderMutation.mutate(folderId, {
+            onSuccess: () => {
+                setShowMore(null);
+            },
         });
+        // TODO: trigger mutation to delete
     };
 
-
-    const toggleSelection = (index) => {
-        setSelectedFiles((prevSelected) =>
-            prevSelected.includes(index)
-                ? prevSelected.filter((i) => i !== index)
-                : [...prevSelected, index]
-        );
+    const handleUpdate = (folder) => {
+        setFolderForm(folder);
+        setShowModal(true);
+        setShowMore(null);
     };
 
     return (
         <div className="text-white">
+            {/* Modal */}
+            <Modal isOpen={showModal} closeModal={() => setShowModal(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                    <div className="bg-white p-6 rounded-lg w-[90%] max-w-md text-black">
+                        <h2 className="text-lg font-bold mb-4">
+                            {folderForm ? "Update Subfolder" : "Create New Subfolder"}
+                        </h2>
+                        <CreateFolderForm
+                            folder={folderForm}
+                            folderRel={folderId}
+                            onClose={() => setShowModal(false)}
+                        />
+                    </div>
+                </div>
+            </Modal>
             {/* Header Buttons */}
             <div className="flex flex-wrap gap-4 justify-around items-center mb-6">
                 <div className="flex rounded-3xl">
@@ -70,7 +99,7 @@ const DriveContent = () => {
             {/* Folders Section */}
             <div className="py-4 h-max flex items-center justify-between gap-2">
                 <h2 className="text-lg font-semibold">
-                    Your folders | {folders.length} Folders
+                    Your folders | {data?.length || 0} {data?.length === 1 ? "Folder" : "Folders"}
                 </h2>
                 <section className="flex items-center gap-2">
                     {/* Toggle Button with Motion */}
@@ -82,8 +111,8 @@ const DriveContent = () => {
                     >
                         <button
                             className={`p-2 rounded-l-xl border-4 transition-all duration-300 ${!isGrid
-                                    ? "border-oliveGreen bg-black text-oliveGreen scale-110"
-                                    : "text-gray-600 hover:bg-gray-200"
+                                ? "border-oliveGreen bg-black text-oliveGreen scale-110"
+                                : "text-gray-600 hover:bg-gray-200"
                                 }`}
                             onClick={() => setIsGrid(false)}
                         >
@@ -91,8 +120,8 @@ const DriveContent = () => {
                         </button>
                         <button
                             className={`p-2 rounded-r-xl border-4 transition-all duration-300 ${isGrid
-                                    ? "border-oliveGreen bg-black text-oliveGreen scale-110"
-                                    : "text-gray-600 hover:bg-gray-200"
+                                ? "border-oliveGreen bg-black text-oliveGreen scale-110"
+                                : "text-gray-600 hover:bg-gray-200"
                                 }`}
                             onClick={() => setIsGrid(true)}
                         >
@@ -100,105 +129,84 @@ const DriveContent = () => {
                         </button>
                     </motion.div>
                     <motion.p
-                        onClick={()=>{scrollTo(0,0); navigate('/dashboard/new-file')}}
+                        onClick={handleAddNew}
                         whileHover={{ scale: 1.1 }}
                         className="w-12 h-12 rounded-lg bg-olive text-white ml-auto flex items-center justify-center cursor-pointer"
                     >
                         <IoMdAdd strokeWidth={2} />
                     </motion.p>
                 </section>
+            </div>
 
-            </div>
-            <div className="grid grid-cols-responsive gap-4 mb-6">
-                {folders.map((folder, index) => (
-                    <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.05 }}
-                        className="p-4 bg-white rounded-lg text-center min-h-60 flex flex-col items-center justify-center"
-                    >
-                        <FaFolder size={60} className="flex-1 mb-2 text-oliveDark" />
-                        <div className="mt-auto py-3">
-                            <p className="font-bold text-oliveLight">{folder.name}</p>
-                            <p className="text-sm text-gray-400">
-                                {folder.files} Files | {folder.subFolders} Folders
-                            </p>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+            {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-oliveGreen">
+                    <FaSpinner className="animate-spin text-4xl text-oliveHover" />
+                    <p className="mt-4 text-sm">Loading your folders...</p>
+                </div>
+            ) : error ? (
+                <div className="text-red-500 text-center py-8">
+                    Failed to load folders. Please try again.
+                </div>
+            ) :
+                data?.length > 0 ? (
+                    <div className="grid grid-cols-responsive gap-4 mb-6">
+                        {data?.map((folder, index) => (
+                            <motion.div
+                                key={folder?.id ?? index}
+                                whileHover={{ scale: 1.05 }}
+                                className="relative p-4 bg-white rounded-lg text-center min-h-60 flex flex-col items-center justify-center"
+                            >
+                                <div className="absolute top-2 right-2" >
+                                    <IoMdMore
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleOptions(index);
+                                        }}
+                                        className="text-xl text-gray-800 hover:text-black cursor-pointer"
+                                    />
+                                    {showMore === index && (
+                                        <div
+                                            onMouseLeave={() => setShowMore(null)}
+                                            className="absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-lg z-10 overflow-hidden"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <button
+                                                onClick={() => handleUpdate(folder)}
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Update
+                                            </button>
+                                            <button
+                                                disabled={deleteFolderMutation.isPending}
+                                                onClick={() => handleDelete(folder.id)}
+                                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                                            >
+                                                {deleteFolderMutation.isPending ? "Deleting..." : "Delete"}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                                <FaFolder size={60} className="flex-1 mb-2 text-oliveDark" />
+                                <div className="mt-auto py-3">
+                                    <p className="font-bold text-oliveLight">{folder.name}</p>
+                                    <p className="text-sm text-gray-400">
+                                        {folder?.files ?? 0} Files | {folder?.subFolders ?? 0} Folders
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-gray-400 py-10">
+                        <p className="text-lg font-semibold mb-2">There are no subfolders in this folder</p>
+                        <p className="text-sm">Start by uploading folders or creating a new subfolder.</p>
+                    </div>
+                )}
 
             {/* Files Table */}
-            <div className="py-4 h-max flex items-center justify-between gap-2">
-                <section>
-                    <h2 className="text-lg font-semibold">
-                        Your files | {files.length} Files
-                    </h2>
-                    <p className="text-xs mb-4">Click on a file to preview the file</p>
-
-                </section>
-                <motion.p
-                    whileHover={{ scale: 1.1 }}
-                    className="w-12 h-12 rounded-lg bg-olive text-white ml-auto flex items-center justify-center cursor-pointer"
-                >
-                    <IoMdAdd strokeWidth={2} />
-                </motion.p>
-            </div>
-            <div className="rounded-lg overflow-x-auto">
-                <table className="min-w-[700px] w-full text-left">
-                    <thead>
-                        <tr className="bg-oliveLight text-white">
-                            <th className="p-3 pr-0">
-                                <input
-                                    type="checkbox"
-                                    onChange={() => setSelectedFiles(selectedFiles.length === files.length ? [] : files.map((_, i) => i))}
-                                    checked={selectedFiles.length === files.length}
-                                    className="cursor-pointer w-[14px] h-[14px] rounded-md border-gray-400 focus:ring-oliveLight"
-                                />
-                            </th>
-                            <th className="p-3">File Name</th>
-                            <th className="p-3">Location</th>
-                            <th className="p-3">File Type</th>
-                            <th className="p-3">Important</th>
-                            <th className="p-3">Modified</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {files.map((file, index) => (
-                            <motion.tr
-                                key={index}
-                                onClick={()=>navigate(`/dashboard/file-view/${encodeURIComponent(import.meta.env.VITE_FILE)}`)}
-                                whileHover={{ scale: 1.01 }}
-                                className={`${index === 0
-                                    ? "bg-oliveGreen/80 text-black"
-                                    : (index + 1) % 2 === 0
-                                        ? "bg-white text-black" // Every 3rd row is always white
-                                        : "bg-oliveLight/70 text-white" // Even index rows
-                                    } cursor-pointer`}
-                            >
-                                <td className="p-3 pr-0">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedFiles.includes(index)}
-                                        onChange={() => toggleSelection(index)}
-                                        className="cursor-pointer w-[14px] h-[14px] rounded-md border-gray-400 focus:ring-oliveLight"
-                                    />
-                                </td>
-                                <td className="p-3">{file.name}</td>
-                                <td className="p-3">{file.location}</td>
-                                <td className="p-3">{file.type}</td>
-                                <td className="p-3">
-                                    <ToggleSwitch
-                                        isChecked={file.important}
-                                        onToggle={() => toggleImportant(index)}
-                                        inactiveBg="bg-oliveLight"
-                                    />
-                                </td>
-                                <td className="p-3">{file.date}</td>
-                            </motion.tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <FolderFiles data={data} loading={isLoading} error={error} addFile={() => setShowUpload(true)} />
+            {/* Upload File Modal */}
+            <UploadFileModal isOpen={showUpload} onClose={() => setShowUpload(false)} folderRel={folderId} />
         </div>
     );
 };

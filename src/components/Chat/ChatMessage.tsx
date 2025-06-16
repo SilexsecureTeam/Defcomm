@@ -27,9 +27,9 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
     }, [chatVisibility]);
 
     const handleAcceptCall = (msg) => {
-    setProviderMeetingId(msg?.message?.slice("CALL_INVITE:".length));
-    setShowCall(true);
-  };
+        setProviderMeetingId(msg?.message?.slice("CALL_INVITE:".length));
+        setShowCall(true);
+    };
 
 
     // Format message date
@@ -53,7 +53,7 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
     const formattedDate = getFormattedDate(msg?.updated_at);
 
     return (
-        <div className={`flex flex-col ${msg?.is_my_chat === "yes" ? "items-end" : "items-start"} space-y-1`}>
+        <div className={`flex flex-col ${msg?.is_my_chat === "yes" ? "items-end" : "items-start"} space-y-1 text-sm`}>
             {/* Toggle Switch */}
             <div className="flex items-center gap-2">
                 <label className="relative inline-flex items-center cursor-pointer">
