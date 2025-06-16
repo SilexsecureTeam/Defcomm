@@ -10,7 +10,7 @@ import { ChatContext } from "../../../context/ChatContext";
 import { toast } from 'react-toastify';
 import CallMessagingModal from "./CallMessagingModal";
 import audioController from "../../../utils/audioController";
-import joinSound from "../../../assets/audio/join.mp3";
+import messageSound from "../../../assets/audio/message.mp3";
 
 const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenSharing, me }) => {
   const { toggleMic, toggleWebcam, presenterId } = useMeeting();
@@ -49,7 +49,7 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
         setHandRaised(raised);
       } else if (raised) {
         toast.info(`${name || "Someone"} raised their hand ✋`);
-        audioController.playRingtone(joinSound);
+        audioController.playRingtone(messageSound);
       }
     }
   }, [handMessages, myId]);
