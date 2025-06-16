@@ -3,7 +3,7 @@ import useFileManager from '../../hooks/useFileManager';
 import ShareFileModal from '../fileManager/shareFileModal/ShareFileModal';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaFileAlt } from 'react-icons/fa';
-import { formatDate } from '../../utils/formmaters';
+import { formatDate, getColorByIndex } from '../../utils/formmaters';
 import { FiPlus, FiSend } from 'react-icons/fi';
 import { IoIosMore } from 'react-icons/io';
 
@@ -49,9 +49,9 @@ const RecentFiles = () => {
                         <div className="flex items-center space-x-3">
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
-                                className={`p-2 rounded-lg ${file.color || "text-black"}/30`}
+                                className={`p-2 rounded-lg ${getColorByIndex(index)?.bg || "bg-black/30"}`}
                             >
-                                <FaFileAlt className={`${file.color || "text-black"} text-lg`} />
+                                <FaFileAlt className={`${getColorByIndex(index)?.text || "text-black"} text-lg`} />
                             </motion.div>
                             <h3 className="text-sm font-medium text-gray-900 w-1/2 max-w-40 truncate">{file.name}</h3>
                         </div>
