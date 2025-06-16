@@ -63,7 +63,7 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
       latestChatMessage.id !== lastSeenMessageId
     ) {
       setHasNewMessage(true);
-      audioController.playRingtone(joinSound);
+      audioController.playRingtone(messageSound);
     }
   }, [chatMessages, showChatModal, myId, lastSeenMessageId, latestChatMessage]);
 
