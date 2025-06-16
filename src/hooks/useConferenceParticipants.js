@@ -7,7 +7,7 @@ import { MeetingContext } from "../context/MeetingContext";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import audioController from "../utils/audioController";
-import joinSound from "../assets/audio/join.mp3";
+import messageSound from "../assets/audio/message.mp3";
 
 export default function useConferenceParticipants() {
   const { authDetails } = useContext(AuthContext);
@@ -54,7 +54,7 @@ export default function useConferenceParticipants() {
       const id = participant.id;
       if (!joinedParticipantsRef.current.has(id)) {
         joinedParticipantsRef.current.add(id);
-        audioController.playRingtone(joinSound);
+        audioController.playRingtone(messageSound);
         toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
       }
     },
@@ -79,7 +79,7 @@ export default function useConferenceParticipants() {
           ? "You started sharing your screen."
           : `${presenter?.displayName || "A participant"} started sharing their screen.`
       );
-      audioController.playRingtone(joinSound);
+      audioController.playRingtone(messageSound);
       setIsScreenSharing(true);
     },
     onRecordingStateChanged: ({ status }) => {
