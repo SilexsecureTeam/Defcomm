@@ -121,7 +121,7 @@ const ParticipantVideo = ({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           exit={{ scale: 0 }}
-          className="absolute top-2 left-2 p-1 bg-yellow text-black rounded-full shadow"
+          className="absolute top-8 left-2 p-1 bg-yellow text-black rounded-full shadow"
         >
           <FaHandPaper size={24} title="Hand Raised" />
         </motion.div>
