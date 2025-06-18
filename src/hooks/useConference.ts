@@ -36,67 +36,64 @@ const useConference = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
-  const getMeetingByIdQuery = (id) =>{
-  return useQuery({
-    queryKey: ["meeting", id],
-    queryFn: async () => {
-      const { data } = await client.get(`/user/getmeeting/${id}`);
-      return data?.data || null;
-    },
-    enabled: !!id && !!authDetails, // only fetch if ID and auth exist
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
-}
+  const getMeetingByIdQuery = (id) => {
+    return useQuery({
+      queryKey: ["meeting", id],
+      queryFn: async () => {
+        const { data } = await client.get(`/user/getmeeting/${id}`);
+        return data?.data || null;
+      },
+      enabled: !!id && !!authDetails, // only fetch if ID and auth exist
+      staleTime: 0,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    });
+  };
 
-const getCallLogs = useQuery({
-    queryKey: ["callLogs"],
-    queryFn: async () => {
-      const { data } = await client.get(`/user/chat/callLog`);
-      return data?.data || [];
-    },
-    enabled: !!authDetails,
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
-
-const joinMeeting = async (id) => {
-  const { data } = await client.get(`/user/meetingInvitationJoin/${id}`);
-  return data || null;
-};
+  const joinMeeting = async (id) => {
+    const { data } = await client.get(`/user/meetingInvitationJoin/${id}`);
+    return data || null;
+  };
 
   // Create Meeting Mutation
   const createMeetingMutation = useMutation({
-    mutationFn: (payload) =>
-      client.post("/user/meeting/create", payload),
+    mutationFn: (payload) => client.post("/user/meeting/create", payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["myMeetings"]);
-      onSuccess({ message: "Meeting successfully created!", success: "New meeting added" });
+      onSuccess({
+        message: "Meeting successfully created!",
+        success: "New meeting added",
+      });
     },
     onError: (err) => {
-      onFailure({ message: "Failed to create meeting", error: extractErrorMessage(err) });
-    }
+      onFailure({
+        message: "Failed to create meeting",
+        error: extractErrorMessage(err),
+      });
+    },
   });
 
   // Create Meeting Mutation
   const updateMeetingMutation = useMutation({
-    mutationFn: (payload) =>
-      client.post("/user/meeting/update", payload),
+    mutationFn: (payload) => client.post("/user/meeting/update", payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["myMeetings"]);
-      onSuccess({ message: "Meeting updated successfully!", success: "Meeting updated" });
+      onSuccess({
+        message: "Meeting updated successfully!",
+        success: "Meeting updated",
+      });
     },
     onError: (err) => {
-      onFailure({ message: "Failed to update meeting", error: extractErrorMessage(err) });
-    }
+      onFailure({
+        message: "Failed to update meeting",
+        error: extractErrorMessage(err),
+      });
+    },
   });
 
   return {
     getMeetingInviteQuery,
     getMeetingByIdQuery,
-    getCallLogs,
     joinMeeting,
     getMyMeetingsQuery,
     createMeetingMutation,
