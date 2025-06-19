@@ -20,15 +20,17 @@ const ChatInterface = () => {
     setSelectedChatUser,
     setShowCall,
     setShowSettings,
-    meetingId,
-    setMeetingId,
-    typingUsers
+    typingUsers,
   } = useContext(ChatContext);
   const { authDetails } = useContext(AuthContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
 
-  const { data: messages, isLoading, error } = useQuery({
+  const {
+    data: messages,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["chatMessages", selectedChatUser?.contact_id],
     queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
     enabled: !!selectedChatUser?.contact_id,
@@ -49,9 +51,9 @@ const ChatInterface = () => {
     }
   }, [messages]);
 
-
   const renderMessages = () => {
-    if (!messages?.data?.length) return <p className="text-gray-500 text-center">No messages yet.</p>;
+    if (!messages?.data?.length)
+      return <p className="text-gray-500 text-center">No messages yet.</p>;
 
     let lastDate = null;
 
@@ -69,10 +71,7 @@ const ChatInterface = () => {
               <div className="flex-1 border-t border-gray-400"></div>
             </div>
           )}
-          <ChatMessage
-            msg={msg}
-            selectedChatUser={selectedChatUser}
-          />
+          <ChatMessage msg={msg} selectedChatUser={selectedChatUser} />
         </React.Fragment>
       );
     });

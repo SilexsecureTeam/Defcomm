@@ -1,11 +1,10 @@
 import { toast } from "react-toastify";
 
-
 import DOMPurify from "dompurify";
 
 export const parseHtml = (inputString) => {
   if (typeof inputString !== "string") return "";
-  
+
   // Sanitize input to prevent XSS attacks
   const sanitizedString = DOMPurify.sanitize(inputString, { ALLOWED_TAGS: [] });
 
@@ -29,26 +28,37 @@ export const getTimeAgo = (timestamp) => {
   return `${days}d ago`;
 };
 
+export const formatCallDuration = (totalSeconds) => {
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+    2,
+    "0"
+  );
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+
+  return `${hours}.${minutes}.${seconds}`;
+};
+
 // Format the date for messages
 export const getFormattedDate = (dateString) => {
-        const messageDate = new Date(dateString);
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
+  const messageDate = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
 
-        if (messageDate.toDateString() === today.toDateString()) {
-            return "Today";
-        } else if (messageDate.toDateString() === yesterday.toDateString()) {
-            return "Yesterday";
-        } else {
-            return messageDate.toLocaleDateString(undefined, {
-                weekday: "long",
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-            });
-        }
-    };
+  if (messageDate.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (messageDate.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  } else {
+    return messageDate.toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+};
 
 export const extractErrorMessage = (error) => {
   const getString = (data) => {
@@ -57,15 +67,15 @@ export const extractErrorMessage = (error) => {
 
   if (error?.response?.data?.message) {
     return getString(error.response.data.message);
-  } 
+  }
 
   if (error?.response?.data?.error) {
     return getString(error.response.data.error);
-  } 
+  }
 
   if (error?.response?.error) {
     return getString(error.response.error);
-  } 
+  }
 
   return getString(error?.message || "An unknown error occurred");
 };
@@ -77,12 +87,12 @@ export const formatDate = (dateString) => {
     month: "short",
     day: "numeric",
   });
-}
+};
 
 export const maskEmail = (email) => {
-    if (!email) return "";
-    const [name, domain] = email.split("@");
-    return `${name.slice(0, 3)}****@${domain}`;
-  };
+  if (!email) return "";
+  const [name, domain] = email.split("@");
+  return `${name.slice(0, 3)}****@${domain}`;
+};
 
- export const maskPhone = (phone) => `${phone.substring(0,5)}******`;
+export const maskPhone = (phone) => `${phone.substring(0, 5)}******`;

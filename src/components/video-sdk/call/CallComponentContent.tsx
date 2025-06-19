@@ -14,6 +14,8 @@ import { axiosClient } from "../../../services/axios-client";
 import ParticipantMedia from "./ParticipantMedia";
 import audioController from "../../../utils/audioController";
 import useChat from "../../../hooks/useChat";
+import { formatCallDuration } from "../../../utils/formmaters";
+import { MeetingContext } from "../../../context/MeetingContext";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const [isMeetingActive, setIsMeetingActive] = useState(false);
@@ -26,7 +28,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const [other, setOther] = useState(null);
   const [me, setMe] = useState(null);
   const { authDetails } = useContext(AuthContext);
-  const { selectedChatUser } = useContext(ChatContext);
+  const { selectedChatUser, callMessage } = useContext(ChatContext);
+  const { setProviderMeetingId, providerMeetingId } =
+    useContext(MeetingContext);
   const { updateCallLog } = useChat();
 
   const messageData = selectedChatUser?.chat_meta;
@@ -100,11 +104,22 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       clearInterval(callTimer.current);
       callTimer.current = null;
     }
-    leave();
-    setIsMeetingActive(false);
-    setMeetingId(null);
-    audioController.stopRingtone();
-    setShowSummary(true);
+    try {
+      await updateCallLog.mutateAsync({
+        mss_id: callMessage?.mss_id,
+        duration: formatCallDuration(callDuration),
+      } as any);
+      onSuccess({
+        message: "Call Ended",
+        success: "You have successfully left the call",
+      });
+    } finally {
+      leave();
+      setIsMeetingActive(false);
+      setMeetingId(null);
+      audioController.stopRingtone();
+      setShowSummary(true);
+    }
   };
 
   useEffect(() => {
@@ -127,6 +142,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     try {
       const newMeetingId = await createMeeting();
       if (!newMeetingId) throw new Error("No meeting ID returned.");
+      setProviderMeetingId(newMeetingId);
       setMeetingId(newMeetingId);
       setIsInitiator(true);
     } catch (error) {
@@ -148,7 +164,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     setIsLoading(true);
     try {
-      await sendMessageUtil({
+      sendMessageUtil({
         client,
         message: `CALL_INVITE:${meetingId}`,
         file: null,
@@ -159,7 +175,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         sendMessageMutation,
       });
 
-      await join();
+      join();
     } catch (error: any) {
       setIsLoading(false);
       onFailure({
@@ -182,14 +198,14 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     setIsLoading(true);
     try {
       await updateCallLog.mutateAsync({
-        mss_id: messageData?.mss_id,
-        call_state: "pick",
-        call_duration: callDuration,
+        mss_id: callMessage?.mss_id,
       } as any);
 
       join();
     } catch (error) {
       onFailure({ message: "Call Log Update Failed", error: error.message });
+    } finally {
+      setIsLoading(false);
     }
   };
 

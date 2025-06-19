@@ -63,6 +63,8 @@ const useChat = () => {
     mutationFn: async (callLog) => {
       const { data } = await client.post(`/user/chat/messages/call`, {
         recieve_user_id: authDetails?.user_enid,
+        call_state: "pick",
+        call_duration: "00.00.00",
         ...callLog,
       });
       //   return data;

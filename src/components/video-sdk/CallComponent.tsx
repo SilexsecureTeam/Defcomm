@@ -16,10 +16,10 @@ const CallComponent = ({ initialMeetingId, setInitialMeetingId }: Props) => {
 
   useEffect(() => {
     if (meetingId && !providerMeetingId) {
-      if (setInitialMeetingId) {
-        setInitialMeetingId(null);
+      // If initialMeetingId is provided, set it as the providerMeetingId
+      if (initialMeetingId) {
+        setProviderMeetingId(meetingId);
       }
-      setProviderMeetingId(meetingId);
     }
   }, [meetingId]);
 
