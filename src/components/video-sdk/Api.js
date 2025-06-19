@@ -24,7 +24,7 @@ export const createMeeting = async () => {
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
+      const errorData = await res?.json();
       onFailure({
         message: "Failed to generate meeting ID.",
         error:
@@ -33,7 +33,7 @@ export const createMeeting = async () => {
       });
     }
 
-    const { roomId } = await res.json();
+    const { roomId } = await res?.json();
     return roomId;
   } catch (error) {
     onFailure({
