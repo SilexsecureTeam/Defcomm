@@ -6,7 +6,7 @@ import { ChatContext } from "../../../context/ChatContext";
 import { MeetingContext } from "../../../context/MeetingContext";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { onFailure } from "../../../utils/notifications/OnFailure";
-import { onPrompt } from "../../../utils/notifications/OnPrompt";
+import { onPrompt } from "../../../utils/notifications/onPrompt";
 import { onSuccess } from "../../../utils/notifications/OnSuccess";
 import audioController from "../../../utils/audioController";
 import ParticipantMedia from "./ParticipantMedia";
