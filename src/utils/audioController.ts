@@ -3,7 +3,7 @@ const audioController = {
   timeoutId: null as ReturnType<typeof setTimeout> | null,
   isPlaying: false,
 
-  playRingtone(ringtone: string, repeatFor30s: boolean = true) {
+  playRingtone(ringtone: string, repeatFor30s: boolean = false) {
     // Prevent duplicate play
     if (this.isPlaying) return;
 
