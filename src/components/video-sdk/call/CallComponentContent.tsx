@@ -84,6 +84,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       setMeetingId(null);
       audioController.stopRingtone();
       setCallMessage(null);
+      setIsInitiator(false);
       setProviderMeetingId(null);
       setShowSummary(true);
     }

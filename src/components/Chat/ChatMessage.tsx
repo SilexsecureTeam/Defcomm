@@ -122,6 +122,7 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
 
                   return (
                     <ChatCallInvite
+                      msg={msg}
                       isMyChat={msg?.is_my_chat === "yes"}
                       onAcceptCall={() => handleAcceptCall(msg)}
                       status={

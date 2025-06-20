@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { MdCall } from "react-icons/md";
 import callerTone from "../../assets/audio/caller.mp3";
 import receiverTone from "../../assets/audio/receiver.mp3";
-import audioController from "../../utils/audioController"; // Import the shared audio controller
+import audioController from "../../utils/audioController";
+import { ChatContext } from "../../context/ChatContext";
 
 interface ChatCallInviteProps {
+  msg: any;
   isMyChat: boolean;
   onAcceptCall: () => void;
   status: "Ringing..." | "Call Ended";
@@ -12,11 +14,17 @@ interface ChatCallInviteProps {
 }
 
 function ChatCallInvite({
+  msg,
   isMyChat,
   onAcceptCall,
   status,
   caller,
 }: ChatCallInviteProps) {
+  const { callMessage } = useContext(ChatContext);
+
+  const isCallActive =
+    callMessage?.id === msg?.id && callMessage?.status === "on";
+
   useEffect(() => {
     if (status === "Ringing...") {
       const ringtone = isMyChat ? callerTone : receiverTone;
@@ -24,6 +32,10 @@ function ChatCallInvite({
     } else {
       audioController.stopRingtone();
     }
+
+    return () => {
+      audioController.stopRingtone();
+    };
   }, [status, isMyChat]);
 
   return (
@@ -50,18 +62,31 @@ function ChatCallInvite({
         </span>
         <span
           className={`text-xs ${
-            status === "Ringing..." ? "text-green-600" : "text-red-500"
+            isCallActive
+              ? "text-green-600"
+              : status === "Ringing..."
+              ? "text-green-600"
+              : "text-red-500"
           }`}
         >
-          {status}
+          {isCallActive ? "Call Ongoing" : status}
         </span>
       </div>
-      {status === "Ringing..." && (
+
+      {/* Button: Accept or Join only if not already active */}
+      {status === "Ringing..." && !isCallActive && (
         <button
           onClick={onAcceptCall}
           className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
         >
           {isMyChat ? "Join" : "Accept"}
+        </button>
+      )}
+
+      {/* Button: Return to ongoing call */}
+      {isCallActive && (
+        <button className="bg-olive/80 hover:bg-olive text-white px-3 py-1 rounded text-sm">
+          Return
         </button>
       )}
     </div>
