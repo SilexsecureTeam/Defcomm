@@ -141,7 +141,7 @@ const ParticipantMedia = ({
           {callType == "video" && (
             <div
               onClick={handleToggleCam}
-              className={`hidden absolute cursor-pointer hover:scale-105 duration-100 md:flex items-center justify-center left-2 bottom-2 ${
+              className={`hidden absolute cursor-pointer hover:scale-105 duration-100 md:flex items-center justify-center left-2 bottom-2 text-white ${
                 webcamOn ? "bg-green" : "bg-red-700"
               } rounded-full h-[24px] w-[24px]`}
             >

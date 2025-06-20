@@ -25,7 +25,7 @@ const Modal = ({
 
   return (
     <>
-      {/* Modal Overlay */}
+      {/* Full Modal Overlay */}
       <div className="fixed inset-0 z-[1000000] pointer-events-none">
         <div
           className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
@@ -58,7 +58,7 @@ const Modal = ({
               </button>
             </div>
 
-            {/* Scrollable Content - children never unmount */}
+            {/* Scrollable Content */}
             <div className="overflow-y-auto max-h-[calc(90vh-3rem)]">
               {children}
             </div>
@@ -66,16 +66,24 @@ const Modal = ({
         </div>
       </div>
 
-      {/* Minimized Bar */}
+      {/* Draggable Minimized Bar */}
       <AnimatePresence>
         {isMinimized && canMinimize && (
           <motion.div
+            drag
+            dragConstraints={{
+              top: -1000,
+              bottom: 1000,
+              left: -1000,
+              right: 1000,
+            }}
+            dragElastic={0.2}
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="fixed bottom-4 right-4 z-[1000001] flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg"
+            className="fixed bottom-4 right-4 z-[1000001] flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg cursor-move"
           >
-            <div className="truncate flex-1 font-medium">
+            <div className="truncate flex-1 font-medium cursor-default">
               {minimizedContent || modalTitle || "Minimized"}
             </div>
             <button

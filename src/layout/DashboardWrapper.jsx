@@ -23,6 +23,7 @@ import Modal from "../components/modal/Modal";
 import CallComponent from "../components/video-sdk/CallComponent";
 import Settings from "../pages/Settings";
 import usePusherChannel from "../hooks/usePusherChannel";
+import { FaPhone } from "react-icons/fa6";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -248,7 +249,13 @@ const DashboardWrapper = ({ children }) => {
             setProviderMeetingId(null);
           }}
           canMinimize={true}
-          minimizedContent="Secure Call"
+          minimizedContent={
+            <div className="flex items-center gap-2">
+              <span className="text-lg md:text-sm font-semibold flex items-center gap-2">
+                <FaPhone /> Secure Call
+              </span>
+            </div>
+          }
         >
           <CallComponent
             initialMeetingId={callMessage?.message?.slice(

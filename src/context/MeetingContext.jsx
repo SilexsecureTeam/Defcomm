@@ -30,22 +30,22 @@ export const MeetingProvider = ({ children }) => {
         setShowConference,
       }}
     >
-        <SDKMeetingProvide
-          config={{
-            meetingId: providerMeetingId,
-            name: authDetails?.user?.name || "You",
-            participantId: authDetails?.user?.id,
-            micEnabled: true,
-            webcamEnabled: callType === "video",
-            mode: "SEND_AND_RECV",
-            chatEnabled: true,
-            raiseHandEnabled: true,
-            debugMode: true,
-          }}
-          token={getAuthToken()}
-        >
-          {children}
-        </SDKMeetingProvide>
+      <SDKMeetingProvide
+        config={{
+          meetingId: providerMeetingId,
+          name: authDetails?.user?.name || "You",
+          participantId: authDetails?.user?.id,
+          micEnabled: true,
+          webcamEnabled: false,
+          mode: "SEND_AND_RECV",
+          chatEnabled: true,
+          raiseHandEnabled: true,
+          debugMode: true,
+        }}
+        token={getAuthToken()}
+      >
+        {children}
+      </SDKMeetingProvide>
     </MeetingContext.Provider>
   );
 };

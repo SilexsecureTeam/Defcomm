@@ -35,6 +35,13 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     onMeetingJoined: () => {
       setIsMeetingActive(true);
       onSuccess({ message: "Call Started", success: "Joined successfully." });
+      // ✅ Mark call as ongoing if it hasn't been set already
+      setCallMessage((prev) => {
+        if (prev?.status !== "on") {
+          return { ...prev, status: "on" };
+        }
+        return prev;
+      });
       if (!localMicOn) toggleMic();
     },
     onMeetingLeft: () => {
