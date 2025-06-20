@@ -16,7 +16,7 @@ const usePusherChannel = ({
 }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
-  const { setSelectedChatUser } = useContext(ChatContext);
+  const { setSelectedChatUser, setCallMessage } = useContext(ChatContext);
   useEffect(() => {
     if (!userId || !token) return;
 
@@ -50,9 +50,13 @@ const usePusherChannel = ({
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
       console.log(data);
-      const isCall = data?.message?.startsWith("CALL_INVITE");
+      const isCall = data?.state === "call";
       onNewMessage(newMessage);
       if (isCall) {
+        setCallMessage({
+          ...data?.mss_chat,
+          recieve_user_id: data?.mss_chat?.user_id,
+        });
         audioController.playRingtone(receiverTone, true);
         onNewNotificationToast({
           message: newMessage?.message,

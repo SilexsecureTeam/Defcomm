@@ -10,7 +10,7 @@ const audioController = {
     this.stopRingtone(); // Clear any existing state
 
     this.audio = new Audio(ringtone);
-    this.audio.loop = true;
+    this.audio.loop = repeatFor30s;
 
     // Mark it as playing early to avoid re-entry
     this.isPlaying = true;

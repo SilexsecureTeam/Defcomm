@@ -26,7 +26,6 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
   }, [chatVisibility]);
 
   const handleAcceptCall = (msg) => {
-    setCallMessage(msg);
     setShowCall(true);
   };
 

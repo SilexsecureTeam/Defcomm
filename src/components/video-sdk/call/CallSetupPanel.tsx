@@ -45,7 +45,6 @@ const CallSetupPanel = ({
       setIsInitiator(true);
       setShowSummary(false);
       setCallDuration(0);
-      setCallMessage((prev) => ({ ...prev, status: "on" }));
     } catch (error) {
       onFailure({ message: "Meeting Creation Failed", error: error.message });
     } finally {
@@ -99,7 +98,9 @@ const CallSetupPanel = ({
     setIsLoading(true);
     try {
       await updateCallLog.mutateAsync({
-        mss_id: callMessage?.mss_id,
+        mss_id: callMessage?.id,
+        recieve_user_id: callMessage?.user_id,
+        duration: formatCallDuration(callDuration),
       } as any);
 
       join();

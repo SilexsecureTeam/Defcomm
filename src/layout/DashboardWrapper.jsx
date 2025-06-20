@@ -64,7 +64,7 @@ const DashboardWrapper = ({ children }) => {
     token: authDetails?.access_token,
     onNewMessage: (newMessage) => {
       const senderId = newMessage?.data?.user_id;
-      console.log(typingUsers);
+
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
           if (prev[newMessage.user]) return prev; // already typing
@@ -110,7 +110,6 @@ const DashboardWrapper = ({ children }) => {
                 ...old.data,
                 {
                   ...newMessage.data,
-                  mss_id: newMessage?.data?.message,
                   message: newMessage?.message,
                   is_my_chat: isMyChat ? "yes" : "no",
                 },

@@ -6,6 +6,7 @@ import { ChatContext } from "../../../context/ChatContext";
 import { MeetingContext } from "../../../context/MeetingContext";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { onFailure } from "../../../utils/notifications/OnFailure";
+import { onPrompt } from "../../../utils/notifications/OnPrompt";
 import { onSuccess } from "../../../utils/notifications/OnSuccess";
 import audioController from "../../../utils/audioController";
 import ParticipantMedia from "./ParticipantMedia";
@@ -15,8 +16,7 @@ import useChat from "../../../hooks/useChat";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext(AuthContext);
-  const { selectedChatUser, callMessage, setCallMessage } =
-    useContext(ChatContext);
+  const { callMessage, setCallMessage } = useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
   const { updateCallLog } = useChat();
 
@@ -30,28 +30,32 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
   const callTimer = useRef<NodeJS.Timeout | null>(null);
   const callStartRef = useRef<number | null>(null);
+  const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
     onMeetingJoined: () => {
       setIsMeetingActive(true);
       onSuccess({ message: "Call Started", success: "Joined successfully." });
-      // ✅ Mark call as ongoing if it hasn't been set already
+
       setCallMessage((prev) => {
-        if (prev?.status !== "on") {
-          return { ...prev, status: "on" };
-        }
+        if (prev?.status !== "on") return { ...prev, status: "on" };
         return prev;
       });
+
       if (!localMicOn) toggleMic();
     },
+
     onMeetingLeft: () => {
       setIsMeetingActive(false);
       if (callTimer.current) clearInterval(callTimer.current);
     },
+
     onParticipantJoined: () => {
       setIsRinging(false);
       setCallMessage((prev) => ({ ...prev, status: "on" }));
       audioController.stopRingtone();
+
+      if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
 
       if (!callStartRef.current) {
         callStartRef.current = Date.now();
@@ -62,29 +66,39 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         }, 1000);
       }
     },
+
     onParticipantLeft: () => {
       const count = [...participants.values()].length;
       if (count <= 1) handleLeave();
     },
+
     onError: (err) => onFailure({ message: "Call Error", error: err.message }),
   });
 
   const handleLeave = async () => {
-    if (callTimer.current) {
-      clearInterval(callTimer.current);
-      callTimer.current = null;
-    }
+    if (callTimer.current) clearInterval(callTimer.current);
+
+    const isMissed = callDuration === 0;
 
     try {
       await updateCallLog.mutateAsync({
-        mss_id: callMessage?.mss_id,
+        mss_id: callMessage?.id,
         duration: formatCallDuration(callDuration),
+        call_state: isMissed ? "miss" : "pick",
+        recieve_user_id: callMessage?.recieve_user_id,
       } as any);
 
-      onSuccess({
-        message: "Call Ended",
-        success: "You have successfully left the call",
-      });
+      if (isMissed) {
+        onPrompt({
+          message: "Call Missed",
+          error: "No response from the other user. You have left the call.",
+        });
+      } else {
+        onSuccess({
+          message: "Call Ended",
+          success: "You have successfully left the call.",
+        });
+      }
     } finally {
       leave();
       setIsMeetingActive(false);
@@ -97,6 +111,27 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     }
   };
 
+  // Auto-leave after 30s if unanswered
+  useEffect(() => {
+    if (isInitiator && isRinging && isMeetingActive && callMessage) {
+      ringTimeoutRef.current = setTimeout(async () => {
+        console.log("⏳ Call timeout — no answer.");
+        await updateCallLog.mutateAsync({
+          mss_id: callMessage?.id,
+          duration: "00.00.00",
+          call_state: "miss",
+          recieve_user_id: callMessage?.recieve_user_id,
+        } as any);
+        handleLeave();
+      }, 30000);
+    }
+
+    return () => {
+      if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
+    };
+  }, [isInitiator, isRinging, isMeetingActive]);
+
+  // Set `me` and `other` participants
   useEffect(() => {
     if (participants && isMeetingActive) {
       const myParticipant = [...participants.values()].find(
@@ -113,8 +148,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   return (
     <div className="flex flex-col items-center bg-olive p-5">
       <div className="relative w-full">
-        {/* Setup Panel - stays mounted, just hidden when meeting is active */}
-        <div className={isMeetingActive ? "hidden" : ""}>
+        {!isMeetingActive && (
           <CallSetupPanel
             meetingId={meetingId}
             setMeetingId={setMeetingId}
@@ -126,22 +160,19 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             isInitiator={isInitiator}
             setIsInitiator={setIsInitiator}
           />
-        </div>
+        )}
 
-        {/* Participant Media - stays mounted, just hidden when not active */}
-        <div className={!isMeetingActive ? "hidden" : ""}>
-          {me && (
-            <ParticipantMedia
-              participantId={me.id}
-              auth={authDetails}
-              isRinging={isRinging}
-              callDuration={callDuration}
-              handleLeave={handleLeave}
-              participant={other}
-              isInitiator={true}
-            />
-          )}
-        </div>
+        {isMeetingActive && me && (
+          <ParticipantMedia
+            participantId={me.id}
+            auth={authDetails}
+            isRinging={isRinging}
+            callDuration={callDuration}
+            handleLeave={handleLeave}
+            participant={other}
+            isInitiator={true}
+          />
+        )}
       </div>
 
       <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />
