@@ -41,7 +41,7 @@ const CallSetupPanel = ({
       setProviderMeetingId(newMeetingId);
       setMeetingId(newMeetingId);
       setIsInitiator(true);
-      setShowSummary(true);
+      setShowSummary(false);
       setCallDuration(0);
       setCallMessage((prev) => ({ ...prev, status: "on" }));
     } catch (error) {
