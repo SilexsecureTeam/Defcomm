@@ -90,8 +90,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
       if (isMissed) {
         onPrompt({
-          message: "Call Missed",
-          error: "No response from the other user. You have left the call.",
+          title: "Call Missed",
+          message: "No response from the other user. You have left the call.",
         });
       } else {
         onSuccess({
