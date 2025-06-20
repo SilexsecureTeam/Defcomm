@@ -10,6 +10,7 @@ import { useSendMessageMutation } from "../../../hooks/useSendMessageMutation";
 import CallSummary from "../../Chat/CallSummary";
 import { axiosClient } from "../../../services/axios-client";
 import useChat from "../../../hooks/useChat";
+import audioController from "../../../utils/audioController";
 
 const CallSetupPanel = ({
   meetingId,
@@ -98,6 +99,7 @@ const CallSetupPanel = ({
       } as any);
 
       join();
+      audioController.stopRingtone();
     } catch (error) {
       onFailure({ message: "Call Log Update Failed", error: error.message });
     } finally {

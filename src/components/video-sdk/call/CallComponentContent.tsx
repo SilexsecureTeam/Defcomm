@@ -48,7 +48,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         ...prev,
         status: "on",
       }));
-      console.log(callMessage);
+      audioController.stopRingtone();
       if (!callStartRef.current) {
         callStartRef.current = Date.now();
         callTimer.current = setInterval(() => {

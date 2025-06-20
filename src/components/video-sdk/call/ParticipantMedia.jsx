@@ -74,7 +74,7 @@ const ParticipantMedia = ({
     <div className="w-[90vw] flex flex-col md:flex-row justify-center gap-2 h-[80vh]">
       <button
         onClick={() => setIsPiPMode(true)}
-        className="absolute top-2 right-2 z-50 bg-black/60 hover:bg-black/80 text-white px-2 py-1 rounded-lg text-sm"
+        className="absolute top-5 right-5 z-50 bg-black/60 hover:bg-black/80 text-white px-2 py-1 rounded-lg text-sm"
       >
         Minimize
       </button>
