@@ -19,6 +19,7 @@ const CallSetupPanel = ({
   callDuration,
   join,
   showSummary = false,
+  setShowSummary = () => {},
 }: any) => {
   const { selectedChatUser, callMessage, setCallMessage } =
     useContext(ChatContext);
@@ -40,6 +41,7 @@ const CallSetupPanel = ({
       setProviderMeetingId(newMeetingId);
       setMeetingId(newMeetingId);
       setIsInitiator(true);
+      setShowSummary(true);
       setCallDuration(0);
       setCallMessage((prev) => ({ ...prev, status: "on" }));
     } catch (error) {

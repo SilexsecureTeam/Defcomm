@@ -104,48 +104,47 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   }, [participants, isMeetingActive]);
 
   return (
-    <div className="flex flex-col items-center bg-olive p-5">
-      <>
-        {!isPiPMode ? (
-          <div className="flex flex-col items-center bg-olive p-5">
-            {!isMeetingActive ? (
-              <CallSetupPanel
-                meetingId={meetingId}
-                setMeetingId={setMeetingId}
-                setCallDuration={setCallDuration}
-                join={join}
-                showSummary={showSummary}
-                callDuration={callDuration}
-              />
-            ) : (
-              me && (
-                <ParticipantMedia
-                  participantId={me.id}
-                  auth={authDetails}
-                  isRinging={isRinging}
-                  callDuration={callDuration}
-                  handleLeave={handleLeave}
-                  participant={other}
-                  isInitiator={true}
-                  setIsPiPMode={setIsPiPMode} // Pass this prop
-                />
-              )
-            )}
-            <img
-              src={logo}
-              alt="Defcomm Icon"
-              className="w-40 mt-8 filter invert"
+    <>
+      {!isPiPMode ? (
+        <div className="flex flex-col items-center bg-olive p-5">
+          {!isMeetingActive ? (
+            <CallSetupPanel
+              meetingId={meetingId}
+              setMeetingId={setMeetingId}
+              setCallDuration={setCallDuration}
+              join={join}
+              setShowSummary={setShowSummary}
+              showSummary={showSummary}
+              callDuration={callDuration}
             />
-          </div>
-        ) : (
-          <CallPiP
-            callDuration={callDuration}
-            onRestore={() => setIsPiPMode(false)}
-            onEnd={handleLeave}
+          ) : (
+            me && (
+              <ParticipantMedia
+                participantId={me.id}
+                auth={authDetails}
+                isRinging={isRinging}
+                callDuration={callDuration}
+                handleLeave={handleLeave}
+                participant={other}
+                isInitiator={true}
+                setIsPiPMode={setIsPiPMode} // Pass this prop
+              />
+            )
+          )}
+          <img
+            src={logo}
+            alt="Defcomm Icon"
+            className="w-40 mt-8 filter invert"
           />
-        )}
-      </>
-    </div>
+        </div>
+      ) : (
+        <CallPiP
+          callDuration={callDuration}
+          onRestore={() => setIsPiPMode(false)}
+          onEnd={handleLeave}
+        />
+      )}
+    </>
   );
 };
 
