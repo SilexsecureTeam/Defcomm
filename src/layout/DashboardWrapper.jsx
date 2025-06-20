@@ -247,6 +247,8 @@ const DashboardWrapper = ({ children }) => {
             setCallMessage(null);
             setProviderMeetingId(null);
           }}
+          canMinimize={true}
+          minimizedContent="Secure Call"
         >
           <CallComponent
             initialMeetingId={callMessage?.message?.slice(
@@ -257,7 +259,11 @@ const DashboardWrapper = ({ children }) => {
         </Modal>
       )}
       {showSettings && (
-        <Modal isOpen={showSettings} closeModal={() => setShowSettings(false)}>
+        <Modal
+          isOpen={showSettings}
+          closeModal={() => setShowSettings(false)}
+          minimizedContent="Settings"
+        >
           <Settings />
         </Modal>
       )}

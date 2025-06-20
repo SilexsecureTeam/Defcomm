@@ -12,25 +12,24 @@ import ParticipantMedia from "./ParticipantMedia";
 import CallSetupPanel from "./CallSetupPanel";
 import { formatCallDuration } from "../../../utils/formmaters";
 import useChat from "../../../hooks/useChat";
-import CallPiP from "./CallPiP";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext(AuthContext);
   const { selectedChatUser, callMessage, setCallMessage } =
     useContext(ChatContext);
-  const { updateCallLog } = useChat();
-  const [showSummary, setShowSummary] = useState(false);
   const { setProviderMeetingId } = useContext(MeetingContext);
-  const [isPiPMode, setIsPiPMode] = useState(false);
+  const { updateCallLog } = useChat();
 
   const [callDuration, setCallDuration] = useState(0);
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
   const [other, setOther] = useState(null);
   const [me, setMe] = useState(null);
+  const [isInitiator, setIsInitiator] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
-  const callTimer = useRef(null);
-  const callStartRef = useRef(null);
+  const callTimer = useRef<NodeJS.Timeout | null>(null);
+  const callStartRef = useRef<number | null>(null);
 
   const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
     onMeetingJoined: () => {
@@ -44,11 +43,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     },
     onParticipantJoined: () => {
       setIsRinging(false);
-      setCallMessage((prev) => ({
-        ...prev,
-        status: "on",
-      }));
+      setCallMessage((prev) => ({ ...prev, status: "on" }));
       audioController.stopRingtone();
+
       if (!callStartRef.current) {
         callStartRef.current = Date.now();
         callTimer.current = setInterval(() => {
@@ -70,11 +67,13 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       clearInterval(callTimer.current);
       callTimer.current = null;
     }
+
     try {
       await updateCallLog.mutateAsync({
         mss_id: callMessage?.mss_id,
         duration: formatCallDuration(callDuration),
       } as any);
+
       onSuccess({
         message: "Call Ended",
         success: "You have successfully left the call",
@@ -92,59 +91,53 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
   useEffect(() => {
     if (participants && isMeetingActive) {
-      const me = [...participants.values()].find(
+      const myParticipant = [...participants.values()].find(
         (p) => Number(p.id) === Number(authDetails?.user?.id)
       );
-      const other = [...participants.values()].find(
+      const otherParticipant = [...participants.values()].find(
         (p) => Number(p.id) !== Number(authDetails?.user?.id)
       );
-      setMe(me);
-      setOther(other);
+      setMe(myParticipant);
+      setOther(otherParticipant);
     }
   }, [participants, isMeetingActive]);
 
   return (
-    <>
-      {!isPiPMode ? (
-        <div className="flex flex-col items-center bg-olive p-5">
-          {!isMeetingActive ? (
-            <CallSetupPanel
-              meetingId={meetingId}
-              setMeetingId={setMeetingId}
-              setCallDuration={setCallDuration}
-              join={join}
-              setShowSummary={setShowSummary}
-              showSummary={showSummary}
-              callDuration={callDuration}
-            />
-          ) : (
-            me && (
-              <ParticipantMedia
-                participantId={me.id}
-                auth={authDetails}
-                isRinging={isRinging}
-                callDuration={callDuration}
-                handleLeave={handleLeave}
-                participant={other}
-                isInitiator={true}
-                setIsPiPMode={setIsPiPMode} // Pass this prop
-              />
-            )
-          )}
-          <img
-            src={logo}
-            alt="Defcomm Icon"
-            className="w-40 mt-8 filter invert"
+    <div className="flex flex-col items-center bg-olive p-5">
+      <div className="relative w-full">
+        {/* Setup Panel - stays mounted, just hidden when meeting is active */}
+        <div className={isMeetingActive ? "hidden" : ""}>
+          <CallSetupPanel
+            meetingId={meetingId}
+            setMeetingId={setMeetingId}
+            setCallDuration={setCallDuration}
+            join={join}
+            setShowSummary={setShowSummary}
+            showSummary={showSummary}
+            callDuration={callDuration}
+            isInitiator={isInitiator}
+            setIsInitiator={setIsInitiator}
           />
         </div>
-      ) : (
-        <CallPiP
-          callDuration={callDuration}
-          onRestore={() => setIsPiPMode(false)}
-          onEnd={handleLeave}
-        />
-      )}
-    </>
+
+        {/* Participant Media - stays mounted, just hidden when not active */}
+        <div className={!isMeetingActive ? "hidden" : ""}>
+          {me && (
+            <ParticipantMedia
+              participantId={me.id}
+              auth={authDetails}
+              isRinging={isRinging}
+              callDuration={callDuration}
+              handleLeave={handleLeave}
+              participant={other}
+              isInitiator={true}
+            />
+          )}
+        </div>
+      </div>
+
+      <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />
+    </div>
   );
 };
 

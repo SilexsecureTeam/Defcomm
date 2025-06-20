@@ -11,6 +11,7 @@ import CallSummary from "../../Chat/CallSummary";
 import { axiosClient } from "../../../services/axios-client";
 import useChat from "../../../hooks/useChat";
 import audioController from "../../../utils/audioController";
+import { formatCallDuration } from "../../../utils/formmaters";
 
 const CallSetupPanel = ({
   meetingId,
@@ -20,6 +21,8 @@ const CallSetupPanel = ({
   join,
   showSummary = false,
   setShowSummary = () => {},
+  isInitiator,
+  setIsInitiator,
 }: any) => {
   const { selectedChatUser, callMessage, setCallMessage } =
     useContext(ChatContext);
@@ -28,7 +31,6 @@ const CallSetupPanel = ({
   const { setProviderMeetingId } = useContext(MeetingContext);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitiator, setIsInitiator] = useState(false);
 
   const messageData = selectedChatUser?.chat_meta;
   const client = axiosClient(authDetails?.access_token);
