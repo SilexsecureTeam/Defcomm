@@ -20,9 +20,7 @@ const ChatInterface = () => {
     setSelectedChatUser,
     setShowCall,
     setShowSettings,
-    typingUsers,
   } = useContext(ChatContext);
-  const { authDetails } = useContext(AuthContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
 

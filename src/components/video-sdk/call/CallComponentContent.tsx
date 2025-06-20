@@ -1,103 +1,69 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
+// @ts-ignore
 import logo from "../../../assets/logo.png";
-import CallSummary from "../../Chat/CallSummary";
-import { sendMessageUtil } from "../../../utils/chat/sendMessageUtil";
-import { onFailure } from "../../../utils/notifications/OnFailure";
-import { onSuccess } from "../../../utils/notifications/OnSuccess";
-import { createMeeting } from "../Api";
-import { FaSpinner } from "react-icons/fa";
-import { useMeeting } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
-import { useSendMessageMutation } from "../../../hooks/useSendMessageMutation";
-import { axiosClient } from "../../../services/axios-client";
-import ParticipantMedia from "./ParticipantMedia";
-import audioController from "../../../utils/audioController";
-import useChat from "../../../hooks/useChat";
-import { formatCallDuration } from "../../../utils/formmaters";
 import { MeetingContext } from "../../../context/MeetingContext";
+import { useMeeting } from "@videosdk.live/react-sdk";
+import { onFailure } from "../../../utils/notifications/OnFailure";
+import { onSuccess } from "../../../utils/notifications/OnSuccess";
+import audioController from "../../../utils/audioController";
+import ParticipantMedia from "./ParticipantMedia";
+import CallSetupPanel from "./CallSetupPanel";
+import { formatCallDuration } from "../../../utils/formmaters";
+import useChat from "../../../hooks/useChat";
+import CallPiP from "./CallPip";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
-  const [isMeetingActive, setIsMeetingActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
-  const [isRinging, setIsRinging] = useState(true);
-  const [callDuration, setCallDuration] = useState(0);
-  const [isInitiator, setIsInitiator] = useState(false);
+  const { authDetails } = useContext(AuthContext);
+  const { selectedChatUser, callMessage, setCallMessage } =
+    useContext(ChatContext);
+  const { updateCallLog } = useChat();
   const [showSummary, setShowSummary] = useState(false);
+  const { setProviderMeetingId } = useContext(MeetingContext);
+  const [isPiPMode, setIsPiPMode] = useState(false);
+
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMeetingActive, setIsMeetingActive] = useState(false);
+  const [isRinging, setIsRinging] = useState(true);
   const [other, setOther] = useState(null);
   const [me, setMe] = useState(null);
-  const { authDetails } = useContext(AuthContext);
-  const { selectedChatUser, callMessage } = useContext(ChatContext);
-  const { setProviderMeetingId, providerMeetingId } =
-    useContext(MeetingContext);
-  const { updateCallLog } = useChat();
-
-  const messageData = selectedChatUser?.chat_meta;
-  const client = axiosClient(authDetails?.access_token);
-  const sendMessageMutation = useSendMessageMutation(client);
 
   const callTimer = useRef(null);
+  const callStartRef = useRef(null);
 
-  const { join, participants, localMicOn, toggleMic, leave } = useMeeting({
+  const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
     onMeetingJoined: () => {
-      setIsLoading(false);
       setIsMeetingActive(true);
-      setShowSummary(false);
-      onSuccess({
-        message: "Call Started",
-        success: "You have successfully joined the call",
-      });
+      onSuccess({ message: "Call Started", success: "Joined successfully." });
       if (!localMicOn) toggleMic();
     },
     onMeetingLeft: () => {
       setIsMeetingActive(false);
-      setShowSummary(true);
-      if (callTimer.current) {
-        clearInterval(callTimer.current);
-        callTimer.current = null;
-      }
+      if (callTimer.current) clearInterval(callTimer.current);
     },
-    onParticipantJoined: (participant) => {
+    onParticipantJoined: () => {
       setIsRinging(false);
-      if (!callTimer.current) {
-        callTimer.current = setInterval(
-          () => setCallDuration((prev) => prev + 1),
-          1000
-        );
+      setCallMessage((prev) => ({
+        ...prev,
+        status: "on",
+      }));
+      console.log(callMessage);
+      if (!callStartRef.current) {
+        callStartRef.current = Date.now();
+        callTimer.current = setInterval(() => {
+          const now = Date.now();
+          const duration = Math.floor((now - callStartRef.current!) / 1000);
+          setCallDuration(duration);
+        }, 1000);
       }
     },
     onParticipantLeft: () => {
-      const participantCount = participants
-        ? [...participants.values()].length
-        : 0;
-      console.log("Participant Left, Current Count:", participantCount);
-      if (participantCount <= 1) {
-        handleLeave();
-      }
+      const count = [...participants.values()].length;
+      if (count <= 1) handleLeave();
     },
-    onError: (error) => {
-      onFailure({
-        message: "Technical Error",
-        error: error?.message || "An error occurred",
-      });
-    },
+    onError: (err) => onFailure({ message: "Call Error", error: err.message }),
   });
-
-  const getMe = () => {
-    const speakerParticipants = [...participants.values()].find(
-      (current) => Number(current.id) === Number(authDetails?.user?.id)
-    );
-    setMe(speakerParticipants);
-  };
-
-  const getOther = () => {
-    const speakerParticipants = [...participants.values()].find(
-      (current) => Number(current.id) !== Number(authDetails?.user?.id)
-    );
-
-    setOther(speakerParticipants);
-  };
 
   const handleLeave = async () => {
     if (callTimer.current) {
@@ -118,166 +84,69 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       setIsMeetingActive(false);
       setMeetingId(null);
       audioController.stopRingtone();
+      setCallMessage(null);
+      setProviderMeetingId(null);
       setShowSummary(true);
     }
   };
 
   useEffect(() => {
     if (participants && isMeetingActive) {
-      getMe();
-      getOther();
-      const participantCount = participants
-        ? [...participants.values()].length
-        : 0;
-
-      if (participantCount > 1) {
-        audioController.stopRingtone();
-      }
+      const me = [...participants.values()].find(
+        (p) => Number(p.id) === Number(authDetails?.user?.id)
+      );
+      const other = [...participants.values()].find(
+        (p) => Number(p.id) !== Number(authDetails?.user?.id)
+      );
+      setMe(me);
+      setOther(other);
     }
   }, [participants, isMeetingActive]);
 
-  // Create Meeting
-  const handleCreateMeeting = async () => {
-    setIsCreatingMeeting(true);
-    try {
-      const newMeetingId = await createMeeting();
-      if (!newMeetingId) throw new Error("No meeting ID returned.");
-      setProviderMeetingId(newMeetingId);
-      setMeetingId(newMeetingId);
-      setIsInitiator(true);
-    } catch (error) {
-      onFailure({ message: "Meeting Creation Failed", error: error.message });
-    } finally {
-      setIsCreatingMeeting(false);
-    }
-  };
-
-  // Start Call (for initiator)
-  const handleStartCall = async () => {
-    if (!meetingId) {
-      onFailure({
-        message: "Meeting ID Error",
-        error: "Meeting ID is missing.",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      sendMessageUtil({
-        client,
-        message: `CALL_INVITE:${meetingId}`,
-        file: null,
-        chat_user_type: messageData.chat_user_type,
-        chat_user_id: messageData.chat_user_id,
-        chat_id: messageData.chat_id,
-        mss_type: "call",
-        sendMessageMutation,
-      });
-
-      join();
-    } catch (error: any) {
-      setIsLoading(false);
-      onFailure({
-        message: "Meeting Join Failed",
-        error:
-          error.message || "Something went wrong while joining the meeting.",
-      });
-    }
-  };
-
-  // Join Meeting (for invited participant)
-  const handleJoinMeeting = async () => {
-    if (!meetingId) {
-      onFailure({
-        message: "Meeting ID Error",
-        error: "Meeting ID is missing.",
-      });
-      return;
-    }
-    setIsLoading(true);
-    try {
-      await updateCallLog.mutateAsync({
-        mss_id: callMessage?.mss_id,
-      } as any);
-
-      join();
-    } catch (error) {
-      onFailure({ message: "Call Log Update Failed", error: error.message });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const participantCount = [...participants.values()].length;
-    setIsRinging(participantCount < 2);
-  }, [participants]);
-
-  useEffect(() => {
-    if (isMeetingActive && !localMicOn) {
-      toggleMic();
-    }
-  }, [isMeetingActive, localMicOn]);
-
   return (
     <div className="flex flex-col items-center bg-olive p-5">
-      {!isMeetingActive ? (
-        <div className="py-10 w-72 md:w-96 rounded-lg flex flex-col items-center">
-          {showSummary && (
-            <CallSummary
-              callSummary={{
-                duration: callDuration,
-                caller: isInitiator ? "You" : selectedChatUser?.contact_name,
-                receiver: !isInitiator
-                  ? "You"
-                  : selectedChatUser?.contact_name || "Unknown",
-              }}
-            />
-          )}
-          {!meetingId ? (
-            <button
-              onClick={handleCreateMeeting}
-              className="bg-oliveLight hover:oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
-            >
-              Initiate Call{" "}
-              {isCreatingMeeting && <FaSpinner className="animate-spin" />}
-            </button>
-          ) : isInitiator ? (
-            <button
-              onClick={handleStartCall}
-              className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
-            >
-              Start Call {isLoading && <FaSpinner className="animate-spin" />}
-            </button>
-          ) : (
-            <button
-              onClick={handleJoinMeeting}
-              className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
-            >
-              Join Call {isLoading && <FaSpinner className="animate-spin" />}
-            </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-col gap-2 items-center">
-            {me && (
-              <ParticipantMedia
-                participantId={me?.id}
-                auth={authDetails}
-                isRinging={isRinging}
+      <>
+        {!isPiPMode ? (
+          <div className="flex flex-col items-center bg-olive p-5">
+            {!isMeetingActive ? (
+              <CallSetupPanel
+                meetingId={meetingId}
+                setMeetingId={setMeetingId}
+                setCallDuration={setCallDuration}
+                join={join}
+                showSummary={showSummary}
                 callDuration={callDuration}
-                handleLeave={handleLeave}
-                participant={other}
-                isInitiator={isInitiator}
               />
+            ) : (
+              me && (
+                <ParticipantMedia
+                  participantId={me.id}
+                  auth={authDetails}
+                  isRinging={isRinging}
+                  callDuration={callDuration}
+                  handleLeave={handleLeave}
+                  participant={other}
+                  isInitiator={true}
+                  setIsPiPMode={setIsPiPMode} // Pass this prop
+                />
+              )
             )}
+            <img
+              src={logo}
+              alt="Defcomm Icon"
+              className="w-40 mt-8 filter invert"
+            />
           </div>
-        </>
-      )}
-      <img src={logo} alt="Defcomm Icon" className="w-40 mt-8 filter invert" />
+        ) : (
+          <CallPiP
+            callDuration={callDuration}
+            onRestore={() => setIsPiPMode(false)}
+            onEnd={handleLeave}
+          />
+        )}
+      </>
     </div>
   );
 };
+
 export default CallComponentContent;
