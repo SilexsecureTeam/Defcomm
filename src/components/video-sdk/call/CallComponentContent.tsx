@@ -123,7 +123,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
           recieve_user_id: callMessage?.recieve_user_id,
         } as any);
         handleLeave();
-      }, 30000);
+      }, 10000);
     }
 
     return () => {
@@ -148,7 +148,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   return (
     <div className="flex flex-col items-center bg-olive p-5">
       <div className="relative w-full">
-        {!isMeetingActive && (
+        {!isMeetingActive ? (
           <CallSetupPanel
             meetingId={meetingId}
             setMeetingId={setMeetingId}
@@ -160,18 +160,18 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
             isInitiator={isInitiator}
             setIsInitiator={setIsInitiator}
           />
-        )}
-
-        {isMeetingActive && me && (
-          <ParticipantMedia
-            participantId={me.id}
-            auth={authDetails}
-            isRinging={isRinging}
-            callDuration={callDuration}
-            handleLeave={handleLeave}
-            participant={other}
-            isInitiator={true}
-          />
+        ) : (
+          me && (
+            <ParticipantMedia
+              participantId={me.id}
+              auth={authDetails}
+              isRinging={isRinging}
+              callDuration={callDuration}
+              handleLeave={handleLeave}
+              participant={other}
+              isInitiator={true}
+            />
+          )
         )}
       </div>
 

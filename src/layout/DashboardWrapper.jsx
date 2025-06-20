@@ -43,7 +43,8 @@ const DashboardWrapper = ({ children }) => {
     showSettings,
     setShowSettings,
     setCallMessage,
-    callMessage,
+    setMeetingId,
+    meetingId,
   } = useContext(ChatContext);
   const { state, dispatch } = useContext(DashboardContext);
   const { fetchContacts } = useChat();
@@ -257,10 +258,8 @@ const DashboardWrapper = ({ children }) => {
           }
         >
           <CallComponent
-            initialMeetingId={callMessage?.message?.slice(
-              "CALL_INVITE:".length
-            )}
-            setInitialMeetingId={setCallMessage}
+            initialMeetingId={meetingId}
+            setInitialMeetingId={setMeetingId}
           />
         </Modal>
       )}

@@ -7,8 +7,7 @@ import { ChatContext } from "../../context/ChatContext";
 import { parseHtml } from "../../utils/formmaters";
 
 const ChatMessage = ({ msg, selectedChatUser }) => {
-  const { chatVisibility, setShowCall, setCallMessage } =
-    useContext(ChatContext);
+  const { chatVisibility, setShowCall, setMeetingId } = useContext(ChatContext);
   const [isVisible, setIsVisible] = useState(chatVisibility || false);
   const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
   const [isExpanded, setIsExpanded] = useState(false);
@@ -27,6 +26,7 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
 
   const handleAcceptCall = (msg) => {
     setShowCall(true);
+    setMeetingId(msg?.message?.split("CALL_INVITE:")[1]);
   };
 
   // Format message date

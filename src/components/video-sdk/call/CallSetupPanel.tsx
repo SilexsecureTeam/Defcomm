@@ -21,7 +21,7 @@ const CallSetupPanel = ({
   join,
   showSummary = false,
   setShowSummary = () => {},
-  isInitiator,
+  isInitiator = false,
   setIsInitiator,
 }: any) => {
   const { selectedChatUser, callMessage, setCallMessage } =
@@ -101,6 +101,7 @@ const CallSetupPanel = ({
         mss_id: callMessage?.id,
         recieve_user_id: callMessage?.user_id,
         duration: formatCallDuration(callDuration),
+        calL_state: "pick",
       } as any);
 
       join();

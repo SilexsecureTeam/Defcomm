@@ -15,6 +15,7 @@ export const ChatProvider = ({ children }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [callMessage, setCallMessage] = useState("");
   const [messages, setMessages] = useState(false);
+  const [meetingId, setMeetingId] = useState(null);
   const [typingUsers, setTypingUsers] = useState({}); // key = userId, value = true/false
 
   const [modalTitle, setModalTitle] = useState("DefComm");
@@ -52,6 +53,8 @@ export const ChatProvider = ({ children }) => {
         setTypingUsers,
         modalTitle,
         setModalTitle,
+        meetingId,
+        setMeetingId,
       }}
     >
       {children}
