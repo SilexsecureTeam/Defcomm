@@ -12,7 +12,7 @@ import ParticipantMedia from "./ParticipantMedia";
 import CallSetupPanel from "./CallSetupPanel";
 import { formatCallDuration } from "../../../utils/formmaters";
 import useChat from "../../../hooks/useChat";
-import CallPiP from "./CallPip";
+import CallPiP from "./CallPiP";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext(AuthContext);
