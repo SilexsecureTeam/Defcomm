@@ -22,10 +22,8 @@ const CallComponent = ({ initialMeetingId, setInitialMeetingId }: Props) => {
       }
     }
   }, [meetingId]);
-
   return (
     <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
   );
 };
-
 export default CallComponent;
