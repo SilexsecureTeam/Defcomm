@@ -53,7 +53,7 @@ const LoginForm = ({ version }) => {
     };
     const response = await requestOtp(formattedData);
     if (response) {
-      setUserData(data);
+      setUserData(formattedData);
       setOtpRequested(true);
       setTimer(60);
     }
