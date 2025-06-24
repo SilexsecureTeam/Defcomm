@@ -28,8 +28,9 @@ const App = () => {
           <MeetingProvider>
             <BotProvider>
               <DashboardContextProvider>
+                <Router>
                 <Suspense fallback={<FallBack />}>
-                  <Router>
+                  
                     <Routes>
                       <Route path="/login" element={<DefcommLogin />} />
                       <Route path="/onboarding" element={<DefcommLogin />} />
@@ -40,8 +41,13 @@ const App = () => {
                       <Route path="/dashboard/*" element={<SecureRoute />}>
   <Route
   path="*"
-  element={<ProtectedRoute Component={Dashboard} />}
+  element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  }
 />
+
 
 </Route>
 
@@ -49,8 +55,9 @@ const App = () => {
                       {/* Catch-all redirect */}
                       <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
-                  </Router>
+                  
                 </Suspense>
+                  </Router>
                 <ToastContainer autoClose={2000} draggable className="z-[100000000000] mt-2" />
               </DashboardContextProvider>
             </BotProvider>
@@ -67,15 +74,17 @@ const App = () => {
 };
 
 // Protected Route Wrapper as a Component
-const ProtectedRoute = ({ Component }) => {
+ const ProtectedRoute = ({ children }) => {
   const { authDetails, isLoading } = useContext(AuthContext);
+
   if (isLoading) return <div className="text-white text-center mt-10">Loading...</div>;
-  // Check if the user role is "user"
+
   if (!authDetails || authDetails.user?.role !== "user") {
     return <Navigate to="/" />;
   }
 
-  return <Component />;
+  return children;
 };
+
 
 export default App;
