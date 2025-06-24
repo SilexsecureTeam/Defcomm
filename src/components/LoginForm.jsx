@@ -58,7 +58,6 @@ const LoginForm = ({ version }) => {
       setTimer(60);
     }
   };
-
   const handleVerifyOtp = async () => {
     if (otp.length === 4 && userData) {
       await verifyOtp({ ...userData, otp, from });
@@ -72,7 +71,6 @@ const LoginForm = ({ version }) => {
       setTimer(60);
     }
   };
-
   return (
     <div className="w-full max-w-[780px] flex justify-center lg:justify-end items-center pt-20">
       <form
