@@ -32,9 +32,10 @@ const App = () => {
                   <Router>
                     <Routes>
                       <Route path="/login" element={<DefcommLogin />} />
+                      <Route path="/onboarding" element={<DefcommLogin />} />
+                      <Route path="/" element={<DefcommLogin />} />
                       <Route path="web" element={<DeffViewer />} />
-                      <Route path="/" element={<Navigate to="/login" />} />
-
+                      
                       {/* Using ProtectedRoute as a Component for dashboard */}
                       <Route path="/dashboard/*" element={<SecureRoute />}>
   <Route
