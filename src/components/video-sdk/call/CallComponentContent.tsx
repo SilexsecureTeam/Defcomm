@@ -47,6 +47,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     onMeetingLeft: () => {
       setIsMeetingActive(false);
+      handleLeave();
       if (callTimer.current) clearInterval(callTimer.current);
     },
 

@@ -61,14 +61,14 @@ const usePusherChannel = ({
         onNewNotificationToast({
           message: newMessage?.message,
           senderName:
-            newMessage?.name?.split(" ")[0] ||
+            newMessage?.sender?.name?.split(" ")[0] ||
             `User ${newMessage?.data?.user_id}`,
           type: "call",
           onClick: () => {
             setSelectedChatUser({
               contact_id: newMessage?.data?.user_id,
               contact_name:
-                newMessage?.name || `User ${newMessage?.data?.user_id}`,
+                newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
               contact_phone:
                 newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
             });
@@ -89,15 +89,16 @@ const usePusherChannel = ({
         onNewNotificationToast({
           message: newMessage?.message,
           senderName:
-            newMessage?.name?.split(" ")[0] ||
+            newMessage?.sender?.name?.split(" ")[0] ||
             `User ${newMessage?.data?.user_id}`,
           onClick: () => {
             setSelectedChatUser({
               contact_id: newMessage?.data?.user_id,
               contact_name:
-                newMessage?.name || `User ${newMessage?.data?.user_id}`,
+                newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
               contact_phone:
-                newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
+                newMessage?.sender?.phone ||
+                `User ${newMessage?.data?.user_id}`,
             });
             navigate("/dashboard/chat");
           },
