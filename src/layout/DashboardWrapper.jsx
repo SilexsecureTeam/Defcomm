@@ -68,8 +68,8 @@ const DashboardWrapper = ({ children }) => {
 
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
-          if (prev[newMessage.user]) return prev; // already typing
-          return { ...prev, [newMessage.user]: true };
+          if (prev[newMessage.id]) return prev; // already typing
+          return { ...prev, [newMessage.id]: true };
         });
         setSelectedChatUser((prev) => {
           if (prev?.is_typing) return prev;
@@ -78,12 +78,8 @@ const DashboardWrapper = ({ children }) => {
         return;
       } else if (newMessage?.state === "not_typing") {
         setTypingUsers((prev) => {
-          if (!prev[newMessage.user]) return prev; // already not typing
-          return { ...prev, [newMessage.user]: false };
-        });
-        setSelectedChatUser((prev) => {
-          if (!prev?.is_typing) return prev;
-          return { ...prev, is_typing: false };
+          if (!prev[newMessage.id]) return prev; // already not typing
+          return { ...prev, [newMessage.id]: false };
         });
         return;
       }

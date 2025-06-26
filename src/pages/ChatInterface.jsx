@@ -20,6 +20,7 @@ const ChatInterface = () => {
     setSelectedChatUser,
     setShowCall,
     setShowSettings,
+    typingUsers,
   } = useContext(ChatContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
@@ -84,7 +85,7 @@ const ChatInterface = () => {
             <h2 className="text-lg font-semibold capitalize">
               {selectedChatUser.contact_name || "Chat"}
             </h2>
-            {selectedChatUser?.is_typing && (
+            {typingUsers[Number(selectedChatUser?.contact_id)] && (
               <div className="text-green-400 text-sm">Typing...</div>
             )}
           </div>
