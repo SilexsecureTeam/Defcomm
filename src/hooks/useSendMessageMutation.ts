@@ -25,23 +25,36 @@ export const useSendMessageMutation = (
     onSuccess: async (response, variables) => {
       console.log("✅ Message sent:", response);
 
-      const messageData = response?.data?.mss_chat;
-      const recipientId = response?.data?.recieve_user_id;
+      const messageData = response?.data?.data;
+      console.log(
+        "Message data:",
+        messageData,
+        variables.get("current_chat_user")
+      );
 
+      // If already fetched, append new message to existing messages
+      queryClient.setQueryData(
+        ["chatMessages", Number(variables.get("current_chat_user"))],
+        (old) => {
+          if (!old || !Array.isArray(old?.data)) return old;
+          console.log(old);
+
+          const exists = old.data.find((msg) => msg.id === messageData?.id);
+          if (exists) return old;
+
+          return {
+            ...old,
+            data: [...old.data, messageData],
+          };
+        }
+      );
       // If it's a call message, store the message in context
       if (variables?.get("mss_type") === "call") {
         setCallMessage({
           ...messageData,
-          recieve_user_id: recipientId,
+          recieve_user_id: Number(variables.get("current_chat_user")),
         });
       }
-
-      // Invalidate messages for the specific chat user
-      const chatUser = variables.get("current_chat_user");
-      if (chatUser) {
-        await queryClient.invalidateQueries(["chatMessages", chatUser]);
-      }
-
       // Clear input field if provided
       clearMessageInput();
     },
