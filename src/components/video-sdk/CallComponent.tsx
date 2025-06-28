@@ -15,13 +15,18 @@ const CallComponent = ({ initialMeetingId, setInitialMeetingId }: Props) => {
     useContext(MeetingContext);
 
   useEffect(() => {
-    if (meetingId && !providerMeetingId) {
-      // If initialMeetingId is provided, set it as the providerMeetingId
-      if (initialMeetingId) {
-        setProviderMeetingId(meetingId);
-      }
+    if (meetingId && !providerMeetingId && initialMeetingId) {
+      setProviderMeetingId(meetingId);
     }
   }, [meetingId]);
+
+  // Keep parent in sync
+  useEffect(() => {
+    if (!meetingId && setInitialMeetingId) {
+      setInitialMeetingId(null);
+    }
+  }, [meetingId]);
+  
   return (
     <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
   );
