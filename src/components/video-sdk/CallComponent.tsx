@@ -28,7 +28,10 @@ const CallComponent = ({ initialMeetingId, setInitialMeetingId }: Props) => {
   }, [meetingId]);
   
   return (
-    <CallComponentContent meetingId={meetingId} setMeetingId={setMeetingId} />
+    <CallComponentContent meetingId={meetingId} setMeetingId={(id) => {
+        setMeetingId(id);
+        if (setInitialMeetingId) setInitialMeetingId(id);
+      }} />
   );
 };
 export default CallComponent;
