@@ -53,28 +53,35 @@ const usePusherChannel = ({
       const isCall = data?.state === "call";
       onNewMessage(newMessage);
       if (isCall) {
+        const meetingId = newMessage?.message?.split("CALL_INVITE:")[1]; // Extract meetingId
+
         setCallMessage({
           msg_id: newMessage?.data?.id,
           ...data?.mss_chat,
+          meetingId, // ✅ Ensure this gets passed
+          name: newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
+          phone: newMessage?.sender?.phone,
+          user_id: newMessage?.data?.user_id,
+          status: "ringing", // initial
         });
         audioController.playRingtone(receiverTone, true);
-        onNewNotificationToast({
-          message: newMessage?.message,
-          senderName:
-            newMessage?.sender?.name?.split(" ")[0] ||
-            `User ${newMessage?.data?.user_id}`,
-          type: "call",
-          onClick: () => {
-            setSelectedChatUser({
-              contact_id: newMessage?.data?.user_id,
-              contact_name:
-                newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
-              contact_phone:
-                newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
-            });
-            navigate("/dashboard/chat");
-          },
-        });
+        // onNewNotificationToast({
+        //   message: newMessage?.message,
+        //   senderName:
+        //     newMessage?.sender?.name?.split(" ")[0] ||
+        //     `User ${newMessage?.data?.user_id}`,
+        //   type: "call",
+        //   onClick: () => {
+        //     setSelectedChatUser({
+        //       contact_id: newMessage?.data?.user_id,
+        //       contact_name:
+        //         newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
+        //       contact_phone:
+        //         newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
+        //     });
+        //     navigate("/dashboard/chat");
+        //   },
+        // });
         return; // prevent further toast/audio
       }
 

@@ -5,6 +5,7 @@ import { queryClient } from "../services/query-client";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import { ChatContext } from "../context/ChatContext";
+import { m } from "framer-motion";
 
 export const useSendMessageMutation = (
   client: AxiosInstance,
@@ -50,6 +51,7 @@ export const useSendMessageMutation = (
         setCallMessage({
           ...messageData,
           id: messageData?.id_en,
+          msg_id: messageData?.id,
         });
       }
       // Clear input field if provided

@@ -24,6 +24,7 @@ import CallComponent from "../components/video-sdk/CallComponent";
 import Settings from "../pages/Settings";
 import usePusherChannel from "../hooks/usePusherChannel";
 import { FaPhone } from "react-icons/fa6";
+import IncomingCallWidget from "../utils/IncomingCallWidget";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -45,6 +46,7 @@ const DashboardWrapper = ({ children }) => {
     setCallMessage,
     setMeetingId,
     meetingId,
+    setCallDuration,
   } = useContext(ChatContext);
   const { state, dispatch } = useContext(DashboardContext);
   const { fetchContacts } = useChat();
@@ -86,6 +88,8 @@ const DashboardWrapper = ({ children }) => {
 
       // For callUpdate: patch an existing message
       if (newMessage?.state === "callUpdate") {
+        setCallDuration(newMessage?.call?.call_duration || 0);
+
         queryClient.setQueryData(
           ["chatMessages", newMessage?.sender?.id],
           (old) => {
@@ -104,6 +108,18 @@ const DashboardWrapper = ({ children }) => {
             };
           }
         );
+
+        // ✅ Auto-leave modal if the call was missed and this user is the receiver
+        if (
+          newMessage?.call?.call_state === "miss" &&
+          newMessage?.call?.receiver_id === userId
+        ) {
+          setShowCall(false);
+          setCallMessage(null);
+          setProviderMeetingId(null);
+          audioController.stopRingtone();
+        }
+
         return;
       }
 
@@ -262,6 +278,8 @@ const DashboardWrapper = ({ children }) => {
             setShowCall(false);
             setCallMessage(null);
             setProviderMeetingId(null);
+            setCallDuration(0);
+            audioController.stopRingtone();
           }}
           canMinimize={true}
           minimizedContent={
@@ -287,6 +305,7 @@ const DashboardWrapper = ({ children }) => {
           <Settings />
         </Modal>
       )}
+      <IncomingCallWidget />
     </main>
   );
 };

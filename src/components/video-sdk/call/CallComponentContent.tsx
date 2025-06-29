@@ -16,11 +16,10 @@ import useChat from "../../../hooks/useChat";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext(AuthContext);
-  const { callMessage, setCallMessage } = useContext(ChatContext);
+  const { callMessage, setCallMessage, callDuration, setCallDuration } =
+    useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
   const { updateCallLog } = useChat();
-
-  const [callDuration, setCallDuration] = useState(0);
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
   const [other, setOther] = useState<{} | null>(null);

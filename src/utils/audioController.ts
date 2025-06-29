@@ -2,6 +2,7 @@ const audioController = {
   audio: null as HTMLAudioElement | null,
   timeoutId: null as ReturnType<typeof setTimeout> | null,
   isPlaying: false,
+  muted: false,
 
   playRingtone(ringtone: string, repeatFor30s: boolean = false) {
     // Prevent duplicate play
@@ -11,13 +12,11 @@ const audioController = {
 
     this.audio = new Audio(ringtone);
     this.audio.loop = repeatFor30s;
+    this.audio.volume = this.muted ? 0 : 1;
 
-    // Mark it as playing early to avoid re-entry
     this.isPlaying = true;
 
-    // Start playing with safe .play()
     const playPromise = this.audio.play();
-
     if (playPromise !== undefined) {
       playPromise.catch((error) => {
         console.warn("Ringtone play interrupted:", error);
@@ -25,7 +24,6 @@ const audioController = {
       });
     }
 
-    // Stop after 30 seconds
     if (repeatFor30s) {
       this.timeoutId = setTimeout(() => {
         this.stopRingtone();
@@ -50,6 +48,17 @@ const audioController = {
     }
 
     this.isPlaying = false;
+  },
+
+  setMuted(value: boolean) {
+    this.muted = value;
+    if (this.audio) {
+      this.audio.volume = this.muted ? 0 : 1;
+    }
+  },
+
+  toggleMute() {
+    this.setMuted(!this.muted);
   },
 };
 
