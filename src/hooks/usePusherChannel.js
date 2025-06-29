@@ -54,8 +54,8 @@ const usePusherChannel = ({
       onNewMessage(newMessage);
       if (isCall) {
         setCallMessage({
+          msg_id: newMessage?.data?.id,
           ...data?.mss_chat,
-          recieve_user_id: data?.mss_chat?.user_id,
         });
         audioController.playRingtone(receiverTone, true);
         onNewNotificationToast({

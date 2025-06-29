@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/ChatContext"; // Import Chat Context
 import logoIcon from "../../assets/logo-icon.png";
@@ -67,7 +67,7 @@ function SideBarItemTwo({ data, setIsOpen }) {
         <p>{data?.contact_name}</p>
         <small>{data?.contact_phone}</small>
         {typingUsers[Number(data?.contact_id)] && (
-          <div className="text-green-400 text-sm">Typing...</div>
+          <div className="text-green-400 text-xs">Typing...</div>
         )}
       </div>
       <button

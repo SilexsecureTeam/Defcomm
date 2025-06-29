@@ -52,7 +52,7 @@ export const useSendMessageMutation = (
       if (variables?.get("mss_type") === "call") {
         setCallMessage({
           ...messageData,
-          recieve_user_id: Number(variables.get("current_chat_user")),
+          id: messageData?.id_en,
         });
       }
       // Clear input field if provided

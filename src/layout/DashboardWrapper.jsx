@@ -68,18 +68,14 @@ const DashboardWrapper = ({ children }) => {
 
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
-          if (prev[newMessage.id]) return prev; // already typing
-          return { ...prev, [newMessage.id]: true };
-        });
-        setSelectedChatUser((prev) => {
-          if (prev?.is_typing) return prev;
-          return { ...prev, is_typing: true };
+          if (prev[newMessage?.sender_id]) return prev; // already typing
+          return { ...prev, [newMessage?.sender_id]: true };
         });
         return;
       } else if (newMessage?.state === "not_typing") {
         setTypingUsers((prev) => {
-          if (!prev[newMessage.id]) return prev; // already not typing
-          return { ...prev, [newMessage.id]: false };
+          if (!prev[newMessage?.sender_id]) return prev; // already not typing
+          return { ...prev, [newMessage?.sender_id]: false };
         });
         return;
       }
@@ -87,6 +83,35 @@ const DashboardWrapper = ({ children }) => {
       if (!senderId) return;
 
       const existingData = queryClient.getQueryData(["chatMessages", senderId]);
+
+      // For callUpdate: patch an existing message
+      if (newMessage?.state === "callUpdate") {
+        if (!existingData) return;
+
+        queryClient.setQueryData(
+          ["chatMessages", newMessage?.sender?.id],
+          (old) => {
+            if (!old || !Array.isArray(old.data)) return old;
+
+            return {
+              ...old,
+              data: old.data.map((msg) => {
+                if (msg.id_en === newMessage?.call?.chat_id) {
+                  // Merge new call state and duration into the message
+                  return {
+                    ...msg,
+                    call_state: newMessage?.call?.call_state,
+                    call_duration: newMessage?.call?.call_duration,
+                  };
+                }
+                return msg;
+              }),
+            };
+          }
+        );
+
+        return;
+      }
 
       if (!existingData) {
         // No data cached yet — trigger a refetch so UI is populated

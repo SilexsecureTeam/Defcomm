@@ -24,8 +24,7 @@ const CallSetupPanel = ({
   isInitiator = false,
   setIsInitiator,
 }: any) => {
-  const { selectedChatUser, callMessage, setCallMessage } =
-    useContext(ChatContext);
+  const { selectedChatUser, callMessage } = useContext(ChatContext);
   const { updateCallLog } = useChat();
   const { authDetails } = useContext(AuthContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
@@ -124,30 +123,30 @@ const CallSetupPanel = ({
           }}
         />
       )}
-      {(!meetingId || showSummary) ? (
-  <button
-    onClick={handleCreateMeeting}
-    disabled={isCreatingMeeting}
-    className="bg-oliveLight hover:bg-oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
-  >
-    Initiate Call {isCreatingMeeting && <FaSpinner className="animate-spin" />}
-  </button>
-) : isInitiator ? (
-  <button
-    onClick={handleStartCall}
-    className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
-  >
-    Start Call {isLoading && <FaSpinner className="animate-spin" />}
-  </button>
-) : (
-  <button
-    onClick={handleJoinMeeting}
-    className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
-  >
-    Join Call {isLoading && <FaSpinner className="animate-spin" />}
-  </button>
-)}
-
+      {!meetingId || showSummary ? (
+        <button
+          onClick={handleCreateMeeting}
+          disabled={isCreatingMeeting}
+          className="bg-oliveLight hover:bg-oliveDark text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
+        >
+          Initiate Call{" "}
+          {isCreatingMeeting && <FaSpinner className="animate-spin" />}
+        </button>
+      ) : isInitiator ? (
+        <button
+          onClick={handleStartCall}
+          className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
+        >
+          Start Call {isLoading && <FaSpinner className="animate-spin" />}
+        </button>
+      ) : (
+        <button
+          onClick={handleJoinMeeting}
+          className="bg-green-600 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
+        >
+          Join Call {isLoading && <FaSpinner className="animate-spin" />}
+        </button>
+      )}
     </div>
   );
 };

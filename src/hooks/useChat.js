@@ -61,10 +61,7 @@ const useChat = () => {
 
   const updateCallLog = useMutation({
     mutationFn: async (callLog) => {
-      const { data } = await client.post(`/user/chat/messages/call`, {
-        call_duration: "00.00.00",
-        ...callLog,
-      });
+      const { data } = await client.post(`/user/chat/messages/call`, callLog);
       //   return data;
     },
     onSuccess: () => {

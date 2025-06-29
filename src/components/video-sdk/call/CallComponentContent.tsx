@@ -23,8 +23,8 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const [callDuration, setCallDuration] = useState(0);
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
-  const [other, setOther] = useState(null);
-  const [me, setMe] = useState(null);
+  const [other, setOther] = useState<{} | null>(null);
+  const [me, setMe] = useState<{} | null>(null);
   const [isInitiator, setIsInitiator] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
@@ -37,17 +37,17 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       setIsMeetingActive(true);
       onSuccess({ message: "Call Started", success: "Joined successfully." });
 
-      setCallMessage((prev) => {
-        if (prev?.status !== "on") return { ...prev, status: "on" };
-        return prev;
-      });
+      // setCallMessage((prev) => {
+      //   if (prev?.status !== "on") return { ...prev, status: "on" };
+      //   return prev;
+      // });
 
       if (!localMicOn) toggleMic();
     },
 
     onMeetingLeft: () => {
       setIsMeetingActive(false);
-      handleLeave();
+      // handleLeave();
       if (callTimer.current) clearInterval(callTimer.current);
     },
 
@@ -77,6 +77,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   });
 
   const handleLeave = async () => {
+    console.log("Leaving call...", callDuration);
     if (callTimer.current) clearInterval(callTimer.current);
 
     const isMissed = callDuration === 0;
@@ -84,9 +85,9 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     try {
       await updateCallLog.mutateAsync({
         mss_id: callMessage?.id,
-        duration: formatCallDuration(callDuration),
+        call_duration: formatCallDuration(callDuration),
         call_state: isMissed ? "miss" : "pick",
-        recieve_user_id: callMessage?.recieve_user_id,
+        recieve_user_id: callMessage?.user_id,
       } as any);
 
       if (isMissed) {
@@ -115,16 +116,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   // Auto-leave after 30s if unanswered
   useEffect(() => {
     if (isInitiator && isRinging && isMeetingActive && callMessage) {
-      ringTimeoutRef.current = setTimeout(async () => {
-        console.log("⏳ Call timeout — no answer.");
-        await updateCallLog.mutateAsync({
-          mss_id: callMessage?.id,
-          duration: "00.00.00",
-          call_state: "miss",
-          recieve_user_id: callMessage?.recieve_user_id,
-        } as any);
-        handleLeave();
-      }, 10000);
+      ringTimeoutRef.current = setTimeout(handleLeave, 10000);
     }
 
     return () => {
@@ -164,7 +156,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         ) : (
           me && (
             <ParticipantMedia
-              participantId={me.id}
+              participantId={me?.id}
               auth={authDetails}
               isRinging={isRinging}
               callDuration={callDuration}
