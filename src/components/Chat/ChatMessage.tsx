@@ -87,7 +87,7 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
 
       {/* Message Content */}
       <div
-        className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 break-all transition-all ${
+        className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 overflow-wrap break-words transition-all ${
           msg?.is_my_chat === "yes"
             ? "bg-oliveDark text-white"
             : "bg-white text-black"
