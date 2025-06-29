@@ -36,7 +36,7 @@ function Categories() {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mt-4">
         {categories.map((cat, index) => (
           <div
             key={cat?.key || index}

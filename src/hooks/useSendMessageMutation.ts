@@ -23,8 +23,6 @@ export const useSendMessageMutation = (
     },
 
     onSuccess: async (response, variables) => {
-      console.log("✅ Message sent:", response);
-
       const messageData = response?.data?.data;
       console.log(
         "Message data:",
@@ -37,7 +35,6 @@ export const useSendMessageMutation = (
         ["chatMessages", Number(variables.get("current_chat_user"))],
         (old) => {
           if (!old || !Array.isArray(old?.data)) return old;
-          console.log(old);
 
           const exists = old.data.find((msg) => msg.id === messageData?.id);
           if (exists) return old;

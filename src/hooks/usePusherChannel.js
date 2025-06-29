@@ -82,6 +82,7 @@ const usePusherChannel = ({
         showToast &&
         data?.state !== "not_typing" &&
         data?.state !== "is_typing" &&
+        data?.state !== "callUpdate" &&
         data?.data?.user_id !== userId;
 
       if (shouldToast) {

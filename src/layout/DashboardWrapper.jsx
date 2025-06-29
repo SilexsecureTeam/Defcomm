@@ -86,30 +86,24 @@ const DashboardWrapper = ({ children }) => {
 
       // For callUpdate: patch an existing message
       if (newMessage?.state === "callUpdate") {
-        if (!existingData) return;
-
         queryClient.setQueryData(
           ["chatMessages", newMessage?.sender?.id],
           (old) => {
             if (!old || !Array.isArray(old.data)) return old;
-
             return {
               ...old,
-              data: old.data.map((msg) => {
-                if (msg.id_en === newMessage?.call?.chat_id) {
-                  // Merge new call state and duration into the message
-                  return {
-                    ...msg,
-                    call_state: newMessage?.call?.call_state,
-                    call_duration: newMessage?.call?.call_duration,
-                  };
-                }
-                return msg;
-              }),
+              data: old.data.map((msg) =>
+                msg.id_en === newMessage?.call?.chat_id
+                  ? {
+                      ...msg,
+                      call_state: newMessage?.call?.call_state,
+                      call_duration: newMessage?.call?.call_duration,
+                    }
+                  : msg
+              ),
             };
           }
         );
-
         return;
       }
 

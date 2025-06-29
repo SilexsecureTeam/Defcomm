@@ -86,7 +86,7 @@ export default function ChatList() {
                 {maskPhone(data?.contact_phone)}
               </small>
               {typingUsers[Number(data?.contact_id)] && (
-                <div className="text-green-400 text-sm">Typing...</div>
+                <div className="text-green-400 text-xs">Typing...</div>
               )}
             </div>
             <div className="flex-shrink-0 ml-auto flex flex-col text-[10px]">
