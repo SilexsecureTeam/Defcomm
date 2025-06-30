@@ -25,9 +25,12 @@ export const ChatProvider = ({ children }) => {
     sessionStorage.setItem("chatVisibility", JSON.stringify(chatVisibility));
   }, [chatVisibility]);
 
-  //     useEffect(()=>{
-  // console.log(selectedChatUser)
-  //     },[selectedChatUser])
+  const initialShowToggleSwitch =
+    JSON.parse(sessionStorage.getItem("showToggleSwitch")) ?? true;
+
+  const [showToggleSwitch, setShowToggleSwitch] = useState(
+    initialShowToggleSwitch
+  );
 
   return (
     <ChatContext.Provider
@@ -58,6 +61,8 @@ export const ChatProvider = ({ children }) => {
         setMeetingId,
         callDuration,
         setCallDuration,
+        showToggleSwitch,
+        setShowToggleSwitch,
       }}
     >
       {children}

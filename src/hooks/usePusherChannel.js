@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
 
 import { ChatContext } from "../context/ChatContext";
+import { NotificationContext } from "../context/NotificationContext";
+
 const usePusherChannel = ({
   userId,
   token,
@@ -17,6 +19,7 @@ const usePusherChannel = ({
   const pusherRef = useRef(null);
   const navigate = useNavigate();
   const { setSelectedChatUser, setCallMessage } = useContext(ChatContext);
+  const { addNotification, markAsSeen } = useContext(NotificationContext);
   useEffect(() => {
     if (!userId || !token) return;
 
@@ -93,6 +96,17 @@ const usePusherChannel = ({
         data?.data?.user_id !== userId;
 
       if (shouldToast) {
+        const notificationPayload = {
+          id: newMessage?.data?.id,
+          senderName: newMessage?.sender?.name,
+          phone: newMessage?.sender?.phone,
+          message: newMessage?.message,
+          time: new Date().toISOString(),
+          user_id: newMessage?.data?.user_id,
+          type: "message", // or "call"
+        };
+
+        addNotification(notificationPayload); // ✅ Add to context
         audioController.playRingtone(notificationSound);
         onNewNotificationToast({
           message: newMessage?.message,
@@ -100,6 +114,7 @@ const usePusherChannel = ({
             newMessage?.sender?.name?.split(" ")[0] ||
             `User ${newMessage?.data?.user_id}`,
           onClick: () => {
+            markAsSeen(newMessage?.data?.id);
             setSelectedChatUser({
               contact_id: newMessage?.data?.user_id,
               contact_name:
