@@ -25,6 +25,7 @@ import Settings from "../pages/Settings";
 import usePusherChannel from "../hooks/usePusherChannel";
 import { FaPhone } from "react-icons/fa6";
 import IncomingCallWidget from "../utils/IncomingCallWidget";
+import audioController from "../utils/audioController";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -97,7 +98,7 @@ const DashboardWrapper = ({ children }) => {
             return {
               ...old,
               data: old.data.map((msg) =>
-                msg.id_en === newMessage?.call?.chat_id
+                msg.id === newMessage?.mss?.id
                   ? {
                       ...msg,
                       call_state: newMessage?.call?.call_state,

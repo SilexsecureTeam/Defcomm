@@ -13,7 +13,7 @@ interface SendMessageParams {
   sendMessageMutation: UseMutationResult<any, unknown, FormData, unknown>;
 }
 
-export const sendMessageUtil = ({
+export const sendMessageUtil = async ({
   client,
   message,
   file,
@@ -21,7 +21,7 @@ export const sendMessageUtil = ({
   chat_user_id,
   chat_id,
   sendMessageMutation,
-  mss_type= "text"
+  mss_type = "text",
 }: SendMessageParams) => {
   if (!message.trim() && !file) return; // Prevent empty message submission
 
@@ -35,10 +35,16 @@ export const sendMessageUtil = ({
     formData.append("is_file", "no");
   }
 
-  formData.append("current_chat_user_type", chat_user_type );
+  formData.append("current_chat_user_type", chat_user_type);
   formData.append("current_chat_user", chat_user_id);
   formData.append("chat_id", chat_id);
   formData.append("mss_type", mss_type);
 
-  sendMessageMutation.mutate(formData);
+  try {
+    await sendMessageMutation.mutateAsync(formData);
+    return true;
+  } catch (error) {
+    onFailure({ message: "Message send failed", error: error.message });
+    return false;
+  }
 };

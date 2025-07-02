@@ -1,17 +1,18 @@
-import React, { useEffect, useContext } from "react";
-import { MdCall, MdCallMissed, MdCallEnd } from "react-icons/md";
-// @ts-ignore
-import callerTone from "../../assets/audio/caller.mp3";
-// @ts-ignore
-import receiverTone from "../../assets/audio/receiver.mp3";
-import audioController from "../../utils/audioController";
+import React, { useContext, useEffect } from "react";
+import { MdCall, MdCallEnd, MdCallMissed } from "react-icons/md";
+import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
+import audioController from "../../utils/audioController";
+
+// You may need to update these paths
+import callerTone from "../../assets/audio/caller.mp3";
+import receiverTone from "../../assets/audio/receiver.mp3";
 
 interface ChatCallInviteProps {
   msg: any;
   isMyChat: boolean;
   onAcceptCall: () => void;
-  status: "Ringing..." | "Call Ended";
+  status: string;
   caller: string;
 }
 
@@ -22,14 +23,16 @@ function ChatCallInvite({
   status,
   caller,
 }: ChatCallInviteProps) {
+  const { authDetails } = useContext(AuthContext);
   const { callMessage } = useContext(ChatContext);
 
   const isCallActive =
     Number(callMessage?.msg_id) === Number(msg?.id) &&
     callMessage?.status === "on";
 
-  const callState = msg?.call_state || "ringing"; // fallback to ringing
+  const callState = msg?.call_state || "ringing";
 
+  // 🔊 Play ringtone when ringing
   useEffect(() => {
     if (status === "Ringing...") {
       const ringtone = isMyChat ? callerTone : receiverTone;
@@ -41,28 +44,38 @@ function ChatCallInvite({
     return () => {
       audioController.stopRingtone();
     };
-  }, [callState, status, isMyChat]);
+  }, [callState, status]);
 
+  // 📝 Main call message text
+  const getMessageText = () => {
+    if (callState === "miss") {
+      return isMyChat
+        ? `${msg.user_to_name || "They"} missed your call`
+        : "You missed the call";
+    }
+
+    if (callState === "pick") {
+      return isMyChat
+        ? `${msg.user_to_name || "They"} picked the call`
+        : "You picked the call";
+    }
+
+    if (status === "Ringing...") {
+      return isMyChat ? "You are calling..." : `${caller} is calling...`;
+    }
+
+    return isMyChat ? "You called" : `${caller} called`;
+  };
+
+  // 📡 Call status indicator
   const getStatusText = () => {
+    if (isCallActive) return "Call Ongoing";
     if (callState === "pick") return "Call Ended";
     if (callState === "miss") return "Missed Call";
     return status;
   };
 
-  const getMessageText = () => {
-    if (callState === "miss")
-      return isMyChat ? "You missed the call" : `${caller} missed your call`;
-    if (callState === "pick")
-      return isMyChat ? "You picked the call" : `${caller} picked the call`;
-    return isMyChat
-      ? status === "Ringing..."
-        ? "You are calling..."
-        : "You called"
-      : status === "Ringing..."
-      ? `${caller} is calling...`
-      : `${caller} called`;
-  };
-
+  // 📞 Call icon
   const getIcon = () => {
     if (callState === "miss")
       return <MdCallMissed size={24} className="text-red-500" />;
@@ -98,9 +111,9 @@ function ChatCallInvite({
               : "text-gray-500"
           }`}
         >
-          {isCallActive ? "Call Ongoing" : getStatusText()}
+          {getStatusText()}
         </span>
-        {/* Show call duration if picked */}
+
         {callState === "pick" && msg.call_duration && (
           <span className="text-xs text-gray-600">
             Duration: {msg.call_duration}
@@ -108,7 +121,7 @@ function ChatCallInvite({
         )}
       </div>
 
-      {/* Show Join/Accept if ringing and not already active */}
+      {/* ✅ Accept or Join button (only when ringing and not active) */}
       {callState === "ringing" && status === "Ringing..." && !isCallActive && (
         <button
           onClick={onAcceptCall}
@@ -118,7 +131,7 @@ function ChatCallInvite({
         </button>
       )}
 
-      {/* Show Return if ongoing */}
+      {/* 🔁 Return button for ongoing call */}
       {isCallActive && (
         <button className="bg-olive/80 hover:bg-olive text-white px-3 py-1 rounded text-sm">
           Return

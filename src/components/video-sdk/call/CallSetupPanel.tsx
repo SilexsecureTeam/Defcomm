@@ -11,7 +11,10 @@ import CallSummary from "../../Chat/CallSummary";
 import { axiosClient } from "../../../services/axios-client";
 import useChat from "../../../hooks/useChat";
 import audioController from "../../../utils/audioController";
-import { formatCallDuration } from "../../../utils/formmaters";
+import {
+  extractErrorMessage,
+  formatCallDuration,
+} from "../../../utils/formmaters";
 
 const CallSetupPanel = ({
   meetingId,
@@ -26,7 +29,7 @@ const CallSetupPanel = ({
 }: any) => {
   const { selectedChatUser, callMessage } = useContext(ChatContext);
   const { updateCallLog } = useChat();
-  const { authDetails } = useContext(AuthContext);
+  const { authDetails } = useContext<any>(AuthContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +66,7 @@ const CallSetupPanel = ({
 
     setIsLoading(true);
     try {
-      sendMessageUtil({
+      const messageSent = await sendMessageUtil({
         client,
         message: `CALL_INVITE:${meetingId}`,
         file: null,
@@ -74,14 +77,20 @@ const CallSetupPanel = ({
         sendMessageMutation,
       });
 
-      join();
+      if (!messageSent) {
+        return; // Don't proceed if sending failed
+      }
+
+      join(); // Proceed only if message was actually sent
     } catch (error: any) {
-      setIsLoading(false);
       onFailure({
         message: "Meeting Join Failed",
         error:
-          error.message || "Something went wrong while joining the meeting.",
+          extractErrorMessage(error) ||
+          "Something went wrong while joining the meeting.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
