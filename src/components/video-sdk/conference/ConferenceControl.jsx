@@ -165,7 +165,7 @@ const ConferenceControl = ({
         </button>
         <button
           onClick={handleLeaveMeeting}
-          className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
+          className="flex-shrink-0 bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
         >
           <FaPhone />
         </button>
