@@ -16,7 +16,6 @@ import {
 import {
   useMeeting,
   useParticipant,
-  useParticipants,
   usePubSub,
 } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../../context/AuthContext";
@@ -34,10 +33,9 @@ const ConferenceControl = ({
   isScreenSharing,
   me,
 }) => {
-  const { toggleMic, toggleWebcam, presenterId } = useMeeting();
-  const { webcamOn, micOn } = useParticipant(me?.id ?? "", {});
-  const participants = useParticipants();
-
+  const { toggleMic, toggleWebcam, presenterId, participants } = useMeeting();
+  const { webcamOn, micOn } = useParticipant(me?.id ?? "", {})
+  
   const { publish, messages: handMessages } = usePubSub("HAND_RAISE");
   const { messages: chatMessages } = usePubSub("CALL_CHAT");
 
