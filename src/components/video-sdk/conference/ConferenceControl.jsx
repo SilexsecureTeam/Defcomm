@@ -34,8 +34,7 @@ const ConferenceControl = ({
   me,
 }) => {
   const { toggleMic, toggleWebcam, presenterId, participants } = useMeeting();
-  const { webcamOn, micOn } = useParticipant(me?.id ?? "", {})
-  
+  const { webcamOn, micOn } = useParticipant(me?.id ?? "", {});
   const { publish, messages: handMessages } = usePubSub("HAND_RAISE");
   const { messages: chatMessages } = usePubSub("CALL_CHAT");
 
@@ -75,7 +74,6 @@ const ConferenceControl = ({
     }
   };
 
-  // Handle hand raise updates
   useEffect(() => {
     if (handMessages.length) {
       const latest = handMessages[handMessages.length - 1];
@@ -99,7 +97,6 @@ const ConferenceControl = ({
     }
   }, [handMessages, myId]);
 
-  // Detect new chat messages
   useEffect(() => {
     if (
       !showChatModal &&
@@ -112,7 +109,6 @@ const ConferenceControl = ({
     }
   }, [chatMessages, showChatModal, myId, lastSeenMessageId, latestChatMessage]);
 
-  // Reset chat badge
   useEffect(() => {
     if (showChatModal && latestChatMessage) {
       setHasNewMessage(false);
@@ -123,20 +119,16 @@ const ConferenceControl = ({
   return (
     <>
       {/* Bottom Toolbar */}
-      <div className="sticky mt-auto bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl py-4 z-10">
+      <div className="sticky mt-auto bottom-0 bg-black/70 flex flex-wrap justify-center items-center gap-4 px-3 py-3 text-xl sm:text-2xl z-10">
         <button
           onClick={() => toggleMic()}
-          className={`text-gray-500 hover:text-white ${
-            micOn ? "text-white" : ""
-          }`}
+          className={`text-gray-500 hover:text-white ${micOn ? "text-white" : ""}`}
         >
           {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
         </button>
         <button
           onClick={() => toggleWebcam()}
-          className={`text-gray-500 hover:text-white ${
-            webcamOn ? "text-white" : ""
-          }`}
+          className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : ""}`}
         >
           {webcamOn ? <FaVideo /> : <FaVideoSlash />}
         </button>
@@ -146,16 +138,10 @@ const ConferenceControl = ({
           className={`hidden md:block text-gray-500 hover:text-white ${
             isScreenSharing && presenterId === myId ? "text-green-400" : ""
           } ${
-            presenterId && presenterId !== myId
-              ? "opacity-50 cursor-not-allowed"
-              : ""
+            presenterId && presenterId !== myId ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {isScreenSharing && presenterId === myId ? (
-            <FaStopCircle />
-          ) : (
-            <FaDesktop />
-          )}
+          {isScreenSharing && presenterId === myId ? <FaStopCircle /> : <FaDesktop />}
         </button>
         <button
           onClick={() => setShowParticipants((prev) => !prev)}
@@ -165,7 +151,7 @@ const ConferenceControl = ({
         </button>
         <button
           onClick={handleLeaveMeeting}
-          className="flex-shrink-0 bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
+          className="bg-red-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:bg-red-700"
         >
           <FaPhone />
         </button>
@@ -175,7 +161,6 @@ const ConferenceControl = ({
         >
           {!handRaised ? <FaRegHandPaper /> : <FaHandPaper />}
         </button>
-        
         <button
           onClick={() => setShowSettings(true)}
           className="text-gray-500 hover:text-white"
@@ -188,7 +173,9 @@ const ConferenceControl = ({
         >
           <FaCommentDots />
           {hasNewMessage && (
-            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full" />
+            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-semibold w-5 h-5 flex items-center justify-center rounded-full">
+              {chatMessages.length}
+            </span>
           )}
         </button>
       </div>
@@ -196,16 +183,22 @@ const ConferenceControl = ({
       {/* Participants Panel */}
       {showParticipants && (
         <div className="fixed right-4 bottom-20 w-64 max-h-[60vh] overflow-y-auto bg-white border border-gray-300 shadow-md rounded-md p-4 z-40">
-          <h3 className="text-black font-semibold mb-2">Participants</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-black font-semibold">Participants</h3>
+            <button
+              onClick={() => setShowParticipants(false)}
+              className="text-gray-400 hover:text-red-500 text-xs"
+            >
+              Close
+            </button>
+          </div>
           <ul className="space-y-2 text-gray-800 text-sm">
             {[...participants.keys()].map((id) => {
               const participant = participants.get(id);
               const isRaised = raisedHands.find((u) => u.id === id);
               return (
                 <li key={id} className="flex items-center justify-between">
-                  <span className="truncate">
-                    {participant.displayName || "Unnamed"}
-                  </span>
+                  <span className="truncate">{participant.displayName || "Unnamed"}</span>
                   <div className="flex items-center gap-2">
                     {participant.micOn ? (
                       <FaMicrophone className="text-green-500" />
@@ -226,12 +219,10 @@ const ConferenceControl = ({
         </div>
       )}
 
-      {/* Raised Hands (if any) */}
+      {/* Raised Hands Panel */}
       {raisedHands.length > 0 && (
         <div className="fixed bottom-20 left-4 bg-yellow-100 border border-yellow-300 p-3 rounded-md shadow-lg text-sm z-40 max-w-xs">
-          <strong className="block mb-2 text-yellow-800">
-            Raised Hands ✋
-          </strong>
+          <strong className="block mb-2 text-yellow-800">Raised Hands ✋</strong>
           <ul className="space-y-1 text-yellow-900">
             {raisedHands.map(({ id, name }) => (
               <li key={id} className="truncate">
