@@ -44,7 +44,8 @@ const ConferenceControl = ({
   const [showChatModal, setShowChatModal] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [lastSeenMessageId, setLastSeenMessageId] = useState(null);
-
+const [showRaisedPanel, setShowRaisedPanel] = useState(true);
+  
   const { authDetails } = useContext(AuthContext);
   const { setShowSettings } = useContext(ChatContext);
 
@@ -220,19 +221,37 @@ const ConferenceControl = ({
       )}
 
       {/* Raised Hands Panel */}
-      {raisedHands.length > 0 && (
-        <div className="fixed bottom-20 left-4 bg-yellow-100 border border-yellow-300 p-3 rounded-md shadow-lg text-sm z-40 max-w-xs">
-          <strong className="block mb-2 text-yellow-800">Raised Hands ✋</strong>
-          <ul className="space-y-1 text-yellow-900">
-            {raisedHands.map(({ id, name }) => (
-              <li key={id} className="truncate">
-                {name || "Participant"}
-              </li>
-            ))}
-          </ul>
+{raisedHands.length > 0 && (
+  <div className="fixed bottom-20 left-4 z-40">
+    {!showRaisedPanel ? (
+      <button
+        onClick={() => setShowRaisedPanel(true)}
+        className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-1 rounded-full shadow hover:bg-yellow-200 transition"
+      >
+        ✋ {raisedHands.length}
+      </button>
+    ) : (
+      <div className="bg-yellow-100 border border-yellow-300 p-3 rounded-md shadow-lg text-sm max-w-xs">
+        <div className="flex justify-between items-center mb-2">
+          <strong className="text-yellow-800">Raised Hands ✋</strong>
+          <button
+            onClick={() => setShowRaisedPanel(false)}
+            className="text-yellow-700 text-xs hover:underline"
+          >
+            Minimize
+          </button>
         </div>
-      )}
-
+        <ul className="space-y-1 text-yellow-900 max-h-40 overflow-y-auto">
+          {raisedHands.map(({ id, name }) => (
+            <li key={id} className="truncate">
+              {name || "Participant"}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+)}
       {/* Chat Modal */}
       <CallMessagingModal
         isOpen={showChatModal}
