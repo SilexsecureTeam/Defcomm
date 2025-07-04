@@ -1,24 +1,49 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect } from "react";
 import {
-  FaPhone, FaMicrophoneSlash, FaMicrophone, FaVideoSlash,
-  FaVideo, FaCog, FaDesktop, FaStopCircle, FaHandPaper,
-  FaRegHandPaper, FaCommentDots
+  FaPhone,
+  FaMicrophoneSlash,
+  FaMicrophone,
+  FaVideoSlash,
+  FaVideo,
+  FaCog,
+  FaDesktop,
+  FaStopCircle,
+  FaHandPaper,
+  FaRegHandPaper,
+  FaCommentDots,
+  FaUsers,
 } from "react-icons/fa";
-import { useMeeting, useParticipant, usePubSub } from "@videosdk.live/react-sdk";
+import {
+  useMeeting,
+  useParticipant,
+  useParticipants,
+  usePubSub,
+} from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import CallMessagingModal from "./CallMessagingModal";
 import audioController from "../../../utils/audioController";
 import messageSound from "../../../assets/audio/message.mp3";
 
-const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenSharing, me }) => {
+const AUTO_LOWER_TIMEOUT = 60000;
+
+const ConferenceControl = ({
+  handleLeaveMeeting,
+  handleScreenShare,
+  isScreenSharing,
+  me,
+}) => {
   const { toggleMic, toggleWebcam, presenterId } = useMeeting();
   const { webcamOn, micOn } = useParticipant(me?.id ?? "", {});
+  const participants = useParticipants();
+
   const { publish, messages: handMessages } = usePubSub("HAND_RAISE");
   const { messages: chatMessages } = usePubSub("CALL_CHAT");
 
   const [handRaised, setHandRaised] = useState(false);
+  const [raisedHands, setRaisedHands] = useState([]);
+  const [showParticipants, setShowParticipants] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [lastSeenMessageId, setLastSeenMessageId] = useState(null);
@@ -38,23 +63,45 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
       timestamp: new Date().toISOString(),
     });
     setHandRaised(newRaiseState);
+
+    if (newRaiseState) {
+      setTimeout(() => {
+        publish({
+          name: authDetails?.user?.name,
+          id: myId,
+          raised: false,
+          timestamp: new Date().toISOString(),
+        });
+        setHandRaised(false);
+      }, AUTO_LOWER_TIMEOUT);
+    }
   };
 
-  // Handle hand raise toast notifications
+  // Handle hand raise updates
   useEffect(() => {
     if (handMessages.length) {
       const latest = handMessages[handMessages.length - 1];
-      const { id, name, raised } = latest.message;
+      const { id, name, raised, timestamp } = latest.message;
+
       if (id === myId) {
         setHandRaised(raised);
-      } else if (raised) {
-        toast.info(`${name || "Someone"} raised their hand ✋`);
-        audioController.playRingtone(messageSound);
+      } else {
+        setRaisedHands((prev) => {
+          const already = prev.some((u) => u.id === id);
+          if (raised && !already) {
+            toast.info(`${name || "Someone"} raised their hand ✋`);
+            audioController.playRingtone(messageSound);
+            return [...prev, { id, name, timestamp }];
+          } else if (!raised) {
+            return prev.filter((p) => p.id !== id);
+          }
+          return prev;
+        });
       }
     }
   }, [handMessages, myId]);
 
-  // Detect new incoming message when chat is closed
+  // Detect new chat messages
   useEffect(() => {
     if (
       !showChatModal &&
@@ -67,7 +114,7 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
     }
   }, [chatMessages, showChatModal, myId, lastSeenMessageId, latestChatMessage]);
 
-  // Reset red dot and mark latest message as seen
+  // Reset chat badge
   useEffect(() => {
     if (showChatModal && latestChatMessage) {
       setHasNewMessage(false);
@@ -77,11 +124,22 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
 
   return (
     <>
+      {/* Bottom Toolbar */}
       <div className="sticky mt-auto bottom-0 bg-black/70 flex justify-center items-center gap-8 text-2xl py-4 z-10">
-        <button onClick={() => toggleMic()} className={`text-gray-500 hover:text-white ${micOn ? "text-white" : ""}`}>
+        <button
+          onClick={() => toggleMic()}
+          className={`text-gray-500 hover:text-white ${
+            micOn ? "text-white" : ""
+          }`}
+        >
           {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
         </button>
-        <button onClick={() => toggleWebcam()} className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : ""}`}>
+        <button
+          onClick={() => toggleWebcam()}
+          className={`text-gray-500 hover:text-white ${
+            webcamOn ? "text-white" : ""
+          }`}
+        >
           {webcamOn ? <FaVideo /> : <FaVideoSlash />}
         </button>
         <button
@@ -89,20 +147,46 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
           onClick={handleScreenShare}
           className={`hidden md:block text-gray-500 hover:text-white ${
             isScreenSharing && presenterId === myId ? "text-green-400" : ""
-          } ${presenterId && presenterId !== myId ? "opacity-50 cursor-not-allowed" : ""}`}
+          } ${
+            presenterId && presenterId !== myId
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          }`}
         >
-          {isScreenSharing && presenterId === myId ? <FaStopCircle /> : <FaDesktop />}
+          {isScreenSharing && presenterId === myId ? (
+            <FaStopCircle />
+          ) : (
+            <FaDesktop />
+          )}
         </button>
-        <button onClick={handleLeaveMeeting} className="flex-shrink-0 bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700">
+        <button
+          onClick={handleLeaveMeeting}
+          className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
+        >
           <FaPhone />
         </button>
-        <button onClick={handleRaiseHand} className="text-yellow-400 hover:text-yellow-500">
+        <button
+          onClick={handleRaiseHand}
+          className="text-yellow-400 hover:text-yellow-500"
+        >
           {!handRaised ? <FaRegHandPaper /> : <FaHandPaper />}
         </button>
-        <button onClick={() => setShowSettings(true)} className="text-gray-500 hover:text-white">
+        <button
+          onClick={() => setShowParticipants((prev) => !prev)}
+          className="text-gray-500 hover:text-white"
+        >
+          <FaUsers />
+        </button>
+        <button
+          onClick={() => setShowSettings(true)}
+          className="text-gray-500 hover:text-white"
+        >
           <FaCog />
         </button>
-        <button onClick={() => setShowChatModal(true)} className="relative text-gray-500 hover:text-white">
+        <button
+          onClick={() => setShowChatModal(true)}
+          className="relative text-gray-500 hover:text-white"
+        >
           <FaCommentDots />
           {hasNewMessage && (
             <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full" />
@@ -110,7 +194,60 @@ const ConferenceControl = ({ handleLeaveMeeting, handleScreenShare, isScreenShar
         </button>
       </div>
 
-      <CallMessagingModal isOpen={showChatModal} onClose={() => setShowChatModal(false)} />
+      {/* Participants Panel */}
+      {showParticipants && (
+        <div className="fixed right-4 bottom-20 w-64 max-h-[60vh] overflow-y-auto bg-white border border-gray-300 shadow-md rounded-md p-4 z-40">
+          <h3 className="text-black font-semibold mb-2">Participants</h3>
+          <ul className="space-y-2 text-gray-800 text-sm">
+            {[...participants.keys()].map((id) => {
+              const participant = participants.get(id);
+              const isRaised = raisedHands.find((u) => u.id === id);
+              return (
+                <li key={id} className="flex items-center justify-between">
+                  <span className="truncate">
+                    {participant.displayName || "Unnamed"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {participant.micOn ? (
+                      <FaMicrophone className="text-green-500" />
+                    ) : (
+                      <FaMicrophoneSlash className="text-gray-400" />
+                    )}
+                    {participant.webcamOn ? (
+                      <FaVideo className="text-green-500" />
+                    ) : (
+                      <FaVideoSlash className="text-gray-400" />
+                    )}
+                    {isRaised && <FaHandPaper className="text-yellow-500" />}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Raised Hands (if any) */}
+      {raisedHands.length > 0 && (
+        <div className="fixed bottom-20 left-4 bg-yellow-100 border border-yellow-300 p-3 rounded-md shadow-lg text-sm z-40 max-w-xs">
+          <strong className="block mb-2 text-yellow-800">
+            Raised Hands ✋
+          </strong>
+          <ul className="space-y-1 text-yellow-900">
+            {raisedHands.map(({ id, name }) => (
+              <li key={id} className="truncate">
+                {name || "Participant"}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Chat Modal */}
+      <CallMessagingModal
+        isOpen={showChatModal}
+        onClose={() => setShowChatModal(false)}
+      />
     </>
   );
 };
