@@ -158,6 +158,12 @@ const ConferenceControl = ({
           )}
         </button>
         <button
+          onClick={() => setShowParticipants((prev) => !prev)}
+          className="text-gray-500 hover:text-white"
+        >
+          <FaUsers />
+        </button>
+        <button
           onClick={handleLeaveMeeting}
           className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-700"
         >
@@ -169,12 +175,7 @@ const ConferenceControl = ({
         >
           {!handRaised ? <FaRegHandPaper /> : <FaHandPaper />}
         </button>
-        <button
-          onClick={() => setShowParticipants((prev) => !prev)}
-          className="text-gray-500 hover:text-white"
-        >
-          <FaUsers />
-        </button>
+        
         <button
           onClick={() => setShowSettings(true)}
           className="text-gray-500 hover:text-white"
