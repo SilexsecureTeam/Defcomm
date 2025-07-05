@@ -109,12 +109,12 @@ const ToolbarControls = ({
       </button>
 
       {/* SETTINGS */}
-      <button
+      {/*<button
         onClick={() => setShowSettings(true)}
         className="text-gray-500 hover:text-white"
       >
         <FaCog />
-      </button>
+      </button>*/}
 
       {/* CHAT */}
       <button
