@@ -140,20 +140,21 @@ const ToolbarControls = ({
         </button>
 
         {showReactions && (
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white text-black rounded-lg shadow-lg px-3 py-1 flex gap-2 z-50 max-w-[90vw] overflow-x-auto whitespace-nowrap scrollbar-thin">
- {emojiList.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => {
-                  sendReaction(emoji);
-                  setShowReactions(false);
-                }}
-                className="text-2xl hover:scale-125 transition-transform"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+      <div className="absolute bottom-14 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-xs bg-white text-black rounded-lg shadow-lg px-3 py-2 flex justify-center gap-2 flex-wrap z-50">
+  {emojiList.map((emoji) => (
+    <button
+      key={emoji}
+      onClick={() => {
+        sendReaction(emoji);
+        setShowReactions(false);
+      }}
+      className="text-2xl hover:scale-125 transition-transform"
+    >
+      {emoji}
+    </button>
+  ))}
+</div>
+
         )}
       </div>
     </div>
