@@ -140,7 +140,7 @@ const ToolbarControls = ({
         </button>
 
         {showReactions && (
-      <div className="absolute bottom-14 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-xs bg-white text-black rounded-lg shadow-lg px-3 py-2 flex justify-center gap-2 flex-wrap z-50">
+      <div className="absolute bottom-14 left-1/2 transform -translate-x-1/2 max-w-1/2 bg-white text-black rounded-lg shadow-lg px-3 py-2 flex justify-center gap-2 flex-wrap z-50">
   {emojiList.map((emoji) => (
     <button
       key={emoji}
