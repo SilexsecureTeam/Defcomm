@@ -15,15 +15,15 @@ import { formatCallDuration } from "../../../utils/formmaters";
 import useChat from "../../../hooks/useChat";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
-  const { authDetails } = useContext(AuthContext);
+  const { authDetails } = useContext<any>(AuthContext);
   const { callMessage, setCallMessage, callDuration, setCallDuration } =
     useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
   const { updateCallLog } = useChat();
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
-  const [other, setOther] = useState<{} | null>(null);
-  const [me, setMe] = useState<{} | null>(null);
+  const [other, setOther] = useState<any | null>(null);
+  const [me, setMe] = useState<any | null>(null);
   const [isInitiator, setIsInitiator] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
@@ -46,16 +46,20 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
     onMeetingLeft: () => {
       setIsMeetingActive(false);
-      // handleLeave();
       if (callTimer.current) clearInterval(callTimer.current);
+      if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
+      callStartRef.current = null;
+      setIsRinging(false);
     },
-
     onParticipantJoined: () => {
       setIsRinging(false);
       setCallMessage((prev) => ({ ...prev, status: "on" }));
       audioController.stopRingtone();
 
-      if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
+      if (ringTimeoutRef.current) {
+        clearTimeout(ringTimeoutRef.current);
+        ringTimeoutRef.current = null;
+      }
 
       if (!callStartRef.current) {
         callStartRef.current = Date.now();
@@ -66,7 +70,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
         }, 1000);
       }
     },
-
     onParticipantLeft: () => {
       const count = [...participants.values()].length;
       if (count <= 1) handleLeave();
@@ -112,16 +115,21 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     }
   };
 
-  // Auto-leave after 30s if unanswered
   useEffect(() => {
-    if (isInitiator && isRinging && isMeetingActive && callMessage) {
-      ringTimeoutRef.current = setTimeout(handleLeave, 10000);
+    // Auto-leave after 10s if I initiated the call, it's still ringing, and no one has joined yet.
+    if (isInitiator && isRinging && callMessage && !callStartRef.current) {
+      ringTimeoutRef.current = setTimeout(() => {
+        console.warn("Auto-leaving call due to no response after 10s");
+        handleLeave(); // this will mark as missed
+      }, 10000); // 10 seconds
     }
 
     return () => {
-      if (ringTimeoutRef.current) clearTimeout(ringTimeoutRef.current);
+      if (ringTimeoutRef.current) {
+        clearTimeout(ringTimeoutRef.current);
+      }
     };
-  }, [isInitiator, isRinging, isMeetingActive]);
+  }, [isInitiator, isRinging, callMessage]);
 
   // Set `me` and `other` participants
   useEffect(() => {

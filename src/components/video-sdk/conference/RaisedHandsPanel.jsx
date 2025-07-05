@@ -2,7 +2,7 @@ const RaisedHandsPanel = ({ raisedHands, showPanel, onMinimize, onExpand }) => {
   if (!raisedHands.length) return null;
 
   return (
-    <div className="sticky bottom-20 left-4 z-40">
+    <div className="sticky bottom-25 left-4 z-40">
       {!showPanel ? (
         <button
           onClick={onExpand}
@@ -11,7 +11,7 @@ const RaisedHandsPanel = ({ raisedHands, showPanel, onMinimize, onExpand }) => {
           ✋ {raisedHands.length}
         </button>
       ) : (
-        <div className="bg-yellow/10 border border-yellow/30 p-3 rounded-md shadow-lg text-sm max-w-xs">
+        <div className="bg-yellow/10 border border-yellow/30 p-3 rounded-md shadow-lg text-sm max-w-40">
           <div className="flex justify-between items-center mb-2">
             <strong className="text-olive">Raised Hands ✋</strong>
             <button

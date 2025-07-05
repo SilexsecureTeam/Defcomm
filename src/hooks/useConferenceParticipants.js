@@ -55,15 +55,23 @@ export default function useConferenceParticipants() {
       if (!joinedParticipantsRef.current.has(id)) {
         joinedParticipantsRef.current.add(id);
         audioController.playRingtone(messageSound);
-        toast.info(`${participant.displayName || "A participant"} has joined the meeting`);
+        toast.info(
+          `${participant.displayName || "A participant"} has joined the meeting`
+        );
       }
     },
     onParticipantLeft: (participant) => {
       if (removedParticipantsRef.current.has(participant.id)) {
-        toast.info(`${participant.displayName || "A participant"} was removed from the meeting`);
+        toast.info(
+          `${
+            participant.displayName || "A participant"
+          } was removed from the meeting`
+        );
         removedParticipantsRef.current.delete(participant.id);
       } else {
-        toast.info(`${participant.displayName || "A participant"} just left the meeting`);
+        toast.info(
+          `${participant.displayName || "A participant"} just left the meeting`
+        );
       }
     },
     onPresenterChanged: (newPresenterId) => {
@@ -77,7 +85,9 @@ export default function useConferenceParticipants() {
       toast.info(
         isSelf
           ? "You started sharing your screen."
-          : `${presenter?.displayName || "A participant"} started sharing their screen.`
+          : `${
+              presenter?.displayName || "A participant"
+            } started sharing their screen.`
       );
       audioController.playRingtone(messageSound);
       setIsScreenSharing(true);
@@ -113,7 +123,6 @@ export default function useConferenceParticipants() {
     } else {
       navigate("/dashboard/conference");
     }
-    console.log(conference, providerMeetingId);
   }, [conference]);
 
   const remoteParticipants = useMemo(() => {

@@ -41,7 +41,7 @@ const ToolbarControls = ({
   const emojiList = ["👍", "😂", "👏", "❤️", "😮"];
 
   return (
-    <div className="relative sticky mt-auto bottom-0 bg-black/70 flex flex-wrap justify-center items-center gap-4 px-3 py-3 text-xl sm:text-2xl z-10">
+    <div className="sticky mt-auto bottom-0 bg-black/70 flex flex-wrap justify-center items-center gap-4 px-3 py-3 text-xl sm:text-2xl z-10">
       {/* MIC */}
       <button
         onClick={toggleMic}
@@ -140,21 +140,20 @@ const ToolbarControls = ({
         </button>
 
         {showReactions && (
-      <div className="absolute bottom-14 right-0 md:left-1/2 transform md:-translate-x-1/2 bg-white text-black rounded-lg shadow-lg px-3 py-2 flex justify-center gap-2 overflow-x-auto z-50">
-  {emojiList.map((emoji) => (
-    <button
-      key={emoji}
-      onClick={() => {
-        sendReaction(emoji);
-        setShowReactions(false);
-      }}
-      className="text-2xl hover:scale-125 transition-transform"
-    >
-      {emoji}
-    </button>
-  ))}
-</div>
-
+          <div className="absolute bottom-14 right-0 md:left-1/2 transform md:-translate-x-1/2 w-max max-w-80 bg-white text-black rounded-lg shadow-lg px-3 py-2 flex justify-center gap-2 overflow-x-auto z-50">
+            {emojiList.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => {
+                  sendReaction(emoji);
+                  setShowReactions(false);
+                }}
+                className="text-2xl hover:scale-125 transition-transform"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
         )}
       </div>
     </div>

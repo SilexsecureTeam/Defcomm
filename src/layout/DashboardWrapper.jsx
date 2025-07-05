@@ -12,6 +12,7 @@ import { ChatContext } from "../context/ChatContext";
 import { MeetingContext } from "../context/MeetingContext";
 import useChat from "../hooks/useChat";
 import DashboardLayout from "./DashboardLayout";
+
 // Sidebar Components
 import SideBar from "../components/dashboard/SideBar";
 import AiSideBar from "../components/dashboard/AiSideBar";
@@ -30,12 +31,15 @@ import audioController from "../utils/audioController";
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
   const { authDetails } = useContext(AuthContext);
+  const userId = authDetails?.user?.id; // ✅ ADD THIS
+
   const {
     conference,
     showConference,
     setShowConference,
     setProviderMeetingId,
   } = useContext(MeetingContext);
+
   const {
     setSelectedChatUser,
     setTypingUsers,
@@ -49,12 +53,12 @@ const DashboardWrapper = ({ children }) => {
     meetingId,
     setCallDuration,
   } = useContext(ChatContext);
+
   const { state, dispatch } = useContext(DashboardContext);
   const { fetchContacts } = useChat();
   const { pathname } = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch chat contacts (only if type is CHAT)
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: fetchContacts,
@@ -62,7 +66,7 @@ const DashboardWrapper = ({ children }) => {
     staleTime: 0,
   });
 
-  // Real-time listener
+  // ✅ PUSHER LISTENER
   usePusherChannel({
     userId: authDetails?.user?.id,
     token: authDetails?.access_token,
@@ -71,13 +75,13 @@ const DashboardWrapper = ({ children }) => {
 
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
-          if (prev[newMessage?.sender_id]) return prev; // already typing
+          if (prev[newMessage?.sender_id]) return prev;
           return { ...prev, [newMessage?.sender_id]: true };
         });
         return;
       } else if (newMessage?.state === "not_typing") {
         setTypingUsers((prev) => {
-          if (!prev[newMessage?.sender_id]) return prev; // already not typing
+          if (!prev[newMessage?.sender_id]) return prev;
           return { ...prev, [newMessage?.sender_id]: false };
         });
         return;
@@ -87,9 +91,16 @@ const DashboardWrapper = ({ children }) => {
 
       const existingData = queryClient.getQueryData(["chatMessages", senderId]);
 
-      // For callUpdate: patch an existing message
       if (newMessage?.state === "callUpdate") {
-        setCallDuration(newMessage?.call?.call_duration || 0);
+        if (!newMessage?.mss?.id === callMessage?.msg_id) {
+          setCallMessage((prev) => ({
+            ...prev,
+            ...newMessage?.mss,
+            call_state: newMessage?.call?.call_state,
+          }));
+
+          setCallDuration(newMessage?.call?.call_duration || 0);
+        }
 
         queryClient.setQueryData(
           ["chatMessages", newMessage?.sender?.id],
@@ -110,7 +121,7 @@ const DashboardWrapper = ({ children }) => {
           }
         );
 
-        // ✅ Auto-leave modal if the call was missed and this user is the receiver
+        // ✅ Handle missed call for receiver
         if (
           newMessage?.call?.call_state === "miss" &&
           newMessage?.call?.receiver_id === userId
@@ -125,12 +136,10 @@ const DashboardWrapper = ({ children }) => {
       }
 
       if (!existingData) {
-        // No data cached yet — trigger a refetch so UI is populated
         queryClient.invalidateQueries(["chatMessages", senderId]);
         return;
       }
 
-      // If already fetched, append new message to existing messages
       queryClient.setQueryData(["chatMessages", senderId], (old) => {
         if (!old || !Array.isArray(old.data)) return old;
         const exists = old.data.some((msg) => msg.id === newMessage.data.id);
@@ -154,7 +163,7 @@ const DashboardWrapper = ({ children }) => {
 
   const toggleIsOpen = () => setIsOpen((prev) => !prev);
   const isChatPage = pathname.includes("/dashboard/chat");
-  // Setup sidebar based on route/type
+
   const { SidebarComponent, SidebarItemComponent, optionList } = useMemo(() => {
     let Sidebar = SideBar;
     let SidebarItem = SideBarItem;
@@ -180,7 +189,6 @@ const DashboardWrapper = ({ children }) => {
     };
   }, [pathname, state?.type, contacts]);
 
-  // Handle route change and reset state
   useLayoutEffect(() => {
     const matchedOption = [
       ...dashboardOptions,
@@ -297,6 +305,7 @@ const DashboardWrapper = ({ children }) => {
           />
         </Modal>
       )}
+
       {showSettings && (
         <Modal
           isOpen={showSettings}
@@ -306,6 +315,7 @@ const DashboardWrapper = ({ children }) => {
           <Settings />
         </Modal>
       )}
+
       <IncomingCallWidget />
     </main>
   );
