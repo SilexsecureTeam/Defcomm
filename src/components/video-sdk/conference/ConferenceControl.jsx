@@ -172,7 +172,7 @@ const ConferenceControl = ({
             animate={{ opacity: 1, y: -60, scale: 1 }}
             exit={{ opacity: 0, y: -100, scale: 0.5 }}
             transition={{ duration: 0.8 }}
-            className="fixed top-32 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none"
+            className="fixed top-40 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none"
           >
             <div className="text-6xl">{activeReaction.emoji}</div>
             <motion.div
