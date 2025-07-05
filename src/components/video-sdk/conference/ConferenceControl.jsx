@@ -1,19 +1,5 @@
 import { useState, useContext, useEffect } from "react";
 import {
-  FaPhone,
-  FaMicrophoneSlash,
-  FaMicrophone,
-  FaVideoSlash,
-  FaVideo,
-  FaCog,
-  FaDesktop,
-  FaStopCircle,
-  FaHandPaper,
-  FaRegHandPaper,
-  FaCommentDots,
-  FaUsers,
-} from "react-icons/fa";
-import {
   useMeeting,
   useParticipant,
   usePubSub,
@@ -21,9 +7,14 @@ import {
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
 import { toast } from "react-toastify";
-import CallMessagingModal from "./CallMessagingModal";
 import audioController from "../../../utils/audioController";
 import messageSound from "../../../assets/audio/message.mp3";
+import { motion, AnimatePresence } from "framer-motion";
+
+import ToolbarControls from "./ToolbarControls";
+import ParticipantsPanel from "./ParticipantsPanel";
+import RaisedHandsPanel from "./RaisedHandsPanel";
+import CallMessagingModal from "./CallMessagingModal";
 
 const AUTO_LOWER_TIMEOUT = 60000;
 
@@ -37,6 +28,8 @@ const ConferenceControl = ({
   const { webcamOn, micOn } = useParticipant(me?.id ?? "", {});
   const { publish, messages: handMessages } = usePubSub("HAND_RAISE");
   const { messages: chatMessages } = usePubSub("CALL_CHAT");
+  const { publish: publishReaction, messages: reactionMessages } =
+    usePubSub("CALL_REACTION");
 
   const [handRaised, setHandRaised] = useState(false);
   const [raisedHands, setRaisedHands] = useState([]);
@@ -44,8 +37,9 @@ const ConferenceControl = ({
   const [showChatModal, setShowChatModal] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [lastSeenMessageId, setLastSeenMessageId] = useState(null);
-const [showRaisedPanel, setShowRaisedPanel] = useState(true);
-  
+  const [showRaisedPanel, setShowRaisedPanel] = useState(true);
+  const [activeReaction, setActiveReaction] = useState(null);
+
   const { authDetails } = useContext(AuthContext);
   const { setShowSettings } = useContext(ChatContext);
 
@@ -73,6 +67,19 @@ const [showRaisedPanel, setShowRaisedPanel] = useState(true);
         setHandRaised(false);
       }, AUTO_LOWER_TIMEOUT);
     }
+  };
+
+  const sendReaction = (emoji) => {
+    const name = authDetails?.user?.name || "Someone";
+    publishReaction({
+      id: myId,
+      name,
+      emoji,
+      timestamp: new Date().toISOString(),
+    });
+
+    setActiveReaction({ emoji, name });
+    setTimeout(() => setActiveReaction(null), 3000);
   };
 
   useEffect(() => {
@@ -117,142 +124,83 @@ const [showRaisedPanel, setShowRaisedPanel] = useState(true);
     }
   }, [showChatModal, latestChatMessage]);
 
+  useEffect(() => {
+    if (reactionMessages.length) {
+      const latest = reactionMessages[reactionMessages.length - 1];
+      const { emoji, id, name } = latest.message;
+      setActiveReaction({ emoji, name });
+      setTimeout(() => setActiveReaction(null), 3000);
+    }
+  }, [reactionMessages]);
+
+  const lastSeenIndex = chatMessages.findIndex(
+    (m) => m.id === lastSeenMessageId
+  );
+  const chatCount = chatMessages
+    .slice(lastSeenIndex + 1)
+    .filter((m) => m.message?.id !== myId).length;
+
   return (
     <>
-      {/* Bottom Toolbar */}
-      <div className="sticky mt-auto bottom-0 bg-black/70 flex flex-wrap justify-center items-center gap-4 px-3 py-3 text-xl sm:text-2xl z-10">
-        <button
-          onClick={() => toggleMic()}
-          className={`text-gray-500 hover:text-white ${micOn ? "text-white" : ""}`}
-        >
-          {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
-        </button>
-        <button
-          onClick={() => toggleWebcam()}
-          className={`text-gray-500 hover:text-white ${webcamOn ? "text-white" : ""}`}
-        >
-          {webcamOn ? <FaVideo /> : <FaVideoSlash />}
-        </button>
-        <button
-          disabled={presenterId && presenterId !== myId}
-          onClick={handleScreenShare}
-          className={`hidden md:block text-gray-500 hover:text-white ${
-            isScreenSharing && presenterId === myId ? "text-green-400" : ""
-          } ${
-            presenterId && presenterId !== myId ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {isScreenSharing && presenterId === myId ? <FaStopCircle /> : <FaDesktop />}
-        </button>
-        <button
-          onClick={() => setShowParticipants((prev) => !prev)}
-          className="text-gray-500 hover:text-white"
-        >
-          <FaUsers />
-        </button>
-        <button
-          onClick={handleLeaveMeeting}
-          className="bg-red-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:bg-red-700"
-        >
-          <FaPhone />
-        </button>
-        <button
-          onClick={handleRaiseHand}
-          className="text-yellow-400 hover:text-yellow-500"
-        >
-          {!handRaised ? <FaRegHandPaper /> : <FaHandPaper />}
-        </button>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="text-gray-500 hover:text-white"
-        >
-          <FaCog />
-        </button>
-        <button
-          onClick={() => setShowChatModal(true)}
-          className="relative text-gray-500 hover:text-white"
-        >
-          <FaCommentDots />
-          {hasNewMessage && (
-            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-semibold w-5 h-5 flex items-center justify-center rounded-full">
-              {chatMessages.length}
-            </span>
-          )}
-        </button>
-      </div>
+      <ToolbarControls
+        micOn={micOn}
+        webcamOn={webcamOn}
+        toggleMic={toggleMic}
+        toggleWebcam={toggleWebcam}
+        presenterId={presenterId}
+        myId={myId}
+        isScreenSharing={isScreenSharing}
+        handleScreenShare={handleScreenShare}
+        handleLeaveMeeting={handleLeaveMeeting}
+        handleRaiseHand={handleRaiseHand}
+        handRaised={handRaised}
+        showParticipants={showParticipants}
+        setShowParticipants={setShowParticipants}
+        setShowSettings={setShowSettings}
+        setShowChatModal={setShowChatModal}
+        hasNewMessage={hasNewMessage}
+        sendReaction={sendReaction}
+        chatCount={chatCount}
+        participantCount={[...participants.keys()].length}
+      />
 
-      {/* Participants Panel */}
-      {showParticipants && (
-        <div className="fixed right-4 bottom-20 w-64 max-h-[60vh] overflow-y-auto bg-white border border-gray-300 shadow-md rounded-md p-4 z-40">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-black font-semibold">Participants</h3>
-            <button
-              onClick={() => setShowParticipants(false)}
-              className="text-gray-400 hover:text-red-500 text-xs"
+      <AnimatePresence>
+        {activeReaction && (
+          <motion.div
+            key={activeReaction.emoji + activeReaction.name}
+            initial={{ opacity: 0, y: 0, scale: 0.8 }}
+            animate={{ opacity: 1, y: -60, scale: 1 }}
+            exit={{ opacity: 0, y: -100, scale: 0.5 }}
+            transition={{ duration: 0.8 }}
+            className="fixed top-32 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none"
+          >
+            <div className="text-6xl">{activeReaction.emoji}</div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-1 text-white bg-black/60 rounded px-3 py-1 text-sm shadow-lg"
             >
-              Close
-            </button>
-          </div>
-          <ul className="space-y-2 text-gray-800 text-sm">
-            {[...participants.keys()].map((id) => {
-              const participant = participants.get(id);
-              const isRaised = raisedHands.find((u) => u.id === id);
-              return (
-                <li key={id} className="flex items-center justify-between">
-                  <span className="truncate">{participant.displayName || "Unnamed"}</span>
-                  <div className="flex items-center gap-2">
-                    {participant.micOn ? (
-                      <FaMicrophone className="text-green-500" />
-                    ) : (
-                      <FaMicrophoneSlash className="text-gray-400" />
-                    )}
-                    {participant.webcamOn ? (
-                      <FaVideo className="text-green-500" />
-                    ) : (
-                      <FaVideoSlash className="text-gray-400" />
-                    )}
-                    {isRaised && <FaHandPaper className="text-yellow-500" />}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+              {activeReaction.name}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {showParticipants && (
+        <ParticipantsPanel
+          participants={participants}
+          raisedHands={raisedHands}
+          onClose={() => setShowParticipants(false)}
+        />
       )}
 
-      {/* Raised Hands Panel */}
-{raisedHands.length > 0 && (
-  <div className="fixed bottom-20 left-4 z-40">
-    {!showRaisedPanel ? (
-      <button
-        onClick={() => setShowRaisedPanel(true)}
-        className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-1 rounded-full shadow hover:bg-yellow-200 transition"
-      >
-        ✋ {raisedHands.length}
-      </button>
-    ) : (
-      <div className="bg-yellow-100 border border-yellow-300 p-3 rounded-md shadow-lg text-sm max-w-xs">
-        <div className="flex justify-between items-center mb-2">
-          <strong className="text-yellow-800">Raised Hands ✋</strong>
-          <button
-            onClick={() => setShowRaisedPanel(false)}
-            className="text-yellow-700 text-xs hover:underline"
-          >
-            Minimize
-          </button>
-        </div>
-        <ul className="space-y-1 text-yellow-900 max-h-40 overflow-y-auto">
-          {raisedHands.map(({ id, name }) => (
-            <li key={id} className="truncate">
-              {name || "Participant"}
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </div>
-)}
-      {/* Chat Modal */}
+      <RaisedHandsPanel
+        raisedHands={raisedHands}
+        showPanel={showRaisedPanel}
+        onMinimize={() => setShowRaisedPanel(false)}
+        onExpand={() => setShowRaisedPanel(true)}
+      />
+
       <CallMessagingModal
         isOpen={showChatModal}
         onClose={() => setShowChatModal(false)}

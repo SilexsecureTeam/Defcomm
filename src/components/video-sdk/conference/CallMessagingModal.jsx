@@ -32,8 +32,14 @@ const CallMessagingModal = ({ isOpen, onClose }) => {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (isOpen) {
+      const timeout = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+      }, 250); // delay matches animation duration
+
+      return () => clearTimeout(timeout);
+    }
+  }, [messages, isOpen]);
 
   return (
     <AnimatePresence>
@@ -65,7 +71,9 @@ const CallMessagingModal = ({ isOpen, onClose }) => {
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
               {messages.length === 0 && (
-                <p className="text-center text-gray-500">No messages yet. Say hello 👋</p>
+                <p className="text-center text-gray-500">
+                  No messages yet. Say hello 👋
+                </p>
               )}
               {messages.map((msg, i) => {
                 const isMe = msg.message.id === meId;
