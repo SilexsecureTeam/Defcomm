@@ -30,6 +30,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const callTimer = useRef<NodeJS.Timeout | null>(null);
   const callStartRef = useRef<number | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const callLogUpdatedRef = useRef(false);
 
   const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
     onMeetingJoined: () => {
@@ -80,39 +81,48 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
   const handleLeave = async () => {
     console.log("Leaving call...", callDuration);
+
     if (callTimer.current) clearInterval(callTimer.current);
 
     const isMissed = callDuration === 0;
 
-    try {
-      await updateCallLog.mutateAsync({
-        mss_id: callMessage?.id,
-        call_duration: formatCallDuration(callDuration),
-        call_state: isMissed ? "miss" : "pick",
-        recieve_user_id: callMessage?.user_id,
-      } as any);
+    // 👇 Prevent double logging from both parties
+    if (!callLogUpdatedRef.current && callMessage?.id) {
+      try {
+        await updateCallLog.mutateAsync({
+          mss_id: callMessage?.id,
+          call_duration: formatCallDuration(callDuration),
+          call_state: isMissed ? "miss" : "pick",
+          recieve_user_id: callMessage?.user_id,
+        } as any);
 
-      if (isMissed) {
-        onPrompt({
-          title: "Call Missed",
-          message: "No response from the other user. You have left the call.",
-        });
-      } else {
-        onSuccess({
-          message: "Call Ended",
-          success: "You have successfully left the call.",
-        });
+        callLogUpdatedRef.current = true; // ✅ Mark as logged
+
+        if (isMissed) {
+          onPrompt({
+            title: "Call Missed",
+            message: "No response from the other user. You have left the call.",
+          });
+        } else {
+          onSuccess({
+            message: "Call Ended",
+            success: "You have successfully left the call.",
+          });
+        }
+      } catch (error) {
+        console.warn("Call log update failed:", error);
       }
-    } finally {
-      leave();
-      setIsMeetingActive(false);
-      setMeetingId(null);
-      audioController.stopRingtone();
-      setCallMessage(null);
-      setIsInitiator(false);
-      setProviderMeetingId(null);
-      setShowSummary(true);
     }
+
+    // Clean up regardless
+    leave();
+    setIsMeetingActive(false);
+    setMeetingId(null);
+    audioController.stopRingtone();
+    setCallMessage(null);
+    setIsInitiator(false);
+    setProviderMeetingId(null);
+    setShowSummary(true);
   };
 
   useEffect(() => {

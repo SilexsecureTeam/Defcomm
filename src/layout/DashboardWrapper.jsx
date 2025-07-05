@@ -287,6 +287,7 @@ const DashboardWrapper = ({ children }) => {
             setShowCall(false);
             setCallMessage(null);
             setProviderMeetingId(null);
+            setMeetingId(null);
             setCallDuration(0);
             audioController.stopRingtone();
           }}

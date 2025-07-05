@@ -70,9 +70,9 @@ const CallSetupPanel = ({
         client,
         message: `CALL_INVITE:${meetingId}`,
         file: null,
-        chat_user_type: messageData.chat_user_type,
-        chat_user_id: messageData.chat_user_id,
-        chat_id: messageData.chat_id,
+        chat_user_type: messageData?.chat_user_type || "user",
+        chat_user_id: messageData?.chat_user_id,
+        chat_id: messageData?.chat_id,
         mss_type: "call",
         sendMessageMutation,
       });

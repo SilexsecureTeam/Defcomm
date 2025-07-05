@@ -17,7 +17,7 @@ export const sendMessageUtil = async ({
   client,
   message,
   file,
-  chat_user_type,
+  chat_user_type = "user",
   chat_user_id,
   chat_id,
   sendMessageMutation,
