@@ -88,7 +88,7 @@ const ProtectedRoute = ({ children }) => {
     return <div className="text-white text-center mt-10">Loading...</div>;
 
   if (!authDetails || authDetails.user?.role !== "user") {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

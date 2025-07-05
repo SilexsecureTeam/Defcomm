@@ -2,7 +2,7 @@ const RaisedHandsPanel = ({ raisedHands, showPanel, onMinimize, onExpand }) => {
   if (!raisedHands.length) return null;
 
   return (
-    <div className="sticky bottom-25 left-4 z-40">
+    <div className="sticky bottom-24 left-4 z-40">
       {!showPanel ? (
         <button
           onClick={onExpand}

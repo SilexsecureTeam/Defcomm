@@ -93,15 +93,7 @@ const ConferenceControl = ({
         setRaisedHands((prev) => {
           const already = prev.some((u) => u.id === id);
           if (raised && !already) {
-            toast.info(`${name || "Someone"} raised their hand ✋`, {
-              toastId: `hand-${prev.id}`, // prevent duplicate toasts
-              className: "hand-raise-toast",
-              autoClose: 2000,
-              pauseOnHover: false,
-              closeButton: false,
-              hideProgressBar: true,
-            });
-
+            toast.info(`${name || "Someone"} raised their hand ✋`);
             audioController.playRingtone(messageSound);
             return [...prev, { id, name, timestamp }];
           } else if (!raised) {

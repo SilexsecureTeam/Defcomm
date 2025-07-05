@@ -15,15 +15,18 @@ const useAuth = () => {
 
   // 🔄 Query: Get Profile Data
   const profileQuery = useQuery({
-    queryKey: ['profile'],
+    queryKey: ["profile"],
     queryFn: async () => {
       const { data } = await client.get("/user/profile");
       updateAuth({ ...authDetails, user: data?.data }); // You might want to update with new profile data too
-      return data
+      return data;
     },
     enabled: !!authDetails?.access_token, // only run if user is logged in
     onError: (err) => {
-      onFailure({ message: "Failed to fetch profile", error: extractErrorMessage(err) });
+      onFailure({
+        message: "Failed to fetch profile",
+        error: extractErrorMessage(err),
+      });
     },
   });
 
@@ -38,7 +41,10 @@ const useAuth = () => {
     },
     onSuccess: (userData) => {
       updateAuth(userData);
-      onSuccess({ message: "Login Successful!", success: "Continuing to dashboard" });
+      onSuccess({
+        message: "Login Successful!",
+        success: "Continuing to dashboard",
+      });
       navigate("/dashboard/home");
     },
     onError: (error) => {
@@ -49,35 +55,49 @@ const useAuth = () => {
   // 📤 Profile Upload Mutation
   const profileMutation = useMutation({
     mutationFn: async (userData) => {
-      const { data } = await client.post("/user/profile/upload", userData,{
+      const { data } = await client.post("/user/profile/upload", userData, {
         headers: {
-          "Content-Type": "multipart/form-data",  // This header ensures the form data is processed correctly
-        }
+          "Content-Type": "multipart/form-data", // This header ensures the form data is processed correctly
+        },
       });
       return data;
     },
     onSuccess: (user) => {
-      queryClient.invalidateQueries(['profile']); // Refresh profile
-      onSuccess({ message: "Profile Update", success: "Profile updated successfully!" });
+      queryClient.invalidateQueries(["profile"]); // Refresh profile
+      onSuccess({
+        message: "Profile Update",
+        success: "Profile updated successfully!",
+      });
     },
     onError: (err) => {
       console.log("Profile Update error:", err);
-      onFailure({ message: "Profile Update Failed", error: extractErrorMessage(err) });
+      onFailure({
+        message: "Profile Update Failed",
+        error: extractErrorMessage(err),
+      });
     },
   });
 
   // 🔢 OTP Request
   const requestOtpMutation = useMutation({
     mutationFn: async (credential) => {
-      const { data } = await client.post("/requestOtpSms", { phone: credential?.phone });
+      const { data } = await client.post("/requestOtpSms", {
+        phone: credential?.phone,
+      });
       if (data?.status !== 200) throw new Error("An error occurred");
       return data;
     },
     onSuccess: (data) => {
-      onSuccess({ message: "OTP Requested!", success: `Here is the otp- ${data?.otp}` });
+      onSuccess({
+        message: "OTP Requested!",
+        success: `Here is the otp- ${data?.otp}`,
+      });
     },
     onError: (err) => {
-      onFailure({ message: "OTP Request Failed", error: extractErrorMessage(err) });
+      onFailure({
+        message: "OTP Request Failed",
+        error: extractErrorMessage(err),
+      });
     },
   });
 
@@ -85,16 +105,23 @@ const useAuth = () => {
   const verifyOtpMutation = useMutation({
     mutationFn: async (otpData) => {
       const { data } = await client.post("/loginWithPhone", otpData);
-      if (data?.status !== 200) throw new Error("Invalid response: User data not found");
+      if (data?.status !== 200)
+        throw new Error("Invalid response: User data not found");
       return data.data;
     },
     onSuccess: (userData, variables) => {
-  updateAuth(userData);
-  navigate(variables?.from || "/dashboard/home");
-  onSuccess({ message: "OTP Verified!", success: "Continuing to dashboard" });
-},
+      updateAuth(userData);
+      navigate(variables?.from || "/dashboard/home", { replace: true });
+      onSuccess({
+        message: "OTP Verified!",
+        success: "Continuing to dashboard",
+      });
+    },
     onError: (err) => {
-      onFailure({ message: "OTP Verification Failed", error: extractErrorMessage(err) });
+      onFailure({
+        message: "OTP Verification Failed",
+        error: extractErrorMessage(err),
+      });
     },
   });
 
@@ -105,7 +132,10 @@ const useAuth = () => {
     },
     onSuccess: () => {
       updateAuth(null);
-      navigate("/login", { state: { from: null, fromLogout: true }, replace: true });
+      navigate("/login", {
+        state: { from: null, fromLogout: true },
+        replace: true,
+      });
       onSuccess({
         message: "Logout successful",
         success: "You have been logged out.",
