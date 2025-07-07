@@ -44,7 +44,7 @@ const ToolbarControls = ({
     <div className="sticky mt-auto bottom-0 bg-black/70 flex flex-wrap justify-center items-center gap-4 px-3 py-3 text-xl sm:text-2xl z-10">
       {/* MIC */}
       <button
-        onClick={toggleMic}
+        onClick={() => toggleMic()}
         className={`text-gray-500 hover:text-white ${
           micOn ? "text-white" : ""
         }`}
