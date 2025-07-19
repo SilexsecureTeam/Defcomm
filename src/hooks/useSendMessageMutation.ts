@@ -25,11 +25,6 @@ export const useSendMessageMutation = (
 
     onSuccess: async (response, variables) => {
       const messageData = response?.data?.data;
-      console.log(
-        "Message data:",
-        messageData,
-        variables.get("current_chat_user")
-      );
 
       // If already fetched, append new message to existing messages
       queryClient.setQueryData(

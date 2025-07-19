@@ -4,7 +4,7 @@ import { onFailure } from "../../utils/notifications/OnFailure";
 
 interface SendMessageParams {
   client: AxiosInstance;
-  message: string;
+  message: String;
   file: File | null;
   chat_user_type: string;
   chat_user_id: string;
