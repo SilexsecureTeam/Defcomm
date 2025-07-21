@@ -21,6 +21,7 @@ const ChatInterface = () => {
     setShowCall,
     setShowSettings,
     typingUsers,
+    setModalTitle,
   } = useContext(ChatContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
@@ -90,10 +91,19 @@ const ChatInterface = () => {
             )}
           </div>
           <div className="flex gap-4">
-            <button onClick={() => setShowCall(true)}>
+            <button
+              onClick={() => {
+                setShowCall(true);
+                setModalTitle("Place a Call");
+              }}
+            >
               <MdCall size={24} />
             </button>
-            <button onClick={() => setShowSettings(true)}>
+            <button
+              onClick={() => {
+                setShowSettings(true);
+              }}
+            >
               <FaCog size={24} />
             </button>
           </div>

@@ -16,8 +16,13 @@ import useChat from "../../../hooks/useChat";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext<any>(AuthContext);
-  const { callMessage, setCallMessage, callDuration, setCallDuration } =
-    useContext(ChatContext);
+  const {
+    callMessage,
+    setCallMessage,
+    callDuration,
+    setCallDuration,
+    setModalTitle,
+  } = useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
   const { updateCallLog } = useChat();
   const [isMeetingActive, setIsMeetingActive] = useState(false);
@@ -68,6 +73,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
           const now = Date.now();
           const duration = Math.floor((now - callStartRef.current!) / 1000);
           setCallDuration(duration);
+          setModalTitle(formatCallDuration(duration));
         }, 1000);
       }
     },

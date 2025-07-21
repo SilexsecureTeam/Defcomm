@@ -27,7 +27,8 @@ const CallSetupPanel = ({
   isInitiator = false,
   setIsInitiator,
 }: any) => {
-  const { selectedChatUser, callMessage } = useContext(ChatContext);
+  const { selectedChatUser, callMessage, setModalTitle } =
+    useContext(ChatContext);
   const { updateCallLog } = useChat();
   const { authDetails } = useContext<any>(AuthContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
@@ -47,6 +48,7 @@ const CallSetupPanel = ({
       setIsInitiator(true);
       setShowSummary(false);
       setCallDuration(0);
+      setModalTitle("Call Setup");
     } catch (error) {
       onFailure({ message: "Meeting Creation Failed", error: error.message });
     } finally {
@@ -80,7 +82,7 @@ const CallSetupPanel = ({
       if (!messageSent) {
         return; // Don't proceed if sending failed
       }
-
+      setModalTitle("Call in Progress");
       join(); // Proceed only if message was actually sent
     } catch (error: any) {
       onFailure({

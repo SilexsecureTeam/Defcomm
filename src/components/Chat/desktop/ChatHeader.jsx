@@ -4,8 +4,13 @@ import logoIcon from "../../../assets/logo-icon.png";
 import { FiPhone, FiVideo } from "react-icons/fi";
 import { motion } from "framer-motion";
 export default function ChatHeader() {
-  const { selectedChatUser, setShowCall, setCallType, typingUsers } =
-    useContext(ChatContext);
+  const {
+    selectedChatUser,
+    setShowCall,
+    setCallType,
+    typingUsers,
+    setModalTitle,
+  } = useContext(ChatContext);
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-700">
       {selectedChatUser ? (
@@ -51,7 +56,10 @@ export default function ChatHeader() {
             whileTap={{ scale: 0.95 }}
             title="Call"
             className="p-2 rounded-full hover:bg-oliveGreen/80 transition"
-            onClick={() => setShowCall(true)}
+            onClick={() => {
+              setModalTitle("Place a Call");
+              setShowCall(true);
+            }}
           >
             <FiPhone />
           </motion.button>
@@ -61,6 +69,7 @@ export default function ChatHeader() {
             title="Video Call"
             className="p-2 rounded-full hover:bg-oliveGreen/80 transition"
             onClick={() => {
+              setModalTitle("Place a Call");
               setShowCall(true);
               setCallType("video");
             }}

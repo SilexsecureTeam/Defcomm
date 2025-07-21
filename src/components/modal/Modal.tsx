@@ -19,7 +19,7 @@ const Modal = ({
   minimizedContent,
 }: MinimizableModalProps) => {
   const [isMinimized, setIsMinimized] = useState(false);
-  const { modalTitle } = useContext(ChatContext);
+  const { setModalTitle, modalTitle } = useContext(ChatContext);
 
   if (!isOpen && !isMinimized) return null;
 
@@ -36,7 +36,10 @@ const Modal = ({
         >
           <div className="relative bg-white rounded-lg shadow-lg max-h-[90vh] overflow-hidden">
             {/* Sticky Header */}
-            <div className="sticky top-0 z-10 bg-white p-2 border-b flex justify-end gap-2">
+            <div className="sticky top-0 z-10 bg-white p-2 border-b flex justify-between items-center gap-2">
+              <h1 className="text-oliveDark text-base font-bold mr-auto">
+                {modalTitle || ""}
+              </h1>
               {canMinimize && (
                 <button
                   onClick={() => setIsMinimized(true)}
@@ -49,6 +52,7 @@ const Modal = ({
               <button
                 onClick={() => {
                   closeModal();
+                  setModalTitle("Defcomm");
                   setIsMinimized(false);
                 }}
                 className="p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"

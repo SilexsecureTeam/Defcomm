@@ -8,7 +8,6 @@ export const MeetingContext = createContext();
 
 export const MeetingProvider = ({ children }) => {
   const { authDetails } = useContext(AuthContext);
-  const { callType } = useContext(ChatContext);
 
   const [conference, setConference] = useState(null);
   const [me, setMe] = useState(null);

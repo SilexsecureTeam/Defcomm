@@ -20,7 +20,7 @@ export const ChatProvider = ({ children }) => {
   const [typingUsers, setTypingUsers] = useState({}); // key = userId, value = true/false
   const [showContactModal, setShowContactModal] = useState(false);
 
-  const [modalTitle, setModalTitle] = useState("DefComm");
+  const [modalTitle, setModalTitle] = useState("Defcomm");
   // Store the boolean value correctly when it changes
   useEffect(() => {
     sessionStorage.setItem("chatVisibility", JSON.stringify(chatVisibility));
