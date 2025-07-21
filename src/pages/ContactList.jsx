@@ -1,7 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import SEOHelmet from "../engine/SEOHelmet";
-import { FiSearch, FiPhone, FiVideo } from "react-icons/fi";
+import { FiSearch, FiPhone, FiVideo, FiTrash2 } from "react-icons/fi";
 import { IoFilter } from "react-icons/io5";
 import { MdMoreHoriz, MdCallMissed, MdCallMade } from "react-icons/md";
 import { FaPlus } from "react-icons/fa6";
@@ -13,18 +13,21 @@ import AddContactInterface from "../components/dashboard/AddContactInterface";
 import { ChatContext } from "../context/ChatContext";
 import { AuthContext } from "../context/AuthContext";
 import CallHistory from "../components/CallHistory";
+import useGroups from "../hooks/useGroup";
 
 const ContactList = () => {
   const { authDetails } = useContext(AuthContext);
-  const { setSelectedChatUser, setShowCall, setCallType } =
+  const { setSelectedChatUser, setShowCall, setCallType, setShowContactModal } =
     useContext(ChatContext);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContactForLogs, setSelectedContactForLogs] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [deletingContactId, setDeletingContactId] = useState(null);
+
   const { fetchContacts, getCallLogs } = useChat();
+  const { removeContactMutation } = useGroups();
 
   // Fetch Call Logs using React Query
   const { data: callLogs } = getCallLogs;
@@ -51,6 +54,14 @@ const ContactList = () => {
     });
     setShowCall(true);
     setCallType(call);
+  };
+  const handleDeleteContact = async (contactId) => {
+    setDeletingContactId(contactId);
+    try {
+      await removeContactMutation.mutateAsync(contactId);
+    } finally {
+      setDeletingContactId(null);
+    }
   };
 
   function maskContactInfo(contactInfo) {
@@ -136,7 +147,7 @@ const ContactList = () => {
           </motion.button>
 
           <motion.button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setShowContactModal(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex gap-2 items-center text-black px-4 py-2 bg-oliveHover rounded-lg text-sm hover:bg-oliveGreen"
@@ -245,6 +256,24 @@ const ContactList = () => {
                       >
                         <MdMoreHoriz />
                       </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        title="Delete Contact"
+                        disabled={deletingContactId === contact.id}
+                        className={`p-2 rounded-full transition-all ${
+                          deletingContactId === contact.id
+                            ? "bg-red-200 text-red-400 cursor-not-allowed"
+                            : "bg-red-100 hover:bg-red-200 text-red-600"
+                        }`}
+                        onClick={() => handleDeleteContact(contact.id)}
+                      >
+                        {deletingContactId === contact.id ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-red-600 rounded-full animate-spin" />
+                        ) : (
+                          <FiTrash2 />
+                        )}
+                      </motion.button>
                     </td>
                   </tr>
                 );
@@ -256,12 +285,6 @@ const ContactList = () => {
 
       {!isLoading && !error && filteredContacts?.length === 0 && (
         <div className="text-center text-white py-6">No contacts found.</div>
-      )}
-
-      {isModalOpen && (
-        <Modal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)}>
-          <AddContactInterface />
-        </Modal>
       )}
 
       {selectedContactForLogs && (

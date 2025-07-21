@@ -131,7 +131,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       ringTimeoutRef.current = setTimeout(() => {
         console.warn("Auto-leaving call due to no response after 10s");
         handleLeave(); // this will mark as missed
-      }, 10000); // 10 seconds
+      }, 30000); // 10 seconds
     }
 
     return () => {

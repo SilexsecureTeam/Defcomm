@@ -18,6 +18,7 @@ export const ChatProvider = ({ children }) => {
   const [meetingId, setMeetingId] = useState(null);
   const [callDuration, setCallDuration] = useState(0);
   const [typingUsers, setTypingUsers] = useState({}); // key = userId, value = true/false
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const [modalTitle, setModalTitle] = useState("DefComm");
   // Store the boolean value correctly when it changes
@@ -43,6 +44,8 @@ export const ChatProvider = ({ children }) => {
         setShowCall,
         showSettings,
         setShowSettings,
+        showContactModal,
+        setShowContactModal,
         callMessage,
         setCallMessage,
         messages,

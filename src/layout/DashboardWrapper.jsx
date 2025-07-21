@@ -27,6 +27,7 @@ import usePusherChannel from "../hooks/usePusherChannel";
 import { FaPhone } from "react-icons/fa6";
 import IncomingCallWidget from "../utils/IncomingCallWidget";
 import audioController from "../utils/audioController";
+import AddContactInterface from "../components/dashboard/AddContactInterface";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -43,11 +44,12 @@ const DashboardWrapper = ({ children }) => {
   const {
     setSelectedChatUser,
     setTypingUsers,
-    typingUsers,
     showCall,
     setShowCall,
     showSettings,
     setShowSettings,
+    showContactModal,
+    setShowContactModal,
     setCallMessage,
     setMeetingId,
     meetingId,
@@ -92,7 +94,7 @@ const DashboardWrapper = ({ children }) => {
       const existingData = queryClient.getQueryData(["chatMessages", senderId]);
 
       if (newMessage?.state === "callUpdate") {
-        if (!newMessage?.mss?.id === callMessage?.msg_id) {
+        if (newMessage?.mss?.id === callMessage?.msg_id) {
           setCallMessage((prev) => ({
             ...prev,
             ...newMessage?.mss,
@@ -207,7 +209,6 @@ const DashboardWrapper = ({ children }) => {
       setShowConference(false);
     }
   }, [pathname]);
-
   if (authDetails?.user?.role !== "user") return null;
 
   return (
@@ -306,7 +307,6 @@ const DashboardWrapper = ({ children }) => {
           />
         </Modal>
       )}
-
       {showSettings && (
         <Modal
           isOpen={showSettings}
@@ -316,7 +316,14 @@ const DashboardWrapper = ({ children }) => {
           <Settings />
         </Modal>
       )}
-
+      {showContactModal && (
+        <Modal
+          isOpen={showContactModal}
+          closeModal={() => setShowContactModal(false)}
+        >
+          <AddContactInterface />
+        </Modal>
+      )}
       <IncomingCallWidget />
     </main>
   );

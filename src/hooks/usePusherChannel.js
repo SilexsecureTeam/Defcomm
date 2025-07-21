@@ -2,8 +2,8 @@ import { useEffect, useRef, useContext } from "react";
 import { toast } from "react-toastify";
 import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
 import notificationSound from "../assets/audio/bell.mp3";
-import audioController from "../utils/audioController"; // Import the shared audio controller
 import receiverTone from "../assets/audio/receiver.mp3";
+import audioController from "../utils/audioController";
 import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
 
@@ -18,11 +18,21 @@ const usePusherChannel = ({
 }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
-  const { setSelectedChatUser, setCallMessage } = useContext(ChatContext);
+
+  const { selectedChatUser, setSelectedChatUser, setCallMessage } =
+    useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
+
+  // Maintain latest selectedChatUser in a ref
+  const selectedChatUserRef = useRef(selectedChatUser);
+  useEffect(() => {
+    selectedChatUserRef.current = selectedChatUser;
+  }, [selectedChatUser]);
+
   useEffect(() => {
     if (!userId || !token) return;
 
+    // Clean previous connection
     if (pusherRef.current) {
       try {
         pusherRef.current.disconnect();
@@ -47,52 +57,35 @@ const usePusherChannel = ({
     });
 
     pusherRef.current = pusher;
-
     const channel = pusher.subscribe(`private-chat.${userId}`);
 
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
-      console.log(data);
       const isCall = data?.state === "call";
       onNewMessage(newMessage);
-      if (isCall) {
-        const meetingId = newMessage?.message?.split("CALL_INVITE:")[1]; // Extract meetingId
 
+      if (isCall) {
+        const meetingId = newMessage?.message?.split("CALL_INVITE:")[1];
         setCallMessage({
           msg_id: newMessage?.data?.id,
           ...data?.mss_chat,
-          meetingId, // ✅ Ensure this gets passed
+          meetingId,
           name: newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
           phone: newMessage?.sender?.phone,
           user_id: newMessage?.data?.user_id,
-          status: "ringing", // initial
+          status: "ringing",
         });
         audioController.playRingtone(receiverTone, true);
-        // onNewNotificationToast({
-        //   message: newMessage?.message,
-        //   senderName:
-        //     newMessage?.sender?.name?.split(" ")[0] ||
-        //     `User ${newMessage?.data?.user_id}`,
-        //   type: "call",
-        //   onClick: () => {
-        //     setSelectedChatUser({
-        //       contact_id: newMessage?.data?.user_id,
-        //       contact_name:
-        //         newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
-        //       contact_phone:
-        //         newMessage?.data?.phone || `User ${newMessage?.data?.user_id}`,
-        //     });
-        //     navigate("/dashboard/chat");
-        //   },
-        // });
-        return; // prevent further toast/audio
+        return;
       }
 
+      const currentUser = selectedChatUserRef.current;
       const shouldToast =
         showToast &&
         data?.state !== "not_typing" &&
         data?.state !== "is_typing" &&
         data?.state !== "callUpdate" &&
+        Number(currentUser?.contact_id) !== Number(newMessage?.data?.user_id) &&
         data?.data?.user_id !== userId;
 
       if (shouldToast) {
@@ -103,11 +96,12 @@ const usePusherChannel = ({
           message: newMessage?.message,
           time: new Date().toISOString(),
           user_id: newMessage?.data?.user_id,
-          type: "message", // or "call"
+          type: "message",
         };
 
-        addNotification(notificationPayload); // ✅ Add to context
+        addNotification(notificationPayload);
         audioController.playRingtone(notificationSound);
+
         onNewNotificationToast({
           message: newMessage?.message,
           senderName:
@@ -128,6 +122,7 @@ const usePusherChannel = ({
         });
       }
     });
+
     channel.bind("pusher:subscription_error", (status) => {
       console.error("Pusher subscription error:", status);
     });
@@ -139,7 +134,7 @@ const usePusherChannel = ({
         console.warn("Cleanup error:", e);
       }
     };
-  }, [userId, token]);
+  }, [userId, token]); // Only re-run when userId or token changes
 };
 
 export default usePusherChannel;

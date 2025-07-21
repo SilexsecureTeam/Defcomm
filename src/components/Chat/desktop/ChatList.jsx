@@ -23,7 +23,7 @@ export default function ChatList() {
   );
 
   return (
-    <div className="w-72 p-4 bg-transparent space-y-4 overflow-y-auto">
+    <div className="w-72 p-4 bg-transparent space-y-4">
       <h2 className="text-2xl font-semibold">Chat</h2>
       <input
         value={search}
@@ -49,7 +49,7 @@ export default function ChatList() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-y-auto h-[calc(100vh-200px)]">
         {filteredContact?.map((data) => (
           <div
             key={data?.id}
