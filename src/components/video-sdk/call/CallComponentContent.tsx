@@ -127,11 +127,11 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
 
   useEffect(() => {
     // Auto-leave after 10s if I initiated the call, it's still ringing, and no one has joined yet.
-    if (isInitiator && isRinging && callMessage && !callStartRef.current) {
+    if (isInitiator && isRinging && !callStartRef.current) {
       ringTimeoutRef.current = setTimeout(() => {
         console.warn("Auto-leaving call due to no response after 10s");
         handleLeave(); // this will mark as missed
-      }, 30000); // 10 seconds
+      }, 30000); // 30 seconds
     }
 
     return () => {
