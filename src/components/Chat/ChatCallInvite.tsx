@@ -48,6 +48,9 @@ function ChatCallInvite({
 
   // 📝 Main call message text
   const getMessageText = () => {
+    if (isCallActive)
+      return isMyChat ? "You are in the call" : `${caller} is in the call`;
+
     if (callState === "miss") {
       return isMyChat
         ? `${msg.user_to_name || "They"} missed your call`
@@ -77,6 +80,8 @@ function ChatCallInvite({
 
   // 📞 Call icon
   const getIcon = () => {
+    if (isCallActive)
+      return <MdCall size={24} className="text-green-500 animate-pulse" />;
     if (callState === "miss")
       return <MdCallMissed size={24} className="text-red-500" />;
     if (callState === "pick")
@@ -84,7 +89,7 @@ function ChatCallInvite({
     return (
       <MdCall
         size={24}
-        className={`text-${status === "Ringing..." ? "green" : "red"}-500`}
+        className={`text-${status === "Ringing..." ? "green" : "gray"}-500`}
       />
     );
   };
