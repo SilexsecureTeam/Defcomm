@@ -54,7 +54,7 @@ const ToolbarControls = ({
 
       {/* CAM */}
       <button
-        onClick={toggleWebcam}
+        onClick={() => toggleWebcam()}
         className={`text-gray-500 hover:text-white ${
           webcamOn ? "text-white" : ""
         }`}
