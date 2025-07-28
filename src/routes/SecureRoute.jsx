@@ -6,11 +6,18 @@ const SecureRoute = () => {
   const { authDetails, isLoading } = useContext(AuthContext);
   const location = useLocation();
 
-  if (isLoading) return <div className="text-white text-center mt-10">Loading...</div>;
+  if (isLoading)
+    return <div className="text-white text-center mt-10">Loading...</div>;
 
-  if (!authDetails?.user) {
+  if (!authDetails?.user?.status?.toLowerCase() === "active") {
     const isFromLogout = location.state?.fromLogout;
-    return <Navigate to="/login" state={isFromLogout ? {} : { from: location }} replace />;
+    return (
+      <Navigate
+        to="/login"
+        state={isFromLogout ? {} : { from: location }}
+        replace
+      />
+    );
   }
 
   return <Outlet />;
