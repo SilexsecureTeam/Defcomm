@@ -9,7 +9,10 @@ const SecureRoute = () => {
   if (isLoading)
     return <div className="text-white text-center mt-10">Loading...</div>;
 
-  if (authDetails?.user?.status?.toLowerCase() !== "active") {
+  if (
+    authDetails?.user?.status?.toLowerCase() !== "active" ||
+    authDetails?.user?.status?.toLowerCase() !== "pending"
+  ) {
     const isFromLogout = location.state?.fromLogout;
     return (
       <Navigate
