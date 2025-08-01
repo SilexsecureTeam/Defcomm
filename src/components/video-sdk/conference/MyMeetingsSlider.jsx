@@ -1,23 +1,31 @@
-import React, { useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
-import { motion } from 'framer-motion';
-import CountdownTimer from './CountdownTimer';
+import React, { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import { motion } from "framer-motion";
+import CountdownTimer from "./CountdownTimer";
 import { FaVideo } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
-const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingClick, showSource = false, loading = false, onEditMeeting }) => {
+const MyMeetingsSlider = ({
+  title,
+  meetings,
+  showCountdown = false,
+  onMeetingClick,
+  showSource = false,
+  loading = false,
+  onEditMeeting,
+}) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
   const [dropdownOpenId, setDropdownOpenId] = useState(null);
   const toggleDropdown = (id) => {
-    setDropdownOpenId(prev => (prev === id ? null : id));
+    setDropdownOpenId((prev) => (prev === id ? null : id));
   };
 
-  const sliderId = title.toLowerCase().replace(/\s+/g, '-');
+  const sliderId = title.toLowerCase().replace(/\s+/g, "-");
 
   return (
     <div className="relative w-full mb-8 text-white">
@@ -50,7 +58,10 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
             className="p-3"
           >
             {meetings.map((meeting, index) => (
-              <SwiperSlide key={meeting.id || meeting.meeting_id} className="w-full md:min-w-60">
+              <SwiperSlide
+                key={meeting.id || meeting.meeting_id}
+                className="w-full md:min-w-60"
+              >
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -59,39 +70,44 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
                   className="relative bg-oliveLight/50 hover:bg-oliveLight p-4 rounded-lg shadow-md cursor-pointer transition-all duration-200"
                 >
                   {/* Three-dot menu icon */}
-                  {meeting._source !== "Invited" && <div className="absolute top-2 right-2 z-10">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleDropdown(meeting.id || meeting.meeting_id);
-                      }}
-                      className="p-1 hover:bg-white/10 rounded-full"
-                    >
-                      <BsThreeDotsVertical size={18} />
-                    </button>
-                    {/* Dropdown menu */}
-                    {dropdownOpenId === (meeting.id || meeting.meeting_id) && (
-                      <div
-                        className="absolute right-0 mt-2 w-36 bg-white text-black rounded-md shadow-lg z-20 font-medium text-sm"
+                  {meeting._source !== "Invited" && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleDropdown(meeting.id || meeting.meeting_id);
+                        }}
+                        className="p-1 hover:bg-white/10 rounded-full"
                       >
-                        <button
-                          onClick={(e) =>{e.stopPropagation(); onEditMeeting(meeting); setDropdownOpenId(null)}}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-100 rounded-md"
-                        >
-                          Update
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDropdownOpenId(null);
-                          }}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600 rounded-md"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>}
+                        <BsThreeDotsVertical size={18} />
+                      </button>
+                      {/* Dropdown menu */}
+                      {dropdownOpenId ===
+                        (meeting.id || meeting.meeting_id) && (
+                        <div className="absolute right-0 mt-2 w-36 bg-white text-black rounded-md shadow-lg z-20 font-medium text-sm">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditMeeting(meeting);
+                              setDropdownOpenId(null);
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 rounded-md"
+                          >
+                            Update
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDropdownOpenId(null);
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600 rounded-md"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {showSource && meeting._source && (
                     <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-xs border font-bold border-oliveHover text-oliveHover">
                       {meeting._source}
@@ -100,7 +116,9 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
 
                   <div className="flex items-center gap-2 mb-1 pr-2">
                     <FaVideo className="text-green-400 text-2xl" />
-                    <p className="font-semibold text-lg truncate">{meeting.title}</p>
+                    <p className="font-semibold text-lg truncate">
+                      {meeting.title}
+                    </p>
                   </div>
 
                   <p className="text-sm text-gray-400 mb-1">{meeting.agenda}</p>
@@ -119,15 +137,21 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
           {/* Navigation Buttons */}
           <div className="flex justify-end gap-4 mt-4">
             <button
-              className={`prev-btn-${sliderId} p-2 border border-white rounded-full transition-all duration-300 ${isBeginning ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-black'
-                }`}
+              className={`prev-btn-${sliderId} p-2 border border-white rounded-full transition-all duration-300 ${
+                isBeginning
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-white hover:text-black"
+              }`}
               disabled={isBeginning}
             >
               <AiOutlineLeft size={20} />
             </button>
             <button
-              className={`next-btn-${sliderId} p-2 border border-white rounded-full transition-all duration-300 ${isEnd ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-black'
-                }`}
+              className={`next-btn-${sliderId} p-2 border border-white rounded-full transition-all duration-300 ${
+                isEnd
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-white hover:text-black"
+              }`}
               disabled={isEnd}
             >
               <AiOutlineRight size={20} />
@@ -135,7 +159,9 @@ const MyMeetingsSlider = ({ title, meetings, showCountdown = false, onMeetingCli
           </div>
         </>
       ) : (
-        <p className="text-gray-400 text-sm italic">No upcoming meetings found.</p>
+        <p className="text-gray-400 text-sm italic">
+          No upcoming meetings found.
+        </p>
       )}
     </div>
   );

@@ -8,11 +8,14 @@ import { useLocation } from "react-router-dom";
 import { useContext, useState } from "react";
 import { Constants } from "@videosdk.live/react-sdk";
 import { MeetingContext } from "../context/MeetingContext";
+import Modal from "../components/modal/Modal";
+import AddUsersToMeeting from "../components/dashboard/AddUsersToMeeting";
 
 const ConferenceRoom = () => {
   const { pathname } = useLocation();
   const { conference } = useContext(MeetingContext);
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
 
   const {
     me,
@@ -89,7 +92,10 @@ const ConferenceRoom = () => {
             </p>
           )}
         </div>
-        <button className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md">
+        <button
+          onClick={() => setShowAddUserModal(true)}
+          className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md"
+        >
           + Invite Member
         </button>
       </div>
@@ -153,6 +159,19 @@ const ConferenceRoom = () => {
           recordingState={recordingState}
           recordingTimer={recordingTimer}
         />
+      )}
+      {showAddUserModal && (
+        <Modal
+          isOpen={showAddUserModal}
+          closeModal={() => setShowAddUserModal(false)}
+        >
+          <AddUsersToMeeting
+            selectedMeeting={{
+              id: conference?.id,
+              title: conference?.title,
+            }}
+          />
+        </Modal>
       )}
     </div>
   ) : (

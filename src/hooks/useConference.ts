@@ -91,6 +91,20 @@ const useConference = () => {
     },
   });
 
+  // Add after `updateMeetingMutation`
+  const addUserToMeetingMutation = useMutation({
+    mutationFn: (payload) => client.post("/user/meetingInvitation", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["myMeetings"]);
+    },
+    onError: (err) => {
+      onFailure({
+        message: "Failed to add user to meeting",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
   return {
     getMeetingInviteQuery,
     getMeetingByIdQuery,
@@ -98,6 +112,7 @@ const useConference = () => {
     getMyMeetingsQuery,
     createMeetingMutation,
     updateMeetingMutation,
+    addUserToMeetingMutation,
   };
 };
 

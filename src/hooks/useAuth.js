@@ -110,6 +110,14 @@ const useAuth = () => {
       return data.data;
     },
     onSuccess: (userData, variables) => {
+      if (userData?.user?.status === "block") {
+        onFailure({
+          message: "Access Denied",
+          error: "Your account has been blocked. Please contact support.",
+        });
+        return;
+      }
+
       updateAuth(userData);
       navigate(variables?.from || "/dashboard/home", { replace: true });
       onSuccess({

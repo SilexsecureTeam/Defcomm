@@ -33,17 +33,23 @@ const WaitingScreen = ({
   const [countdown, setCountdown] = useState("");
   const [showEndMeetingModal, setShowEndMeetingModal] = useState(false);
   const [pendingJoin, setPendingJoin] = useState(false);
-  const { leave }= useMeeting();
+  const { leave } = useMeeting();
   const navigate = useNavigate();
-  const { conference, providerMeetingId, setConference, setShowConference, setIsScreenSharing } = useContext(MeetingContext);
+  const {
+    conference,
+    providerMeetingId,
+    setConference,
+    setShowConference,
+    setIsScreenSharing,
+  } = useContext(MeetingContext);
 
   const handleLeaveMeeting = async () => {
-      await leave();
-      setConference(null);
-      setShowConference(false)
-      setIsScreenSharing(false);
-      navigate('/dashboard/conference')
-    };
+    await leave();
+    setConference(null);
+    setShowConference(false);
+    setIsScreenSharing(false);
+    navigate("/dashboard/conference");
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -65,6 +71,21 @@ const WaitingScreen = ({
   }, [startTime]);
 
   const handleJoinClick = () => {
+    const now = new Date().getTime();
+    const meetingStart = new Date(waitingScreen.startdatetime).getTime();
+    const meetingDurationMs = (waitingScreen.duration || 0) * 60 * 1000;
+    const meetingEnd = meetingStart + meetingDurationMs;
+
+    if (now < meetingStart) {
+      alert("You can't join yet. The meeting has not started.");
+      return;
+    }
+
+    if (meetingDurationMs > 0 && now > meetingEnd) {
+      alert("You can no longer join. The meeting has ended.");
+      return;
+    }
+
     if (conference && providerMeetingId) {
       setShowEndMeetingModal(true);
     } else {
@@ -72,7 +93,7 @@ const WaitingScreen = ({
     }
   };
 
-  const handleEndAndJoin = async() => {
+  const handleEndAndJoin = async () => {
     setShowEndMeetingModal(false);
     setPendingJoin(true);
     await handleLeaveMeeting();
@@ -99,8 +120,7 @@ const WaitingScreen = ({
             </p>
           )}
           <p className="text-gray-400 text-sm">
-            Starts at:{" "}
-            {new Date(waitingScreen.startdatetime).toLocaleString()}
+            Starts at: {new Date(waitingScreen.startdatetime).toLocaleString()}
           </p>
 
           <div className="text-lg font-semibold text-yellow-400 mt-2">
@@ -130,8 +150,8 @@ const WaitingScreen = ({
           <div className="bg-white text-black p-6 rounded-lg max-w-sm w-full space-y-4 shadow-xl">
             <h3 className="text-xl font-semibold">Leave Current Meeting?</h3>
             <p>
-              You are already in another meeting. Do you want to end it and
-              join this one?
+              You are already in another meeting. Do you want to end it and join
+              this one?
             </p>
             <div className="flex justify-end gap-4 mt-4">
               <button
@@ -142,6 +162,7 @@ const WaitingScreen = ({
               </button>
               <button
                 onClick={handleEndAndJoin}
+                disabled={isJoining || pendingJoin}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 End and Join

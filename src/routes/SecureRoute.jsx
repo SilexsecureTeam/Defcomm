@@ -6,10 +6,14 @@ const SecureRoute = () => {
   const { authDetails, isLoading } = useContext(AuthContext);
   const location = useLocation();
 
-  if (isLoading)
+  if (isLoading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
+  }
 
-  if (!authDetails?.user) {
+  const status = authDetails?.user?.status;
+
+  // Allow only 'active' and 'pending' users
+  if (status !== "active" && status !== "pending") {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
