@@ -106,7 +106,7 @@ const useComm = () => {
 
   const broadcastMessage = useMutation({
     mutationFn: (payload) =>
-      client.post("/walkietalkie/broadcast", payload, {
+      client.post("/walkietalkie/channelbroadcast", payload, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

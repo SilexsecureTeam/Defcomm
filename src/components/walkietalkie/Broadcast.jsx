@@ -43,7 +43,7 @@ const Broadcast = () => {
   const token = authDetails?.access_token;
 
   useCommChannel({
-    channelId: activeChannel?.id || activeChannel?.channel_id,
+    channelId: activeChannel?.id,
     token,
     onTransmit: (data) => {
       console.log("Transmitting:", data);
@@ -53,9 +53,11 @@ const Broadcast = () => {
     },
   });
 
+  console.log("Active Channel:", activeChannel);
   const handleChannelClick = (channel) => {
-    setActiveChannel(channel);
-    setConnectingChannelId(channel.id);
+    const id = channel.id || channel.channel_id; // fallback for invited
+    setConnectingChannelId(id);
+    setActiveChannel({ ...channel, id }); // ensure activeChannel always has `id`
   };
 
   const handleInviteClick = (e, channel) => {
@@ -68,7 +70,7 @@ const Broadcast = () => {
   const combinedChannels = [
     ...(channels || []),
     ...(invitedChannels?.filter(
-      (inv) => !(channels || []).some((ch) => ch.id === inv.id)
+      (inv) => !(channels || []).some((ch) => ch.id === inv.channel_id)
     ) || []),
   ];
 
@@ -114,8 +116,10 @@ const Broadcast = () => {
       {!isLoading &&
         !isError &&
         combinedChannels.map((item) => {
-          const isActive = activeChannel?.id === item.id;
-          const isInvited = invitedChannels?.some((inv) => inv.id === item.id);
+          const isActive = activeChannel?.id === (item.id || item.channel_id);
+          const isInvited = invitedChannels?.some(
+            (inv) => inv.channel_id === (item.id || item.channel_id)
+          );
 
           return (
             <div

@@ -51,7 +51,7 @@ const VoiceRecordButton = ({ channelId }) => {
   const handleSend = () => {
     if (!audioBlob || !channelId) return;
     const formData = new FormData();
-    formData.append("channel_id", channelId);
+    formData.append("channel", channelId);
     formData.append("record", audioBlob, "voice.webm");
 
     broadcastMessage.mutateAsync(formData, {

@@ -36,15 +36,6 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
     setConnectingChannelId(channelId);
     setIsCommActive(false);
 
-    // Skip if same channel already connected
-    if (
-      lastConnectedChannelRef.current === channelId &&
-      pusherRef.current &&
-      channelRef.current
-    ) {
-      return;
-    }
-
     // Clean up previous channel
     if (channelRef.current) {
       channelRef.current.unbind("transmit", stableOnTransmit);
@@ -99,7 +90,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       setIsCommActive(false);
       setConnectingChannelId(null); // ✅ Reset even on cleanup
     };
-  }, [channelId, token]);
+  }, [channelId, token, activeChannel]);
 
   return {
     pusher: pusherRef.current,
