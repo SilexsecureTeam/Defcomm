@@ -11,11 +11,8 @@ import {
 import { PiChatCircleTextBold } from "react-icons/pi";
 import { RiBatteryChargeFill } from "react-icons/ri";
 import { IoMdFlame } from "react-icons/io";
-
 import useComm from "../../hooks/useComm";
-import useCommChannel from "../../hooks/useCommChannel";
 import AudioVisualizer from "../charts/AudioVisualizer";
-import { AuthContext } from "../../context/AuthContext";
 import { CommContext } from "../../context/CommContext";
 import { stringToColor } from "../../utils/formmaters";
 import Modal from "../modal/Modal";
@@ -24,7 +21,6 @@ import LoaderCard from "./LoaderCard";
 import EmptyState from "./EmptyState";
 
 const Broadcast = () => {
-  const { authDetails } = useContext(AuthContext);
   const {
     setActiveChannel,
     activeChannel,
@@ -40,20 +36,6 @@ const Broadcast = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState(null);
 
-  const token = authDetails?.access_token;
-
-  useCommChannel({
-    channelId: activeChannel?.id,
-    token,
-    onTransmit: (data) => {
-      console.log("Transmitting:", data);
-    },
-    onStatus: (data) => {
-      console.log("Status update:", data);
-    },
-  });
-
-  console.log("Active Channel:", activeChannel);
   const handleChannelClick = (channel) => {
     const id = channel.id || channel.channel_id; // fallback for invited
     setConnectingChannelId(id);
@@ -116,7 +98,7 @@ const Broadcast = () => {
       {!isLoading &&
         !isError &&
         combinedChannels.map((item) => {
-          const isActive = activeChannel?.id === (item.id || item.channel_id);
+          const isActive = activeChannel?.frequency === item.frequency;
           const isInvited = invitedChannels?.some(
             (inv) => inv.channel_id === (item.id || item.channel_id)
           );

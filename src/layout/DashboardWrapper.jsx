@@ -28,6 +28,8 @@ import { FaPhone } from "react-icons/fa6";
 import IncomingCallWidget from "../utils/IncomingCallWidget";
 import audioController from "../utils/audioController";
 import AddContactInterface from "../components/dashboard/AddContactInterface";
+import useCommChannel from "../hooks/useCommChannel";
+import { CommContext } from "../context/CommContext";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -57,6 +59,7 @@ const DashboardWrapper = ({ children }) => {
   } = useContext(ChatContext);
 
   const { state, dispatch } = useContext(DashboardContext);
+  const { activeChannel } = useContext(CommContext);
   const { fetchContacts } = useChat();
   const { pathname } = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -66,6 +69,18 @@ const DashboardWrapper = ({ children }) => {
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT",
     staleTime: 0,
+  });
+
+  // ✅ COMMUNICATION CHANNEL SETUP
+  useCommChannel({
+    channelId: activeChannel?.id,
+    token: authDetails?.access_token,
+    onTransmit: (data) => {
+      console.log("Transmitting:", data);
+    },
+    onStatus: (data) => {
+      console.log("Status update:", data);
+    },
   });
 
   // ✅ PUSHER LISTENER

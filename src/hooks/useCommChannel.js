@@ -90,11 +90,14 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       setIsCommActive(false);
       setConnectingChannelId(null); // ✅ Reset even on cleanup
     };
-  }, [channelId, token, activeChannel]);
+  }, [channelId, token]);
 
-  return {
-    pusher: pusherRef.current,
-    channel: channelRef.current,
+  return () => {
+    try {
+      pusher.disconnect();
+    } catch (e) {
+      console.warn("Cleanup error:", e);
+    }
   };
 };
 
