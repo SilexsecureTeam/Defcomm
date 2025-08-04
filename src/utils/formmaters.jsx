@@ -96,3 +96,22 @@ export const maskEmail = (email) => {
 };
 
 export const maskPhone = (phone) => `${phone.substring(0, 5)}******`;
+export const stringToColor = (str) => {
+  if (typeof str !== "string" || !str.trim()) {
+    // Fallback: dark gray for invalid or empty strings
+    return "hsl(0, 0%, 20%)";
+  }
+
+  let hash = 0;
+
+  // Create a stable hash from the string
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const hue = Math.abs(hash % 360); // 0–359
+  const saturation = 80 + (Math.abs(hash) % 10); // 80%–89%
+  const lightness = 25 + (Math.abs(hash) % 10); // 25%–34%
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};

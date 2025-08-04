@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaCheck, FaSpinner } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import useGroups from "../../hooks/useGroup";
@@ -8,20 +8,30 @@ import { ChatContext } from "../../context/ChatContext";
 import useConference from "../../hooks/useConference";
 import { toast } from "react-toastify";
 import { onSuccess } from "../../utils/notifications/OnSuccess";
+import useComm from "../../hooks/useComm";
 
-const AddUsersToMeeting = ({ selectedMeeting }) => {
+const AddUsersToMeeting = ({ selectedMeeting, mode = "" }) => {
   const { useFetchGroups, useFetchGroupMembers } = useGroups();
   const { fetchContacts } = useChat();
   const { addUserToMeetingMutation } = useConference();
+  const { addUserToChannel } = useComm();
   const { setModalTitle } = useContext(ChatContext);
 
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  setModalTitle(
-    `Add Users to Meeting: ${selectedMeeting?.title || "New Meeting"}`
-  );
+  useEffect(() => {
+    if (mode === "channel") {
+      setModalTitle(
+        `Add Users to Channel: ${selectedMeeting?.name || "New Meeting"}`
+      );
+    } else {
+      setModalTitle(
+        `Add Users to Meeting: ${selectedMeeting?.title || "New Meeting"}`
+      );
+    }
+  }, [selectedMeeting, setModalTitle]);
 
   const { data: contacts, isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts"],
@@ -43,7 +53,7 @@ const AddUsersToMeeting = ({ selectedMeeting }) => {
   };
 
   const handleInvite = async () => {
-    if (!selectedMeeting?.id) {
+    if (!selectedMeeting?.id && mode !== "channel") {
       toast.error("No meeting selected.");
       return;
     }
@@ -53,24 +63,35 @@ const AddUsersToMeeting = ({ selectedMeeting }) => {
     try {
       const userIds = selectedUsers.map((u) => u.member_id_encrpt);
 
-      await addUserToMeetingMutation.mutateAsync({
-        meetings_id: selectedMeeting.id,
-        users: JSON.stringify(userIds), // Array of encrypted IDs
-      });
+      if (mode === "channel") {
+        // Create a new channel with selected users
+        await addUserToChannel.mutateAsync({
+          channel_id: selectedMeeting?.id,
+          users: JSON.stringify(userIds),
+        });
 
-      // ✅ Trigger your custom success handler
-      onSuccess?.({
-        message: "User added to meeting!",
-        success: `Successfully invited ${selectedUsers.length} user${
-          selectedUsers.length === 1 ? "" : "s"
-        }.`,
-      });
+        onSuccess?.({
+          message: "User added to channel!",
+          success: `Successfully invited ${selectedUsers.length} user${
+            selectedUsers.length === 1 ? "" : "s"
+          }.`,
+        });
+      } else {
+        // Add users to existing meeting
+        await addUserToMeetingMutation.mutateAsync({
+          meetings_id: selectedMeeting.id,
+          users: JSON.stringify(userIds),
+        });
 
-      // ✅ Reset selection
+        onSuccess?.({
+          message: "User added to meeting!",
+          success: `Successfully invited ${selectedUsers.length} user${
+            selectedUsers.length === 1 ? "" : "s"
+          }.`,
+        });
+      }
+
       setSelectedUsers([]);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to invite users.");
     } finally {
       setIsSubmitting(false);
     }

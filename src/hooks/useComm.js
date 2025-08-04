@@ -25,6 +25,34 @@ const useComm = () => {
     refetchOnWindowFocus: true,
   });
 
+  const getInvitedChannelList = useQuery({
+    queryKey: ["channelList Invited"],
+    queryFn: async () => {
+      const { data } = await client.get(
+        "/walkietalkie/channellistinvited/active"
+      );
+      return data?.data || [];
+    },
+    enabled: !!authDetails?.user_enid,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
+  const getInvitedChannelPending = useQuery({
+    queryKey: ["channelList Invited Pending"],
+    queryFn: async () => {
+      const { data } = await client.get(
+        "/walkietalkie/channellistinvited/pending"
+      );
+      return data?.data || [];
+    },
+    enabled: !!authDetails?.user_enid,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
   // ➕ Create New Comm Channel
   const createChannelMutation = useMutation({
     mutationFn: (payload) =>
@@ -44,9 +72,61 @@ const useComm = () => {
     },
   });
 
+  const addUserToChannel = useMutation({
+    mutationFn: (payload) =>
+      client.post("/walkietalkie/channelinvite", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["channelList"]);
+    },
+    onError: (err) => {
+      onFailure({
+        message: "Failed to add user to channel",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+  const updateChannelInviteStatus = useMutation({
+    mutationFn: (payload) =>
+      client.post("/walkietalkie/channelinvitedstatus", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["channelList Invited"]);
+      queryClient.invalidateQueries(["channelList Invited Pending"]);
+      onSuccess({
+        message: "Channel invitation status updated!",
+        success: "Updated successfully",
+      });
+    },
+    onError: (err) => {
+      onFailure({
+        message: "Failed to update channel invitation status",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
+  const broadcastMessage = useMutation({
+    mutationFn: (payload) =>
+      client.post("/walkietalkie/broadcast", payload, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
+    onError: (err) => {
+      onFailure({
+        message: "Failed to broadcast message",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
   return {
     getChannelList,
     createChannelMutation,
+    addUserToChannel,
+    getInvitedChannelList,
+    getInvitedChannelPending,
+    updateChannelInviteStatus,
+    broadcastMessage,
   };
 };
 

@@ -6,6 +6,7 @@ import AudioVisualizer from "../charts/AudioVisualizer";
 import { FiPlus } from "react-icons/fi";
 import InitComm from "./InitComm";
 import { CommContext } from "../../context/CommContext";
+import VoiceRecordButton from "./VoiceRecordButton";
 
 const CommInterface = () => {
   const { isCommActive, activeChannel, connectingChannelId } =
@@ -84,9 +85,7 @@ const CommInterface = () => {
         </div>
       </div>
 
-      <button className="mt-6 bg-red-600 p-4 rounded-full">
-        <FaMicrophone size={30} />
-      </button>
+      {activeChannel?.id && <VoiceRecordButton channelId={activeChannel.id} />}
       <p className="text-xs mt-2">Press & hold to talk</p>
     </div>
   );

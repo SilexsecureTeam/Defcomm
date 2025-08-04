@@ -91,7 +91,6 @@ const useConference = () => {
     },
   });
 
-  // Add after `updateMeetingMutation`
   const addUserToMeetingMutation = useMutation({
     mutationFn: (payload) => client.post("/user/meetingInvitation", payload),
     onSuccess: () => {
