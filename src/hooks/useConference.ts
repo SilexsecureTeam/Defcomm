@@ -73,7 +73,7 @@ const useConference = () => {
     },
   });
 
-  // Create Meeting Mutation
+  // Update Meeting Mutation
   const updateMeetingMutation = useMutation({
     mutationFn: (payload) => client.post("/user/meeting/update", payload),
     onSuccess: () => {
