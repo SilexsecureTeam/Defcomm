@@ -73,7 +73,7 @@ const DashboardWrapper = ({ children }) => {
 
   // ✅ COMMUNICATION CHANNEL SETUP
   useCommChannel({
-    channelId: activeChannel?.id,
+    channelId: activeChannel?.channel_id_un,
     token: authDetails?.access_token,
     onTransmit: (data) => {
       console.log("Transmitting:", data);

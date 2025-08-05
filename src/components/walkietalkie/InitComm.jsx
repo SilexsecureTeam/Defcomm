@@ -8,7 +8,7 @@ const InitComm = () => {
 
   return (
     <div
-      className="bg-oliveLight min-h-full w-full min-w-[320px] max-w-[400px] py-8 px-6 text-white flex flex-col items-center justify-center"
+      className="bg-oliveLight min-h-96 w-full min-w-[320px] max-w-[400px] py-8 px-6 text-white flex flex-col items-center justify-center"
       style={{
         background: `linear-gradient(to bottom, #36460A 10%, #000000 65%)`,
       }}

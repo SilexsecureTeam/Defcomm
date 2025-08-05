@@ -1,25 +1,14 @@
-import React, { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FiHome, FiUser, FiLogOut } from "react-icons/fi";
-import { AuthContext } from "../context/AuthContext";
-import DashTabs from "../components/dashboard/DashTabs";
+import React, { useContext } from "react";
 import Broadcast from "../components/walkietalkie/Broadcast";
 import RecentCalls from "../components/walkietalkie/RecentCalls";
-import EmergencyBanner from "../components/dashboard/EmergencyBanner";
-import Categories from "../components/dashboard/Categories";
-import SecureGroup from "../components/dashboard/SecureGroup";
 import SEOHelmet from "../engine/SEOHelmet";
-import useGroups from "../hooks/useGroup";
 import { FaBarsStaggered } from "react-icons/fa6";
 import { IoFlash } from "react-icons/io5";
-import Modal from "../components/modal/Modal";
 import CommInterface from "../components/walkietalkie/CommInterface";
+import { CommContext } from "../context/CommContext";
 
 const WalkieTalkie = () => {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const [isOpen, setIsOpen] = useState(false);
+  const { setIsOpenComm } = useContext(CommContext);
 
   return (
     <>
@@ -38,7 +27,7 @@ const WalkieTalkie = () => {
           aria-label="Open Communication Panel"
           size={24}
           className="cursor-pointer"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setIsOpenComm(true)}
         />
       </div>
 
@@ -53,12 +42,6 @@ const WalkieTalkie = () => {
           </div>
         </div>
       </div>
-
-      {isOpen && (
-        <Modal isOpen={isOpen} closeModal={() => setIsOpen(false)}>
-          <CommInterface />
-        </Modal>
-      )}
     </>
   );
 };

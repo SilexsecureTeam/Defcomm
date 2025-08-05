@@ -6,6 +6,7 @@ export const CommProvider = ({ children }) => {
   const [activeChannel, setActiveChannel] = useState(null);
   const [isCommActive, setIsCommActive] = useState(false);
   const [connectingChannelId, setConnectingChannelId] = useState(null);
+  const [isOpenComm, setIsOpenComm] = useState(false);
 
   return (
     <CommContext.Provider
@@ -16,6 +17,8 @@ export const CommProvider = ({ children }) => {
         setIsCommActive,
         connectingChannelId,
         setConnectingChannelId,
+        isOpenComm,
+        setIsOpenComm,
       }}
     >
       {children}

@@ -56,9 +56,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       forceTLS: true,
       disableStats: true,
       enabledTransports: ["ws", "wss"],
-      authEndpoint: `${
-        import.meta.env.VITE_API_URL
-      }/walkietalkie/channelbroadcast`,
+      authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT,
       auth: {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -66,7 +64,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       },
     });
 
-    const channelName = `${channelId}`;
+    const channelName = `private-walkie.${channelId}`;
     const channel = pusher.subscribe(channelName);
 
     channel.bind("pusher:subscription_succeeded", () => {
@@ -77,7 +75,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
     });
 
     channel.bind("transmit", stableOnTransmit);
-    channel.bind("private.message.sent", ({ data }) => {
+    channel.bind("walkie.message.sent", ({ data }) => {
       const newMessage = data;
       console.log("New message received:", newMessage);
     });

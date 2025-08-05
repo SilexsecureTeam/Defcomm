@@ -21,7 +21,7 @@ function RecentCalls() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-2">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center space-x-2">
           <MdQueueMusic size={20} className="text-green-400" />
