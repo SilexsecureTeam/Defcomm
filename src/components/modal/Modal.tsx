@@ -23,6 +23,19 @@ const Modal = ({
 
   if (!isOpen && !isMinimized) return null;
 
+  // Function to truncate the title to a specific character length.
+  const getTruncatedTitle = (
+    title: string | null | undefined,
+    maxLength: number
+  ) => {
+    if (!title) {
+      return "";
+    }
+    return title.length > maxLength
+      ? `${title.substring(0, maxLength)}...`
+      : title;
+  };
+
   return (
     <>
       {/* Full Modal Overlay */}
@@ -34,11 +47,15 @@ const Modal = ({
               : "opacity-0 pointer-events-none"
           }`}
         >
-          <div className="relative bg-white rounded-lg shadow-lg max-h-[90vh] overflow-hidden">
+          <div className="relative bg-white rounded-lg shadow-lg max-h-[90vh] overflow-hidden min-w-[100px]">
             {/* Sticky Header */}
             <div className="sticky top-0 z-10 bg-white p-2 border-b flex justify-between items-center gap-2">
-              <h1 className="text-oliveDark text-base font-bold mr-auto">
-                {modalTitle || ""}
+              <h1
+                title={modalTitle}
+                className="text-oliveDark text-base font-bold mr-auto min-w-0 overflow-hidden whitespace-nowrap text-ellipsis"
+              >
+                {/* Apply the truncation logic here */}
+                {getTruncatedTitle(modalTitle, 20)}
               </h1>
               {canMinimize && (
                 <button

@@ -39,7 +39,7 @@ const AddUsersToMeeting = ({ selectedMeeting, mode = "" }) => {
     staleTime: 0,
   });
 
-  const { data: groups, isLoading: isLoadingGroups } = useFetchGroups();
+  const { data: groups, isLoading: groupLoading } = useFetchGroups();
   const { data: groupMembers, isLoading: isLoadingGroupMembers } =
     useFetchGroupMembers(selectedGroup?.group_id);
 
@@ -98,9 +98,8 @@ const AddUsersToMeeting = ({ selectedMeeting, mode = "" }) => {
   };
 
   return (
-    <div className="p-5 w-[80vw] md:w-[600px] min-h-32 py-14 bg-oliveDark text-white">
-      {/* Group List */}
-      {isLoadingGroups ? (
+    <div className="p-5 w-[80vw] max-w-[600px] min-h-32 py-14 bg-oliveDark text-white">
+      {groupLoading ? (
         <div className="flex justify-center">
           <FaSpinner className="animate-spin text-white text-2xl" />
         </div>

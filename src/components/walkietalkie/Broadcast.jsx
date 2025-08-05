@@ -126,11 +126,14 @@ const Broadcast = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-semibold">{item.name}</span>
                     {/* Invite Badge and Button */}
-                    {isInvited && (
+                    {isInvited ? (
                       <div className="absolute bottom-2 right-2 flex gap-2 items-center">
                         <span className="cursor-none text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full shadow">
                           Invited
                         </span>
+                      </div>
+                    ) : (
+                      <div className="absolute bottom-2 right-2">
                         <button
                           onClick={(e) => handleInviteClick(e, item)}
                           className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
