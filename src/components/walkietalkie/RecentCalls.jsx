@@ -35,7 +35,7 @@ function RecentCalls() {
       ) : data?.length === 0 ? (
         <EmptyState />
       ) : (
-        data.map((call, index) => (
+        data?.map((call, index) => (
           <div
             key={index}
             className="flex gap-3 items-center mt-4 p-3 bg-gray-800 text-white rounded-md even:bg-oliveGreen even:text-gray-900 shadow-sm"

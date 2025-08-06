@@ -3,10 +3,13 @@ import Pusher from "pusher-js";
 import { toast } from "react-toastify";
 import { CommContext } from "../context/CommContext";
 import { formatLocalTime } from "../utils/formmaters";
+import { AuthContext } from "../context/AuthContext";
 
 const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
+  const { authDetails } = useContext(AuthContext);
+  const user = authDetails?.user;
 
   const {
     setIsCommActive,
@@ -88,7 +91,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
         return updated.slice(0, 2);
       });
 
-      if (msg?.record) {
+      if (msg?.record && data?.sender?.id !== user?.id) {
         // Set current speaker immediately
         setCurrentSpeaker({
           name: msg.user_name || "Unknown",
