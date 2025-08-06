@@ -88,6 +88,18 @@ export const formatDate = (dateString) => {
     day: "numeric",
   });
 };
+export const formatLocalTime = () => {
+  return new Date().toLocaleString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+};
 
 export const maskEmail = (email) => {
   if (!email) return "";

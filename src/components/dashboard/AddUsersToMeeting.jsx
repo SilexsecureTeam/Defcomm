@@ -53,7 +53,7 @@ const AddUsersToMeeting = ({ selectedMeeting, mode = "" }) => {
   };
 
   const handleInvite = async () => {
-    if (!selectedMeeting?.id && mode !== "channel") {
+    if (!selectedMeeting?.channel_id && mode !== "channel") {
       toast.error("No meeting selected.");
       return;
     }
@@ -66,7 +66,7 @@ const AddUsersToMeeting = ({ selectedMeeting, mode = "" }) => {
       if (mode === "channel") {
         // Create a new channel with selected users
         await addUserToChannel.mutateAsync({
-          channel_id: selectedMeeting?.id,
+          channel_id: selectedMeeting?.channel_id,
           users: JSON.stringify(userIds),
         });
 

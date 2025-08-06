@@ -37,9 +37,8 @@ const Broadcast = () => {
   const [selectedChannel, setSelectedChannel] = useState(null);
 
   const handleChannelClick = (channel) => {
-    const id = channel.id || channel.channel_id; // fallback for invited
-    setConnectingChannelId(id);
-    setActiveChannel({ ...channel, id }); // ensure activeChannel always has `id`
+    setConnectingChannelId(channel.channel_id_un);
+    setActiveChannel(channel);
   };
 
   const handleInviteClick = (e, channel) => {
@@ -52,7 +51,8 @@ const Broadcast = () => {
   const combinedChannels = [
     ...(channels || []),
     ...(invitedChannels?.filter(
-      (inv) => !(channels || []).some((ch) => ch.id === inv.channel_id)
+      (inv) =>
+        !(channels || []).some((ch) => ch.channel_id_un === inv.channel_id_un)
     ) || []),
   ];
 
@@ -100,7 +100,7 @@ const Broadcast = () => {
         combinedChannels.map((item) => {
           const isActive = activeChannel?.frequency === item.frequency;
           const isInvited = invitedChannels?.some(
-            (inv) => inv.channel_id === (item.id || item.channel_id)
+            (inv) => inv.channel_id_un === item.channel_id_un
           );
 
           return (
@@ -151,7 +151,8 @@ const Broadcast = () => {
                           color: isCommActive ? "#166534" : "#92400e",
                         }}
                       >
-                        {connectingChannelId === item.id && !isCommActive
+                        {connectingChannelId === item.channel_id_un &&
+                        !isCommActive
                           ? "Connecting..."
                           : isCommActive
                           ? "Connected"

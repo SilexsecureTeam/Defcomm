@@ -5,20 +5,25 @@ import { MeetingContext } from "../context/MeetingContext";
 import SecureConference from "../pages/SecureConference";
 import { CommContext } from "../context/CommContext";
 import Modal from "../components/modal/Modal";
-import { FiPlus } from "react-icons/fi";
+import { FiMic } from "react-icons/fi";
 import CommInterface from "../components/walkietalkie/CommInterface";
 
 const DashboardLayout = () => {
   const { showConference } = useContext(MeetingContext);
-  const { isOpenComm, setIsOpenComm, isCommActive, activeChannel } =
-    useContext(CommContext);
+  const {
+    isOpenComm,
+    setIsOpenComm,
+    isCommActive,
+    activeChannel,
+    currentSpeaker, // 🆕 comes from context
+  } = useContext(CommContext);
 
   const { pathname } = useLocation();
 
   const isChatPage = pathname.includes("/dashboard/chat");
   const isWalkieTalkiePage = pathname.includes("/comm");
 
-  // Auto open modal if user navigates to /comm
+  // Auto open minimized modal if comm active but user not on walkie page
   useEffect(() => {
     if (!isWalkieTalkiePage && isCommActive && activeChannel) {
       setIsOpenComm(true);
@@ -51,11 +56,30 @@ const DashboardLayout = () => {
               closeModal={() => setIsOpenComm(false)}
               canMinimize={true}
               minimizedContent={
-                <div className="flex items-center gap-2">
-                  <span className="text-lg md:text-sm font-semibold flex items-center gap-2">
-                    <FiPlus size={20} /> Walkie Talkie
+                <div className="flex items-center gap-3">
+                  {/* Mic icon */}
+                  <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-green-600">
+                    <FiMic size={16} className="text-white" />
+                    {currentSpeaker && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    )}
+                  </div>
+
+                  {/* Text info */}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">
+                      {currentSpeaker
+                        ? `Speaking: ${currentSpeaker.name}`
+                        : "Walkie Talkie Active"}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {activeChannel?.name || "No channel name"}
+                    </span>
+                  </div>
+
+                  <span className="ml-auto text-xs text-gray-500">
+                    Click to expand
                   </span>
-                  <span className="text-xs text-gray-400">Click to expand</span>
                 </div>
               }
               title="Walkie Talkie Communication"
