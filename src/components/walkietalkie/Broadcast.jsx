@@ -27,6 +27,9 @@ const Broadcast = () => {
     isCommActive,
     connectingChannelId,
     setConnectingChannelId,
+    leaveChannel,
+    showCommLog,
+    setShowCommLog,
   } = useContext(CommContext);
 
   const { getChannelList, getInvitedChannelList } = useComm();
@@ -37,6 +40,11 @@ const Broadcast = () => {
   const [selectedChannel, setSelectedChannel] = useState(null);
 
   const handleChannelClick = (channel) => {
+    if (activeChannel?.frequency === channel.frequency) {
+      // Already active, do nothing
+      return;
+    }
+    leaveChannel(); // Cleanup previous state
     setConnectingChannelId(channel.channel_id_un);
     setActiveChannel(channel);
   };
@@ -45,6 +53,14 @@ const Broadcast = () => {
     e.stopPropagation();
     setSelectedChannel(channel);
     setShowInviteModal(true);
+  };
+
+  const handleShowLogClick = (e, channel) => {
+    e.stopPropagation();
+
+    if (isCommActive && activeChannel?.frequency === channel.frequency) {
+      setShowCommLog(true);
+    }
   };
 
   // Combine channels and invitedChannels while avoiding duplicates
@@ -162,7 +178,10 @@ const Broadcast = () => {
                   </div>
 
                   <div className="flex items-center space-x-3 overflow-x-auto">
-                    <MdMarkChatUnread className="size-4 hover:text-green-600" />
+                    <MdMarkChatUnread
+                      // onClick={(e) => handleShowLogClick(e, item)}
+                      className="size-4 hover:text-green-600"
+                    />
                     <FaDesktop className="size-4 hover:text-green-600" />
                     <FaWaveSquare className="size-4 hover:text-green-600" />
                     <PiChatCircleTextBold className="size-4 hover:text-green-600" />

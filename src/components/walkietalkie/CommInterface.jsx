@@ -17,7 +17,9 @@ const CommInterface = () => {
     connectingChannelId,
     currentSpeaker,
     leaveChannel,
-    walkieMessages, // <-- assuming from context
+    walkieMessages,
+    setShowCommLog,
+    showCommLog,
   } = useContext(CommContext);
 
   const [seconds, setSeconds] = useState(0);
@@ -69,9 +71,14 @@ const CommInterface = () => {
     >
       {/* Channel Header */}
       <div className="bg-oliveHover w-full mt-6 px-3 py-1 rounded-3xl">
-        <div className="flex items-center justify-between bg-lightGreen text-black p-2 rounded-md">
+        <div className="flex items-center justify-between gap-2 bg-lightGreen text-black p-2 rounded-md">
           <span className="font-semibold flex items-center gap-2">
-            <MdMarkChatUnread size={20} /> {activeChannel?.name}
+            <MdMarkChatUnread
+              onClick={() => setShowCommLog(!showCommLog)}
+              size={20}
+              className="cursor-pointer"
+            />{" "}
+            {activeChannel?.name}
           </span>
           <div className="flex items-center gap-3">
             <span>{formatTime(seconds)}</span>
@@ -151,7 +158,6 @@ const CommInterface = () => {
       {activeChannel?.channel_id && (
         <VoiceRecordButton channelId={activeChannel.channel_id} />
       )}
-      <p className="text-xs mt-2">Tap to talk</p>
     </div>
   );
 };

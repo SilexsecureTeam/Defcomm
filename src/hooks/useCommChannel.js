@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { CommContext } from "../context/CommContext";
 import { AuthContext } from "../context/AuthContext";
 import { formatLocalTime } from "../utils/formmaters";
-import radioSound from "../assets/audio/radio.mp3"; // background hiss
+import { useRadioHiss } from "../utils/walkie-talkie/useRadioHiss";
 
 const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
   const pusherRef = useRef(null);
@@ -12,6 +12,8 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
   const audioRef = useRef(null); // currently playing voice
   const queueRef = useRef([]); // queued messages
   const radioBgRef = useRef(null); // looping hiss background
+
+  const { startRadioHiss, stopRadioHiss } = useRadioHiss(0.03);
 
   const { authDetails } = useContext(AuthContext);
   const user = authDetails?.user;
@@ -37,25 +39,6 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
     },
     [onStatus]
   );
-
-  /** Start looping hiss */
-  const startRadioHiss = () => {
-    if (!radioBgRef.current) {
-      const hiss = new Audio(radioSound);
-      hiss.loop = true;
-      hiss.volume = 0.3; // subtle
-      radioBgRef.current = hiss;
-    }
-    radioBgRef.current.play().catch(() => {});
-  };
-
-  /** Stop hiss immediately */
-  const stopRadioHiss = () => {
-    if (radioBgRef.current) {
-      radioBgRef.current.pause();
-      radioBgRef.current.currentTime = 0;
-    }
-  };
 
   /** Plays the next queued message */
   const playNextInQueue = () => {

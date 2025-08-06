@@ -11,6 +11,7 @@ export const CommProvider = ({ children }) => {
   // Store walkie-talkie messages
   const [walkieMessages, setWalkieMessages] = useState([]);
   const [recentMessages, setRecentMessages] = useState([]);
+  const [showCommLog, setShowCommLog] = useState(false);
 
   // 🆕 Renamed liveSpeaker -> currentSpeaker
   const [currentSpeaker, setCurrentSpeaker] = useState(null);
@@ -24,6 +25,7 @@ export const CommProvider = ({ children }) => {
     setWalkieMessages([]);
     setRecentMessages([]);
     setIsOpenComm(false);
+    setShowCommLog(false);
   };
 
   return (
@@ -44,6 +46,8 @@ export const CommProvider = ({ children }) => {
         currentSpeaker,
         setCurrentSpeaker,
         leaveChannel,
+        showCommLog,
+        setShowCommLog,
       }}
     >
       {children}
