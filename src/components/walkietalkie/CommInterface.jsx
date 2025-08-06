@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { MdMarkChatUnread } from "react-icons/md";
 import { FiPlus } from "react-icons/fi";
 import { FaBroadcastTower, FaMicrophoneAlt } from "react-icons/fa";
@@ -8,6 +8,7 @@ import InitComm from "./InitComm";
 import { CommContext } from "../../context/CommContext";
 import VoiceRecordButton from "./VoiceRecordButton";
 import { formatLocalTime } from "../../utils/formmaters";
+import CommLogPanel from "./CommLogPanel";
 
 const CommInterface = () => {
   const {
@@ -16,9 +17,16 @@ const CommInterface = () => {
     connectingChannelId,
     currentSpeaker,
     leaveChannel,
+    walkieMessages, // <-- assuming from context
   } = useContext(CommContext);
 
   const [seconds, setSeconds] = useState(0);
+  const logEndRef = useRef(null);
+
+  // Auto-scroll to latest log
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [walkieMessages]);
 
   // Timer for connection time
   useEffect(() => {
@@ -32,10 +40,8 @@ const CommInterface = () => {
   }, [isCommActive, activeChannel, connectingChannelId]);
 
   const formatTime = (sec) => {
-    const m = Math.floor(sec / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (sec % 60).toString().padStart(2, "0");
+    const m = String(Math.floor(sec / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
     return `${m}:${s}`;
   };
 
@@ -122,13 +128,7 @@ const CommInterface = () => {
       </div>
 
       {/* Live / Idle Visualizer */}
-      <div className="my-4 mx-auto">
-        <AudioVisualizer
-          progress={currentSpeaker ? 80 : 20}
-          width={200}
-          height={60}
-        />
-      </div>
+      <CommLogPanel />
 
       {/* Group Info */}
       <div className="flex items-center gap-3 my-4">
@@ -151,7 +151,7 @@ const CommInterface = () => {
       {activeChannel?.channel_id && (
         <VoiceRecordButton channelId={activeChannel.channel_id} />
       )}
-      <p className="text-xs mt-2">Press & hold to talk</p>
+      <p className="text-xs mt-2">Tap to talk</p>
     </div>
   );
 };

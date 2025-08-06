@@ -14,12 +14,16 @@ export const CommProvider = ({ children }) => {
 
   // 🆕 Renamed liveSpeaker -> currentSpeaker
   const [currentSpeaker, setCurrentSpeaker] = useState(null);
+  // Function to leave the current channel
   const leaveChannel = () => {
     // cleanup state
     setIsCommActive(false);
     setActiveChannel(null);
     setCurrentSpeaker(null);
-    // optional: tell backend you disconnected
+    setConnectingChannelId(null);
+    setWalkieMessages([]);
+    setRecentMessages([]);
+    setIsOpenComm(false);
   };
 
   return (

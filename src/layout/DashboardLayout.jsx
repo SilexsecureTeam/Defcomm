@@ -70,16 +70,12 @@ const DashboardLayout = () => {
                     <span className="text-sm font-semibold">
                       {currentSpeaker
                         ? `Speaking: ${currentSpeaker.name}`
-                        : "Walkie Talkie Active"}
+                        : "Walkie Talkie"}
                     </span>
                     <span className="text-xs text-gray-400">
                       {activeChannel?.name || "No channel name"}
                     </span>
                   </div>
-
-                  <span className="ml-auto text-xs text-gray-500">
-                    Click to expand
-                  </span>
                 </div>
               }
               title="Walkie Talkie Communication"

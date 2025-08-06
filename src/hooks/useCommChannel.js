@@ -2,12 +2,17 @@ import { useContext, useEffect, useRef, useCallback } from "react";
 import Pusher from "pusher-js";
 import { toast } from "react-toastify";
 import { CommContext } from "../context/CommContext";
-import { formatLocalTime } from "../utils/formmaters";
 import { AuthContext } from "../context/AuthContext";
+import { formatLocalTime } from "../utils/formmaters";
+import radioSound from "../assets/audio/radio.mp3"; // background hiss
 
 const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
+  const audioRef = useRef(null); // currently playing voice
+  const queueRef = useRef([]); // queued messages
+  const radioBgRef = useRef(null); // looping hiss background
+
   const { authDetails } = useContext(AuthContext);
   const user = authDetails?.user;
 
@@ -17,23 +22,74 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
     setConnectingChannelId,
     setWalkieMessages,
     setRecentMessages,
-    setCurrentSpeaker, // 🆕 use setter
+    setCurrentSpeaker,
   } = useContext(CommContext);
 
   const stableOnTransmit = useCallback(
-    (data) => {
-      if (onTransmit) onTransmit(data);
-    },
+    (data) => onTransmit?.(data),
     [onTransmit]
   );
 
   const stableOnStatus = useCallback(
     (data) => {
-      if (onStatus) onStatus(data);
+      onStatus?.(data);
       toast.info(`${data.name} ${data.status}`);
     },
     [onStatus]
   );
+
+  /** Start looping hiss */
+  const startRadioHiss = () => {
+    if (!radioBgRef.current) {
+      const hiss = new Audio(radioSound);
+      hiss.loop = true;
+      hiss.volume = 0.3; // subtle
+      radioBgRef.current = hiss;
+    }
+    radioBgRef.current.play().catch(() => {});
+  };
+
+  /** Stop hiss immediately */
+  const stopRadioHiss = () => {
+    if (radioBgRef.current) {
+      radioBgRef.current.pause();
+      radioBgRef.current.currentTime = 0;
+    }
+  };
+
+  /** Plays the next queued message */
+  const playNextInQueue = () => {
+    if (queueRef.current.length === 0) {
+      setCurrentSpeaker(null);
+      stopRadioHiss();
+      return;
+    }
+
+    const nextMsg = queueRef.current.shift();
+
+    setCurrentSpeaker({
+      name:
+        nextMsg.sender?.id === user?.id
+          ? "You"
+          : nextMsg.user_name || "Unknown",
+      time: formatLocalTime(),
+    });
+
+    // Start background hiss before voice
+    startRadioHiss();
+
+    const audioUrl = `${import.meta.env.VITE_BASE_URL}/${nextMsg.record}`;
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+
+    audio.play().catch((err) => console.warn("Audio play error:", err));
+
+    audio.onended = () => {
+      stopRadioHiss(); // stop when done
+      audioRef.current = null;
+      playNextInQueue();
+    };
+  };
 
   useEffect(() => {
     if (!channelId || !token) return;
@@ -41,7 +97,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
     setConnectingChannelId(channelId);
     setIsCommActive(false);
 
-    // Cleanup old connection
+    // cleanup old
     if (channelRef.current) {
       channelRef.current.unbind("transmit", stableOnTransmit);
       channelRef.current.unbind("status", stableOnStatus);
@@ -54,7 +110,6 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       channelRef.current = null;
     }
 
-    // Setup Pusher
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
       cluster: "mt1",
       wsHost: import.meta.env.VITE_PUSHER_HOST,
@@ -62,11 +117,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       disableStats: true,
       enabledTransports: ["ws", "wss"],
       authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT,
-      auth: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
+      auth: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     const channelName = `private-walkie.${channelId}`;
@@ -80,31 +131,23 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
 
     channel.bind("transmit", stableOnTransmit);
 
-    // Handle received walkie message
     channel.bind("walkie.message.sent", ({ data }) => {
-      const msg = data.mss_chat;
-      console.log("Received walkie message:", data);
+      const msg = {
+        ...data.mss_chat,
+        display_name:
+          data.sender?.id === user?.id
+            ? "You"
+            : data.mss_chat.user_name || "Unknown",
+      };
+
+      console.log("Received walkie message:", msg);
 
       setWalkieMessages((prev) => [...prev, msg]);
-      setRecentMessages((prev) => {
-        const updated = [msg, ...prev];
-        return updated.slice(0, 2);
-      });
+      setRecentMessages((prev) => [msg, ...prev].slice(0, 2));
 
-      if (msg?.record && data?.sender?.id !== user?.id) {
-        // Set current speaker immediately
-        setCurrentSpeaker({
-          name: msg.user_name || "Unknown",
-          time: formatLocalTime(),
-        });
-
-        const audioUrl = `${import.meta.env.VITE_BASE_URL}/${msg.record}`;
-        const audio = new Audio(audioUrl);
-        audio.play().catch(console.warn);
-
-        audio.onended = () => {
-          setCurrentSpeaker(null);
-        };
+      if (msg?.record && data.sender?.id !== user?.id) {
+        queueRef.current.push(msg);
+        if (!audioRef.current) playNextInQueue();
       }
     });
 
@@ -120,6 +163,14 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       pusher.disconnect();
       setIsCommActive(false);
       setConnectingChannelId(null);
+      setCurrentSpeaker(null);
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      stopRadioHiss();
+      queueRef.current = [];
     };
   }, [channelId, token]);
 
