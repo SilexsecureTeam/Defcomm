@@ -123,7 +123,7 @@ const CommInterface = () => {
         </div>
 
         <figure className="w-24 h-32 rounded-3xl bg-gradient-to-b to-gray-400 from-oliveGreen text-xs font-medium flex flex-col items-center justify-center p-2 py-4 shadow-lg border border-oliveLight">
-          <p className="font-bold text-gray-100">{activeChannel?.frequency}</p>
+          <p className="font-bold text-gray-100 text-[10px]">{activeChannel?.frequency}</p>
           <small
             className={`text-lg mt-1 ${
               currentSpeaker ? "text-lime-800" : "text-gray-600"
