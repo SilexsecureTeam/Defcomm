@@ -151,7 +151,9 @@ const CommInterface = () => {
         </div>
 
         <div>
-          <p className="text-sm mt-1">Emergency Situation Room</p>
+          <p className="text-sm mt-1">
+            {activeChannel?.description || "Emergency Situation Room"}
+          </p>
           <p className="text-xs text-gray-400">+ 70 Live *************</p>
         </div>
       </div>
