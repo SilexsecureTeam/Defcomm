@@ -3,6 +3,12 @@ import { useState, useRef, useEffect } from "react";
 import { FaMicrophone, FaStop } from "react-icons/fa";
 import { MdSend, MdCancel } from "react-icons/md";
 import useComm from "../../hooks/useComm";
+import buttonSound from "../../assets/audio/radio-button.mp3";
+
+const playClickSound = () => {
+  const audio = new Audio(buttonSound);
+  audio.play().catch((err) => console.error("Failed to play sound:", err));
+};
 
 const VoiceRecordButton = ({ channelId }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -30,6 +36,7 @@ const VoiceRecordButton = ({ channelId }) => {
 
   const startRecording = async () => {
     try {
+      playClickSound();
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       recordedChunks.current = [];
@@ -60,6 +67,7 @@ const VoiceRecordButton = ({ channelId }) => {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current?.state === "recording") {
+      playClickSound();
       mediaRecorderRef.current.stop();
     }
   };

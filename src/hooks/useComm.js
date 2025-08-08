@@ -104,6 +104,25 @@ const useComm = () => {
     },
   });
 
+  const deleteChannel = useMutation({
+    mutationFn: (channelId) =>
+      client.get(`/walkietalkie/channedelete/${channelId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["channelList"]);
+      queryClient.invalidateQueries(["channelList Invited"]);
+      onSuccess({
+        message: "Channel deleted successfully!",
+        success: "Deleted",
+      });
+    },
+    onError: (err) => {
+      onFailure({
+        message: "Failed to delete channel",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
   const broadcastMessage = useMutation({
     mutationFn: (payload) =>
       client.post("/walkietalkie/channelbroadcast", payload, {
@@ -127,6 +146,7 @@ const useComm = () => {
     getInvitedChannelPending,
     updateChannelInviteStatus,
     broadcastMessage,
+    deleteChannel,
   };
 };
 

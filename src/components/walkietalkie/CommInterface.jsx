@@ -53,7 +53,7 @@ const CommInterface = () => {
 
   if (connectingChannelId) {
     return (
-      <div className="bg-black text-white h-full w-full flex flex-col justify-center items-center">
+      <div className="bg-black text-white w-full flex flex-col justify-center items-center min-h-96">
         <div className="loader border-4 border-oliveLight border-t-transparent rounded-full w-10 h-10 animate-spin"></div>
         <p className="mt-4 text-sm text-gray-300">
           Connecting to {activeChannel?.name || "channel"}...
@@ -123,7 +123,9 @@ const CommInterface = () => {
         </div>
 
         <figure className="w-24 h-32 rounded-3xl bg-gradient-to-b to-gray-400 from-oliveGreen text-xs font-medium flex flex-col items-center justify-center p-2 py-4 shadow-lg border border-oliveLight">
-          <p className="font-bold text-gray-100 text-[10px]">{activeChannel?.frequency}</p>
+          <p className="font-bold text-gray-100 text-[10px]">
+            {activeChannel?.frequency}
+          </p>
           <small
             className={`text-lg mt-1 ${
               currentSpeaker ? "text-lime-800" : "text-gray-600"

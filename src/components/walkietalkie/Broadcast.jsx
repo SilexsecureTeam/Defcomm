@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { IoShieldCheckmark } from "react-icons/io5";
-import { MdMarkChatUnread, MdMoreVert } from "react-icons/md";
+import { MdMarkChatUnread, MdMoreVert, MdDelete } from "react-icons/md";
+import ConfirmModal from "../modal/ConfirmModal";
 import {
   FaDesktop,
   FaWaveSquare,
@@ -19,6 +20,7 @@ import Modal from "../modal/Modal";
 import AddUsersToMeeting from "../dashboard/AddUsersToMeeting";
 import LoaderCard from "./LoaderCard";
 import EmptyState from "./EmptyState";
+import { onPrompt } from "../../utils/notifications/onPrompt";
 
 const Broadcast = () => {
   const {
@@ -28,16 +30,16 @@ const Broadcast = () => {
     connectingChannelId,
     setConnectingChannelId,
     leaveChannel,
-    showCommLog,
-    setShowCommLog,
   } = useContext(CommContext);
 
-  const { getChannelList, getInvitedChannelList } = useComm();
+  const { getChannelList, getInvitedChannelList, deleteChannel } = useComm();
   const { data: channels, isLoading, isError, refetch } = getChannelList;
   const { data: invitedChannels } = getInvitedChannelList;
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [channelToDelete, setChannelToDelete] = useState(null);
 
   const handleChannelClick = (channel) => {
     if (activeChannel?.frequency === channel.frequency) {
@@ -54,13 +56,36 @@ const Broadcast = () => {
     setSelectedChannel(channel);
     setShowInviteModal(true);
   };
-
-  const handleShowLogClick = (e, channel) => {
+  const handleDeleteClick = (e, channel) => {
     e.stopPropagation();
-
-    if (isCommActive && activeChannel?.frequency === channel.frequency) {
-      setShowCommLog(true);
+    if (
+      channel.channel_id_un === activeChannel?.channel_id_un &&
+      isCommActive
+    ) {
+      onPrompt({
+        title: "Cannot Delete Active Channel",
+        message:
+          "You cannot delete the channel you are currently connected to.",
+      });
+      return;
     }
+    setChannelToDelete(channel);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (!channelToDelete) return;
+
+    deleteChannel.mutate(channelToDelete.channel_id, {
+      onSuccess: () => {
+        setShowDeleteModal(false);
+        setChannelToDelete(null);
+        refetch();
+      },
+      onError: (error) => {
+        console.error("Delete channel error:", error);
+      },
+    });
   };
 
   // Combine channels and invitedChannels while avoiding duplicates
@@ -178,10 +203,7 @@ const Broadcast = () => {
                   </div>
 
                   <div className="flex items-center space-x-3 overflow-x-auto">
-                    <MdMarkChatUnread
-                      // onClick={(e) => handleShowLogClick(e, item)}
-                      className="size-4 hover:text-green-600"
-                    />
+                    <MdMarkChatUnread className="size-4 hover:text-green-600" />
                     <FaDesktop className="size-4 hover:text-green-600" />
                     <FaWaveSquare className="size-4 hover:text-green-600" />
                     <PiChatCircleTextBold className="size-4 hover:text-green-600" />
@@ -189,6 +211,13 @@ const Broadcast = () => {
                     <FaVolumeUp className="size-4 hover:text-green-600" />
                     <RiBatteryChargeFill className="size-4 hover:text-green-600" />
                     <FaSignal className="size-4 text-red-600" />
+                    {!isInvited && (
+                      <MdDelete
+                        className="size-4 text-red-500 hover:text-red-700"
+                        onClick={(e) => handleDeleteClick(e, item)}
+                        title="Delete Channel"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -208,6 +237,19 @@ const Broadcast = () => {
         >
           <AddUsersToMeeting selectedMeeting={selectedChannel} mode="channel" />
         </Modal>
+      )}
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && channelToDelete && (
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          closeModal={() => setShowDeleteModal(false)}
+          title="Delete Channel"
+          description={`Are you sure you want to delete the channel "${channelToDelete.name}"? This cannot be undone.`}
+          onConfirm={confirmDelete}
+          isLoading={deleteChannel.isPending}
+          confirmText="Delete"
+          confirmColor="red"
+        />
       )}
     </div>
   );

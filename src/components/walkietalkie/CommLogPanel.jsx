@@ -14,7 +14,7 @@ const CommLogPanel = () => {
     useContext(CommContext);
   const { authDetails } = useContext(AuthContext);
   const currentUserId = authDetails?.user?.id;
-  const { startRadioHiss, stopRadioHiss } = useRadioHiss(0.03);
+  const { startRadioHiss, stopRadioHiss } = useRadioHiss();
 
   const [expanded, setExpanded] = useState(false);
   const [newMessageAlert, setNewMessageAlert] = useState(false);
@@ -34,27 +34,14 @@ const CommLogPanel = () => {
 
   // Detect new message
   useEffect(() => {
-    if (
-      !expanded &&
-      !showCommLog &&
-      walkieMessages.length > lastMsgCount.current &&
-      lastMsgCount.current !== 0
-    ) {
+    if (walkieMessages.length > lastMsgCount.current) {
       const latest = walkieMessages[walkieMessages.length - 1];
       const latestUser = latest.display_name || latest.user_name || "Unknown";
       setAlertUser(latestUser);
       setNewMessageAlert(true);
     }
     lastMsgCount.current = walkieMessages.length;
-  }, [walkieMessages, expanded, showCommLog, currentUserId]);
-
-  // Stop alert if expanded or modal open
-  useEffect(() => {
-    if (expanded || showCommLog) {
-      setNewMessageAlert(false);
-      setAlertUser(null);
-    }
-  }, [expanded, showCommLog]);
+  }, [walkieMessages, showCommLog, currentUserId]);
 
   // Play / Pause audio
   const handlePlayPause = (msg, index) => {

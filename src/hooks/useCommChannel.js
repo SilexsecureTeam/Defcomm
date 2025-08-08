@@ -5,6 +5,7 @@ import { CommContext } from "../context/CommContext";
 import { AuthContext } from "../context/AuthContext";
 import { formatLocalTime } from "../utils/formmaters";
 import { useRadioHiss } from "../utils/walkie-talkie/useRadioHiss";
+import { useTranscribeAudio } from "./useTranscribeAudio";
 
 const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
   const pusherRef = useRef(null);
@@ -13,7 +14,11 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
   const queueRef = useRef([]); // queued messages
   const radioBgRef = useRef(null); // looping hiss background
 
-  const { startRadioHiss, stopRadioHiss } = useRadioHiss(0.03);
+  const { transcribe, transcript } = useTranscribeAudio(
+    import.meta.env.VITE_OPENAI_API_KEY
+  );
+
+  const { startRadioHiss, stopRadioHiss } = useRadioHiss();
 
   const { authDetails } = useContext(AuthContext);
   const user = authDetails?.user;
@@ -114,7 +119,7 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
 
     channel.bind("transmit", stableOnTransmit);
 
-    channel.bind("walkie.message.sent", ({ data }) => {
+    channel.bind("walkie.message.sent", async ({ data }) => {
       const msg = {
         ...data.mss_chat,
         display_name:
@@ -130,6 +135,21 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
 
       if (msg?.record && data.sender?.id !== user?.id) {
         queueRef.current.push(msg);
+
+        // Transcribe message using Whisper
+        try {
+          const audioUrl = `${import.meta.env.VITE_BASE_URL}/${msg.record}`;
+          const response = await fetch(audioUrl);
+          const audioBlob = await response.blob();
+          const file = new File([audioBlob], "audio.webm", {
+            type: audioBlob.type || "audio/webm",
+          });
+
+          await transcribe(file);
+          console.log("Transcript:", transcript);
+        } catch (err) {
+          console.warn("Error during transcription:", err);
+        }
         if (!audioRef.current) playNextInQueue();
       }
     });
