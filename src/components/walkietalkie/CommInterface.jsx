@@ -1,14 +1,20 @@
 import { useContext, useEffect, useState, useRef } from "react";
-import { MdMarkChatUnread } from "react-icons/md";
+import {
+  MdMarkChatUnread,
+  MdTouchApp,
+  MdPanTool,
+  MdPowerSettingsNew,
+} from "react-icons/md";
 import { FiPlus } from "react-icons/fi";
 import { FaBroadcastTower, FaMicrophoneAlt } from "react-icons/fa";
 import military from "../../assets/military.png";
-import AudioVisualizer from "../charts/AudioVisualizer";
 import InitComm from "./InitComm";
 import { CommContext } from "../../context/CommContext";
 import VoiceRecordButton from "./VoiceRecordButton";
 import { formatLocalTime } from "../../utils/formmaters";
 import CommLogPanel from "./CommLogPanel";
+import VoiceModeModal from "./VoiceModeModal";
+import CommHeader from "./CommHeader";
 
 const CommInterface = () => {
   const {
@@ -16,10 +22,7 @@ const CommInterface = () => {
     activeChannel,
     connectingChannelId,
     currentSpeaker,
-    leaveChannel,
     walkieMessages,
-    setShowCommLog,
-    showCommLog,
   } = useContext(CommContext);
 
   const [seconds, setSeconds] = useState(0);
@@ -29,23 +32,6 @@ const CommInterface = () => {
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [walkieMessages]);
-
-  // Timer for connection time
-  useEffect(() => {
-    let timer;
-    if (isCommActive && activeChannel && !connectingChannelId) {
-      timer = setInterval(() => setSeconds((prev) => prev + 1), 1000);
-    } else {
-      setSeconds(0);
-    }
-    return () => clearInterval(timer);
-  }, [isCommActive, activeChannel, connectingChannelId]);
-
-  const formatTime = (sec) => {
-    const m = String(Math.floor(sec / 60)).padStart(2, "0");
-    const s = String(sec % 60).padStart(2, "0");
-    return `${m}:${s}`;
-  };
 
   if (!isCommActive && !activeChannel && !connectingChannelId) {
     return <InitComm />;
@@ -70,27 +56,7 @@ const CommInterface = () => {
       }}
     >
       {/* Channel Header */}
-      <div className="bg-oliveHover w-full mt-6 px-3 py-1 rounded-3xl">
-        <div className="flex items-center justify-between gap-2 bg-lightGreen text-black p-2 rounded-md">
-          <span className="font-semibold flex items-center gap-2">
-            <MdMarkChatUnread
-              onClick={() => setShowCommLog(!showCommLog)}
-              size={20}
-              className="cursor-pointer"
-            />{" "}
-            {activeChannel?.name}
-          </span>
-          <div className="flex items-center gap-3">
-            <span>{formatTime(seconds)}</span>
-            <button
-              onClick={leaveChannel}
-              className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded-full shadow"
-            >
-              End
-            </button>
-          </div>
-        </div>
-      </div>
+      <CommHeader />
 
       {/* Timestamp & Logo */}
       <p className="self-start text-sm mt-4 flex items-center gap-2">
