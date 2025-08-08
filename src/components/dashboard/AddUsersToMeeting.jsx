@@ -53,7 +53,7 @@ const AddUsersToMeeting = ({ selectedMeeting, mode = "" }) => {
   };
 
   const handleInvite = async () => {
-    if (!selectedMeeting?.channel_id && mode !== "channel") {
+    if (!selectedMeeting?.channel_id && mode === "channel") {
       toast.error("No meeting selected.");
       return;
     }

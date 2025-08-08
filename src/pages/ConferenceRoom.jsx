@@ -165,12 +165,7 @@ const ConferenceRoom = () => {
           isOpen={showAddUserModal}
           closeModal={() => setShowAddUserModal(false)}
         >
-          <AddUsersToMeeting
-            selectedMeeting={{
-              id: conference?.id,
-              title: conference?.title,
-            }}
-          />
+          <AddUsersToMeeting selectedMeeting={conference} />
         </Modal>
       )}
     </div>

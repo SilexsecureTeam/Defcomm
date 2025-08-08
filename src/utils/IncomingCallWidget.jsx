@@ -23,12 +23,12 @@ const IncomingCallWidget = () => {
       callHandledRef.current = false;
       audioController.playRingtone();
 
-      // Auto-miss after 10s
+      // Auto-miss after 30s
       timeoutRef.current = setTimeout(() => {
         if (!callHandledRef.current) {
           handleReject(true); // autoMiss = true
         }
-      }, 10000);
+      }, 30000);
     } else {
       setShow(false);
       audioController.stopRingtone();
