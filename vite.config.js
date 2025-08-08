@@ -8,10 +8,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/secure': {
-        target: 'https://backend.defcomm.ng/',
+      "/secure": {
+        target: "https://backend.defcomm.ng/",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/secure/, '/api'),
+        rewrite: (path) => path.replace(/^\/secure/, ""),
       },
     },
   },

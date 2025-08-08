@@ -163,9 +163,11 @@ const Broadcast = () => {
 
               {/* Main Content */}
               <section className="p-3 flex-1">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                <div className="flex flex-wrap justify-between items-center gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold">{item.name}</span>
+                    <span className="flex-1 text-[16px] font-semibold max-w-40">
+                      {item.name}
+                    </span>
                     {/* Invite Badge and Button */}
                     {isInvited ? (
                       <div className="absolute bottom-2 right-2 flex gap-2 items-center">
