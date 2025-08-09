@@ -135,6 +135,8 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
           {isUser ? "You" : displayName || "Presenter"}
         </span>
         <button
+          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          aria-label="Fullscreen Toggle"
           onClick={handleFullscreenToggle}
           className="text-white text-xl hover:text-lime-400"
         >
