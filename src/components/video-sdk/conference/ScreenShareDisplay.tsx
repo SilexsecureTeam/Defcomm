@@ -13,8 +13,12 @@ const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
 
 const ScreenShareDisplay = ({ participantId, isUser }) => {
-  const { screenShareStream, screenShareOn, displayName } =
-    useParticipant(participantId);
+  const {
+    screenShareStream,
+    screenShareOn,
+    displayName,
+    screenShareAudioStream,
+  } = useParticipant(participantId);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoom, setZoom] = useState(1);
@@ -41,6 +45,16 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
     }
     return null;
   }, [screenShareOn, screenShareStream]);
+
+  const screenAudio = useMemo(() => {
+    if (screenShareOn && screenShareAudioStream) {
+      const stream = new MediaStream();
+      stream.addTrack(screenShareAudioStream.track);
+      return stream;
+    }
+    return null;
+  }, [screenShareOn, screenShareAudioStream]);
+
   // Clamp position to stay within bounds based on zoom
   const clampPosition = (pos) => {
     if (!containerRef.current || zoom <= 1) return { x: 0, y: 0 };
@@ -139,6 +153,11 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
           onError={(err) => console.error("Screen share error:", err)}
         />
       </div>
+
+      {/* Tab Audio (separate) */}
+      {screenAudio && (
+        <audio autoPlay playsInline controls={false} srcObject={screenAudio} />
+      )}
 
       {/* Zoom Controls */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 opacity-0 hover:opacity-100 transition-opacity duration-300 flex gap-4 bg-black bg-opacity-50 px-5 py-2 rounded-full">
