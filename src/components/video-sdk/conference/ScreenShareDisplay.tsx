@@ -12,21 +12,26 @@ import {
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
 
-const ScreenShareDisplay = ({
-  participantId,
-  isUser,
-}: {
-  participantId: string;
-  isUser: boolean;
-}) => {
+const ScreenShareDisplay = ({ participantId, isUser }) => {
   const { screenShareStream, screenShareOn, displayName } =
     useParticipant(participantId);
+
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  const dragStartRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleChange);
+    return () => document.removeEventListener("fullscreenchange", handleChange);
+  }, []);
 
   const screenStream = useMemo(() => {
     if (screenShareOn && screenShareStream) {
@@ -36,13 +41,9 @@ const ScreenShareDisplay = ({
     }
     return null;
   }, [screenShareOn, screenShareStream]);
-
-  if (!screenStream) return null;
-
   // Clamp position to stay within bounds based on zoom
-  const clampPosition = (pos: { x: number; y: number }) => {
+  const clampPosition = (pos) => {
     if (!containerRef.current || zoom <= 1) return { x: 0, y: 0 };
-
     const bounds = containerRef.current.getBoundingClientRect();
     const limitX = ((zoom - 1) * bounds.width) / 2;
     const limitY = ((zoom - 1) * bounds.height) / 2;
@@ -53,7 +54,7 @@ const ScreenShareDisplay = ({
     };
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e) => {
     if (zoom === 1) return;
     setDragging(true);
     dragStartRef.current = {
@@ -62,18 +63,16 @@ const ScreenShareDisplay = ({
     };
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e) => {
     if (!dragging || zoom === 1 || !dragStartRef.current) return;
     const newX = e.clientX - dragStartRef.current.x;
     const newY = e.clientY - dragStartRef.current.y;
-
-    const clamped = clampPosition({ x: newX, y: newY });
-    setPosition(clamped);
+    setPosition(clampPosition({ x: newX, y: newY }));
   };
 
   const handleMouseUp = () => setDragging(false);
 
-  const handleZoom = (delta: number) => {
+  const handleZoom = (delta) => {
     setZoom((prevZoom) => {
       const newZoom = clamp(prevZoom + delta, 1, 3);
       const newPos = newZoom === 1 ? { x: 0, y: 0 } : clampPosition(position);
@@ -82,12 +81,21 @@ const ScreenShareDisplay = ({
     });
   };
 
+  // Fullscreen toggle
+  const handleFullscreenToggle = () => {
+    if (!isFullscreen) {
+      containerRef.current?.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
+  if (!screenStream) return null;
+
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full bg-black rounded-lg overflow-hidden ${
-        isFullscreen ? "fixed inset-0 z-50" : ""
-      }`}
+      className="relative w-full h-full bg-black rounded-lg overflow-hidden"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -99,7 +107,7 @@ const ScreenShareDisplay = ({
           {isUser ? "You" : displayName || "Presenter"}
         </span>
         <button
-          onClick={() => setIsFullscreen((prev) => !prev)}
+          onClick={handleFullscreenToggle}
           title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           className="text-white text-xl hover:text-lime-400"
         >
@@ -132,8 +140,8 @@ const ScreenShareDisplay = ({
         />
       </div>
 
-      {/* Zoom Controls (Bottom Center) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-4 bg-black bg-opacity-50 px-5 py-2 rounded-full">
+      {/* Zoom Controls */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 opacity-0 hover:opacity-100 transition-opacity duration-300 flex gap-4 bg-black bg-opacity-50 px-5 py-2 rounded-full">
         <button
           onClick={() => handleZoom(0.1)}
           className="text-white text-2xl p-3 hover:bg-white hover:text-black rounded-full transition"
