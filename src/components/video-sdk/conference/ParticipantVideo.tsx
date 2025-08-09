@@ -1,193 +1,201 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParticipant } from "@videosdk.live/react-sdk";
-import ReactPlayer from "react-player";
 import {
-  FaExpand,
-  FaCompress,
-  FaSearchPlus,
-  FaSearchMinus,
-} from "react-icons/fa";
+  useParticipant,
+  useMeeting,
+  usePubSub,
+} from "@videosdk.live/react-sdk";
+import ReactPlayer from "react-player";
+import { FaVideo, FaVideoSlash, FaExpand, FaCompress } from "react-icons/fa";
+import { AiOutlineAudioMuted, AiOutlineAudio } from "react-icons/ai";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { motion } from "framer-motion";
+//@ts-ignore
+import logo from "../../../assets/logo-icon.png";
+import { FaHandPaper } from "react-icons/fa";
+import { toast } from "react-toastify";
 
-// Clamp utility
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
-
-const ScreenShareDisplay = ({ participantId, isUser }) => {
+const ParticipantVideo = ({
+  participantId,
+  label,
+  isMaximized,
+  onToggleMaximize,
+  key = 0,
+  removedParticipantsRef,
+}: {
+  participantId: string;
+  label: string;
+  isMaximized: boolean;
+  key?: number | string;
+  onToggleMaximize: () => void;
+  removedParticipantsRef: any;
+}) => {
   const {
-    screenShareStream,
-    screenShareOn,
-    displayName,
-    screenShareAudioStream,
+    webcamStream,
+    micStream,
+    remove,
+    disableMic,
+    webcamOn,
+    micOn,
+    isLocal,
   } = useParticipant(participantId);
+  const { messages } = usePubSub("HAND_RAISE");
+  const [handRaised, setHandRaised] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
+  const micRef = useRef(null);
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [dragging, setDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  // Fullscreen listener
-  useEffect(() => {
-    const handleChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
-    };
-    document.addEventListener("fullscreenchange", handleChange);
-    return () => document.removeEventListener("fullscreenchange", handleChange);
-  }, []);
-
-  // Prepare video stream
-  const screenStream = useMemo(() => {
-    if (screenShareOn && screenShareStream) {
-      const stream = new MediaStream();
-      stream.addTrack(screenShareStream.track);
-      return stream;
+  const videoStream = useMemo(() => {
+    if (webcamOn && webcamStream) {
+      const mediaStream = new MediaStream();
+      mediaStream.addTrack(webcamStream.track);
+      return mediaStream;
     }
     return null;
-  }, [screenShareOn, screenShareStream]);
+  }, [webcamStream, webcamOn]);
 
-  // Prepare audio stream
-  const screenAudio = useMemo(() => {
-    if (screenShareOn && screenShareAudioStream) {
-      const stream = new MediaStream();
-      stream.addTrack(screenShareAudioStream.track);
-      return stream;
-    }
-    return null;
-  }, [screenShareOn, screenShareAudioStream]);
-
-  // Attach audio stream to ref
   useEffect(() => {
-    if (audioRef.current && screenAudio) {
-      audioRef.current.srcObject = screenAudio;
-      audioRef.current
-        .play()
-        .catch((err) => console.error("Screen audio play error:", err));
+    if (micRef.current) {
+      if (micOn && micStream) {
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(micStream.track);
+        micRef.current.srcObject = mediaStream;
+        micRef.current.muted = isLocal;
+        micRef.current
+          .play()
+          .catch((err) => console.error("Mic play error", err));
+      } else {
+        micRef.current.srcObject = null;
+      }
     }
-  }, [screenAudio]);
-
-  // Clamp position to bounds
-  const clampPosition = (pos: { x: number; y: number }) => {
-    if (!containerRef.current || zoom <= 1) return { x: 0, y: 0 };
-    const bounds = containerRef.current.getBoundingClientRect();
-    const limitX = ((zoom - 1) * bounds.width) / 2;
-    const limitY = ((zoom - 1) * bounds.height) / 2;
-    return {
-      x: clamp(pos.x, -limitX, limitX),
-      y: clamp(pos.y, -limitY, limitY),
-    };
-  };
-
-  // Mouse handlers for panning
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoom === 1) return;
-    setDragging(true);
-    dragStartRef.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging || zoom === 1 || !dragStartRef.current) return;
-    const newX = e.clientX - dragStartRef.current.x;
-    const newY = e.clientY - dragStartRef.current.y;
-    setPosition(clampPosition({ x: newX, y: newY }));
-  };
-
-  const handleMouseUp = () => setDragging(false);
-
-  // Zoom handling
-  const handleZoom = (delta: number) => {
-    setZoom((prevZoom) => {
-      const newZoom = clamp(prevZoom + delta, 1, 3);
-      const newPos = newZoom === 1 ? { x: 0, y: 0 } : clampPosition(position);
-      setPosition(newPos);
-      return newZoom;
-    });
-  };
-
-  // Fullscreen toggle
-  const handleFullscreenToggle = () => {
-    if (!isFullscreen) {
-      containerRef.current?.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
+  }, [micOn, micStream, isLocal]);
+  useEffect(() => {
+    const latestMessage = messages[messages.length - 1];
+    if (latestMessage?.message?.id === participantId) {
+      setHandRaised(!!latestMessage?.message?.raised);
     }
-  };
-
-  if (!screenStream) return null;
+  }, [messages, participantId]);
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-full bg-black rounded-lg overflow-hidden"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+    <motion.div
+      key={key}
+      layout
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className={`relative bg-gray-200 rounded overflow-hidden ${
+        isMaximized
+          ? "col-span-full row-span-full w-full h-[60vh]"
+          : "aspect-square"
+      }`}
     >
-      {/* Header */}
-      <div className="absolute top-0 left-0 w-full flex justify-between items-center px-4 py-2 bg-black bg-opacity-50 z-20">
-        <span className="text-white font-semibold">
-          {isUser ? "You" : displayName || "Presenter"}
-        </span>
-        <button
-          onClick={handleFullscreenToggle}
-          className="text-white text-xl hover:text-lime-400"
-        >
-          {isFullscreen ? <FaCompress /> : <FaExpand />}
-        </button>
-      </div>
+      <audio ref={micRef} autoPlay playsInline />
 
-      {/* Zoom + Pan area */}
-      <div
-        className="absolute inset-0 flex justify-center items-center"
-        style={{
-          transform: `scale(${zoom}) translate(${position.x / zoom}px, ${
-            position.y / zoom
-          }px)`,
-          transformOrigin: "center center",
-          transition: dragging ? "none" : "transform 0.2s ease-out",
-          cursor: zoom > 1 ? "grab" : "default",
-        }}
-      >
+      {/* Video or fallback avatar */}
+      {videoStream ? (
         <ReactPlayer
-          playsinline
           playing
-          muted
+          muted={!isSpeakerEnabled}
           controls={false}
-          url={screenStream}
+          pip={false}
+          url={videoStream}
           width="100%"
           height="100%"
-          className="object-contain pointer-events-none"
+          className="rounded-lg object-cover"
         />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+          <img
+            src={logo}
+            alt="Avatar"
+            className="w-16 h-16 opacity-70 filter invert"
+          />
+        </div>
+      )}
+
+      {/* Name label */}
+      <div
+        title={label}
+        className="truncate max-w-[70%] absolute bottom-2 left-2 text-xs px-2 py-1 bg-gray-700 bg-opacity-50 rounded text-white"
+      >
+        {label}
       </div>
 
-      {/* Screen share audio */}
-      {screenAudio && <audio ref={audioRef} autoPlay playsInline />}
+      {/* Maximize / Minimize */}
+      <button
+        onClick={onToggleMaximize}
+        className="absolute bottom-2 right-2 p-1 bg-gray-800 text-white rounded"
+        aria-label={isMaximized ? "Minimize" : "Maximize"}
+      >
+        {isMaximized ? <FaCompress size={14} /> : <FaExpand size={14} />}
+      </button>
 
-      {/* Zoom controls (hidden until hover) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 opacity-0 hover:opacity-100 transition-opacity duration-300 flex gap-4 bg-black bg-opacity-50 px-5 py-2 rounded-full">
-        <button
-          onClick={() => handleZoom(0.1)}
-          className="text-white text-2xl p-3 hover:bg-white hover:text-black rounded-full transition"
-          title="Zoom In"
+      {handRaised && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          exit={{ scale: 0 }}
+          className="absolute top-8 left-2 p-1 bg-yellow text-black rounded-full shadow"
         >
-          <FaSearchPlus />
+          <FaHandPaper size={24} title="Hand Raised" />
+        </motion.div>
+      )}
+      {/* Participant Options Menu */}
+      {!isLocal && (
+        <div className="absolute top-2 left-2">
+          <div className="relative">
+            <button
+              className="p-1 bg-gray-800 text-white rounded hover:bg-gray-700"
+              onClick={() => setShowMenu((prev) => !prev)}
+            >
+              <BsThreeDotsVertical size={16} />
+            </button>
+
+            {showMenu && (
+              <div className="absolute z-10 mt-1 bg-white text-black rounded shadow">
+                <button
+                  onClick={() => {
+                    disableMic(); // Mutes the specific participant
+                    setShowMenu(false);
+                  }}
+                  className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
+                >
+                  Mute {label?.split(" ")[0]}
+                </button>
+                <button
+                  onClick={() => {
+                    remove(); // Mutes the specific participant
+                    removedParticipantsRef.current.add(participantId);
+                    setShowMenu(false);
+                  }}
+                  className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
+                >
+                  Remove {label?.split(" ")[0]}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mic & Cam Controls (UI Only) */}
+      <div className="absolute top-2 right-2 flex gap-2">
+        <button
+          className={`p-1 rounded ${webcamOn ? "bg-green-600" : "bg-red-600"}`}
+          aria-label={webcamOn ? "Turn off webcam" : "Turn on webcam"}
+        >
+          {webcamOn ? <FaVideo size={14} /> : <FaVideoSlash size={14} />}
         </button>
         <button
-          onClick={() => handleZoom(-0.1)}
-          className="text-white text-2xl p-3 hover:bg-white hover:text-black rounded-full transition"
-          title="Zoom Out"
+          className={`p-1 rounded ${micOn ? "bg-green-600" : "bg-red-600"}`}
+          aria-label={micOn ? "Mute mic" : "Unmute mic"}
         >
-          <FaSearchMinus />
+          {micOn ? (
+            <AiOutlineAudio size={14} />
+          ) : (
+            <AiOutlineAudioMuted size={14} />
+          )}
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-export default ScreenShareDisplay;
+export default ParticipantVideo;

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParticipant } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
 import {
@@ -25,10 +25,11 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const dragStartRef = useRef(null);
-  const containerRef = useRef(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Listen for fullscreen changes
+  // Fullscreen listener
   useEffect(() => {
     const handleChange = () => {
       setIsFullscreen(Boolean(document.fullscreenElement));
@@ -37,6 +38,7 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
     return () => document.removeEventListener("fullscreenchange", handleChange);
   }, []);
 
+  // Prepare video stream
   const screenStream = useMemo(() => {
     if (screenShareOn && screenShareStream) {
       const stream = new MediaStream();
@@ -46,6 +48,7 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
     return null;
   }, [screenShareOn, screenShareStream]);
 
+  // Prepare audio stream
   const screenAudio = useMemo(() => {
     if (screenShareOn && screenShareAudioStream) {
       const stream = new MediaStream();
@@ -55,20 +58,30 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
     return null;
   }, [screenShareOn, screenShareAudioStream]);
 
-  // Clamp position to stay within bounds based on zoom
-  const clampPosition = (pos) => {
+  // Attach audio stream to ref
+  useEffect(() => {
+    if (audioRef.current && screenAudio) {
+      audioRef.current.srcObject = screenAudio;
+      audioRef.current
+        .play()
+        .catch((err) => console.error("Screen audio play error:", err));
+    }
+  }, [screenAudio]);
+
+  // Clamp position to bounds
+  const clampPosition = (pos: { x: number; y: number }) => {
     if (!containerRef.current || zoom <= 1) return { x: 0, y: 0 };
     const bounds = containerRef.current.getBoundingClientRect();
     const limitX = ((zoom - 1) * bounds.width) / 2;
     const limitY = ((zoom - 1) * bounds.height) / 2;
-
     return {
       x: clamp(pos.x, -limitX, limitX),
       y: clamp(pos.y, -limitY, limitY),
     };
   };
 
-  const handleMouseDown = (e) => {
+  // Mouse handlers for panning
+  const handleMouseDown = (e: React.MouseEvent) => {
     if (zoom === 1) return;
     setDragging(true);
     dragStartRef.current = {
@@ -77,7 +90,7 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
     };
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
     if (!dragging || zoom === 1 || !dragStartRef.current) return;
     const newX = e.clientX - dragStartRef.current.x;
     const newY = e.clientY - dragStartRef.current.y;
@@ -86,7 +99,8 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
 
   const handleMouseUp = () => setDragging(false);
 
-  const handleZoom = (delta) => {
+  // Zoom handling
+  const handleZoom = (delta: number) => {
     setZoom((prevZoom) => {
       const newZoom = clamp(prevZoom + delta, 1, 3);
       const newPos = newZoom === 1 ? { x: 0, y: 0 } : clampPosition(position);
@@ -115,21 +129,20 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Top Header */}
+      {/* Header */}
       <div className="absolute top-0 left-0 w-full flex justify-between items-center px-4 py-2 bg-black bg-opacity-50 z-20">
         <span className="text-white font-semibold">
           {isUser ? "You" : displayName || "Presenter"}
         </span>
         <button
           onClick={handleFullscreenToggle}
-          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           className="text-white text-xl hover:text-lime-400"
         >
           {isFullscreen ? <FaCompress /> : <FaExpand />}
         </button>
       </div>
 
-      {/* Zoom and pan area */}
+      {/* Zoom + Pan area */}
       <div
         className="absolute inset-0 flex justify-center items-center"
         style={{
@@ -150,16 +163,13 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
           width="100%"
           height="100%"
           className="object-contain pointer-events-none"
-          onError={(err) => console.error("Screen share error:", err)}
         />
       </div>
 
-      {/* Tab Audio (separate) */}
-      {screenAudio && (
-        <audio autoPlay playsInline controls={false} srcObject={screenAudio} />
-      )}
+      {/* Screen share audio */}
+      {screenAudio && <audio ref={audioRef} autoPlay playsInline />}
 
-      {/* Zoom Controls */}
+      {/* Zoom controls (hidden until hover) */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 opacity-0 hover:opacity-100 transition-opacity duration-300 flex gap-4 bg-black bg-opacity-50 px-5 py-2 rounded-full">
         <button
           onClick={() => handleZoom(0.1)}
