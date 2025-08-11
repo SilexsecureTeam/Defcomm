@@ -100,7 +100,13 @@ const Groups = () => {
               <FaSpinner className="animate-spin text-white text-2xl" />
             </div>
           ) : groupMembers?.length ? (
-            <ul className="space-y-2">
+            <ul
+              className="space-y-2 max-h-96 overflow-y-auto"
+              // style={{
+              //   scrollbarWidth: "none", // Firefox
+              //   msOverflowStyle: "none", // IE/Edge
+              // }}
+            >
               {groupMembers.map((member) => (
                 <li key={member.id} className="p-2 bg-gray-700 rounded-md">
                   {member?.member_name || "Anonymous"}
