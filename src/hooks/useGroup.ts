@@ -58,6 +58,18 @@ const useGroups = () => {
       staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     });
 
+  const useFetchGroupInfo = (groupId: string | null) =>
+    useQuery({
+      queryKey: ["groupInfo", groupId], // Ensure unique cache per groupId
+      queryFn: async () => {
+        if (!groupId) return [];
+        const { data } = await client.get(`/user/group/member/${groupId}`);
+        return data || {};
+      },
+      enabled: !!authDetails && !!groupId, // Fetch only when authenticated and groupId is provided
+      staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    });
+
   // Fetch members of a specific group
   const useFetchPendingFiles = () =>
     useQuery({
@@ -149,6 +161,7 @@ const useGroups = () => {
     addContactMutation,
     removeContactMutation,
     useFetchPendingFiles,
+    useFetchGroupInfo,
   };
 };
 

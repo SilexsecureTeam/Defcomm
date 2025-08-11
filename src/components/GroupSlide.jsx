@@ -10,7 +10,7 @@ import mainLogo from "../assets/logo-icon.png";
 
 const GroupSlide = ({
   groups,
-  selectedGroup,
+  selectedGroup = {},
   setSelectedGroup,
   forceSingleView = false,
 }) => {
