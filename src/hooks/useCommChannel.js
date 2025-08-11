@@ -7,7 +7,7 @@ import { formatLocalTime } from "../utils/formmaters";
 import { useRadioHiss } from "../utils/walkie-talkie/useRadioHiss";
 import { useTranscribeAudio } from "./useTranscribeAudio";
 
-const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
+const useCommChannel = ({ channelId, token }) => {
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
   const audioRef = useRef(null); // currently playing voice
@@ -26,19 +26,6 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
     setRecentMessages,
     setCurrentSpeaker,
   } = useContext(CommContext);
-
-  const stableOnTransmit = useCallback(
-    (data) => onTransmit?.(data),
-    [onTransmit]
-  );
-
-  const stableOnStatus = useCallback(
-    (data) => {
-      onStatus?.(data);
-      toast.info(`${data.name} ${data.status}`);
-    },
-    [onStatus]
-  );
 
   /** Plays the next queued message */
   const playNextInQueue = () => {
@@ -112,8 +99,6 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       setConnectingChannelId(null);
     });
 
-    channel.bind("transmit", stableOnTransmit);
-
     channel.bind("walkie.message.sent", async ({ data }) => {
       const msg = {
         ...data.mss_chat,
@@ -147,14 +132,10 @@ const useCommChannel = ({ channelId, token, onTransmit, onStatus }) => {
       }
     });
 
-    channel.bind("status", stableOnStatus);
-
     pusherRef.current = pusher;
     channelRef.current = channel;
 
     return () => {
-      channel.unbind("transmit", stableOnTransmit);
-      channel.unbind("status", stableOnStatus);
       pusher.unsubscribe(channelName);
       pusher.disconnect();
       setIsCommActive(false);

@@ -1,5 +1,5 @@
 import { useContext, useMemo, useLayoutEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   utilOptions,
@@ -30,11 +30,14 @@ import audioController from "../utils/audioController";
 import AddContactInterface from "../components/dashboard/AddContactInterface";
 import useCommChannel from "../hooks/useCommChannel";
 import { CommContext } from "../context/CommContext";
+import useGroupChannel from "../hooks/useGroupChannel";
+import { GroupContext } from "../context/GroupContext";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
   const { authDetails } = useContext(AuthContext);
-  const userId = authDetails?.user?.id; // ✅ ADD THIS
+
+  const userId = authDetails?.user?.id;
 
   const {
     conference,
@@ -57,6 +60,7 @@ const DashboardWrapper = ({ children }) => {
     meetingId,
     setCallDuration,
   } = useContext(ChatContext);
+  const { activeGroup } = useContext(GroupContext);
 
   const { state, dispatch } = useContext(DashboardContext);
   const { activeChannel } = useContext(CommContext);
@@ -71,19 +75,19 @@ const DashboardWrapper = ({ children }) => {
     staleTime: 0,
   });
 
-  // ✅ COMMUNICATION CHANNEL SETUP
+  // Group Channel
+  useGroupChannel({
+    groupId: activeGroup?.group_meta?.id,
+    token: authDetails?.access_token,
+  });
+
+  // COMMUNICATION CHANNEL SETUP
   useCommChannel({
     channelId: activeChannel?.channel_id_un,
     token: authDetails?.access_token,
-    onTransmit: (data) => {
-      console.log("Transmitting:", data);
-    },
-    onStatus: (data) => {
-      console.log("Status update:", data);
-    },
   });
 
-  // ✅ PUSHER LISTENER
+  // PUSHER LISTENER
   usePusherChannel({
     userId: authDetails?.user?.id,
     token: authDetails?.access_token,
@@ -138,7 +142,7 @@ const DashboardWrapper = ({ children }) => {
           }
         );
 
-        // ✅ Handle missed call for receiver
+        // Handle missed call for receiver
         if (
           newMessage?.call?.call_state === "miss" &&
           newMessage?.call?.receiver_id === userId

@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import Fallback from "../components/Fallback";
 import { ThemeProvider } from "../context/ThemeContext";
 import { CommProvider } from "../context/CommContext";
+import { GroupProvider } from "../context/GroupContext";
 
 // Lazy-loaded pages
 const DashboardWrapper = lazy(() => import("../layout/DashboardWrapper"));
@@ -48,59 +49,67 @@ const DashboardRoutes = () => {
   return (
     <ThemeProvider>
       <CommProvider>
-        <Suspense fallback={<Fallback />}>
-          <Routes>
-            <Route path="/" element={<DashboardWrapper />}>
-              <Route path="home" element={<Home />} />
+        <GroupProvider>
+          <Suspense fallback={<Fallback />}>
+            <Routes>
+              <Route path="/" element={<DashboardWrapper />}>
+                <Route path="home" element={<Home />} />
 
-              <Route
-                path="chat"
-                element={
-                  <div className="w-full h-full">
-                    <div className="block lg:hidden">
-                      <ChatInterface />
+                <Route
+                  path="chat"
+                  element={
+                    <div className="w-full h-full">
+                      <div className="block lg:hidden">
+                        <ChatInterface />
+                      </div>
+                      <div className="hidden lg:block">
+                        <SecureChatUI />
+                      </div>
                     </div>
-                    <div className="hidden lg:block">
-                      <SecureChatUI />
-                    </div>
-                  </div>
-                }
-              />
+                  }
+                />
 
-              <Route path="new-file" element={<DeffViewer />} />
-              <Route path="view/:fileId" element={<PDFViewer />} />
-              <Route path="file-view/:fileUrl" element={<DeffViewer />} />
-              <Route path="contacts" element={<ContactPage />} />
-              <Route path="file-manager" element={<FileManager />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="file-sharing" element={<FileDashboard />} />
-              <Route path="groups" element={<Groups />} />
-              <Route
-                path="group/:groupId/chat"
-                element={<GroupChatInterface />}
-              />
-              <Route path="comm" element={<WalkieTalkie />} />
-              <Route path="drive" element={<MyDrive />} />
-              <Route path="drive/:id" element={<DriveContent />} />
-              <Route path="isurvive" element={<DefcommAi />} />
-              <Route path="isurvive/chat" element={<ChatBox />} />
-              <Route path="isurvive/voice" element={<ChatBoxTwo />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="conference" element={<InitConference />} />
-              <Route path="conference/room" element={<ShowConferenceRoute />} />
-              <Route
-                path="/conference/waiting/:meetingId"
-                element={<WaitingPage />}
-              />
-              <Route path="/conference/my-meetings" element={<MyMeetings />} />
-              <Route
-                path="/conference/create"
-                element={<CreateMeetingForm />}
-              />
-              <Route path="*" element={<ComingSoon />} />
-            </Route>
-          </Routes>
-        </Suspense>
+                <Route path="new-file" element={<DeffViewer />} />
+                <Route path="view/:fileId" element={<PDFViewer />} />
+                <Route path="file-view/:fileUrl" element={<DeffViewer />} />
+                <Route path="contacts" element={<ContactPage />} />
+                <Route path="file-manager" element={<FileManager />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="file-sharing" element={<FileDashboard />} />
+                <Route path="groups" element={<Groups />} />
+                <Route
+                  path="group/:groupId/chat"
+                  element={<GroupChatInterface />}
+                />
+                <Route path="comm" element={<WalkieTalkie />} />
+                <Route path="drive" element={<MyDrive />} />
+                <Route path="drive/:id" element={<DriveContent />} />
+                <Route path="isurvive" element={<DefcommAi />} />
+                <Route path="isurvive/chat" element={<ChatBox />} />
+                <Route path="isurvive/voice" element={<ChatBoxTwo />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="conference" element={<InitConference />} />
+                <Route
+                  path="conference/room"
+                  element={<ShowConferenceRoute />}
+                />
+                <Route
+                  path="/conference/waiting/:meetingId"
+                  element={<WaitingPage />}
+                />
+                <Route
+                  path="/conference/my-meetings"
+                  element={<MyMeetings />}
+                />
+                <Route
+                  path="/conference/create"
+                  element={<CreateMeetingForm />}
+                />
+                <Route path="*" element={<ComingSoon />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </GroupProvider>
       </CommProvider>
     </ThemeProvider>
   );

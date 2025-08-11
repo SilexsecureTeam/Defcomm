@@ -8,16 +8,22 @@ import GroupChatDetails from "../components/dashboard/GroupChatDetails";
 import useGroups from "../hooks/useGroup";
 import useChat from "../hooks/useChat";
 import SendMessage from "../components/Chat/SendMessage";
+import { GroupContext } from "../context/GroupContext";
 
 const GroupChatInterface = () => {
   const { groupId } = useParams();
   const { authDetails } = useContext(AuthContext);
+  const { setActiveGroup } = useContext(GroupContext);
   const userId = authDetails?.user?.id;
 
   const { useFetchGroupInfo } = useGroups();
   const { fetchGroupChatMessages } = useChat();
 
   const { data: groupInfo } = useFetchGroupInfo(groupId);
+
+  useEffect(() => {
+    setActiveGroup(groupInfo);
+  }, [groupInfo]);
 
   const {
     data: messages = [],
@@ -55,7 +61,7 @@ const GroupChatInterface = () => {
       {/* HEADER */}
       <div className="bg-oliveDark text-white p-4 flex items-center justify-between shadow-md">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-full bg-[#233554] flex items-center justify-center font-bold text-lg">
+          <div className="w-12 h-12 rounded-full bg-oliveLight flex items-center justify-center font-bold text-lg">
             {groupInfo?.group_meta?.name?.charAt(0)}
           </div>
           <div>
@@ -69,7 +75,7 @@ const GroupChatInterface = () => {
         </div>
         <button
           onClick={() => setShowGroupInfo(true)}
-          className="p-2 rounded-full hover:bg-[#233554] transition"
+          className="p-2 rounded-full hover:bg-oliveLight transition"
         >
           <Users className="h-6 w-6 text-white" />
         </button>
