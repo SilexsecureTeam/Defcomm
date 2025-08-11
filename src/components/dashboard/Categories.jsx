@@ -49,7 +49,7 @@ function Categories() {
               {<cat.icon />}
             </span>
             <div>
-              <p className="text-sm">{cat.title}</p>
+              <p className="text-xs">{cat.title}</p>
               <h3 className="text-sm font-semibold">{counts[cat.key] || 0}</h3>
             </div>
           </div>
