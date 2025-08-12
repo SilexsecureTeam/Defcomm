@@ -9,12 +9,14 @@ import useGroups from "../hooks/useGroup";
 import useChat from "../hooks/useChat";
 import SendMessage from "../components/Chat/SendMessage";
 import { GroupContext } from "../context/GroupContext";
+import { getFormattedDate } from "../utils/formmaters";
+import GroupMessage from "../components/group/GroupMessage";
+import GroupMessageList from "../components/group/GroupMessageList";
 
 const GroupChatInterface = () => {
   const { groupId } = useParams();
   const { authDetails } = useContext(AuthContext);
-  const { setActiveGroup } = useContext(GroupContext);
-  const userId = authDetails?.user?.id;
+  const { setActiveGroup, activeGroup } = useContext(GroupContext);
 
   const { useFetchGroupInfo } = useGroups();
   const { fetchGroupChatMessages } = useChat();
@@ -25,14 +27,11 @@ const GroupChatInterface = () => {
     setActiveGroup(groupInfo);
   }, [groupInfo]);
 
-  const {
-    data: messages = [],
-    isLoading: isMessagesLoading,
-    refetch: refetchMessages,
-  } = useQuery({
-    queryKey: ["groupMessages", groupId],
-    queryFn: () => fetchGroupChatMessages(groupId),
+  const { data: messages = [], isLoading: isMessagesLoading } = useQuery({
+    queryKey: ["groupMessages", groupInfo?.group_meta?.id],
+    queryFn: () => fetchGroupChatMessages(groupInfo?.group_meta?.id),
     enabled: !!groupId,
+    //refetchInterval: 5000,
   });
 
   const [newMessage, setNewMessage] = useState("");
@@ -42,14 +41,6 @@ const GroupChatInterface = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-    // TODO: send message API call
-    setNewMessage("");
-    refetchMessages();
-  };
 
   const messageVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 10 },
@@ -90,39 +81,10 @@ const GroupChatInterface = () => {
         ) : (
           <AnimatePresence>
             {messages?.data?.length > 0 ? (
-              messages?.data?.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  layout
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={messageVariants}
-                  className={`flex ${
-                    msg.senderId === userId ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-xs sm:max-w-md p-3 rounded-xl shadow-md ${
-                      msg.senderId === userId
-                        ? "bg-[#00B4D8] text-white rounded-br-none"
-                        : "bg-white text-gray-800 rounded-bl-none border border-gray-200"
-                    }`}
-                  >
-                    <p className={`font-semibold text-xs mb-1 opacity-80`}>
-                      {groupInfo?.data?.find((m) => m.id === msg.senderId)
-                        ?.name || msg.senderId}
-                    </p>
-                    <p className="text-sm">{msg.text}</p>
-                    <span className="text-[10px] block text-right opacity-70">
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                </motion.div>
-              ))
+              <GroupMessageList
+                messages={messages?.data}
+                participants={groupInfo?.data}
+              />
             ) : (
               <div className="flex justify-center items-center h-full">
                 <p className="text-gray-500 italic">Start the conversation!</p>
