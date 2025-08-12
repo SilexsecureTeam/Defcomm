@@ -30,31 +30,61 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
     setMeetingId(msg?.message?.split("CALL_INVITE:")[1]);
   };
 
+  const getInitials = (name) => {
+    if (!name) return "?";
+    const parts = name.trim().split(" ");
+    return parts.length > 1
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.slice(0, 2).toUpperCase();
+  };
+
+  const isMine = msg?.is_my_chat === "yes";
+
+  // New color palette for the military theme
+  const COLORS = {
+    mine: "#556B2F", // A dark, muted green
+    theirs: "#1E2A1E", // A slightly darker, muted green
+    text: "#E0E0E0", // Off-white for readability on dark backgrounds
+    muted: "#8A9188", // A light gray-green for timestamps and muted text
+    brass: "#B49E69", // A subtle gold/brass accent color
+  };
+
   return (
     <div
-      className={`flex flex-col ${
-        msg?.is_my_chat === "yes" ? "items-end" : "items-start"
-      }`}
+      className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
+      style={{ padding: "4px 0" }} // Added padding for better spacing
     >
-      {/* Avatar & Name */}
-      {showAvatar && msg?.is_my_chat !== "yes" && (
-        <div className="flex items-center gap-2 mb-1 pl-1">
-          {sender?.avatar && (
-            <img
-              src={sender.avatar}
-              alt={sender.name}
-              className="w-8 h-8 rounded-full object-cover shadow-sm"
-            />
-          )}
-          <span className="text-xs font-medium text-gray-500">
-            {sender.name}
+      {/* Avatar & Sender */}
+      {showAvatar && (
+        <div
+          className={`flex items-center gap-2 mb-2 ${
+            !isMine ? "pl-1" : "pr-1 flex-row-reverse"
+          }`}
+        >
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-sm"
+            style={{
+              backgroundColor: isMine ? COLORS.mine : COLORS.theirs,
+              color: COLORS.text,
+              border: `1px solid ${COLORS.brass}`,
+            }}
+          >
+            {getInitials(sender?.member_name || `U${msg?.user_id}`)}
+          </div>
+          <span
+            className="text-xs font-semibold"
+            style={{ color: COLORS.muted }}
+          >
+            {isMine ? "You" : sender?.member_name || `User ${msg?.user_id}`}
           </span>
         </div>
       )}
 
       {/* Toggle Switch */}
       {showToggleSwitch && (
-        <div className="flex items-center gap-2 mb-1">
+        <div
+          className={`flex items-center gap-2 mb-1 ${isMine ? "pl-1" : "pr-1"}`}
+        >
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -66,10 +96,13 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
               }}
             />
             <div
-              className={`w-10 h-5 rounded-full transition-all peer-checked:bg-emerald-500 bg-gray-300`}
+              className="w-10 h-5 rounded-full relative transition-all"
+              style={{
+                backgroundColor: isVisible ? COLORS.brass : COLORS.muted,
+              }}
             >
               <motion.div
-                className="absolute top-0 bottom-0 left-[2px] my-auto w-4 h-4 bg-white rounded-full shadow-sm"
+                className="absolute top-0 bottom-0 left-[2px] my-auto w-4 h-4 bg-white rounded-full shadow"
                 layout
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 animate={{ x: isVisible ? 20 : 0 }}
@@ -79,13 +112,16 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
         </div>
       )}
 
-      {/* Message Bubble */}
+      {/* Message bubble */}
       <div
-        className={`relative p-3 rounded-2xl max-w-[75%] shadow-sm text-sm leading-relaxed ${
-          msg?.is_my_chat === "yes"
-            ? "bg-emerald-600 text-white rounded-br-sm"
-            : "bg-white text-gray-900 border border-gray-200 rounded-bl-sm"
-        }`}
+        className="relative p-3 max-w-[75%] shadow-md text-sm leading-relaxed rounded-xl"
+        style={{
+          backgroundColor: isMine ? COLORS.mine : COLORS.theirs,
+          color: COLORS.text,
+          border: `1px solid ${COLORS.muted}`,
+          borderTopRightRadius: isMine ? "4px" : "12px",
+          borderTopLeftRadius: isMine ? "12px" : "4px",
+        }}
       >
         <AnimatePresence mode="wait">
           {isVisible ? (
@@ -110,7 +146,7 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
               ) : msg?.message?.startsWith("CALL_INVITE") ? (
                 <ChatCallInvite
                   msg={msg}
-                  isMyChat={msg?.is_my_chat === "yes"}
+                  isMyChat={isMine}
                   onAcceptCall={handleAcceptCall}
                   status={
                     (Date.now() - new Date(msg?.updated_at).getTime()) / 1000 <=
@@ -118,7 +154,7 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
                       ? "Ringing..."
                       : "Call Ended"
                   }
-                  caller={sender?.name}
+                  caller={sender?.member_name}
                 />
               ) : (
                 <div>
@@ -126,7 +162,8 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
                     <>
                       {msg?.message.slice(0, MAX_LENGTH)}...
                       <button
-                        className="text-xs text-emerald-200 ml-1"
+                        className="text-xs ml-1 font-medium"
+                        style={{ color: COLORS.brass }}
                         onClick={() => setIsExpanded(true)}
                       >
                         Read More
@@ -146,28 +183,32 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
               exit={{ opacity: 0.5 }}
               transition={{ duration: 0.15 }}
               onClick={() => !showToggleSwitch && setIsVisible(true)}
-              className="cursor-pointer text-gray-400 select-none"
+              style={{
+                color: COLORS.muted,
+                cursor: "pointer",
+                userSelect: "none",
+              }}
             >
               {"*".repeat(Math.min(msg.message?.length || 4, 200))}
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Timestamp inside bubble */}
-        <span
-          className={`absolute bottom-1 right-3 text-[10px] ${
-            msg?.is_my_chat === "yes" ? "text-emerald-100" : "text-gray-400"
-          }`}
-        >
-          {new Date(msg?.updated_at).toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
       </div>
 
-      {/* Space after message group */}
-      {isLastInGroup && <div className="mb-2" />}
+      {/* Timestamp */}
+      <div
+        className={`mt-1 text-[10px] ${
+          isMine ? "text-right pr-1" : "text-left pl-1"
+        }`}
+        style={{ color: COLORS.muted }}
+      >
+        {new Date(msg?.updated_at).toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </div>
+
+      {isLastInGroup && <div className="mb-3" />}
     </div>
   );
 };

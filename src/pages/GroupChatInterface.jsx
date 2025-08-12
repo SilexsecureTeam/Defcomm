@@ -21,7 +21,7 @@ const GroupChatInterface = () => {
   const { useFetchGroupInfo } = useGroups();
   const { fetchGroupChatMessages } = useChat();
 
-  const { data: groupInfo } = useFetchGroupInfo(groupId);
+  const { data: groupInfo, isLoading } = useFetchGroupInfo(groupId);
 
   useEffect(() => {
     setActiveGroup(groupInfo);
@@ -34,7 +34,6 @@ const GroupChatInterface = () => {
     //refetchInterval: 5000,
   });
 
-  const [newMessage, setNewMessage] = useState("");
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -42,41 +41,83 @@ const GroupChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const messageVariants = {
-    hidden: { opacity: 0, scale: 0.95, y: 10 },
-    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3 } },
+  const COLORS = {
+    header: "#1C1C1C",
+    avatar: "#B49E69",
+    messagesBg: "#212121",
+    scrollbarThumb: "#4A5568",
+    scrollbarTrack: "#1C1C1C",
+    textLight: "#E0E0E0",
   };
 
   return (
-    <div className="flex flex-col h-[60vh] bg-gray-50">
+    <div
+      className="flex flex-col h-[80vh] text-white"
+      style={{
+        backgroundColor: "#1A1F16", // deep greenish-black base
+        backgroundImage: `
+      linear-gradient(#2E3522 1px, transparent 1px),
+      linear-gradient(90deg, #2E3522 1px, transparent 1px)
+    `,
+        backgroundSize: "50px 50px",
+        backgroundBlendMode: "overlay",
+        boxShadow: "inset 0 0 50px rgba(0, 0, 0, 0.6)", // adds depth
+      }}
+    >
       {/* HEADER */}
-      <div className="bg-oliveDark text-white p-4 flex items-center justify-between shadow-md">
+      <div
+        className="text-white p-4 flex items-center justify-between shadow-md"
+        style={{ backgroundColor: COLORS.header }}
+      >
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-full bg-oliveLight flex items-center justify-center font-bold text-lg">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
+            style={{ backgroundColor: COLORS.avatar }}
+          >
             {groupInfo?.group_meta?.name?.charAt(0)}
           </div>
           <div>
-            <h2 className="text-lg font-semibold">
+            <h2
+              className="text-lg font-semibold"
+              style={{ color: COLORS.textLight }}
+            >
               {groupInfo?.group_meta?.name}
             </h2>
-            <p className="text-sm opacity-70">
+            <p
+              className="text-sm opacity-70"
+              style={{ color: COLORS.textLight }}
+            >
               {groupInfo?.data?.length} members
             </p>
           </div>
         </div>
         <button
           onClick={() => setShowGroupInfo(true)}
-          className="p-2 rounded-full hover:bg-oliveLight transition"
+          className="p-2 rounded-full transition"
+          style={{
+            backgroundColor: "transparent",
+            color: COLORS.textLight,
+            hover: { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+          }}
         >
-          <Users className="h-6 w-6 text-white" />
+          <Users className="h-6 w-6" />
         </button>
       </div>
 
       {/* MESSAGES AREA */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-        {isMessagesLoading ? (
+      <div
+        className="flex-1 overflow-y-auto px-6 py-4 space-y-4 scrollbar-thin"
+        style={{
+          scrollbarColor: `${COLORS.scrollbarThumb} ${COLORS.scrollbarTrack}`,
+          backgroundColor: COLORS.messagesBg,
+        }}
+      >
+        {isLoading || isMessagesLoading ? (
           <div className="flex justify-center items-center h-full text-gray-500">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+            <div
+              className="animate-spin rounded-full h-6 w-6 border-b-2"
+              style={{ borderColor: COLORS.textLight }}
+            ></div>
           </div>
         ) : (
           <AnimatePresence>
@@ -87,7 +128,9 @@ const GroupChatInterface = () => {
               />
             ) : (
               <div className="flex justify-center items-center h-full">
-                <p className="text-gray-500 italic">Start the conversation!</p>
+                <p className="italic" style={{ color: COLORS.muted }}>
+                  Start the conversation!
+                </p>
               </div>
             )}
           </AnimatePresence>
