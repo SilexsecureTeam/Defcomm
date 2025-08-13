@@ -6,14 +6,25 @@ const CountdownTimer = ({ startTime, durationMinutes = 60 }) => {
   const [statusColor, setStatusColor] = useState("text-green-400");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const start = new Date(startTime);
-      const end = new Date(start.getTime() + durationMinutes * 60000); // default 60 mins
+    const [datePart, timePart] = startTime.split(" ");
+    // Force UTC by appending "Z" (or you could append +01:00 for Nigeria time)
+    const startUTC = new Date(`${datePart}T${timePart}Z`);
+    const endUTC = new Date(startUTC.getTime() + durationMinutes * 60000);
 
-      if (now < start) {
-        // Meeting hasn't started
-        const diff = start - now;
+    const interval = setInterval(() => {
+      const nowUTC = new Date(
+        Date.UTC(
+          new Date().getUTCFullYear(),
+          new Date().getUTCMonth(),
+          new Date().getUTCDate(),
+          new Date().getUTCHours(),
+          new Date().getUTCMinutes(),
+          new Date().getUTCSeconds()
+        )
+      );
+
+      if (nowUTC < startUTC) {
+        const diff = startUTC - nowUTC;
 
         const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
         const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 7);
@@ -31,7 +42,6 @@ const CountdownTimer = ({ startTime, durationMinutes = 60 }) => {
         setStatus("countdown");
         setTimeLeft(parts.join(" "));
 
-        // Color warning thresholds
         if (weeks === 0 && days === 0 && hours === 0 && minutes <= 5) {
           setStatusColor("text-red-400 font-bold");
         } else if (weeks === 0 && days === 0 && hours === 0) {
@@ -39,18 +49,15 @@ const CountdownTimer = ({ startTime, durationMinutes = 60 }) => {
         } else {
           setStatusColor("text-green-400");
         }
-
-      } else if (now >= start && now < end) {
-        // Meeting is ongoing
+      } else if (nowUTC >= startUTC && nowUTC < endUTC) {
         setStatus("ongoing");
         setTimeLeft("Ongoing");
         setStatusColor("text-blue-400 font-semibold");
       } else {
-        // Meeting ended
         setStatus("ended");
         setTimeLeft("Ended");
         setStatusColor("text-gray-400 font-medium");
-        clearInterval(interval); // stop timer once ended
+        clearInterval(interval);
       }
     }, 1000);
 

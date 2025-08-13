@@ -120,7 +120,7 @@ const MeetingList = ({
               </div>
               {showCountdown && (
                 <div className="text-green-400 text-sm mt-2 md:mt-0">
-                  <CountdownTime startTime={startDate} />
+                  <CountdownTime startTime={meeting?.startdatetime} />
                 </div>
               )}
             </div>
