@@ -4,7 +4,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa";
 
 import { onFailure } from "../../../utils/notifications/OnFailure";
-import { extractErrorMessage } from "../../../utils/formmaters";
+import {
+  extractErrorMessage,
+  formatDateTimeForBackend,
+} from "../../../utils/formmaters";
 import { createMeeting } from "../Api";
 import { MeetingContext } from "../../../context/MeetingContext";
 import GroupSelectorModal from "../../dashboard/GroupSelectorModal";
@@ -13,14 +16,11 @@ import HeaderBar from "./HeaderBar";
 
 const CreateMeetingForm = () => {
   const location = useLocation();
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const editData = location?.state?.data || null;
   const isEditing = !!editData;
 
-  const {
-    createMeetingMutation,
-    updateMeetingMutation
-  } = useConference();
+  const { createMeetingMutation, updateMeetingMutation } = useConference();
 
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isGeneratingId, setIsGeneratingId] = useState(false);
@@ -33,7 +33,7 @@ const CreateMeetingForm = () => {
     formState: { errors },
     reset,
     setValue,
-    watch
+    watch,
   } = useForm({
     defaultValues: {
       meeting_id: "",
@@ -59,19 +59,11 @@ const CreateMeetingForm = () => {
       if (editData.group) {
         setSelectedGroup({
           group_id: editData.group_user_id,
-          group_name: editData.group?.group_name || "Selected Group"
+          group_name: editData.group?.group_name || "Selected Group",
         });
       }
     }
   }, [isEditing, editData, reset]);
-
-  const formatDateTimeForBackend = (datetimeLocal) => {
-  if (!datetimeLocal) return "";
-  // Manually format the local datetime without timezone shift
-  const [date, time] = datetimeLocal.split("T");
-  return `${date} ${time}:00`; // e.g., "2025-06-06 16:30:00"
-};
-
 
   const generateMeetingId = async () => {
     setIsGeneratingId(true);
@@ -109,7 +101,7 @@ const CreateMeetingForm = () => {
     mutation(payload, {
       onSuccess: () => {
         reset();
-        navigate('/dashboard/conference/my-meetings', {replace: true});
+        navigate("/dashboard/conference/my-meetings", { replace: true });
       },
       onError: (error) => {
         onFailure({
@@ -124,21 +116,28 @@ const CreateMeetingForm = () => {
   return (
     <div>
       <HeaderBar />
-      <form onSubmit={handleSubmit(onCreateMeeting)} className="w-full text-white">
+      <form
+        onSubmit={handleSubmit(onCreateMeeting)}
+        className="w-full text-white"
+      >
         <h2 className="text-2xl font-semibold mb-6">
           {isEditing ? "Update Meeting" : "Create a New Meeting"}
         </h2>
 
         {["subject", "title", "agenda"].map((field) => (
           <div key={field}>
-            <label className="block mb-1 font-semibold capitalize">{field}</label>
+            <label className="block mb-1 font-semibold capitalize">
+              {field}
+            </label>
             <input
               type="text"
               placeholder={field}
               {...register(field, { required: `${field} is required` })}
               className="p-3 border border-gray-300 bg-transparent rounded-md w-full mb-3 text-gray-300"
             />
-            {errors[field] && <p className="text-red-500 mb-3">{errors[field].message}</p>}
+            {errors[field] && (
+              <p className="text-red-500 mb-3">{errors[field].message}</p>
+            )}
           </div>
         ))}
 
@@ -146,10 +145,14 @@ const CreateMeetingForm = () => {
         <label className="block mb-1 font-semibold">Start Date & Time</label>
         <input
           type="datetime-local"
-          {...register("startdatetime", { required: "Start datetime is required" })}
+          {...register("startdatetime", {
+            required: "Start datetime is required",
+          })}
           className="p-3 border border-gray-300 bg-transparent rounded-md w-full mb-6 text-gray-300 placeholder:text-gray-300"
         />
-        {errors.startdatetime && <p className="text-red-500 mb-3">{errors.startdatetime.message}</p>}
+        {errors.startdatetime && (
+          <p className="text-red-500 mb-3">{errors.startdatetime.message}</p>
+        )}
 
         {/* Group Selection */}
         {!isEditing && (
@@ -170,7 +173,9 @@ const CreateMeetingForm = () => {
               value={selectedGroup?.group_id || ""}
             />
             {errors.group_user_id && (
-              <p className="text-red-500 mb-3">{errors.group_user_id.message}</p>
+              <p className="text-red-500 mb-3">
+                {errors.group_user_id.message}
+              </p>
             )}
           </>
         )}
@@ -183,7 +188,8 @@ const CreateMeetingForm = () => {
             onClick={generateMeetingId}
             className="text-sm bg-[#5C7C2A] px-3 py-1 rounded-md hover:bg-[#4e6220] flex items-center gap-2"
           >
-            Generate ID {isGeneratingId && <FaSpinner className="animate-spin text-xs" />}
+            Generate ID{" "}
+            {isGeneratingId && <FaSpinner className="animate-spin text-xs" />}
           </button>
         </label>
         <input
@@ -192,7 +198,9 @@ const CreateMeetingForm = () => {
           {...register("meeting_id", { required: "Meeting ID is required" })}
           className="p-3 border border-gray-300 bg-transparent rounded-md w-full mb-3 text-gray-300"
         />
-        {errors.meeting_id && <p className="text-red-500 mb-3">{errors.meeting_id.message}</p>}
+        {errors.meeting_id && (
+          <p className="text-red-500 mb-3">{errors.meeting_id.message}</p>
+        )}
 
         {/* Submit */}
         <button
