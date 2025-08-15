@@ -31,8 +31,8 @@ const GroupChatInterface = () => {
   }, [groupInfo]);
 
   const { data: messages = [], isLoading: isMessagesLoading } = useQuery({
-    queryKey: ["groupMessages", groupInfo?.group_meta[0]?.id],
-    queryFn: () => fetchGroupChatMessages(groupInfo?.group_meta[0]?.id),
+    queryKey: ["groupMessages", groupInfo?.group_meta?.id],
+    queryFn: () => fetchGroupChatMessages(groupInfo?.group_meta?.id),
     enabled: !!groupId,
     //refetchInterval: 5000,
   });
@@ -87,14 +87,14 @@ const GroupChatInterface = () => {
             className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
             style={{ backgroundColor: COLORS.avatar }}
           >
-            {groupInfo?.group_meta[0]?.name?.charAt(0)}
+            {groupInfo?.group_meta?.name?.charAt(0)}
           </div>
           <div>
             <h2
               className="text-lg font-semibold"
               style={{ color: COLORS.textLight }}
             >
-              {groupInfo?.group_meta[0]?.name}
+              {groupInfo?.group_meta?.name}
             </h2>
             <p
               className="text-sm opacity-70"

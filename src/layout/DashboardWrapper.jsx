@@ -32,6 +32,7 @@ import useCommChannel from "../hooks/useCommChannel";
 import { CommContext } from "../context/CommContext";
 import useGroupChannel from "../hooks/useGroupChannel";
 import { GroupContext } from "../context/GroupContext";
+import SecureAccessGuard from "../routes/security/SecureAccessGuard";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -89,10 +90,11 @@ const DashboardWrapper = ({ children }) => {
 
   // PUSHER LISTENER
   usePusherChannel({
-    userId: authDetails?.user?.id,
+    userId: authDetails?.user_enid,
     token: authDetails?.access_token,
     onNewMessage: (newMessage) => {
-      const senderId = newMessage?.data?.user_id;
+      const senderId = newMessage?.sender?.id_en;
+      console.log(newMessage);
 
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
@@ -123,24 +125,21 @@ const DashboardWrapper = ({ children }) => {
           setCallDuration(newMessage?.call?.call_duration || 0);
         }
 
-        queryClient.setQueryData(
-          ["chatMessages", newMessage?.sender?.id],
-          (old) => {
-            if (!old || !Array.isArray(old.data)) return old;
-            return {
-              ...old,
-              data: old.data.map((msg) =>
-                msg.id === newMessage?.mss?.id
-                  ? {
-                      ...msg,
-                      call_state: newMessage?.call?.call_state,
-                      call_duration: newMessage?.call?.call_duration,
-                    }
-                  : msg
-              ),
-            };
-          }
-        );
+        queryClient.setQueryData(["chatMessages", senderId], (old) => {
+          if (!old || !Array.isArray(old.data)) return old;
+          return {
+            ...old,
+            data: old.data.map((msg) =>
+              msg.id === newMessage?.mss?.id
+                ? {
+                    ...msg,
+                    call_state: newMessage?.call?.call_state,
+                    call_duration: newMessage?.call?.call_duration,
+                  }
+                : msg
+            ),
+          };
+        });
 
         // Handle missed call for receiver
         if (
@@ -239,6 +238,7 @@ const DashboardWrapper = ({ children }) => {
         backgroundRepeat: "no-repeat",
       }}
     >
+      <SecureAccessGuard />
       {/* Sidebar */}
       <SidebarComponent
         authDetails={authDetails}

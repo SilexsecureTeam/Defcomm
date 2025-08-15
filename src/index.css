@@ -52,6 +52,7 @@ html {
   width: 100vw;
   height: 100vh;
   scroll-behavior: smooth;
+  user-select: none; /* Prevent text selection */
 }
 /* Style the entire website's scrollbar */
 ::-webkit-scrollbar {

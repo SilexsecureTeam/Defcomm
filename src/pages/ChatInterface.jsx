@@ -31,8 +31,8 @@ const ChatInterface = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["chatMessages", selectedChatUser?.contact_id],
-    queryFn: () => fetchChatMessages(selectedChatUser?.contact_id),
+    queryKey: ["chatMessages", selectedChatUser?.contact_id_encrypt],
+    queryFn: () => fetchChatMessages(selectedChatUser?.contact_id_encrypt),
     enabled: !!selectedChatUser?.contact_id,
     staleTime: Infinity,
     refetchOnWindowFocus: false,

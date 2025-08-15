@@ -69,8 +69,6 @@ const useCommChannel = ({ channelId, token }) => {
 
     // cleanup old
     if (channelRef.current) {
-      channelRef.current.unbind("transmit", stableOnTransmit);
-      channelRef.current.unbind("status", stableOnStatus);
       if (pusherRef.current) {
         pusherRef.current.unsubscribe(channelRef.current.name);
         pusherRef.current.disconnect();
