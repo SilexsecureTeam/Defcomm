@@ -69,13 +69,13 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
               border: `1px solid ${COLORS.brass}`,
             }}
           >
-            {getInitials(sender?.member_name || `U${msg?.user_id}`)}
+            {getInitials(msg?.user?.name)}
           </div>
           <span
             className="text-xs font-semibold"
             style={{ color: COLORS.muted }}
           >
-            {isMine ? "You" : sender?.member_name || `User ${msg?.user_id}`}
+            {isMine ? "You" : sender?.member_name}
           </span>
         </div>
       )}
