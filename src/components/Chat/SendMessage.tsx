@@ -15,6 +15,7 @@ import { parseHtml } from "../../utils/formmaters";
 interface MessageData {
   chat_user_id: string;
   chat_user_type: string;
+  chat_user_id_en: string;
   chat_id: string;
 }
 interface SendMessageProps {
@@ -47,7 +48,7 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
     // Send "is_typing" once
     if (!typingSent.current) {
       typingMutation.mutate({
-        current_chat_user: messageData.chat_user_id,
+        current_chat_user: messageData.chat_user_id_en,
         typing: "is_typing",
       });
       typingSent.current = true;
@@ -57,7 +58,7 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
     if (notTypingTimeout.current) clearTimeout(notTypingTimeout.current);
     notTypingTimeout.current = setTimeout(() => {
       typingMutation.mutate({
-        current_chat_user: messageData.chat_user_id,
+        current_chat_user: messageData.chat_user_id_en,
         typing: "not_typing",
       });
       typingSent.current = false;
@@ -67,7 +68,7 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
   const handleFocus = () => {
     if (!typingSent.current) {
       typingMutation.mutate({
-        current_chat_user: messageData.chat_user_id,
+        current_chat_user: messageData.chat_user_id_en,
         typing: "is_typing",
       });
       typingSent.current = true;
@@ -77,7 +78,7 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
   const handleBlur = () => {
     if (notTypingTimeout.current) clearTimeout(notTypingTimeout.current);
     typingMutation.mutate({
-      current_chat_user: messageData.chat_user_id,
+      current_chat_user: messageData.chat_user_id_en,
       typing: "not_typing",
     });
     typingSent.current = false;
@@ -89,7 +90,7 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
       message: localMessage,
       file,
       chat_user_type: messageData.chat_user_type,
-      chat_user_id: messageData.chat_user_id,
+      chat_user_id: messageData.chat_user_id_en,
       chat_id: messageData.chat_id,
       sendMessageMutation,
     } as any);

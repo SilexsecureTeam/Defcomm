@@ -38,6 +38,7 @@ const CreateMeetingForm = lazy(() =>
   import("../components/video-sdk/conference/CreateMeetingForm")
 );
 const GroupChatInterface = lazy(() => import("../pages/GroupChatInterface"));
+const GroupChatPage = lazy(() => import("../pages/GroupChatPage"));
 
 const DashboardRoutes = () => {
   const { authDetails } = useContext(AuthContext);
@@ -77,6 +78,7 @@ const DashboardRoutes = () => {
                 <Route path="profile" element={<Profile />} />
                 <Route path="file-sharing" element={<FileDashboard />} />
                 <Route path="groups" element={<Groups />} />
+                <Route path="group_list" element={<GroupChatPage />} />
                 <Route
                   path="group/:groupId/chat"
                   element={<GroupChatInterface />}

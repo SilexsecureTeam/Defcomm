@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const Groups = () => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const {
     useFetchGroups,
@@ -58,7 +57,7 @@ const Groups = () => {
     <div className="p-6 text-white flex flex-col gap-6">
       {/* Your Groups Section */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Your Groups</h2>
+        <h2 className="text-2xl font-semibold mb-4">Manage Groups</h2>
         {isLoading ? (
           <div className="flex justify-center">
             <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
@@ -84,16 +83,6 @@ const Groups = () => {
               </strong>{" "}
               Members
             </h2>
-            <button
-              onClick={() =>
-                navigate(`/dashboard/group/${selectedGroup.group_id}/chat`, {
-                  state: { group: selectedGroup },
-                })
-              }
-              className="bg-oliveLight hover:bg-oliveDark text-oliveHover px-4 py-2 rounded-lg"
-            >
-              Go to Chat
-            </button>
           </div>
           {isGroupMembersLoading ? (
             <div className="flex justify-center">

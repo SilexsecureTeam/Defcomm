@@ -9,7 +9,7 @@ const GroupChatDetails = ({ groupInfo, showGroupInfo, setShowGroupInfo }) => {
   const { setModalTitle } = useContext(ChatContext);
   const userId = authDetails?.user?.id;
   useEffect(() => {
-    setModalTitle(groupInfo?.group_meta?.name);
+    setModalTitle(groupInfo?.group_meta[0]?.name);
   }, [showGroupInfo]);
   return (
     <AnimatePresence>
@@ -26,7 +26,7 @@ const GroupChatDetails = ({ groupInfo, showGroupInfo, setShowGroupInfo }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-gray-600 mb-6">
-              {groupInfo?.group_meta?.decription}
+              {groupInfo?.group_meta[0]?.decription}
             </p>
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-gray-800">Members</h3>

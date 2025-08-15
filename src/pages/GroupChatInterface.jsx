@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Send } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../context/AuthContext";
 import GroupChatDetails from "../components/dashboard/GroupChatDetails";
@@ -9,14 +9,17 @@ import useGroups from "../hooks/useGroup";
 import useChat from "../hooks/useChat";
 import SendMessage from "../components/Chat/SendMessage";
 import { GroupContext } from "../context/GroupContext";
-import { getFormattedDate } from "../utils/formmaters";
-import GroupMessage from "../components/group/GroupMessage";
 import GroupMessageList from "../components/group/GroupMessageList";
+import { FaCog } from "react-icons/fa";
+import { ChatContext } from "../context/ChatContext";
+import { IoArrowBack } from "react-icons/io5";
 
 const GroupChatInterface = () => {
   const { groupId } = useParams();
   const { authDetails } = useContext(AuthContext);
   const { setActiveGroup, activeGroup } = useContext(GroupContext);
+  const { setShowSettings } = useContext(ChatContext);
+  const navigate = useNavigate();
 
   const { useFetchGroupInfo } = useGroups();
   const { fetchGroupChatMessages } = useChat();
@@ -28,8 +31,8 @@ const GroupChatInterface = () => {
   }, [groupInfo]);
 
   const { data: messages = [], isLoading: isMessagesLoading } = useQuery({
-    queryKey: ["groupMessages", groupInfo?.group_meta?.id],
-    queryFn: () => fetchGroupChatMessages(groupInfo?.group_meta?.id),
+    queryKey: ["groupMessages", groupInfo?.group_meta[0]?.id],
+    queryFn: () => fetchGroupChatMessages(groupInfo?.group_meta[0]?.id),
     enabled: !!groupId,
     //refetchInterval: 5000,
   });
@@ -69,31 +72,44 @@ const GroupChatInterface = () => {
         className="text-white p-4 flex items-center justify-between shadow-md"
         style={{ backgroundColor: COLORS.header }}
       >
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/dashboard/group_list")}
+          className="mr-3 p-2 rounded-full hover:bg-gray-700 transition"
+          style={{ color: COLORS.textLight }}
+        >
+          <IoArrowBack size={22} />
+        </button>
+
+        {/* Group Avatar + Name */}
         <div className="flex items-center space-x-4">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
             style={{ backgroundColor: COLORS.avatar }}
           >
-            {groupInfo?.group_meta?.name?.charAt(0)}
+            {groupInfo?.group_meta[0]?.name?.charAt(0)}
           </div>
           <div>
             <h2
               className="text-lg font-semibold"
               style={{ color: COLORS.textLight }}
             >
-              {groupInfo?.group_meta?.name}
+              {groupInfo?.group_meta[0]?.name}
             </h2>
             <p
               className="text-sm opacity-70"
               style={{ color: COLORS.textLight }}
             >
-              {groupInfo?.data?.length} members
+              {groupInfo?.data?.length || 0}{" "}
+              {groupInfo?.data?.length === 1 ? "member" : "members"}
             </p>
           </div>
         </div>
+
+        {/* Members Button */}
         <button
           onClick={() => setShowGroupInfo(true)}
-          className="p-2 rounded-full transition"
+          className="ml-auto p-2 rounded-full transition"
           style={{
             backgroundColor: "transparent",
             color: COLORS.textLight,
@@ -101,6 +117,16 @@ const GroupChatInterface = () => {
           }}
         >
           <Users className="h-6 w-6" />
+        </button>
+
+        {/* Settings Button */}
+        <button
+          className="ml-3"
+          onClick={() => {
+            setShowSettings(true);
+          }}
+        >
+          <FaCog size={24} />
         </button>
       </div>
 
