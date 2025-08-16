@@ -74,6 +74,7 @@ const DashboardWrapper = ({ children }) => {
     queryFn: fetchContacts,
     enabled: state?.type === "CHAT",
     staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Group Channel
@@ -94,7 +95,6 @@ const DashboardWrapper = ({ children }) => {
     token: authDetails?.access_token,
     onNewMessage: (newMessage) => {
       const senderId = newMessage?.sender?.id_en;
-      console.log(newMessage);
 
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
@@ -196,7 +196,10 @@ const DashboardWrapper = ({ children }) => {
       Sidebar = AiSideBar;
       SidebarItem = null;
       option = [];
-    } else if (isChatPage) {
+    } else if (
+      isChatPage ||
+      (pathname.startsWith("/dashboard/group/") && pathname.endsWith("/chat"))
+    ) {
       Sidebar = SideBarTwo;
       SidebarItem = SideBarItemTwo;
       option = contacts || [];

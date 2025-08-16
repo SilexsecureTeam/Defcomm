@@ -1,167 +1,237 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import mainLogo from "../../assets/logo-icon.png";
-import { FaBars, FaTimes, FaUserPlus } from "react-icons/fa";
-import { dashboardTabs } from "../../utils/constants";
+import {
+  FaBars,
+  FaTimes,
+  FaUserPlus,
+  FaChevronDown,
+  FaChevronRight,
+} from "react-icons/fa";
 import useChat from "../../hooks/useChat";
 import { useQuery } from "@tanstack/react-query";
 import useGroups from "../../hooks/useGroup";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/ChatContext";
+import SideBarItemTwo from "./SideBarItemTwo";
 
-function SideBarTwo({ children, state, toogleIsOpen, isMenuOpen, contacts }) {
+function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
   const { pathname } = useLocation();
-
+  const navigate = useNavigate();
   const { setShowContactModal } = useContext(ChatContext);
   const isChatPage = pathname.includes("/dashboard/chat");
-  const { fetchChatHistory } = useChat();
 
-  // Fetch Chat History using React Query
-  const { data: chatHistory, isLoading } = useQuery({
+  // 🟢 Fetch Chat History
+  const { fetchChatHistory, useFetchContacts } = useChat();
+  const {
+    data: chatHistory,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError,
+  } = useQuery({
     queryKey: ["chat-history"],
     queryFn: fetchChatHistory,
-    //  refetchInterval: 5000,
-    staleTime: 0,
   });
-  const { useFetchGroups, useFetchGroupMembers, addContactMutation } =
-    useGroups();
+
+  // 🟢 Fetch Contacts
+  const {
+    data: contacts,
+    isLoading: isContactsLoading,
+    isError: isContactsError,
+  } = useFetchContacts;
+
+  // 🟢 Fetch Groups
+  const { useFetchGroups } = useGroups();
+  const {
+    data: groups,
+    isLoading: isGroupsLoading,
+    isError: isGroupsError,
+  } = useFetchGroups();
+
+  // Expand/Collapse state
+  const [openSections, setOpenSections] = useState({
+    users: true,
+    groups: true,
+  });
+
+  // Search
+  const [search, setSearch] = useState("");
+
+  const toggleSection = (section) => {
+    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // 🟢 Order contacts (recent chats first, no duplicates)
+  const orderedContacts = useMemo(() => {
+    if (!contacts) return [];
+    if (!chatHistory) return contacts;
+
+    const reversedIds = chatHistory
+      .slice()
+      .reverse()
+      .map((c) => c.chat_user_to_id);
+
+    const uniqueHistoryIds = [...new Set(reversedIds)];
+
+    const inHistory = uniqueHistoryIds
+      .map((id) => contacts.find((c) => c.contact_id === id))
+      .filter(Boolean);
+
+    const inHistoryIds = new Set(inHistory.map((c) => c.contact_id));
+    const others = contacts.filter((c) => !inHistoryIds.has(c.contact_id));
+
+    return [...inHistory, ...others];
+  }, [contacts, chatHistory]);
+
+  // 🟢 Filter by search
+  const filteredContacts = useMemo(() => {
+    return orderedContacts.filter((c) =>
+      c.contact_name?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [orderedContacts, search]);
+
+  const filteredGroups = useMemo(() => {
+    return groups?.filter((g) =>
+      g.group_name?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [groups, search]);
+
+  // 🟢 Auto-expand section if search has results
+  useEffect(() => {
+    if (search.trim() !== "") {
+      if (filteredContacts.length > 0) {
+        setOpenSections((prev) => ({ ...prev, users: true }));
+      }
+      if (filteredGroups?.length > 0) {
+        setOpenSections((prev) => ({ ...prev, groups: true }));
+      }
+    }
+  }, [search, filteredContacts, filteredGroups]);
 
   return (
-    <>
-      {/* SidebarTwo */}
-      <motion.aside
-        initial={{ x: "-100%" }}
-        animate={{ x: isMenuOpen ? 0 : "-100%" }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className={`
-                ${
-                  isMenuOpen
-                    ? "!bg-[#2c3b03] fixed left-0 top-0 bottom-0 z-[100000]"
-                    : "hidden"
-                }
-                ${isChatPage ? "lg:!hidden" : "lg:flex"} 
-                md:!flex flex-col md:!translate-x-0 md:relative 
-                bg-transparent w-72 text-white h-full overflow-y-auto
-                `}
-      >
-        <div className="relative p-4 text-xl font-bold flex flex-col items-center min-h-28 bg-transparent">
-          <div
-            onClick={toogleIsOpen}
-            className="absolute top-8 left-8 cursor-pointer text-white block mr-2 md:hidden transition-all ease-in-out duration-300"
+    <motion.aside
+      initial={{ x: "-100%" }}
+      animate={{ x: isMenuOpen ? 0 : "-100%" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className={`
+        ${
+          isMenuOpen
+            ? "!bg-[#2c3b03] fixed left-0 top-0 bottom-0 z-[100000]"
+            : "hidden"
+        }
+        ${isChatPage ? "lg:!hidden" : "lg:flex"}
+        md:!flex flex-col md:!translate-x-0 md:relative 
+        bg-transparent w-72 text-white h-full overflow-y-auto
+      `}
+    >
+      {/* Header */}
+      <div className="relative p-4 text-xl font-bold flex flex-col items-center min-h-28">
+        <div
+          onClick={toogleIsOpen}
+          className="absolute top-8 left-8 cursor-pointer text-white block md:hidden"
+        >
+          {!isMenuOpen ? <FaBars size={24} /> : <FaTimes size={24} />}
+        </div>
+        <Link to={"/dashboard/home"}>
+          <img src={mainLogo} alt="logo" className="w-14" />
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <nav className="bg-transparent flex-1 p-4">
+        <p className="mt-4 mb-2 font-medium text-xl text-center">
+          Secure Contact
+        </p>
+
+        {/* Add Contact Button */}
+        <button
+          onClick={() => setShowContactModal(true)}
+          className="w-full mb-3 flex items-center gap-2 px-4 py-2 bg-oliveHover text-black rounded-lg hover:bg-oliveGreen transition"
+        >
+          <FaUserPlus />
+          <span>Add Contact</span>
+        </button>
+
+        {/* Search Box */}
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search users or groups..."
+          className="w-full mb-4 px-3 py-2 rounded-lg bg-gray-800 text-sm text-white focus:outline-none focus:ring-2 focus:ring-oliveGreen"
+        />
+
+        {/* Users Section */}
+        <div>
+          <button
+            onClick={() => toggleSection("users")}
+            className="flex sticky top-0 justify-between items-center w-full px-2 py-2 bg-oliveDark rounded-md"
           >
-            {!isMenuOpen ? <FaBars size={24} /> : <FaTimes size={24} />}
-          </div>
-          <Link to={"/dashboard/home"}>
-            <img src={mainLogo} alt="logo" className="w-14" />
-          </Link>
+            <span className="font-semibold">Users</span>
+            {openSections.users ? <FaChevronDown /> : <FaChevronRight />}
+          </button>
+          {openSections.users && (
+            <ul className="mt-2 space-y-2">
+              {isContactsLoading || isHistoryLoading ? (
+                <p className="text-gray-400 text-sm px-2">Loading users...</p>
+              ) : isContactsError || isHistoryError ? (
+                <p className="text-red-400 text-sm px-2">
+                  Failed to load users
+                </p>
+              ) : filteredContacts?.length ? (
+                filteredContacts.map((contact) => (
+                  <SideBarItemTwo
+                    key={contact.contact_id}
+                    data={contact}
+                    setIsOpen={toogleIsOpen}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm px-2">No users found</p>
+              )}
+            </ul>
+          )}
         </div>
 
-        {/* ✅ Make sure this section also allows scrolling if needed */}
-        <nav className="bg-transparent flex-1 p-4">
-          <div className="min-h-28 flex items-center">
-            {state?.type && (
-              <motion.section
-                className="flex gap-2 item-center bg-gray-400/50 p-2 border-l-[5px] border-l-olive overflow-x-auto"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <motion.figure
-                  className="bg-oliveDark/70 cursor-pointer p-3 rounded-xl shadow-md flex items-center justify-center !text-black font-bold transition-all"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <img
-                    src={
-                      dashboardTabs.find((tab) => tab.type === state.type)?.img
+        {/* Groups Section */}
+        <div className="mt-4">
+          <button
+            onClick={() => toggleSection("groups")}
+            className="flex sticky top-0 justify-between items-center w-full px-2 py-2 bg-oliveDark rounded-md"
+          >
+            <span className="font-semibold">Groups</span>
+            {openSections.groups ? <FaChevronDown /> : <FaChevronRight />}
+          </button>
+          {openSections.groups && (
+            <ul className="mt-2 space-y-2">
+              {isGroupsLoading ? (
+                <p className="text-gray-400 text-sm px-2">Loading groups...</p>
+              ) : isGroupsError ? (
+                <p className="text-red-400 text-sm px-2">
+                  Failed to load groups
+                </p>
+              ) : filteredGroups?.length ? (
+                filteredGroups.map((group) => (
+                  <li
+                    onClick={() =>
+                      navigate(`/dashboard/group/${group?.group_id}/chat`)
                     }
-                    alt="Dashboard Item"
-                    className="w-8 h-8 object-contain"
-                  />
-                </motion.figure>
-              </motion.section>
-            )}
-          </div>
-          <p className="mt-4 mb-2 font-medium text-xl text-center">
-            Secure Contact
-          </p>
-          {children?.length && (
-            <div className="relative">
-              {/* Add Contact Button */}
-              <button
-                onClick={() => setShowContactModal(true)}
-                className="font-medium ml-auto mb-2 flex items-center gap-2 px-4 py-2 bg-oliveHover text-black rounded-lg hover:bg-oliveGreen transition"
-              >
-                <FaUserPlus />
-                <span className="hidden md:block">Add Contact</span>
-              </button>
-              <ul className="overflow-y-auto h-80">
-                {children[0] ? (
-                  children[0]
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-60 text-gray-500">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-16 h-16 text-gray-400"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 10.5V8.25a6.75 6.75 0 10-13.5 0V10.5M12 15v2.25m-3.75-3h7.5"
-                      />
-                    </svg>
-                    <p className="text-lg mt-2">No contacts available</p>
-                    <p className="text-sm text-gray-400 text-center">
-                      Start a conversation by adding new contacts.
-                    </p>
-                  </div>
-                )}
-              </ul>
-              <ul className="flex flex-col gap-[10px] mt-20">
-                {chatHistory
-                  ?.slice(-2)
-                  ?.reverse()
-                  ?.map((chat) => (
-                    <li
-                      key={chat?.id}
-                      className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 group items-center p-3 font-medium bg-none`}
-                    >
-                      <section className="flex items-center gap-3">
-                        <figure className="flex-shrink-0 relative w-12 h-12 bg-gray-300 rounded-full">
-                          <img
-                            src={chat?.image}
-                            alt={chat?.chat_user_to_name?.split("")[0]}
-                            className="rounded-full"
-                          />
-                        </figure>
-                        <div className="mr-auto">
-                          <p className="font-bold text-sm">
-                            {chat?.chat_user_to_name}
-                          </p>
-                          <span className="text-oliveGreen text-xs ">
-                            {chat?.last_message?.length > 15
-                              ? `${chat?.last_message?.slice(0, 15)}...`
-                              : chat?.last_message}
-                          </span>
-                        </div>
-                        <div className="ml-auto flex flex-col items-end text-[10px]">
-                          <span className="text-gray-200">Yesterday</span>
-                          <span className="w-max font-medium px-2 py-1 bg-red-700 rounded-lg tet-center">
-                            12
-                          </span>
-                        </div>
-                      </section>
-                    </li>
-                  ))}
-              </ul>
-            </div>
+                    key={group.group_id}
+                    className="cursor-pointer flex gap-3 items-center p-2 rounded-lg hover:bg-gray-800"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-oliveGreen flex items-center justify-center font-bold">
+                      {group?.group_name.charAt(0)}
+                    </div>
+                    <p>{group?.group_name}</p>
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm px-2">No groups found</p>
+              )}
+            </ul>
           )}
-        </nav>
-      </motion.aside>
-    </>
+        </div>
+      </nav>
+    </motion.aside>
   );
 }
 

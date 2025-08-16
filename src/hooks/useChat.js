@@ -12,15 +12,14 @@ const useChat = () => {
   const token = authDetails?.access_token;
   const client = axiosClient(token);
 
-  const useFetchContacts = () =>
-    useQuery({
-      queryKey: ["contacts"],
-      queryFn: async () => {
-        const { data } = await client.get("/user/contact");
-        return data?.data || [];
-      },
-      enabled: !!authDetails, // Fetch only when authenticated
-    });
+  const useFetchContacts = useQuery({
+    queryKey: ["contacts"],
+    queryFn: async () => {
+      const { data } = await client.get("/user/contact");
+      return data?.data || [];
+    },
+    enabled: !!authDetails, // Fetch only when authenticated
+  });
 
   // Fetch Contacts Manually
   const fetchContacts = async () => {
@@ -83,6 +82,7 @@ const useChat = () => {
     getCallLogs,
     updateCallLog,
     fetchGroupChatMessages,
+    useFetchContacts,
   };
 };
 

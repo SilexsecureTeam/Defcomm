@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Send } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,14 +25,38 @@ const GroupChatInterface = () => {
   const { fetchGroupChatMessages } = useChat();
 
   const { data: groupInfo, isLoading } = useFetchGroupInfo(groupId);
+  const mergedGroupInfo = useMemo(() => {
+    if (!groupInfo) return null;
+
+    const members = groupInfo?.data || [];
+    const alreadyMember = members.some(
+      (m) => m.contact_id === authDetails?.user?.id // adapt key if different
+    );
+
+    if (alreadyMember) return groupInfo;
+
+    return {
+      ...groupInfo,
+      data: [
+        ...members,
+        {
+          member_id: authDetails?.user?.id,
+          member_name: authDetails?.user?.name,
+          member_email: authDetails?.user?.email,
+          // you can add avatar or other props here if needed
+          isSelf: true,
+        },
+      ],
+    };
+  }, [groupInfo, authDetails]);
 
   useEffect(() => {
-    setActiveGroup(groupInfo);
-  }, [groupInfo]);
+    setActiveGroup(mergedGroupInfo);
+  }, [mergedGroupInfo]);
 
   const { data: messages = [], isLoading: isMessagesLoading } = useQuery({
-    queryKey: ["groupMessages", groupInfo?.group_meta?.id],
-    queryFn: () => fetchGroupChatMessages(groupInfo?.group_meta?.id),
+    queryKey: ["groupMessages", mergedGroupInfo?.group_meta?.id],
+    queryFn: () => fetchGroupChatMessages(mergedGroupInfo?.group_meta?.id),
     enabled: !!groupId,
     //refetchInterval: 5000,
   });
@@ -87,21 +111,21 @@ const GroupChatInterface = () => {
             className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
             style={{ backgroundColor: COLORS.avatar }}
           >
-            {groupInfo?.group_meta?.name?.charAt(0)}
+            {mergedGroupInfo?.group_meta?.name?.charAt(0)}
           </div>
           <div>
             <h2
               className="text-lg font-semibold"
               style={{ color: COLORS.textLight }}
             >
-              {groupInfo?.group_meta?.name}
+              {mergedGroupInfo?.group_meta?.name}
             </h2>
             <p
               className="text-sm opacity-70"
               style={{ color: COLORS.textLight }}
             >
-              {groupInfo?.data?.length || 0}{" "}
-              {groupInfo?.data?.length === 1 ? "member" : "members"}
+              {mergedGroupInfo?.data?.length || 0}{" "}
+              {mergedGroupInfo?.data?.length === 1 ? "member" : "members"}
             </p>
           </div>
         </div>
@@ -150,7 +174,7 @@ const GroupChatInterface = () => {
             {messages?.data?.length > 0 ? (
               <GroupMessageList
                 messages={messages?.data}
-                participants={groupInfo?.data}
+                participants={mergedGroupInfo?.data}
               />
             ) : (
               <div className="flex justify-center items-center h-full">
@@ -169,7 +193,7 @@ const GroupChatInterface = () => {
 
       {/* GROUP INFO MODAL */}
       <GroupChatDetails
-        groupInfo={groupInfo}
+        groupInfo={mergedGroupInfo}
         showGroupInfo={showGroupInfo}
         setShowGroupInfo={setShowGroupInfo}
       />

@@ -24,6 +24,7 @@ export const useSendMessageMutation = (
     },
 
     onSuccess: async (response, variables) => {
+      queryClient.invalidateQueries("chat-history");
       const messageData = response?.data?.data;
       // If already fetched, append new message to existing messages
       queryClient.setQueryData(

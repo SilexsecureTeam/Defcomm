@@ -63,6 +63,7 @@ const GroupMessageList = ({ messages, participants }) => {
               sender={sender}
               showAvatar={showAvatar}
               isLastInGroup={isLastInGroup}
+              participants={participants}
             />
           </React.Fragment>
         );

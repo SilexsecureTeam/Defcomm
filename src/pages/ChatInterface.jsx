@@ -13,6 +13,7 @@ import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
 import ChatMessage from "../components/Chat/ChatMessage";
 import { getFormattedDate } from "../utils/formmaters";
+import { motion } from "framer-motion";
 
 const ChatInterface = () => {
   const {
@@ -57,10 +58,19 @@ const ChatInterface = () => {
 
     let lastDate = null;
 
-    return messages.data.map((msg) => {
+    return messages.data.map((msg, index) => {
       const formattedDate = getFormattedDate(msg.updated_at);
       const showDateHeader = lastDate !== formattedDate;
       lastDate = formattedDate;
+
+      // 👉 Find next message
+      const nextMsg = messages.data[index + 1];
+
+      // 👉 It's the last message from user if:
+      // - it's NOT my message
+      // - and either there is no next message OR the next one is my message
+      const isLastMessageFromUser =
+        msg.is_my_chat !== "yes" && (!nextMsg || nextMsg.is_my_chat === "yes");
 
       return (
         <React.Fragment key={msg.id}>
@@ -71,7 +81,11 @@ const ChatInterface = () => {
               <div className="flex-1 border-t border-gray-400"></div>
             </div>
           )}
-          <ChatMessage msg={msg} selectedChatUser={selectedChatUser} />
+          <ChatMessage
+            msg={msg}
+            selectedChatUser={selectedChatUser}
+            isLastMessageFromUser={isLastMessageFromUser}
+          />
         </React.Fragment>
       );
     });
@@ -87,7 +101,7 @@ const ChatInterface = () => {
               {selectedChatUser.contact_name || "Chat"}
             </h2>
             {typingUsers[Number(selectedChatUser?.contact_id)] && (
-              <div className="text-green-400 text-sm">Typing...</div>
+              <div className="text-green-400 text-xs">Typing...</div>
             )}
           </div>
           <div className="flex gap-4">
@@ -125,7 +139,25 @@ const ChatInterface = () => {
                 Failed to load messages. Please try again.
               </p>
             ) : (
-              renderMessages()
+              <>
+                {renderMessages()}
+
+                {/* 🔹 Typing indicator as a new bubble */}
+                {typingUsers[selectedChatUser?.contact_id] && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-start space-x-1"
+                  >
+                    <div className="p-2 rounded-lg bg-white text-black shadow-md flex items-center space-x-1 max-w-40">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150" />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300" />
+                    </div>
+                  </motion.div>
+                )}
+              </>
             )
           ) : (
             <p className="text-oliveDark text-center text-lg font-bold mt-10">

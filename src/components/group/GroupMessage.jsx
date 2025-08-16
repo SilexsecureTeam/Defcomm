@@ -6,7 +6,13 @@ import CustomAudioMessage from "../Chat/CustomAudioMessage";
 import ChatFilePreview from "../Chat/ChatFilePreview";
 import ChatCallInvite from "../Chat/ChatCallInvite";
 
-const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
+const GroupMessage = ({
+  msg,
+  sender,
+  showAvatar,
+  isLastInGroup,
+  participants,
+}) => {
   const { chatVisibility, setShowCall, setMeetingId, showToggleSwitch } =
     useContext(ChatContext);
 
@@ -69,13 +75,16 @@ const GroupMessage = ({ msg, sender, showAvatar, isLastInGroup }) => {
               border: `1px solid ${COLORS.brass}`,
             }}
           >
-            {getInitials(msg?.user?.name)}
+            {getInitials(
+              participants?.find((m) => m?.member_id === msg.user_id)
+                ?.member_name
+            )}
           </div>
           <span
             className="text-xs font-semibold"
             style={{ color: COLORS.muted }}
           >
-            {isMine ? "You" : sender?.member_name}
+            {isMine ? "You" : sender?.member_name || "Anonymous"}
           </span>
         </div>
       )}

@@ -33,7 +33,7 @@ const GroupChatDetails = ({ groupInfo, showGroupInfo, setShowGroupInfo }) => {
               {groupInfo?.data?.map((member) => (
                 <div key={member.id} className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full capitalize bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
-                    {member.member_name.charAt(0)}
+                    {member?.member_name?.charAt(0)}
                   </div>
                   <p className="text-gray-800 font-medium">
                     {member.member_name}
