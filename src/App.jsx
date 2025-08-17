@@ -16,6 +16,8 @@ import { ChatProvider } from "./context/ChatContext";
 import { MeetingProvider } from "./context/MeetingContext";
 import { BotProvider } from "./context/BotContext";
 import { NotificationProvider } from "./context/NotificationContext";
+// 🔒 Secure Access Guard
+import SecureAccessGuard from "./routes/security/SecureAccessGuard";
 
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
@@ -23,11 +25,11 @@ const Dashboard = lazy(() => import("./routes/DashboardRoutes"));
 const DeffViewer = lazy(() => import("./pages/DeffViewer"));
 const SecureChatUI = lazy(() => import("./pages/SecureChatUI"));
 const ChatInterface = lazy(() => import("./pages/ChatInterface"));
-
 const SecureRoute = lazy(() => import("./routes/SecureRoute"));
 
 const App = () => {
   return (
+    // <SecureAccessGuard>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <NotificationProvider>
@@ -72,15 +74,15 @@ const App = () => {
         </NotificationProvider>
       </AuthProvider>
 
-      {/* Show DevTools only in development mode */}
       {import.meta.env.VITE_MODE === "development" && (
         <ReactQueryDevtools initialIsOpen={false} position="right" />
       )}
     </QueryClientProvider>
+    // </SecureAccessGuard>
   );
 };
 
-// Protected Route Wrapper as a Component
+// Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const { authDetails, isLoading } = useContext(AuthContext);
 

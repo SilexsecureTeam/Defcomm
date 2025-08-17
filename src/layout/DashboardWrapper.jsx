@@ -242,7 +242,6 @@ const DashboardWrapper = ({ children }) => {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <SecureAccessGuard />
       {/* Sidebar */}
       <SidebarComponent
         authDetails={authDetails}
