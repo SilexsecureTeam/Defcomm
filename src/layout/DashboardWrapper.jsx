@@ -33,6 +33,7 @@ import { CommContext } from "../context/CommContext";
 import useGroupChannel from "../hooks/useGroupChannel";
 import { GroupContext } from "../context/GroupContext";
 import SecureAccessGuard from "../routes/security/SecureAccessGuard";
+import useGroups from "../hooks/useGroup";
 
 const DashboardWrapper = ({ children }) => {
   const queryClient = useQueryClient();
@@ -62,6 +63,8 @@ const DashboardWrapper = ({ children }) => {
     setCallDuration,
   } = useContext(ChatContext);
   const { activeGroup } = useContext(GroupContext);
+  const { useFetchGroups } = useGroups();
+  const { data: groups } = useFetchGroups();
 
   const { state, dispatch } = useContext(DashboardContext);
   const { activeChannel } = useContext(CommContext);
@@ -79,8 +82,8 @@ const DashboardWrapper = ({ children }) => {
 
   // Group Channel
   useGroupChannel({
-    groupId: activeGroup?.group_meta?.id,
     token: authDetails?.access_token,
+    groups,
   });
 
   // COMMUNICATION CHANNEL SETUP
@@ -182,8 +185,9 @@ const DashboardWrapper = ({ children }) => {
   });
 
   const toggleIsOpen = () => setIsOpen((prev) => !prev);
-  const isChatPage = pathname.includes("/dashboard/chat");
-
+  const isChatPage =
+    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
+    pathname === "/dashboard/chat";
   const { SidebarComponent, SidebarItemComponent, optionList } = useMemo(() => {
     let Sidebar = SideBar;
     let SidebarItem = SideBarItem;
@@ -219,9 +223,6 @@ const DashboardWrapper = ({ children }) => {
       ...dashboardTabs,
     ].find((opt) => pathname === opt.route);
     if (matchedOption) dispatch(matchedOption);
-    if (!matchedOption || matchedOption?.type !== "CHAT")
-      setSelectedChatUser(null);
-
     if (
       pathname !== "/dashboard/conference/room" &&
       showConference &&

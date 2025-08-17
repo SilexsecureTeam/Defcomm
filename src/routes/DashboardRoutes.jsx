@@ -57,6 +57,19 @@ const DashboardRoutes = () => {
                 <Route path="home" element={<Home />} />
 
                 <Route
+                  path="user/:userId/chat"
+                  element={
+                    <div className="w-full h-full">
+                      <div className="block lg:hidden">
+                        <ChatInterface />
+                      </div>
+                      <div className="hidden lg:block">
+                        <SecureChatUI />
+                      </div>
+                    </div>
+                  }
+                />
+                <Route
                   path="chat"
                   element={
                     <div className="w-full h-full">

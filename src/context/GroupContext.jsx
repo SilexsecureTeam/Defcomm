@@ -5,6 +5,8 @@ export const GroupContext = createContext();
 export const GroupProvider = ({ children }) => {
   const [activeGroup, setActiveGroup] = useState(null);
   const [groupUserTyping, setGroupUserTyping] = useState();
+  const [groupConnections, setGroupConnections] = useState({});
+  // e.g. { groupId: "connected" | "error" }
 
   return (
     <GroupContext.Provider
@@ -13,6 +15,8 @@ export const GroupProvider = ({ children }) => {
         setActiveGroup,
         groupUserTyping,
         setGroupUserTyping,
+        groupConnections,
+        setGroupConnections,
       }}
     >
       {children}

@@ -19,7 +19,9 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { setShowContactModal } = useContext(ChatContext);
-  const isChatPage = pathname.includes("/dashboard/chat");
+  const isChatPage =
+    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
+    pathname === "/dashboard/chat";
 
   // 🟢 Fetch Chat History
   const { fetchChatHistory, useFetchContacts } = useChat();

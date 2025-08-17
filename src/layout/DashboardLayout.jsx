@@ -20,7 +20,10 @@ const DashboardLayout = () => {
 
   const { pathname } = useLocation();
 
-  const isChatPage = pathname.includes("/dashboard/chat");
+  const isChatPage =
+    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
+    pathname === "/dashboard/chat";
+
   const isWalkieTalkiePage = pathname.includes("/comm");
 
   // Auto open minimized modal if comm active but user not on walkie page

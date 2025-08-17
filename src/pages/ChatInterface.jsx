@@ -6,7 +6,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import SEOHelmet from "../engine/SEOHelmet";
 import { ChatContext } from "../context/ChatContext";
-import { AuthContext } from "../context/AuthContext";
 import useChat from "../hooks/useChat";
 
 import SendMessage from "../components/Chat/SendMessage";
@@ -14,10 +13,14 @@ import CallInterface from "../components/Chat/CallInterface";
 import ChatMessage from "../components/Chat/ChatMessage";
 import { getFormattedDate } from "../utils/formmaters";
 import { motion } from "framer-motion";
+import { useLocation, useParams } from "react-router-dom";
+import ChatMessageList from "../components/Chat/ChatMessageList";
 
 const ChatInterface = () => {
+  const { userId } = useParams();
+  const location = useLocation();
+  const chatUserData = location?.state;
   const {
-    selectedChatUser,
     setSelectedChatUser,
     setShowCall,
     setShowSettings,
@@ -32,15 +35,15 @@ const ChatInterface = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["chatMessages", selectedChatUser?.contact_id_encrypt],
-    queryFn: () => fetchChatMessages(selectedChatUser?.contact_id_encrypt),
-    enabled: !!selectedChatUser?.contact_id,
+    queryKey: ["chatMessages", chatUserData?.contact_id_encrypt],
+    queryFn: () => fetchChatMessages(chatUserData?.contact_id_encrypt),
+    enabled: !!chatUserData?.contact_id,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    if (messages?.chat_meta && selectedChatUser) {
+    if (messages?.chat_meta && chatUserData) {
       setSelectedChatUser((prev) => ({
         ...prev,
         chat_meta: messages.chat_meta,
@@ -50,57 +53,19 @@ const ChatInterface = () => {
     if (messages?.data && messageRef.current) {
       messageRef.current?.lastElementChild?.scrollIntoView();
     }
-  }, [messages]);
+  }, [messages, typingUsers[chatUserData?.contact_id]]);
 
-  const renderMessages = () => {
-    if (!messages?.data?.length)
-      return <p className="text-gray-500 text-center">No messages yet.</p>;
-
-    let lastDate = null;
-
-    return messages.data.map((msg, index) => {
-      const formattedDate = getFormattedDate(msg.updated_at);
-      const showDateHeader = lastDate !== formattedDate;
-      lastDate = formattedDate;
-
-      // 👉 Find next message
-      const nextMsg = messages.data[index + 1];
-
-      // 👉 It's the last message from user if:
-      // - it's NOT my message
-      // - and either there is no next message OR the next one is my message
-      const isLastMessageFromUser =
-        msg.is_my_chat !== "yes" && (!nextMsg || nextMsg.is_my_chat === "yes");
-
-      return (
-        <React.Fragment key={msg.id}>
-          {showDateHeader && (
-            <div className="flex items-center justify-center gap-2 my-4 text-gray-500 text-sm font-medium">
-              <div className="flex-1 border-t border-gray-400"></div>
-              <span>{formattedDate}</span>
-              <div className="flex-1 border-t border-gray-400"></div>
-            </div>
-          )}
-          <ChatMessage
-            msg={msg}
-            selectedChatUser={selectedChatUser}
-            isLastMessageFromUser={isLastMessageFromUser}
-          />
-        </React.Fragment>
-      );
-    });
-  };
   return (
     <div className="relative flex flex-col lg:flex-row gap-4 h-full">
       <SEOHelmet title="Secure Chat" />
 
-      {selectedChatUser && (
+      {userId && (
         <div className="lg:hidden sticky top-0 z-50 flex justify-between items-center bg-oliveDark text-white p-4">
           <div>
             <h2 className="text-lg font-semibold capitalize">
-              {selectedChatUser.contact_name || "Chat"}
+              {chatUserData?.contact_name || "Chat"}
             </h2>
-            {typingUsers[Number(selectedChatUser?.contact_id)] && (
+            {typingUsers[Number(chatUserData?.contact_id)] && (
               <div className="text-green-400 text-xs">Typing...</div>
             )}
           </div>
@@ -129,7 +94,7 @@ const ChatInterface = () => {
           ref={messageRef}
           className="flex-1 overflow-y-auto w-full h-full flex flex-col space-y-4 p-4 pb-10"
         >
-          {selectedChatUser ? (
+          {chatUserData ? (
             isLoading ? (
               <div className="h-20 flex justify-center items-center text-oliveDark gap-2">
                 <FaSpinner className="animate-spin text-2xl" /> Loading Messages
@@ -140,10 +105,10 @@ const ChatInterface = () => {
               </p>
             ) : (
               <>
-                {renderMessages()}
+                <ChatMessageList messages={messages} />
 
                 {/* 🔹 Typing indicator as a new bubble */}
-                {typingUsers[selectedChatUser?.contact_id] && (
+                {typingUsers[chatUserData?.contact_id] && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -165,9 +130,9 @@ const ChatInterface = () => {
             </p>
           )}
         </div>
-        {selectedChatUser && <SendMessage messageData={messages?.chat_meta} />}
+        {chatUserData && <SendMessage messageData={messages?.chat_meta} />}
       </div>
-      {selectedChatUser && (
+      {chatUserData && (
         <div className="w-max hidden lg:block">
           <CallInterface
             setShowCall={setShowCall}

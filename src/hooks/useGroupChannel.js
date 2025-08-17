@@ -4,20 +4,23 @@ import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../context/AuthContext";
 import { GroupContext } from "../context/GroupContext";
+import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
 
-const useGroupChannel = ({ groupId, token }) => {
+const useGroupChannels = ({ groups, token }) => {
   const pusherRef = useRef(null);
   const { authDetails } = useContext(AuthContext);
-  const { activeGroup, setGroupUserTyping } = useContext(GroupContext);
+  const { setGroupUserTyping, setGroupConnections } = useContext(GroupContext);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!groupId || !token) return;
+    if (!token || !groups?.length) return;
 
+    // Disconnect previous instance
     if (pusherRef.current) {
       pusherRef.current.disconnect();
     }
 
+    // Create Pusher instance
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
       cluster: "mt1",
       wsHost: import.meta.env.VITE_PUSHER_HOST,
@@ -28,69 +31,91 @@ const useGroupChannel = ({ groupId, token }) => {
       auth: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    const channelName = `private-group.${groupId}`;
-    const channel = pusher.subscribe(channelName);
+    // Subscribe to all joined groups
+    groups.forEach((group) => {
+      const channelName = `private-group.${group.group_id}`;
+      const channel = pusher.subscribe(channelName);
 
-    channel.bind("pusher:subscription_succeeded", () => {
-      toast.success(`Connected to ${activeGroup?.group_meta?.name} group`);
-    });
+      channel.bind("pusher:subscription_succeeded", () => {
+        setGroupConnections((prev) => ({
+          ...prev,
+          [group.group_id]: "connected",
+        }));
+        //toast.success(`Connected to ${group.group_name}`);
+      });
 
-    channel.bind("group.message.sent", ({ data }) => {
-      console.log(data);
+      channel.bind("pusher:subscription_error", () => {
+        setGroupConnections((prev) => ({
+          ...prev,
+          [group.group_id]: "error",
+        }));
+        //toast.error(`Failed to connect to ${group.group_name}`);
+      });
 
-      const senderId = data?.data?.user_id;
+      channel.bind("group.message.sent", ({ data }) => {
+        const senderId = data?.data?.user_id;
 
-      // Typing indicators
-      if (data?.state === "is_typing") {
-        setGroupUserTyping?.((prev) =>
-          prev[data?.sender_id] ? prev : { ...prev, [data?.sender_id]: true }
-        );
-        return;
-      } else if (data?.state === "not_typing") {
-        setGroupUserTyping?.((prev) =>
-          !prev[data?.sender_id] ? prev : { ...prev, [data?.sender_id]: false }
-        );
-        return;
-      }
+        // Typing indicator
+        if (data?.state === "is_typing") {
+          setGroupUserTyping?.((prev) => ({
+            ...prev,
+            [data?.sender_id]: true,
+          }));
+          return;
+        } else if (data?.state === "not_typing") {
+          setGroupUserTyping?.((prev) => ({
+            ...prev,
+            [data?.sender_id]: false,
+          }));
+          return;
+        }
 
-      if (!senderId) return;
+        if (!senderId) return;
 
-      const existingData = queryClient.getQueryData(["groupMessages", groupId]);
+        // Show toast if not my message
+        if (senderId !== authDetails?.user?.id) {
+          onNewNotificationToast({
+            senderName: data?.sender?.name,
+            message: data?.message,
+            type: "group",
+            groupName: group.group_name,
+          });
+        }
 
-      // No cached messages yet → refetch
-      if (!existingData) {
-        queryClient.invalidateQueries(["groupMessages", groupId]);
-        return;
-      }
-
-      // Append new message if not already there
-      queryClient.setQueryData(["groupMessages", groupId], (old) => {
-        if (!old?.data) return old;
-        const exists = old.data.some((msg) => msg.id === data.data.id);
-        const isMyChat = data.data.user_id === authDetails?.user?.id;
-        return exists
-          ? old
-          : {
-              ...old,
-              data: [
-                ...old.data,
-                {
-                  ...data.data,
-                  message: data?.message,
-                  is_my_chat: isMyChat ? "yes" : "no",
-                },
-              ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
-            };
+        // Cache management for that group's messages
+        queryClient.setQueryData(["groupMessages", group.group_id], (old) => {
+          if (!old?.data) return old;
+          const exists = old.data.some((msg) => msg.id === data.data.id);
+          const isMyChat = data.data.user_id === authDetails?.user?.id;
+          return exists
+            ? old
+            : {
+                ...old,
+                data: [
+                  ...old.data,
+                  {
+                    ...data.data,
+                    message: data?.message,
+                    is_my_chat: isMyChat ? "yes" : "no",
+                  },
+                ].sort(
+                  (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                ),
+              };
+        });
       });
     });
 
     pusherRef.current = pusher;
 
+    // Cleanup
     return () => {
-      pusher.unsubscribe(channelName);
+      groups.forEach((group) => {
+        pusher.unsubscribe(`private-group.${group.group_id}`);
+      });
       pusher.disconnect();
     };
-  }, [groupId, token]);
+  }, [token, groups]);
 
   return () => {
     try {
@@ -101,4 +126,4 @@ const useGroupChannel = ({ groupId, token }) => {
   };
 };
 
-export default useGroupChannel;
+export default useGroupChannels;

@@ -9,6 +9,7 @@ import useChat from "../../../hooks/useChat";
 import ChatMessage from "../ChatMessage"; // Import the new Message component
 import { getFormattedDate } from "../../../utils/formmaters";
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
 const ChatInterface = () => {
   const {
@@ -21,23 +22,25 @@ const ChatInterface = () => {
   } = useContext(ChatContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
-  const { authDetails } = useContext(AuthContext);
-  // Fetch messages
+
+  const location = useLocation();
+  const chatUserData = location?.state;
+
   const {
     data: messages,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["chatMessages", selectedChatUser?.contact_id_encrypt],
-    queryFn: () => fetchChatMessages(selectedChatUser?.contact_id_encrypt),
-    enabled: !!selectedChatUser?.contact_id,
+    queryKey: ["chatMessages", chatUserData?.contact_id_encrypt],
+    queryFn: () => fetchChatMessages(chatUserData?.contact_id_encrypt),
+    enabled: !!chatUserData?.contact_id,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
     setMessages(messages);
-    if (messages?.chat_meta && selectedChatUser) {
+    if (messages?.chat_meta && chatUserData) {
       setSelectedChatUser((prev) => {
         if (!prev) return prev; // 🔴 Prevents overwriting null
         return { ...prev, chat_meta: messages.chat_meta };
@@ -47,11 +50,6 @@ const ChatInterface = () => {
       messageRef.current?.lastElementChild?.scrollIntoView();
     }
   }, [messages]);
-
-  const handleAcceptCall = (msg) => {
-    setMeetingId(msg?.message?.slice("CALL_INVITE:".length));
-    setShowCall(true);
-  };
 
   const renderMessages = () => {
     if (!messages?.data?.length) return;
@@ -84,7 +82,7 @@ const ChatInterface = () => {
           )}
           <ChatMessage
             msg={msg}
-            selectedChatUser={selectedChatUser}
+            selectedChatUser={chatUserData}
             isLastMessageFromUser={isLastMessageFromUser}
           />
         </React.Fragment>
@@ -113,7 +111,7 @@ const ChatInterface = () => {
               {renderMessages()}
 
               {/* 🔹 Typing indicator as a new bubble */}
-              {typingUsers[selectedChatUser?.contact_id] && (
+              {typingUsers[chatUserData?.contact_id] && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

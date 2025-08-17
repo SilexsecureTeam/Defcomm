@@ -7,12 +7,12 @@ import Modal from "../modal/Modal";
 import NotificationList from "../../utils/notifications/NotificationList";
 import { NotificationContext } from "../../context/NotificationContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChatContext } from "../../context/ChatContext";
 
 function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
-  const isChatPage = pathname.includes("/dashboard/chat");
+  const isChatPage =
+    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
+    pathname === "/dashboard/chat";
   const { unseenCount, notificationOpen, toggleNotificationModal } =
     useContext(NotificationContext);
 

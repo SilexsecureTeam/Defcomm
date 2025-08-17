@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/ChatContext"; // Import Chat Context
 import logoIcon from "../../assets/logo-icon.png";
 import { MdDelete } from "react-icons/md";
@@ -8,12 +8,15 @@ import { FaSpinner } from "react-icons/fa";
 
 function SideBarItemTwo({ data, setIsOpen }) {
   const navigate = useNavigate();
-  const { setSelectedChatUser, selectedChatUser, typingUsers } =
-    useContext(ChatContext); // Use context
+  const location = useLocation();
+  const chatUserData = location?.state;
+  const { setSelectedChatUser, typingUsers } = useContext(ChatContext);
 
   const navigateToChat = () => {
-    setSelectedChatUser(data); // Save selected user to context
     setIsOpen(false);
+    navigate(`/dashboard/user/${data?.contact_id_encrypt}/chat`, {
+      state: data,
+    });
   };
   const { removeContactMutation } = useGroups();
   const [loadingStates, setLoadingStates] = useState({});
@@ -24,7 +27,7 @@ function SideBarItemTwo({ data, setIsOpen }) {
     try {
       const res = await removeContactMutation.mutateAsync(data?.id);
       if (res) {
-        if (selectedChatUser?.contact_id === data?.contact_id) {
+        if (chatUserData?.contact_id === data?.contact_id) {
           setSelectedChatUser(null);
         }
       }
@@ -38,7 +41,7 @@ function SideBarItemTwo({ data, setIsOpen }) {
       key={data?.id}
       onClick={navigateToChat}
       className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 ${
-        selectedChatUser?.contact_id === data?.contact_id && "bg-gray-800"
+        chatUserData?.contact_id === data?.contact_id && "bg-gray-800"
       } group items-center p-3 font-medium`}
     >
       <figure className="relative w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-black font-bold">

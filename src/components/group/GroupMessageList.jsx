@@ -1,8 +1,7 @@
 import React from "react";
 import GroupMessage from "./GroupMessage";
 
-const formatDateLabel = (dateString) => {
-  const date = new Date(dateString);
+const formatDateLabel = (date) => {
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
@@ -18,56 +17,65 @@ const formatDateLabel = (dateString) => {
   });
 };
 
+// Group messages by date
+const groupMessagesByDate = (messages) => {
+  return messages.reduce((acc, msg) => {
+    const dateKey = new Date(msg.updated_at).toDateString();
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(msg);
+    return acc;
+  }, {});
+};
+
 const GroupMessageList = ({ messages, participants }) => {
+  const groupedMessages = groupMessagesByDate(messages);
+
   return (
     <div className="flex flex-col px-4 py-4 space-y-1 hide-scrollbar relative">
-      {messages.map((msg, index) => {
-        const sender =
-          participants.find(
-            (p) => Number(p.member_id) === Number(msg.user_id)
-          ) || {};
-        const prevMsg = messages[index - 1];
-        const nextMsg = messages[index + 1];
+      {Object.entries(groupedMessages).map(([dateKey, dayMessages]) => (
+        <div key={dateKey} className="relative">
+          {/* Sticky date header */}
+          <div className="sticky top-0 z-10 flex justify-center py-1">
+            <span
+              className="px-3 py-1 text-xs rounded-full shadow-sm"
+              style={{
+                color: "#C5D6C3",
+                border: "1px solid rgba(255,255,255,0.05)",
+              }}
+            >
+              {formatDateLabel(new Date(dateKey))}
+            </span>
+          </div>
 
-        const sameDayAsPrev =
-          prevMsg &&
-          new Date(prevMsg.updated_at).toDateString() ===
-            new Date(msg.updated_at).toDateString();
+          {/* Messages of this day */}
+          <div className="space-y-1">
+            {dayMessages.map((msg, index) => {
+              const sender =
+                participants.find(
+                  (p) => Number(p.member_id) === Number(msg.user_id)
+                ) || {};
+              const prevMsg = dayMessages[index - 1];
+              const nextMsg = dayMessages[index + 1];
 
-        const showDateSeparator = !sameDayAsPrev;
+              const showAvatar =
+                !prevMsg || Number(prevMsg.user_id) !== Number(msg.user_id);
+              const isLastInGroup =
+                !nextMsg || Number(nextMsg.user_to) !== Number(msg.user_to);
 
-        const showAvatar =
-          !prevMsg || Number(prevMsg.user_id) !== Number(msg.user_id);
-        const isLastInGroup =
-          !nextMsg || Number(nextMsg.user_to) !== Number(msg.user_to);
-
-        return (
-          <React.Fragment key={msg.id || index}>
-            {showDateSeparator && (
-              <div className="sticky top-0 z-10 flex justify-center my-3">
-                <span
-                  className="px-3 py-1 text-xs rounded-full shadow-sm"
-                  style={{
-                    backgroundColor: "#1E2A1E", // dark military green
-                    color: "#C5D6C3", // soft muted green text
-                    border: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  {formatDateLabel(msg.updated_at)}
-                </span>
-              </div>
-            )}
-
-            <GroupMessage
-              msg={msg}
-              sender={sender}
-              showAvatar={showAvatar}
-              isLastInGroup={isLastInGroup}
-              participants={participants}
-            />
-          </React.Fragment>
-        );
-      })}
+              return (
+                <GroupMessage
+                  key={msg.id || index}
+                  msg={msg}
+                  sender={sender}
+                  showAvatar={showAvatar}
+                  isLastInGroup={isLastInGroup}
+                  participants={participants}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

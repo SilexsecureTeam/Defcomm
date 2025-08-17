@@ -17,9 +17,11 @@ import { IoArrowBack } from "react-icons/io5";
 const GroupChatInterface = () => {
   const { groupId } = useParams();
   const { authDetails } = useContext(AuthContext);
-  const { setActiveGroup, activeGroup } = useContext(GroupContext);
+  const { setActiveGroup, groupConnections } = useContext(GroupContext);
   const { setShowSettings } = useContext(ChatContext);
   const navigate = useNavigate();
+
+  const connectionStatus = groupConnections?.[groupId];
 
   const { useFetchGroupInfo } = useGroups();
   const { fetchGroupChatMessages } = useChat();
@@ -106,29 +108,39 @@ const GroupChatInterface = () => {
         </button>
 
         {/* Group Avatar + Name */}
-        <div className="flex items-center space-x-4">
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
-            style={{ backgroundColor: COLORS.avatar }}
-          >
-            {mergedGroupInfo?.group_meta?.name?.charAt(0)}
-          </div>
-          <div>
-            <h2
-              className="text-lg font-semibold"
-              style={{ color: COLORS.textLight }}
+        {mergedGroupInfo && (
+          <div className="flex items-center space-x-4">
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
+              style={{ backgroundColor: COLORS.avatar }}
             >
-              {mergedGroupInfo?.group_meta?.name}
-            </h2>
-            <p
-              className="text-sm opacity-70"
-              style={{ color: COLORS.textLight }}
-            >
-              {mergedGroupInfo?.data?.length || 0}{" "}
-              {mergedGroupInfo?.data?.length === 1 ? "member" : "members"}
-            </p>
+              {mergedGroupInfo?.group_meta?.name?.charAt(0)}
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2
+                  className="text-lg font-semibold"
+                  style={{ color: COLORS.textLight }}
+                >
+                  {mergedGroupInfo?.group_meta?.name}
+                </h2>
+                {connectionStatus === "connected" && (
+                  <span className="text-green-400 text-sm">● Connected</span>
+                )}
+                {connectionStatus === "error" && (
+                  <span className="text-red-400 text-sm">● Error</span>
+                )}
+              </div>
+              <p
+                className="text-sm opacity-70"
+                style={{ color: COLORS.textLight }}
+              >
+                {mergedGroupInfo?.data?.length || 0}{" "}
+                {mergedGroupInfo?.data?.length === 1 ? "member" : "members"}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Members Button */}
         <button

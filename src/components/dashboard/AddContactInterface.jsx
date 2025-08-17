@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaCheck, FaSpinner } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import Modal from "../modal/Modal";
@@ -11,7 +11,10 @@ const AddContactInterface = () => {
   const { useFetchGroups, useFetchGroupMembers, addContactMutation } =
     useGroups();
   const { setModalTitle } = useContext(ChatContext);
-  setModalTitle("Add Contacts");
+
+  useEffect(() => {
+    setModalTitle("Add Contacts");
+  }, []);
   const { fetchContacts } = useChat();
 
   const { data: contacts, isLoading } = useQuery({
