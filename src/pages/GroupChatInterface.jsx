@@ -125,10 +125,10 @@ const GroupChatInterface = () => {
                   {mergedGroupInfo?.group_meta?.name}
                 </h2>
                 {connectionStatus === "connected" && (
-                  <small className="text-green-400 text-xs">● Connected</small>
+                  <small className="text-green-400 text-2xl">● </small>
                 )}
                 {connectionStatus === "error" && (
-                  <span className="text-red-400 text-sm">● Error</span>
+                  <small className="text-red-400 text-2xl">●</small>
                 )}
               </div>
               <p
