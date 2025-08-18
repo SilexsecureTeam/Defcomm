@@ -73,7 +73,7 @@ const SessionManager = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 font-sans text-gray-800">
+    <div className="min-h-screen bg-white p-2 md:p-3 font-sans text-gray-800">
       <div className="max-w-5xl mx-auto py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -87,7 +87,7 @@ const SessionManager = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-center mb-10">
+        <div className="flex flex-wrap justify-center mb-10">
           <div className="flex space-x-2 bg-gray-200 p-2 rounded-full shadow-lg">
             {["active", "all", "blocked", "removed"].map((tab) => (
               <motion.button
@@ -145,7 +145,7 @@ const SessionManager = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                  <div className="flex items-center gap-2 mt-4 md:mt-0">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(
                         device
