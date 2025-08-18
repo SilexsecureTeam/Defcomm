@@ -88,7 +88,7 @@ const DashboardWrapper = ({ children }) => {
 
   // COMMUNICATION CHANNEL SETUP
   useCommChannel({
-    channelId: activeChannel?.channel_id_un,
+    channelId: activeChannel?.channel_id,
     token: authDetails?.access_token,
   });
 
