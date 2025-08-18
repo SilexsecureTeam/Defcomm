@@ -1,3 +1,6 @@
+import { AiOutlineBell, AiOutlineLock, AiOutlineUser } from "react-icons/ai";
+import { MdDevices, MdMessage } from "react-icons/md";
+
 export const getProfileFormConfig = ({
   fullName,
   setFullName,
@@ -106,3 +109,40 @@ export const getProfileFormConfig = ({
     },
   ];
 };
+
+export const settingsManagement = [
+  {
+    label: "Profile",
+    key: "profile",
+    icon: AiOutlineUser,
+    content:
+      "View and edit your profile experience and manage their identity across the platform.",
+  },
+  {
+    label: "Notification",
+    key: "notification",
+    icon: AiOutlineBell,
+    content: "Let users control how and when they receive alerts from the app.",
+  },
+  {
+    label: "Set 2FA",
+    key: "2FA",
+    icon: AiOutlineLock,
+    content:
+      "Adds an extra layer of security to user accounts by requiring a second form of verification in addition to a password.",
+  },
+  {
+    label: "Message Reading Pattern",
+    key: "message",
+    icon: MdMessage,
+    content:
+      "Allows users to define when and how messages are read and decrypted based on a set pattern or schedule.",
+  },
+  {
+    label: "Device Sessions",
+    key: "deviceSessions",
+    icon: MdDevices,
+    content:
+      "Manage all devices logged into your account, view active sessions, and control login history for enhanced security.",
+  },
+];

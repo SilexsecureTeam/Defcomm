@@ -47,7 +47,7 @@ const Broadcast = () => {
       return;
     }
     leaveChannel(); // Cleanup previous state
-    setConnectingChannelId(channel.channel_id_un);
+    setConnectingChannelId(channel.channel_id);
     setActiveChannel(channel);
   };
 
@@ -194,7 +194,7 @@ const Broadcast = () => {
                           color: isCommActive ? "#166534" : "#92400e",
                         }}
                       >
-                        {connectingChannelId === item.channel_id_un &&
+                        {connectingChannelId === item.channel_id &&
                         !isCommActive
                           ? "Connecting..."
                           : isCommActive
