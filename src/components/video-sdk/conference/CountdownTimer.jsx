@@ -45,7 +45,7 @@ const CountdownTimer = ({ startTime, durationMinutes = 60 }) => {
         if (weeks === 0 && days === 0 && hours === 0 && minutes <= 5) {
           setStatusColor("text-red-400 font-bold");
         } else if (weeks === 0 && days === 0 && hours === 0) {
-          setStatusColor("text-yellow-400");
+          setStatusColor("text-yellow");
         } else {
           setStatusColor("text-green-400");
         }

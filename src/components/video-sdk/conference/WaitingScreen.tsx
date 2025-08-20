@@ -123,7 +123,7 @@ const WaitingScreen = ({
             Starts at: {new Date(waitingScreen.startdatetime).toLocaleString()}
           </p>
 
-          <div className="text-lg font-semibold text-yellow-400 mt-2">
+          <div className="text-lg font-semibold mt-2">
             <CountdownTimer startTime={waitingScreen.startdatetime} />
           </div>
 

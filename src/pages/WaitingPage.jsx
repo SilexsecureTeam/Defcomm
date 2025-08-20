@@ -7,6 +7,7 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import WaitingScreen from "../components/video-sdk/conference/WaitingScreen";
 import { extractErrorMessage } from "../utils/formmaters";
 import { FaSpinner } from "react-icons/fa"; // <- React icon for loader
+import SEOHelmet from "../engine/SEOHelmet";
 
 const WaitingPage = () => {
   const { meetingId } = useParams();
@@ -65,7 +66,10 @@ const WaitingPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-80 text-red-400 text-center px-4">
         <h2 className="text-2xl font-semibold mb-2">Unable to load meeting</h2>
-        <p className="mb-4">{extractErrorMessage(error) || "Meeting not found or an unexpected error occurred."}</p>
+        <p className="mb-4">
+          {extractErrorMessage(error) ||
+            "Meeting not found or an unexpected error occurred."}
+        </p>
         <button
           onClick={handleCancel}
           className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded"
@@ -76,12 +80,17 @@ const WaitingPage = () => {
     );
   }
   return (
-    <WaitingScreen
-      waitingScreen={meeting}
-      onJoin={confirmJoinMeeting}
-      onCancel={handleCancel}
-      isJoining={isJoining}
-    />
+    <>
+      {/* SEO Content */}
+      <SEOHelmet title={meeting?.title || "Meeting"} />
+
+      <WaitingScreen
+        waitingScreen={meeting}
+        onJoin={confirmJoinMeeting}
+        onCancel={handleCancel}
+        isJoining={isJoining}
+      />
+    </>
   );
 };
 
