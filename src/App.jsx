@@ -29,56 +29,59 @@ const SecureRoute = lazy(() => import("./routes/SecureRoute"));
 
 const App = () => {
   return (
-    // <SecureAccessGuard>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <NotificationProvider>
-          <ChatProvider>
-            <MeetingProvider>
-              <BotProvider>
-                <DashboardContextProvider>
-                  <Router>
-                    <Suspense fallback={<FallBack />}>
-                      <Routes>
-                        <Route path="/login" element={<DefcommLogin />} />
-                        <Route path="/onboarding" element={<DefcommLogin />} />
-                        <Route path="/" element={<DefcommLogin />} />
-                        <Route path="web" element={<DeffViewer />} />
-
-                        {/* Using ProtectedRoute as a Component for dashboard */}
-                        <Route path="/dashboard/*" element={<SecureRoute />}>
+    <SecureAccessGuard>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <NotificationProvider>
+            <ChatProvider>
+              <MeetingProvider>
+                <BotProvider>
+                  <DashboardContextProvider>
+                    <Router>
+                      <Suspense fallback={<FallBack />}>
+                        <Routes>
+                          <Route path="/login" element={<DefcommLogin />} />
                           <Route
-                            path="*"
-                            element={
-                              <ProtectedRoute>
-                                <Dashboard />
-                              </ProtectedRoute>
-                            }
+                            path="/onboarding"
+                            element={<DefcommLogin />}
                           />
-                        </Route>
+                          <Route path="/" element={<DefcommLogin />} />
+                          <Route path="web" element={<DeffViewer />} />
 
-                        {/* Catch-all redirect */}
-                        <Route path="*" element={<Navigate to="/" />} />
-                      </Routes>
-                    </Suspense>
-                  </Router>
-                  <ToastContainer
-                    autoClose={2000}
-                    draggable
-                    className="z-[100000000000] mt-2"
-                  />
-                </DashboardContextProvider>
-              </BotProvider>
-            </MeetingProvider>
-          </ChatProvider>
-        </NotificationProvider>
-      </AuthProvider>
+                          {/* Using ProtectedRoute as a Component for dashboard */}
+                          <Route path="/dashboard/*" element={<SecureRoute />}>
+                            <Route
+                              path="*"
+                              element={
+                                <ProtectedRoute>
+                                  <Dashboard />
+                                </ProtectedRoute>
+                              }
+                            />
+                          </Route>
 
-      {import.meta.env.VITE_MODE === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} position="right" />
-      )}
-    </QueryClientProvider>
-    // </SecureAccessGuard>
+                          {/* Catch-all redirect */}
+                          <Route path="*" element={<Navigate to="/" />} />
+                        </Routes>
+                      </Suspense>
+                    </Router>
+                    <ToastContainer
+                      autoClose={2000}
+                      draggable
+                      className="z-[100000000000] mt-2"
+                    />
+                  </DashboardContextProvider>
+                </BotProvider>
+              </MeetingProvider>
+            </ChatProvider>
+          </NotificationProvider>
+        </AuthProvider>
+
+        {import.meta.env.VITE_MODE === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} position="right" />
+        )}
+      </QueryClientProvider>
+    </SecureAccessGuard>
   );
 };
 

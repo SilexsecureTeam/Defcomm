@@ -36,9 +36,9 @@ const useDeviceSettings = () => {
   // ✅ Mutation to update device status
   const updateDeviceStatusMutation = useMutation({
     mutationFn: async ({ id, status }) => {
-      const { data } = await client.get(`/auth/logindevice/${id}`, {
-        status,
-      });
+      const { data } = await client.get(
+        `/auth/logindevicestatus/${id}/${status}`
+      );
       return data;
     },
     onSuccess: () => {

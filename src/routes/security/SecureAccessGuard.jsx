@@ -26,7 +26,7 @@ export default function SecureAccessGuard({ children }) {
   // Synchronous DevTools check
   const immediateDevToolsCheck = () => {
     const start = performance.now();
-    debugger;
+    // debugger;
     const timeTaken = performance.now() - start;
     if (timeTaken > 100) triggerBlock("Debugger / Console Inspection Detected");
   };
@@ -91,7 +91,7 @@ export default function SecureAccessGuard({ children }) {
     // Console detection
     const consoleInterval = setInterval(() => {
       const start = performance.now();
-      debugger;
+      //debugger;
       const timeTaken = performance.now() - start;
       if (timeTaken > 100)
         triggerBlock("Debugger / Console Inspection Detected");
@@ -183,7 +183,7 @@ export default function SecureAccessGuard({ children }) {
           <p className="text-xl mb-4">
             Cause: <span className="text-red-500">{reason}</span>
           </p>
-          <p className="mb-4 font-bold text-lg">MISSION INSTRUCTIONS:</p>
+          <p className="mb-4 font-bold text-lg">INSTRUCTIONS:</p>
           <p className="mb-6">{instructions}</p>
           <button
             onClick={() => window.location.reload()}
