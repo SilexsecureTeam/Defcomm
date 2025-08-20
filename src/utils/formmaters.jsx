@@ -131,21 +131,23 @@ export const stringToColor = (str) => {
 export const formatDateTimeForBackend = (datetimeLocal) => {
   if (!datetimeLocal) return "";
 
-  // If it's a Date object, convert to the proper string
+  let date;
+
   if (datetimeLocal instanceof Date) {
-    const year = datetimeLocal.getFullYear();
-    const month = String(datetimeLocal.getMonth() + 1).padStart(2, "0");
-    const day = String(datetimeLocal.getDate()).padStart(2, "0");
-    const hours = String(datetimeLocal.getHours()).padStart(2, "0");
-    const minutes = String(datetimeLocal.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:00`;
+    date = datetimeLocal;
+  } else if (typeof datetimeLocal === "string" && datetimeLocal.includes("T")) {
+    date = new Date(datetimeLocal); // interpret local input
+  } else {
+    return "";
   }
 
-  // If it's already a string from datetime-local input
-  if (typeof datetimeLocal === "string" && datetimeLocal.includes("T")) {
-    const [date, time] = datetimeLocal.split("T");
-    return `${date} ${time}:00`;
-  }
+  // Convert to UTC components
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
 
-  return "";
+  // Final string for backend
+  return `${year}-${month}-${day} ${hours}:${minutes}:00`;
 };
