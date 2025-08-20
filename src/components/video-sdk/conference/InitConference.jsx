@@ -5,6 +5,7 @@ import { useMeeting } from "@videosdk.live/react-sdk";
 import { useNavigate } from "react-router-dom";
 import HeaderBar from "./HeaderBar";
 import MyMeetingsSlider from "./MyMeetingsSlider";
+import SEOHelmet from "../../../engine/SEOHelmet";
 
 const InitConference = ({ meetingId, setMeetingId }) => {
   const navigate = useNavigate();
@@ -46,6 +47,9 @@ const InitConference = ({ meetingId, setMeetingId }) => {
 
   return (
     <div className="min-h-screen p-6 text-white bg-transparent">
+      {/* SEO Content */}
+      <SEOHelmet title="Secure Conference" />
+
       {/* Full View Meeting Detail (Zoom-style) */}
       {
         <>
