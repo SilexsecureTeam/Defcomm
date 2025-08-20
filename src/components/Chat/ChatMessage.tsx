@@ -5,6 +5,7 @@ import ChatFilePreview from "./ChatFilePreview";
 import ChatCallInvite from "./ChatCallInvite";
 import { ChatContext } from "../../context/ChatContext";
 import { parseHtml } from "../../utils/formmaters";
+import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 
 const ChatMessage = ({ msg, selectedChatUser }) => {
   const { chatVisibility, setShowCall, setMeetingId, showToggleSwitch } =
@@ -90,10 +91,10 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
 
       {/* Message Content */}
       <div
-        className={`p-2 rounded-lg shadow-md max-w-60 md:max-w-80 overflow-wrap break-words transition-all ${
+        className={`p-2 relative pr-5 pb-3 rounded-lg shadow-md max-w-60 md:max-w-80 overflow-wrap break-words transition-all ${
           msg?.is_my_chat === "yes"
-            ? "bg-oliveDark text-white"
-            : "bg-white text-black"
+            ? "bg-oliveDark text-white rounded-tr-none"
+            : "bg-white text-black rounded-tl-none"
         }`}
       >
         <AnimatePresence mode="wait">
@@ -176,6 +177,16 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {msg?.is_my_chat === "yes" && (
+          <span className="ml-1 absolute bottom-1 right-1">
+            {msg?.is_read === "yes" ? (
+              <IoCheckmarkDone size={14} className="text-oliveHover" /> // double check green = read
+            ) : (
+              <IoCheckmark size={14} className="text-gray-400" /> // single check gray = delivered
+            )}
+          </span>
+        )}
       </div>
 
       {/* Message Timestamp */}
@@ -191,18 +202,3 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
 };
 
 export default ChatMessage;
-
-{
-  /* <motion.div
-                            key="hidden-message"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            className="w-full max-w-60 md:max-w-80 h-10 bg-gray-300 rounded-md blur-sm italic flex items-center justify-center relative"
-                        >
-                            <span className="">
-                                Message is hidden
-                            </span>
-                        </motion.div> */
-}

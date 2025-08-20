@@ -5,6 +5,7 @@ import { parseHtml } from "../../utils/formmaters";
 import CustomAudioMessage from "../Chat/CustomAudioMessage";
 import ChatFilePreview from "../Chat/ChatFilePreview";
 import ChatCallInvite from "../Chat/ChatCallInvite";
+import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 
 const GroupMessage = ({
   msg,
@@ -123,7 +124,7 @@ const GroupMessage = ({
 
       {/* Message bubble */}
       <div
-        className="relative p-3 max-w-[75%] shadow-md text-sm leading-relaxed rounded-xl"
+        className="relative p-3 pr-5 pb-3 max-w-[75%] shadow-md text-sm leading-relaxed rounded-xl"
         style={{
           backgroundColor: isMine ? COLORS.mine : COLORS.theirs,
           color: COLORS.text,
@@ -202,6 +203,16 @@ const GroupMessage = ({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {isMine && (
+          <span className="ml-1 absolute bottom-1 right-1">
+            {msg?.is_read === "yes" ? (
+              <IoCheckmarkDone size={14} className="text-oliveHover" /> // double check green = read
+            ) : (
+              <IoCheckmark size={14} className="text-gray-400" /> // single check gray = delivered
+            )}
+          </span>
+        )}
       </div>
 
       {/* Timestamp */}

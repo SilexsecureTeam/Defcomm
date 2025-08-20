@@ -3,6 +3,7 @@ import { queryClient } from "../../services/query-client";
 
 // Global "safe mode" flag
 let isSafe = true;
+const isLive = import.meta.env.MODE === "production";
 
 export default function SecureAccessGuard({ children }) {
   const [safe, setSafe] = useState(true);
@@ -11,7 +12,7 @@ export default function SecureAccessGuard({ children }) {
 
   // Trigger security block
   const triggerBlock = (cause = "Unauthorized action detected") => {
-    if (!isSafe) return;
+    if (!isSafe && isLive) return;
     isSafe = false;
     setSafe(false);
     setReason(cause);

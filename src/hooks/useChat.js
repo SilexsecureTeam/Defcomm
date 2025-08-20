@@ -74,6 +74,19 @@ const useChat = () => {
     },
   });
 
+  const useMessageRead = (id) => {
+    return useQuery({
+      queryKey: ["messageRead", id],
+      queryFn: async () => {
+        if (!id) throw new Error("Message id is required");
+
+        const { data } = await client.get(`/user/messages/isread/${id}`);
+        return data?.data || data;
+      },
+      enabled: !!id, // only run when id is available
+    });
+  };
+
   return {
     fetchContacts,
     fetchChatHistory,
@@ -83,6 +96,7 @@ const useChat = () => {
     updateCallLog,
     fetchGroupChatMessages,
     useFetchContacts,
+    useMessageRead,
   };
 };
 
