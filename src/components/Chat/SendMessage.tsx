@@ -35,6 +35,8 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
   const typingSent = useRef(false);
   const notTypingTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  console.log(messageData);
+
   function clearMessageInput() {
     setLocalMessage("");
     setFile(null);
