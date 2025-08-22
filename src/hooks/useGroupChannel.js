@@ -73,7 +73,7 @@ const useGroupChannels = ({ groups, token }) => {
         if (!senderId) return;
 
         // Show toast if not my message
-        if (senderId !== authDetails?.user?.id) {
+        if (senderId !== authDetails?.user_enid) {
           onNewNotificationToast({
             senderName: data?.sender?.name,
             message: data?.message,

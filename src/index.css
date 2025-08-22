@@ -173,3 +173,19 @@ html {
     transform: scale(1) translateY(0);
   }
 }
+
+.mention-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  border-radius: 10px;
+  border-width: 1px;
+  border-color: #c6fc2b;
+  color: #c6fc2b;
+  user-select: none;
+}
+[contenteditable][data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+  pointer-events: none;
+}

@@ -18,7 +18,7 @@ const GroupChatInterface = () => {
   const { groupId } = useParams();
   const { authDetails } = useContext(AuthContext);
   const { setActiveGroup, groupConnections } = useContext(GroupContext);
-  const { setShowSettings } = useContext(ChatContext);
+  const { setShowSettings, setMembers } = useContext(ChatContext);
   const navigate = useNavigate();
 
   const connectionStatus = groupConnections?.[groupId];
@@ -43,6 +43,7 @@ const GroupChatInterface = () => {
         ...members,
         {
           member_id: authDetails?.user?.id,
+          member_id_encrpt: authDetails?.user_enid,
           member_name: authDetails?.user?.name,
           member_email: authDetails?.user?.email,
           // you can add avatar or other props here if needed
@@ -68,6 +69,7 @@ const GroupChatInterface = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setMembers(mergedGroupInfo?.data);
   }, [messages]);
 
   const COLORS = {
@@ -201,7 +203,9 @@ const GroupChatInterface = () => {
       </div>
 
       {/* INPUT BAR - FIXED */}
-      <SendMessage messageData={messages?.chat_meta} />
+      <SendMessage
+        messageData={{ ...messages?.chat_meta, members: mergedGroupInfo?.data }}
+      />
 
       {/* GROUP INFO MODAL */}
       <GroupChatDetails

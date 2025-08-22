@@ -52,15 +52,15 @@ const GroupMessageList = ({ messages, participants }) => {
             {dayMessages.map((msg, index) => {
               const sender =
                 participants.find(
-                  (p) => Number(p.member_id) === Number(msg.user_id)
+                  (p) =>
+                    p.member_id_encrpt === msg.user_id ||
+                    p.member_id === msg.user_id
                 ) || {};
               const prevMsg = dayMessages[index - 1];
               const nextMsg = dayMessages[index + 1];
 
-              const showAvatar =
-                !prevMsg || Number(prevMsg.user_id) !== Number(msg.user_id);
-              const isLastInGroup =
-                !nextMsg || Number(nextMsg.user_to) !== Number(msg.user_to);
+              const showAvatar = !prevMsg || prevMsg.user_id !== msg.user_id;
+              const isLastInGroup = !nextMsg || nextMsg.user_to !== msg.user_to;
 
               return (
                 <GroupMessage

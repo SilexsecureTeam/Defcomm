@@ -163,7 +163,7 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
               transition={{ duration: 0.2 }}
               onClick={() => {
                 if (!showToggleSwitch) {
-                  setIsVisible(true);
+                  setIsVisible(!isVisible);
                 }
               }}
               title={!showToggleSwitch ? "click to show" : "toggle to show"}
