@@ -1,15 +1,18 @@
 import { useContext, useEffect, useRef } from "react";
 import Pusher from "pusher-js";
-import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../context/AuthContext";
 import { GroupContext } from "../context/GroupContext";
 import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
+import { NotificationContext } from "../context/NotificationContext";
+import { useNavigate } from "react-router-dom";
 
 const useGroupChannels = ({ groups, token }) => {
   const pusherRef = useRef(null);
+  const navigate = useNavigate();
   const { authDetails } = useContext(AuthContext);
   const { setGroupUserTyping, setGroupConnections } = useContext(GroupContext);
+  const { addNotification, markAsSeen } = useContext(NotificationContext);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -74,11 +77,16 @@ const useGroupChannels = ({ groups, token }) => {
 
         // Show toast if not my message
         if (senderId !== authDetails?.user_enid) {
+          addNotification(data);
           onNewNotificationToast({
             senderName: data?.sender?.name,
             message: data?.message,
             type: "group",
             groupName: group.group_name,
+            onClick: () => {
+              markAsSeen(data?.data?.id);
+              navigate(`/dashboard/group/${data?.data?.user_to}/chat`);
+            },
           });
         }
 

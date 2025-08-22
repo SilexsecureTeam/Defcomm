@@ -13,7 +13,11 @@ function TaggedRow({ taggedUsers, isMine }) {
       {taggedUsers.map((u) => (
         <button
           key={u.id}
-          className="px-2 py-0.5 rounded-md bg-oliveGreen/10 text-oliveHover text-[11px] hover:bg-oliveGreen/20"
+          className={`px-2 py-0.5 rounded-md ${
+            isMine
+              ? "text-[#cbd081] bg-oliveHover/10"
+              : "text-oliveHover bg-oliveGreen/10"
+          } text-[11px] hover:bg-oliveGreen/20`}
           title={u.name}
         >
           @{u.name}

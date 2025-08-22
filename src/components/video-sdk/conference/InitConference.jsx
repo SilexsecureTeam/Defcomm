@@ -1,5 +1,4 @@
-import { useContext, useState, useMemo, useEffect } from "react";
-import { MeetingContext } from "../../../context/MeetingContext";
+import { useState, useMemo } from "react";
 import useConference from "../../../hooks/useConference";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +9,6 @@ import SEOHelmet from "../../../engine/SEOHelmet";
 const InitConference = ({ meetingId, setMeetingId }) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
-  const [editingMeeting, setEditingMeeting] = useState(null);
 
   const { getMyMeetingsQuery, getMeetingInviteQuery } = useConference();
   const { data: createdMeetings = [], isLoading: loadingCreated } =

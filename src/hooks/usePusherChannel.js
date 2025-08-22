@@ -1,7 +1,5 @@
 import { useEffect, useRef, useContext } from "react";
-import { toast } from "react-toastify";
 import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
-import notificationSound from "../assets/audio/bell.mp3";
 import receiverTone from "../assets/audio/receiver.mp3";
 import audioController from "../utils/audioController";
 import { useNavigate } from "react-router-dom";
@@ -89,19 +87,7 @@ const usePusherChannel = ({
         data?.data?.user_id !== userId;
 
       if (shouldToast) {
-        const notificationPayload = {
-          id: newMessage?.data?.id,
-          senderName: newMessage?.sender?.name,
-          phone: newMessage?.sender?.phone,
-          message: newMessage?.message,
-          time: new Date().toISOString(),
-          user_id: newMessage?.data?.user_id,
-          type: "message",
-        };
-
-        addNotification(notificationPayload);
-        audioController.playRingtone(notificationSound);
-
+        addNotification(newMessage);
         onNewNotificationToast({
           message: newMessage?.message,
           senderName:
@@ -109,15 +95,13 @@ const usePusherChannel = ({
             `User ${newMessage?.data?.user_id}`,
           onClick: () => {
             markAsSeen(newMessage?.data?.id);
-            setSelectedChatUser({
-              contact_id: newMessage?.data?.user_id,
-              contact_name:
-                newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
-              contact_phone:
-                newMessage?.sender?.phone ||
-                `User ${newMessage?.data?.user_id}`,
+            navigate(`/dashboard/user/${newMessage?.data?.user_id}/chat`, {
+              state: {
+                contact_id_encrypt: newMessage?.sender?.id_en,
+                contact_id: newMessage?.sender?.id,
+                contact_name: newMessage?.sender?.name,
+              },
             });
-            navigate("/dashboard/chat");
           },
         });
       }

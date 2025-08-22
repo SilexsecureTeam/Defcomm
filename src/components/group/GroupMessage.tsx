@@ -243,7 +243,9 @@ function GroupMessage({
           >
             {/* The actual bubble (kept visually same as before) */}
             <div
-              className="p-2 pr-3 pb-4 rounded-xl shadow-md"
+              className={`p-2 pr-3 pb-4 rounded-xl shadow-md ${
+                !showToggleSwitch ? "cursor-pointer" : ""
+              }`}
               ref={attachRef}
               style={{
                 backgroundColor: isMine ? COLORS.mine : COLORS.theirs,
@@ -255,7 +257,7 @@ function GroupMessage({
               onClick={() => {
                 if (!showToggleSwitch) toggleVisibility();
               }}
-              title={!showToggleSwitch ? "click to show" : "toggle to show"}
+              title={isVisible ? "Click to hide" : "Click to show"}
             >
               {/* Reply preview (if message is replying to another) */}
               {msg?.tag_mess && (
@@ -267,8 +269,8 @@ function GroupMessage({
                     const key = target?.id;
 
                     if (key && typeof scrollToMessage === "function")
-                      //scrollToMessage(key);
-                      console.log(key);
+                      scrollToMessage(key);
+                    console.log(key);
                   }}
                 />
               )}

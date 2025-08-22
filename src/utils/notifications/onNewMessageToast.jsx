@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import { FaCommentDots, FaPhoneAlt, FaUsers } from "react-icons/fa";
-
+import audioController from "../audioController";
+import notificationSound from "../../assets/audio/bell.mp3";
 export const onNewNotificationToast = ({
   groupName,
   senderName,
@@ -10,6 +11,8 @@ export const onNewNotificationToast = ({
 }) => {
   const isCall = type === "call";
   const isGroup = Boolean(groupName);
+
+  audioController.playRingtone(notificationSound);
 
   const toastComponent = (
     <div

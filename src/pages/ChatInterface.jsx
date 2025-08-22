@@ -43,16 +43,7 @@ const ChatInterface = () => {
   });
 
   useEffect(() => {
-    if (messages?.chat_meta && chatUserData) {
-      setSelectedChatUser((prev) => ({
-        ...prev,
-        chat_meta: messages.chat_meta,
-      }));
-    }
-
-    if (messages?.data && messageRef.current) {
-      messageRef.current?.lastElementChild?.scrollIntoView();
-    }
+    messageRef.current?.lastElementChild?.scrollIntoView();
   }, [messages, typingUsers[chatUserData?.contact_id]]);
 
   return (
