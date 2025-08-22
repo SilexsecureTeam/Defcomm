@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef, useMemo } from "react";
+import React, { useState, useContext, useRef, useMemo } from "react";
 import { axiosClient } from "../../services/axios-client";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
