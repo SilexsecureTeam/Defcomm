@@ -171,6 +171,85 @@ export function htmlToPlainAndRaw(html: string) {
     mentions,
   };
 }
+
+export const ReplyPreview = ({
+  target,
+  myId,
+  participants,
+  onPreviewClick,
+}) => {
+  if (!target) {
+    return (
+      <div
+        className="mb-1 px-3 py-1 rounded-md text-xs"
+        style={{
+          borderLeft: "3px solid rgba(255,255,255,0.06)",
+          background: "rgba(0,0,0,0.06)",
+        }}
+      >
+        <div className="text-[11px] italic" style={{ color: COLORS.muted }}>
+          Replied to
+        </div>
+        <div className="text-[12px]" style={{ color: COLORS.text }}>
+          Message not available
+        </div>
+      </div>
+    );
+  }
+
+  const senderName =
+    String(target.user_id) === String(myId)
+      ? "You"
+      : participants?.find(
+          (p) =>
+            String(p.member_id) === String(target.user_id) ||
+            String(p.member_id_encrpt) === String(target.user_id)
+        )?.member_name ?? "Unknown";
+
+  let preview = "";
+  if (target.mss_type === "text")
+    preview = (target.message || "").slice(0, 120);
+  else if (target.is_file === "yes")
+    preview = `[${target.file_type || "file"}]`;
+  else preview = (target.message || "").slice(0, 120);
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        // only set reply in composer — do NOT scroll here
+        if (typeof onPreviewClick === "function") onPreviewClick(target);
+      }}
+      className="w-full mb-1 text-left px-3 py-1 rounded-md hover:opacity-90 transition-all"
+      style={{
+        borderLeft: `3px solid ${COLORS.muted}`,
+        background: "rgba(0,0,0,0.5)",
+      }}
+    >
+      <div className="text-[11px] font-medium" style={{ color: COLORS.text }}>
+        {senderName}
+      </div>
+      <div
+        className="text-[12px] truncate"
+        style={{ color: COLORS.muted, maxWidth: 280 }}
+        title={typeof preview === "string" ? preview : ""}
+      >
+        {preview}
+      </div>
+    </button>
+  );
+};
+
+export const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+// Gesture tuning
+export const SWIPE_TRIGGER_PX = 72; // distance to trigger reply
+export const SWIPE_MAX_VISUAL = 120; // cap visual offset
+export const DIRECTION_LOCK_RATIO = 0.3; // horizontal must dominate vertical
+
 export default {
   MENTION_TOKEN_REGEX,
   resolveTaggedUsers,
@@ -180,6 +259,11 @@ export default {
   safeString,
   isRecent,
   htmlToPlainAndRaw,
+  ReplyPreview,
+  timeFormatter,
+  SWIPE_TRIGGER_PX,
+  SWIPE_MAX_VISUAL,
+  DIRECTION_LOCK_RATIO,
   COLORS,
   MAX_LENGTH,
 };

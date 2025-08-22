@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import GroupMessage from "./GroupMessage";
+import { AuthContext } from "../../context/AuthContext";
+import { ChatContext } from "../../context/ChatContext";
 
 const formatDateLabel = (date) => {
   const today = new Date();
@@ -18,8 +20,11 @@ const formatDateLabel = (date) => {
 };
 
 // Group messages by date
-const groupMessagesByDate = (messages) => {
-  return messages.reduce((acc, msg) => {
+const groupMessagesByDate = (messages = []) => {
+  const sorted = [...messages].sort(
+    (a, b) => new Date(a.updated_at) - new Date(b.updated_at)
+  );
+  return sorted.reduce((acc, msg) => {
     const dateKey = new Date(msg.updated_at).toDateString();
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(msg);
@@ -27,8 +32,29 @@ const groupMessagesByDate = (messages) => {
   }, {});
 };
 
-const GroupMessageList = ({ messages, participants }) => {
+const GroupMessageList = ({ messages = [], participants = [] }) => {
+  const { authDetails } = useContext(AuthContext);
+  const { registerMessageRefs } = useContext(ChatContext);
   const groupedMessages = groupMessagesByDate(messages);
+
+  // refs map for scroll-to-message: key -> DOM element
+  const messageRefs = useRef(new Map());
+  useEffect(() => {
+    if (typeof registerMessageRefs === "function") {
+      registerMessageRefs(messageRefs);
+    }
+  }, [registerMessageRefs]);
+
+  // build lookup map for quick tag_mess resolution
+  const messagesById = useMemo(() => {
+    const map = new Map();
+    (messages || []).forEach((m) => {
+      if (m?.id_en) map.set(String(m.id_en), m);
+      if (m?.id) map.set(String(m.id), m);
+      if (m?.client_id) map.set(String(m.client_id), m);
+    });
+    return map;
+  }, [messages]);
 
   return (
     <div className="flex flex-col px-4 py-4 space-y-1 hide-scrollbar relative">
@@ -56,20 +82,23 @@ const GroupMessageList = ({ messages, participants }) => {
                     p.member_id_encrpt === msg.user_id ||
                     p.member_id === msg.user_id
                 ) || {};
+
               const prevMsg = dayMessages[index - 1];
               const nextMsg = dayMessages[index + 1];
 
               const showAvatar = !prevMsg || prevMsg.user_id !== msg.user_id;
-              const isLastInGroup = !nextMsg || nextMsg.user_to !== msg.user_to;
+              const isLastInGroup = !nextMsg || nextMsg.user_id !== msg.user_id;
 
               return (
                 <GroupMessage
-                  key={msg.id || index}
+                  key={msg.client_id ?? msg.id ?? index}
                   msg={msg}
                   sender={sender}
                   showAvatar={showAvatar}
                   isLastInGroup={isLastInGroup}
                   participants={participants}
+                  messagesById={messagesById}
+                  messageRefs={messageRefs} // pass refs map
                 />
               );
             })}

@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomAudioMessage from "./CustomAudioMessage";
 import ChatFilePreview from "./ChatFilePreview";
@@ -6,56 +13,183 @@ import ChatCallInvite from "./ChatCallInvite";
 import { ChatContext } from "../../context/ChatContext";
 import { parseHtml } from "../../utils/formmaters";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
+import {
+  DIRECTION_LOCK_RATIO,
+  ReplyPreview,
+  resolveTaggedUsers,
+  SWIPE_MAX_VISUAL,
+  SWIPE_TRIGGER_PX,
+} from "../../utils/chat/messageUtils";
+const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
-const ChatMessage = ({ msg, selectedChatUser }) => {
-  const { chatVisibility, setShowCall, setMeetingId, showToggleSwitch } =
-    useContext(ChatContext);
-  const [isVisible, setIsVisible] = useState(chatVisibility || false);
+const ChatMessage = ({
+  msg,
+  selectedChatUser,
+  messagesById = new Map(),
+  messageRefs = null, // optional useRef(Map) passed from parent list
+}) => {
+  const {
+    chatVisibility,
+    setShowCall,
+    setMeetingId,
+    showToggleSwitch,
+    setReplyTo,
+    scrollToMessage,
+  } = useContext(ChatContext);
+
+  const [isVisible, setIsVisible] = useState(Boolean(chatVisibility));
   const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const MAX_LENGTH = 100;
+  // swipe / drag state
+  const startRef = useRef<any>(null);
+  const lastDeltaRef = useRef(0);
+  const [offsetX, setOffsetX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Sync with chatVisibility from context if user hasn't manually toggled
   useEffect(() => {
-    if (chatVisibility && userToggled) {
-      setIsVisible(chatVisibility);
-      setUserToggled(false);
-    } else {
-      setIsVisible(chatVisibility);
+    if (!userToggled) setIsVisible(Boolean(chatVisibility));
+  }, [chatVisibility, userToggled]);
+
+  useEffect(() => {
+    // if message changes, collapse expanded text
+    setIsExpanded(false);
+  }, [msg?.id, msg?.updated_at]);
+
+  const isMine = useMemo(() => msg?.is_my_chat === "yes", [msg]);
+
+  const taggedUsers = useMemo(
+    () => resolveTaggedUsers(msg, selectedChatUser),
+    [msg, selectedChatUser]
+  );
+
+  const handleAcceptCall = useCallback(
+    (m) => {
+      setShowCall(true);
+      setMeetingId(m?.message?.split("CALL_INVITE:")[1]);
+    },
+    [setShowCall, setMeetingId]
+  );
+
+  // stable key for this message node (matches GroupMessage logic)
+  const messageKey = useMemo(() => {
+    return String(
+      msg?.client_id ?? msg?.id_en ?? msg?.id ?? msg?.tempIdx ?? ""
+    );
+  }, [msg]);
+
+  // attach/unregister DOM node in parent's messageRefs map
+  const attachRef = useCallback(
+    (el) => {
+      try {
+        const map = messageRefs?.current;
+        if (!map) return;
+        if (el) map.set(messageKey, el);
+        else map.delete(messageKey);
+      } catch (err) {
+        // ignore
+      }
+    },
+    [messageKey, messageRefs]
+  );
+
+  // Reply action (from swipe)
+  const doReply = useCallback(() => {
+    if (typeof setReplyTo === "function")
+      setReplyTo({ ...msg, ...selectedChatUser, user_type: "user" });
+  }, [msg, setReplyTo]);
+
+  // Pointer handlers
+  const onPointerDown = useCallback((e) => {
+    startRef.current = { x: e.clientX, y: e.clientY };
+    lastDeltaRef.current = 0;
+    setIsDragging(true);
+    try {
+      if (e.pointerId && e.target.setPointerCapture)
+        e.target.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* ignore */
     }
-  }, [chatVisibility]);
+  }, []);
 
-  const handleAcceptCall = (msg) => {
-    setShowCall(true);
-    setMeetingId(msg?.message?.split("CALL_INVITE:")[1]);
-  };
+  const onPointerMove = useCallback(
+    (e) => {
+      if (!startRef.current) return;
+      const dx = e.clientX - startRef.current.x;
+      const dy = e.clientY - startRef.current.y;
+      lastDeltaRef.current = dx;
 
-  // Format message date
-  const getFormattedDate = (dateString) => {
-    const messageDate = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
+      // direction lock: horizontal must dominate vertical
+      if (Math.abs(dx) < Math.abs(dy) * (1 + DIRECTION_LOCK_RATIO)) {
+        setOffsetX(0);
+        return;
+      }
 
-    if (messageDate.toDateString() === today.toDateString()) return "Today";
-    if (messageDate.toDateString() === yesterday.toDateString())
-      return "Yesterday";
+      // allowed swipe: right for others (reply), left for mine
+      const allowed = isMine ? dx < 0 : dx > 0;
+      const visual = allowed
+        ? Math.max(Math.min(dx, SWIPE_MAX_VISUAL), -SWIPE_MAX_VISUAL)
+        : 0;
+      setOffsetX(visual);
+    },
+    [isMine]
+  );
 
-    return messageDate.toLocaleDateString(undefined, {
-      weekday: "long",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const onPointerUp = useCallback(
+    (e) => {
+      setIsDragging(false);
+      const dx = lastDeltaRef.current || 0;
+      startRef.current = null;
+      lastDeltaRef.current = 0;
 
-  const formattedDate = getFormattedDate(msg?.updated_at);
+      // trigger reply if threshold met
+      if (!isMine && dx >= SWIPE_TRIGGER_PX) {
+        doReply();
+      } else if (isMine && dx <= -SWIPE_TRIGGER_PX) {
+        doReply();
+      }
+
+      setOffsetX(0);
+    },
+    [isMine, doReply]
+  );
+
+  // Resolve replied message (if any) — same logic as GroupMessage
+  const repliedMsg = useMemo(() => {
+    const tag = msg?.tag_mess;
+    if (!tag) return null;
+    if (!messagesById || typeof messagesById.get !== "function") return null;
+    const found = messagesById.get(String(tag));
+    if (found) return found;
+    return null;
+  }, [msg, messagesById]);
+
+  // onPreview handler: scroll to original message (if available)
+  const handlePreviewClick = useCallback(
+    (target) => {
+      const key = String(
+        target?.client_id ??
+          target?.id_en ??
+          target?.id ??
+          target?.tempIdx ??
+          ""
+      );
+      if (key && typeof scrollToMessage === "function") {
+        scrollToMessage(key);
+      }
+    },
+    [scrollToMessage]
+  );
+
+  const MAX_LENGTH = 100;
 
   return (
     <div
       className={`flex flex-col ${
-        msg?.is_my_chat === "yes" ? "items-end" : "items-start"
+        isMine ? "items-end" : "items-start"
       } space-y-1 text-sm`}
     >
       {/* Toggle Switch */}
@@ -73,7 +207,7 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
             />
             <div
               className={`w-10 h-5 rounded-full relative transition-all ${
-                msg?.is_my_chat === "yes"
+                isMine
                   ? "bg-oliveDark peer-checked:bg-oliveGreen"
                   : "bg-gray-300 peer-checked:bg-oliveGreen"
               }`}
@@ -89,116 +223,173 @@ const ChatMessage = ({ msg, selectedChatUser }) => {
         </div>
       )}
 
-      {/* Message Content */}
+      {/* Message bubble container (attachRef used for scroll & highlight) */}
       <div
-        className={`p-2 relative pr-5 pb-3 rounded-lg shadow-md max-w-60 md:max-w-80 overflow-wrap break-words transition-all ${
-          msg?.is_my_chat === "yes"
-            ? "bg-oliveDark text-white rounded-tr-none"
-            : "bg-white text-black rounded-tl-none"
-        }`}
+        className="relative p-0 max-w-[75%] text-sm leading-relaxed"
+        style={{ width: "fit-content" }}
       >
         <AnimatePresence mode="wait">
-          {isVisible ? (
-            <motion.div
-              key="message-content"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-            >
-              {msg?.type === "audio" ? (
-                <CustomAudioMessage />
-              ) : msg?.is_file === "yes" && msg?.message ? (
-                <ChatFilePreview
-                  isMyChat={msg?.is_my_chat}
-                  fileType={msg?.message?.split(".")[1]}
-                  fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${
-                    msg?.message
-                  }`}
-                  fileName={msg?.file_name}
-                />
-              ) : msg?.message.startsWith("CALL_INVITE") ? (
-                (() => {
-                  const callTimestamp = new Date(msg?.updated_at).getTime();
-                  const currentTime = Date.now();
-                  const timeDifference = (currentTime - callTimestamp) / 1000;
-
-                  return (
-                    <ChatCallInvite
-                      msg={msg}
-                      isMyChat={msg?.is_my_chat === "yes"}
-                      onAcceptCall={() => handleAcceptCall(msg)}
-                      status={
-                        timeDifference <= 30 ? "Ringing..." : "Call Ended"
-                      }
-                      caller={selectedChatUser?.contact_name}
-                    />
-                  );
-                })()
-              ) : (
-                <div>
-                  {/* Show "Read More" only for text messages */}
-                  {msg?.message.length > MAX_LENGTH && !isExpanded ? (
-                    <>
-                      {msg?.message.slice(0, MAX_LENGTH)}...
-                      <button
-                        className="text-oliveHover ml-1"
-                        onClick={() => setIsExpanded(true)}
-                      >
-                        Read More
-                      </button>
-                    </>
-                  ) : (
-                    parseHtml(msg?.message)
-                  )}
-                </div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="hidden-message"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
+          <motion.div
+            key={
+              msg?.client_id ??
+              msg?.id ??
+              `tmp-${msg?.tempIdx ?? Math.random()}`
+            }
+            layout
+            initial={{ opacity: 0.6, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1, x: offsetX }}
+            exit={{ opacity: 0.6, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            style={{
+              touchAction: "pan-y",
+              userSelect: isDragging ? "none" : "auto",
+              display: "block",
+            }}
+            className="relative"
+          >
+            <div
+              ref={attachRef}
+              className={`p-2 pr-3 pb-4 rounded-xl shadow-md ${
+                isMine ? "bg-oliveDark text-white" : "bg-white text-black"
+              }`}
+              style={{
+                border: `1px solid rgba(255,255,255,0.04)`,
+                borderTopRightRadius: isMine ? "4px" : "12px",
+                borderTopLeftRadius: isMine ? "12px" : "4px",
+              }}
               onClick={() => {
-                if (!showToggleSwitch) {
-                  setIsVisible(!isVisible);
-                }
+                if (!showToggleSwitch) setIsVisible((v) => !v);
               }}
               title={!showToggleSwitch ? "click to show" : "toggle to show"}
-              className={`${
-                showToggleSwitch ? "" : "cursor-pointer"
-              } w-full max-w-60 md:max-w-80 rounded-md flex items-center justify-center relative font-bold tracking-widest break-all`}
             >
-              {msg?.message
-                ? "*".repeat(Math.min(msg.message.length, 300))
-                : "****"}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {/* Reply preview */}
+              {msg?.tag_mess && (
+                <ReplyPreview
+                  target={repliedMsg}
+                  participants={[
+                    {
+                      member_id: selectedChatUser?.contact_id,
+                      member_id_encrpt: selectedChatUser?.contact_id_encrypt,
+                      member_name: selectedChatUser?.contact_name,
+                    },
+                  ]}
+                  myId={null}
+                  onPreviewClick={(target) => {
+                    console.log(target); //handlePreviewClick(target)
+                  }}
+                />
+              )}
 
-        {msg?.is_my_chat === "yes" && (
-          <span className="ml-1 absolute bottom-1 right-1">
-            {msg?.is_read === "yes" ? (
-              <IoCheckmarkDone size={14} className="text-oliveHover" /> // double check green = read
-            ) : (
-              <IoCheckmark size={14} className="text-gray-400" /> // single check gray = delivered
-            )}
-          </span>
-        )}
+              <div>
+                <AnimatePresence mode="wait">
+                  {isVisible ? (
+                    <motion.div
+                      key="content-visible"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.18 }}
+                    >
+                      {msg?.mss_type === "audio" ? (
+                        <CustomAudioMessage msg={msg} />
+                      ) : msg?.is_file === "yes" && msg?.message ? (
+                        <ChatFilePreview
+                          isMyChat={msg?.is_my_chat}
+                          fileType={(msg?.message || "").split(".").pop()}
+                          fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${
+                            msg?.message
+                          }`}
+                          fileName={msg?.file_name}
+                        />
+                      ) : msg?.message?.startsWith?.("CALL_INVITE") ? (
+                        (() => {
+                          const callTimestamp = new Date(
+                            msg?.updated_at
+                          ).getTime();
+                          const currentTime = Date.now();
+                          const timeDifference =
+                            (currentTime - callTimestamp) / 1000;
+                          return (
+                            <ChatCallInvite
+                              msg={msg}
+                              isMyChat={isMine}
+                              onAcceptCall={() => handleAcceptCall(msg)}
+                              status={
+                                timeDifference <= 30
+                                  ? "Ringing..."
+                                  : "Call Ended"
+                              }
+                              caller={selectedChatUser?.contact_name}
+                            />
+                          );
+                        })()
+                      ) : (
+                        <div>
+                          {msg?.message?.length > MAX_LENGTH && !isExpanded ? (
+                            <>
+                              {msg?.message.slice(0, MAX_LENGTH)}...
+                              <button
+                                className="text-oliveHover ml-1"
+                                onClick={() => setIsExpanded(true)}
+                              >
+                                Read More
+                              </button>
+                            </>
+                          ) : (
+                            parseHtml(msg?.message)
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="content-hidden"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.18 }}
+                      onClick={() => {
+                        if (!showToggleSwitch) setIsVisible(true);
+                      }}
+                      className={`${
+                        showToggleSwitch ? "" : "cursor-pointer"
+                      } w-full max-w-60 md:max-w-80 rounded-md flex items-center justify-center relative font-bold tracking-widest break-all`}
+                      title={
+                        !showToggleSwitch ? "click to show" : "toggle to show"
+                      }
+                    >
+                      {msg?.message
+                        ? "*".repeat(Math.min(msg.message.length, 300))
+                        : "****"}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* read receipts */}
+              {isMine && (
+                <span className="ml-1 absolute bottom-1 right-1">
+                  {msg?.is_read === "yes" ? (
+                    <IoCheckmarkDone size={14} className="text-oliveHover" />
+                  ) : (
+                    <IoCheckmark size={14} className="text-gray-400" />
+                  )}
+                </span>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Message Timestamp */}
       <div className="text-xs text-gray-500">
-        {new Date(msg?.updated_at).toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })}
+        {timeFormatter.format(new Date(msg?.updated_at || Date.now()))}
       </div>
     </div>
   );
 };
 
-export default ChatMessage;
+export default React.memo(ChatMessage);

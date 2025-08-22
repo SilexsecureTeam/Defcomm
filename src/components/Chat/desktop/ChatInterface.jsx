@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { MdCall } from "react-icons/md";
 import { FaSpinner } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import SEOHelmet from "../../../engine/SEOHelmet";
 import { ChatContext } from "../../../context/ChatContext";
-import { AuthContext } from "../../../context/AuthContext";
 import useChat from "../../../hooks/useChat";
 import ChatMessage from "../ChatMessage"; // Import the new Message component
 import { getFormattedDate } from "../../../utils/formmaters";
@@ -12,14 +10,8 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
 const ChatInterface = () => {
-  const {
-    selectedChatUser,
-    setSelectedChatUser,
-    setShowCall,
-    setMessages,
-    setMeetingId,
-    typingUsers,
-  } = useContext(ChatContext);
+  const { setSelectedChatUser, setMessages, typingUsers } =
+    useContext(ChatContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
 
@@ -97,7 +89,7 @@ const ChatInterface = () => {
         ref={messageRef}
         className="w-full h-full overflow-y-auto flex flex-col space-y-4 p-4 pb-20"
       >
-        {selectedChatUser ? (
+        {chatUserData ? (
           isLoading ? (
             <div className="h-20 flex justify-center items-center text-oliveGreen gap-2">
               <FaSpinner className="animate-spin text-2xl" /> Loading Messages

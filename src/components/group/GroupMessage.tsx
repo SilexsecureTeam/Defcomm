@@ -14,41 +14,36 @@ import { AuthContext } from "../../context/AuthContext";
 
 import {
   COLORS,
+  ReplyPreview,
   resolveTaggedUsers,
-  safeString,
+  timeFormatter,
+  SWIPE_TRIGGER_PX,
+  SWIPE_MAX_VISUAL,
+  DIRECTION_LOCK_RATIO,
 } from "../../utils/chat/messageUtils";
 import AvatarRow from "./AvatarRow";
 import { groupMessageType } from "../../utils/types/chat";
 import ToggleSwitch from "../ToggleSwitch";
 import MessageContent from "./MessageContent";
 import TaggedRow from "./TaggedRow";
-
-const timeFormatter = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-// Gesture tuning
-const SWIPE_TRIGGER_PX = 72; // distance to trigger reply
-const SWIPE_MAX_VISUAL = 120; // cap visual offset
-const DIRECTION_LOCK_RATIO = 0.3; // horizontal must dominate vertical
-
 function GroupMessage({
   msg,
   sender = {} as any,
   showAvatar = true,
   isLastInGroup = false,
   participants = [],
+  messagesById = new Map(),
+  messageRefs,
 }) {
-  const { authDetails } = useContext(AuthContext);
-  const chatCtx = useContext(ChatContext);
+  const { authDetails } = useContext(AuthContext) as any;
   const {
     chatVisibility,
     setShowCall,
     setMeetingId,
     showToggleSwitch,
     setReplyTo,
-  } = chatCtx;
+    scrollToMessage,
+  } = useContext(ChatContext) as any;
 
   const [isVisible, setIsVisible] = useState(Boolean(chatVisibility));
   const [userToggled, setUserToggled] = useState(false);
@@ -61,7 +56,6 @@ function GroupMessage({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    // sync context -> local only when user hasn't toggled
     if (!userToggled) setIsVisible(Boolean(chatVisibility));
   }, [chatVisibility, userToggled]);
 
@@ -70,13 +64,17 @@ function GroupMessage({
     setIsExpanded(false);
   }, [msg?.id, msg?.updated_at]);
 
-  const isMine = useMemo(() => msg?.is_my_chat === "yes", [msg]);
+  const isMine = useMemo(() => {
+    const myId = authDetails?.user_enid ?? authDetails?.user?.id ?? null;
+    if (!msg) return false;
+    if (msg.user_id) return String(msg.user_id) === String(myId);
+    return msg?.is_my_chat === "yes";
+  }, [msg, authDetails]);
+
   const taggedUsers = useMemo(
     () => resolveTaggedUsers(msg, participants),
     [msg, participants]
   );
-
-  const messageText = useMemo(() => safeString(msg?.message), [msg]);
 
   const handleAcceptCall = useCallback(() => {
     setShowCall(true);
@@ -97,7 +95,6 @@ function GroupMessage({
 
   // reply handler (calls context if available)
   const doReply = useCallback(() => {
-    console.log("[reply] message:", msg);
     setReplyTo(msg);
   }, [setReplyTo, msg]);
 
@@ -159,6 +156,41 @@ function GroupMessage({
     [isMine, doReply]
   );
 
+  // Resolve replied message (if any)
+  const repliedMsg = useMemo(() => {
+    const tag = msg?.tag_mess;
+    if (!tag) return null;
+    if (!messagesById || typeof messagesById.get !== "function") return null;
+    // try id_en first, then id, then client_id
+    const found = messagesById.get(String(tag));
+    if (found) return found;
+    // fallback: try numeric id
+    for (const key of [String(tag)]) {
+      if (messagesById.has(key)) return messagesById.get(key);
+    }
+    return null;
+  }, [msg, messagesById]);
+
+  // stable key used for this message DOM node
+  const messageKey = useMemo(() => {
+    return String(msg?.id);
+  }, [msg]);
+
+  // attach/unregister DOM node in parent's messageRefs map
+  const attachRef = useCallback(
+    (el) => {
+      try {
+        const map = messageRefs?.current;
+        if (!map) return;
+        if (el) map.set(messageKey, el);
+        else map.delete(messageKey);
+      } catch (err) {
+        // ignore
+      }
+    },
+    [messageKey, messageRefs]
+  );
+
   return (
     <div
       className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
@@ -193,7 +225,8 @@ function GroupMessage({
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={`message-content-${msg?.id ?? Math.random()}`}
+            key={msg?.id}
+            layout
             initial={{ opacity: 0.6, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1, x: offsetX }}
             exit={{ opacity: 0.6, scale: 0.97 }}
@@ -210,7 +243,8 @@ function GroupMessage({
           >
             {/* The actual bubble (kept visually same as before) */}
             <div
-              className="p-3 pr-5 pb-3 rounded-xl shadow-md"
+              className="p-2 pr-3 pb-4 rounded-xl shadow-md"
+              ref={attachRef}
               style={{
                 backgroundColor: isMine ? COLORS.mine : COLORS.theirs,
                 color: COLORS.text,
@@ -223,6 +257,21 @@ function GroupMessage({
               }}
               title={!showToggleSwitch ? "click to show" : "toggle to show"}
             >
+              {/* Reply preview (if message is replying to another) */}
+              {msg?.tag_mess && (
+                <ReplyPreview
+                  target={repliedMsg}
+                  participants={participants}
+                  myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
+                  onPreviewClick={(target) => {
+                    const key = target?.id;
+
+                    if (key && typeof scrollToMessage === "function")
+                      //scrollToMessage(key);
+                      console.log(key);
+                  }}
+                />
+              )}
               <MessageContent
                 msg={msg}
                 isVisible={isVisible}

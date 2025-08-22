@@ -398,6 +398,8 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
                     member?.member_name ||
                     (id === authDetails?.user_enid
                       ? authDetails?.user?.name
+                      : replyTo?.user_type === "user"
+                      ? replyTo?.contact_name
                       : `User ${id}`);
                   const parts = (name || "U").trim().split(" ");
                   return (
@@ -414,6 +416,8 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
               <div className="text-xs font-bold leading-4 truncate opacity-90">
                 {replyTo?.user_id === authDetails?.user_enid
                   ? "You"
+                  : replyTo?.user_type === "user"
+                  ? replyTo?.contact_name
                   : ctxMembers?.find(
                       (m) => m.member_id_encrpt === replyTo?.user_id
                     )?.member_name || `User ${replyTo?.user_id}`}

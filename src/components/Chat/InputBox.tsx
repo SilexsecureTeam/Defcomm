@@ -63,7 +63,7 @@ const InputBox = ({
       </button>
 
       {/* Mention dropdown */}
-      {messageData.chat_user_type === "group" &&
+      {messageData?.chat_user_type === "group" &&
         showMentionMenu &&
         mentionSuggestions.length > 0 && (
           <MentionDropdown
