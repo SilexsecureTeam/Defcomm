@@ -13,7 +13,7 @@ import InputBox from "./InputBox";
 import { onPrompt } from "../../utils/notifications/onPrompt";
 import { FaTimes } from "react-icons/fa";
 import { htmlToPlainAndRaw } from "../../utils/chat/messageUtils";
-import ScrollToBottomButton from "./ScrollTOBottom";
+import ScrollToBottomButton from "./ScrollToBottom";
 
 function SendMessage(
   { messageData, desktop = false }: SendMessageProps,
