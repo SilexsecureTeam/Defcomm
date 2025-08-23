@@ -66,7 +66,7 @@ const GroupChatInterface = () => {
 
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const messagesEndRef = useRef(null);
-
+  const messageRef = useRef(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     setMembers(mergedGroupInfo?.data);
@@ -205,6 +205,7 @@ const GroupChatInterface = () => {
       {/* INPUT BAR - FIXED */}
       <SendMessage
         messageData={{ ...messages?.chat_meta, members: mergedGroupInfo?.data }}
+        scrollRef={messageRef}
       />
 
       {/* GROUP INFO MODAL */}

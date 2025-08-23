@@ -33,7 +33,6 @@ const groupMessagesByDate = (messages = []) => {
 };
 
 const GroupMessageList = ({ messages = [], participants = [] }) => {
-  const { authDetails } = useContext(AuthContext);
   const { registerMessageRefs } = useContext(ChatContext);
   const groupedMessages = groupMessagesByDate(messages);
 

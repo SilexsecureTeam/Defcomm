@@ -20,6 +20,7 @@ import {
   SWIPE_MAX_VISUAL,
   SWIPE_TRIGGER_PX,
 } from "../../utils/chat/messageUtils";
+import { AuthContext } from "../../context/AuthContext";
 const timeFormatter = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
@@ -39,6 +40,8 @@ const ChatMessage = ({
     setReplyTo,
     scrollToMessage,
   } = useContext(ChatContext);
+
+  const { authDetails } = useContext(AuthContext) as any;
 
   const [isVisible, setIsVisible] = useState(Boolean(chatVisibility));
   const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
@@ -74,32 +77,16 @@ const ChatMessage = ({
     [setShowCall, setMeetingId]
   );
 
-  // stable key for this message node (matches GroupMessage logic)
-  const messageKey = useMemo(() => {
-    return String(
-      msg?.client_id ?? msg?.id_en ?? msg?.id ?? msg?.tempIdx ?? ""
-    );
-  }, [msg]);
-
-  // attach/unregister DOM node in parent's messageRefs map
-  const attachRef = useCallback(
-    (el) => {
-      try {
-        const map = messageRefs?.current;
-        if (!map) return;
-        if (el) map.set(messageKey, el);
-        else map.delete(messageKey);
-      } catch (err) {
-        // ignore
-      }
-    },
-    [messageKey, messageRefs]
-  );
-
   // Reply action (from swipe)
   const doReply = useCallback(() => {
     if (typeof setReplyTo === "function")
-      setReplyTo({ ...msg, ...selectedChatUser, user_type: "user" });
+      setReplyTo({
+        ...msg,
+        contact_id: selectedChatUser?.contact_id,
+        contact_id_encrypt: selectedChatUser?.contact_id_encrypt,
+        contact_name: selectedChatUser?.contact_name,
+        user_type: "user",
+      });
   }, [msg, setReplyTo]);
 
   // Pointer handlers
@@ -162,29 +149,32 @@ const ChatMessage = ({
     const tag = msg?.tag_mess;
     if (!tag) return null;
     if (!messagesById || typeof messagesById.get !== "function") return null;
-    const found = messagesById.get(String(tag));
+    const found = messagesById.get(tag);
     if (found) return found;
     return null;
   }, [msg, messagesById]);
 
-  // onPreview handler: scroll to original message (if available)
-  const handlePreviewClick = useCallback(
-    (target) => {
-      const key = String(
-        target?.client_id ??
-          target?.id_en ??
-          target?.id ??
-          target?.tempIdx ??
-          ""
-      );
-      if (key && typeof scrollToMessage === "function") {
-        scrollToMessage(key);
+  const MAX_LENGTH = 100;
+
+  // stable key used for this message DOM node
+  const messageKey = useMemo(() => {
+    return String(msg?.id);
+  }, [msg]);
+
+  // attach/unregister DOM node in parent's messageRefs map
+  const attachRef = useCallback(
+    (el) => {
+      try {
+        const map = messageRefs?.current;
+        if (!map) return;
+        if (el) map.set(messageKey, el);
+        else map.delete(messageKey);
+      } catch (err) {
+        // ignore
       }
     },
-    [scrollToMessage]
+    [messageKey, messageRefs]
   );
-
-  const MAX_LENGTH = 100;
 
   return (
     <div
@@ -227,6 +217,7 @@ const ChatMessage = ({
       <div
         className="relative p-0 max-w-[75%] text-sm leading-relaxed"
         style={{ width: "fit-content" }}
+        ref={attachRef}
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -263,7 +254,10 @@ const ChatMessage = ({
               onClick={() => {
                 if (!showToggleSwitch) setIsVisible((v) => !v);
               }}
-              title={!showToggleSwitch ? "click to show" : "toggle to show"}
+              title={
+                !showToggleSwitch &&
+                (isVisible ? "click to show" : "toggle to show")
+              }
             >
               {/* Reply preview */}
               {msg?.tag_mess && (
@@ -276,10 +270,15 @@ const ChatMessage = ({
                       member_name: selectedChatUser?.contact_name,
                     },
                   ]}
-                  myId={null}
+                  myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
                   onPreviewClick={(target) => {
-                    console.log(target); //handlePreviewClick(target)
+                    const key = target?.id;
+
+                    if (key && typeof scrollToMessage === "function")
+                      console.log(key);
+                    scrollToMessage(key);
                   }}
+                  type="user"
                 />
               )}
 

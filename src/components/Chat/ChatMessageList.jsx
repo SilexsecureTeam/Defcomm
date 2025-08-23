@@ -4,10 +4,13 @@ import { getFormattedDate } from "../../utils/formmaters";
 import ChatMessage from "./ChatMessage";
 import { ChatContext } from "../../context/ChatContext";
 
-const ChatMessageList = ({ messages }) => {
+const ChatMessageList = ({ desktop = false, messages = [] }) => {
   const location = useLocation();
   const chatUserData = location?.state;
   const { registerMessageRefs } = useContext(ChatContext);
+
+  // Refs map for scroll-to-message (registered with ChatContext)
+  const messageRefs = useRef(new Map());
 
   if (!messages?.data?.length)
     return <p className="text-gray-500 text-center">No messages yet.</p>;
@@ -22,27 +25,19 @@ const ChatMessageList = ({ messages }) => {
     }, {});
   };
 
-  // Build a lookup map for fast tag_mess resolution:
-  // key -> message, where key is client_id || id_en || id
+  // build lookup map for quick tag_mess resolution
   const messagesById = useMemo(() => {
     const map = new Map();
     (messages?.data || []).forEach((m) => {
-      if (m?.client_id) map.set(String(m.client_id), m);
-      if (m?.id_en) map.set(String(m.id_en), m);
       if (m?.id) map.set(String(m.id), m);
     });
     return map;
   }, [messages]);
 
-  // Refs map for scroll-to-message (registered with ChatContext)
-  const messageRefs = useRef(new Map());
   useEffect(() => {
     if (typeof registerMessageRefs === "function") {
       registerMessageRefs(messageRefs);
-      // debug: you can remove this console after verifying behavior
-      // console.debug("registered messageRefs for chat list", messageRefs);
     }
-    // keep dependency to registerMessageRefs stable
   }, [registerMessageRefs]);
 
   const groupedMessages = groupMessagesByDate(messages.data);
@@ -50,8 +45,18 @@ const ChatMessageList = ({ messages }) => {
   return Object.entries(groupedMessages).map(([dateKey, dayMessages]) => (
     <div key={dateKey} className="relative">
       {/* Sticky date header for this day */}
-      <div className="sticky top-40 flex justify-center py-1">
-        <span className="px-3 py-1 text-xs rounded-full shadow-sm text-gray-700 border border-gray-300">
+      <div
+        className={`sticky ${
+          desktop ? "top-16" : "top-40"
+        } flex justify-center py-1`}
+      >
+        <span
+          className={`px-3 py-1 text-xs rounded-full shadow-sm border ${
+            desktop
+              ? "text-gray-500 border-gray-800"
+              : "text-gray-700 border-gray-300"
+          }`}
+        >
           {getFormattedDate(dayMessages[0].updated_at)}
         </span>
       </div>
@@ -67,7 +72,7 @@ const ChatMessageList = ({ messages }) => {
 
           return (
             <ChatMessage
-              key={msg.client_id ?? msg.id ?? index}
+              key={msg.id ?? index}
               msg={msg}
               selectedChatUser={chatUserData}
               isLastMessageFromUser={isLastMessageFromUser}

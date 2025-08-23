@@ -177,6 +177,7 @@ export const ReplyPreview = ({
   myId,
   participants,
   onPreviewClick,
+  type,
 }) => {
   if (!target) {
     return (
@@ -184,7 +185,7 @@ export const ReplyPreview = ({
         className="mb-1 px-3 py-1 rounded-md text-xs"
         style={{
           borderLeft: "3px solid rgba(255,255,255,0.06)",
-          background: "rgba(0,0,0,0.06)",
+          background: type === "user" ? "rgba(0,0,0,0.9)" : "rgba(0,0,0,0.06)",
         }}
       >
         <div className="text-[11px] italic" style={{ color: COLORS.muted }}>
@@ -223,7 +224,7 @@ export const ReplyPreview = ({
       className="w-full mb-1 text-left px-3 py-1 rounded-md hover:opacity-90 transition-all"
       style={{
         borderLeft: `3px solid ${COLORS.muted}`,
-        background: "rgba(0,0,0,0.5)",
+        background: type === "user" ? "rgba(0,0,0,0.9)" : "rgba(0,0,0,0.5)",
       }}
     >
       <div className="text-[11px] font-medium" style={{ color: COLORS.text }}>

@@ -13,8 +13,13 @@ import InputBox from "./InputBox";
 import { onPrompt } from "../../utils/notifications/onPrompt";
 import { FaTimes } from "react-icons/fa";
 import { htmlToPlainAndRaw } from "../../utils/chat/messageUtils";
+import ScrollToBottomButton from "./ScrollTOBottom";
 
-function SendMessage({ messageData, desktop = false }: SendMessageProps) {
+function SendMessage(
+  { messageData, desktop = false }: SendMessageProps,
+  scrollRef,
+  sentinelRef
+) {
   const { authDetails } = useContext(AuthContext) as any;
   const {
     file,
@@ -448,6 +453,12 @@ function SendMessage({ messageData, desktop = false }: SendMessageProps) {
       )}
 
       {file && <FileToSendPreview desktop={desktop} />}
+      <ScrollToBottomButton
+        containerRef={scrollRef}
+        // sentinelRef={sentinelRef}
+        threshold={64}
+        unreadCount={0 /* or a state value */}
+      />
 
       <InputBox
         insertMentionChip={insertMentionChip}

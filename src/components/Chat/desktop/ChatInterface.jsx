@@ -8,6 +8,8 @@ import ChatMessage from "../ChatMessage"; // Import the new Message component
 import { getFormattedDate } from "../../../utils/formmaters";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import SendMessage from "../SendMessage";
+import ChatMessageList from "../ChatMessageList";
 
 const ChatInterface = () => {
   const { setSelectedChatUser, setMessages, typingUsers } =
@@ -17,7 +19,7 @@ const ChatInterface = () => {
 
   const location = useLocation();
   const chatUserData = location?.state;
-
+  const messagesEndRef = useRef(null);
   const {
     data: messages,
     isLoading,
@@ -31,56 +33,8 @@ const ChatInterface = () => {
   });
 
   useEffect(() => {
-    setMessages(messages);
-    if (messages?.chat_meta && chatUserData) {
-      setSelectedChatUser((prev) => {
-        if (!prev) return prev; // 🔴 Prevents overwriting null
-        return { ...prev, chat_meta: messages.chat_meta };
-      });
-    }
-    if (messages?.data && messageRef.current) {
-      messageRef.current?.lastElementChild?.scrollIntoView();
-    }
-  }, [messages]);
-
-  const renderMessages = () => {
-    if (!messages?.data?.length) return;
-    <p className="text-gray-200 text-center">No messages yet.</p>;
-
-    let lastDate = null;
-
-    return messages.data.map((msg, index) => {
-      const formattedDate = getFormattedDate(msg.updated_at);
-      const showDateHeader = lastDate !== formattedDate;
-      lastDate = formattedDate;
-
-      // 👉 Find next message
-      const nextMsg = messages.data[index + 1];
-
-      // 👉 It's the last message from user if:
-      // - it's NOT my message
-      // - and either there is no next message OR the next one is my message
-      const isLastMessageFromUser =
-        msg.is_my_chat !== "yes" && (!nextMsg || nextMsg.is_my_chat === "yes");
-
-      return (
-        <React.Fragment key={msg.id}>
-          {showDateHeader && (
-            <div className="flex items-center justify-center gap-2 my-4 text-gray-500 text-sm font-medium">
-              <div className="flex-1 border-t border-gray-400"></div>
-              <span>{formattedDate}</span>
-              <div className="flex-1 border-t border-gray-400"></div>
-            </div>
-          )}
-          <ChatMessage
-            msg={msg}
-            selectedChatUser={chatUserData}
-            isLastMessageFromUser={isLastMessageFromUser}
-          />
-        </React.Fragment>
-      );
-    });
-  };
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typingUsers[chatUserData?.contact_id]]);
 
   return (
     <div className="flex-1 relative gap-4 h-full">
@@ -100,7 +54,7 @@ const ChatInterface = () => {
             </p>
           ) : (
             <>
-              {renderMessages()}
+              <ChatMessageList desktop={true} messages={messages} />
 
               {/* 🔹 Typing indicator as a new bubble */}
               {typingUsers[chatUserData?.contact_id] && (
@@ -117,6 +71,7 @@ const ChatInterface = () => {
                   </div>
                 </motion.div>
               )}
+              <div ref={messagesEndRef} />
             </>
           )
         ) : (
@@ -125,6 +80,12 @@ const ChatInterface = () => {
           </p>
         )}
       </div>
+      {chatUserData && (
+        <SendMessage
+          messageData={messages?.chat_meta}
+          scrollRef={messagesEndRef}
+        />
+      )}
     </div>
   );
 };

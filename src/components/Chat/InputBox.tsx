@@ -42,6 +42,7 @@ const InputBox = ({
         spellCheck
         onInput={onInput}
         onKeyDown={onKeyDown}
+        tabIndex={0}
         onFocus={onFocus}
         onBlur={onBlur}
         className="flex-1 p-2 bg-transparent border-none outline-none leading-snug min-h-[24px] max-h-40 overflow-auto"

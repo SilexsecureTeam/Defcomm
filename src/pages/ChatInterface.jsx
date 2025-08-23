@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useContext } from "react";
 import { MdCall } from "react-icons/md";
 import { FaSpinner } from "react-icons/fa6";
 import { FaCog } from "react-icons/fa";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import SEOHelmet from "../engine/SEOHelmet";
 import { ChatContext } from "../context/ChatContext";
@@ -10,8 +10,6 @@ import useChat from "../hooks/useChat";
 
 import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
-import ChatMessage from "../components/Chat/ChatMessage";
-import { getFormattedDate } from "../utils/formmaters";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "react-router-dom";
 import ChatMessageList from "../components/Chat/ChatMessageList";
@@ -29,7 +27,7 @@ const ChatInterface = () => {
   } = useContext(ChatContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
-
+  const messagesEndRef = useRef(null);
   const {
     data: messages,
     isLoading,
@@ -43,7 +41,7 @@ const ChatInterface = () => {
   });
 
   useEffect(() => {
-    messageRef.current?.lastElementChild?.scrollIntoView();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingUsers[chatUserData?.contact_id]]);
 
   return (
@@ -95,7 +93,7 @@ const ChatInterface = () => {
                 Failed to load messages. Please try again.
               </p>
             ) : (
-              <>
+              <div>
                 <ChatMessageList messages={messages} />
 
                 {/* 🔹 Typing indicator as a new bubble */}
@@ -113,7 +111,7 @@ const ChatInterface = () => {
                     </div>
                   </motion.div>
                 )}
-              </>
+              </div>
             )
           ) : (
             <p className="text-oliveDark text-center text-lg font-bold mt-10">
@@ -121,7 +119,14 @@ const ChatInterface = () => {
             </p>
           )}
         </div>
-        {chatUserData && <SendMessage messageData={messages?.chat_meta} />}
+        <div ref={messagesEndRef} />
+        {chatUserData && (
+          <SendMessage
+            messageData={messages?.chat_meta}
+            scrollRef={messageRef}
+            sentinelRef={messagesEndRef}
+          />
+        )}
       </div>
       {chatUserData && (
         <div className="w-max hidden lg:block">
