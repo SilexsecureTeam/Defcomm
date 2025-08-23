@@ -22,10 +22,10 @@ const formatDateLabel = (date) => {
 // Group messages by date
 const groupMessagesByDate = (messages = []) => {
   const sorted = [...messages].sort(
-    (a, b) => new Date(a.updated_at) - new Date(b.updated_at)
+    (a, b) => new Date(a.created_at) - new Date(b.created_at)
   );
   return sorted.reduce((acc, msg) => {
-    const dateKey = new Date(msg.updated_at).toDateString();
+    const dateKey = new Date(msg.created_at).toDateString();
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(msg);
     return acc;
