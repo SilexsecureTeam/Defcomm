@@ -165,7 +165,7 @@ const ChatMessage = ({
 
   return (
     <div
-      className={`flex flex-col ${
+      className={`message flex flex-col ${
         isMine ? "items-end" : "items-start"
       } space-y-1 text-sm`}
     >
@@ -312,7 +312,7 @@ const ChatMessage = ({
                           );
                         })()
                       ) : (
-                        <div>
+                        <div className="whitespace-pre-wrap break-words">
                           {msg?.message?.length > MAX_LENGTH && !isExpanded ? (
                             <>
                               {msg?.message.slice(0, MAX_LENGTH)}...

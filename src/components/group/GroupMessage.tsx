@@ -6,12 +6,10 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import { ChatContext } from "../../context/ChatContext";
 import { AuthContext } from "../../context/AuthContext";
-
 import {
   COLORS,
   ReplyPreview,
@@ -193,7 +191,9 @@ function GroupMessage({
 
   return (
     <div
-      className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
+      className={`message flex flex-col ${
+        isMine ? "items-end" : "items-start"
+      }`}
       style={{ padding: "4px 0", position: "relative" }}
     >
       <AvatarRow
@@ -270,7 +270,6 @@ function GroupMessage({
 
                     if (key && typeof scrollToMessage === "function")
                       scrollToMessage(key);
-                    console.log(key);
                   }}
                 />
               )}
@@ -308,11 +307,9 @@ function GroupMessage({
       >
         {timeLabel}
       </div>
-
       {isLastInGroup && <div className="mb-3" />}
     </div>
   );
 }
-
 GroupMessage.propTypes = groupMessageType;
 export default React.memo(GroupMessage);

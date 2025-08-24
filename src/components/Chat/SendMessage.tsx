@@ -59,6 +59,7 @@ function SendMessage(
     setMentionQuery("");
     setMentionIndex(0);
     setTagUsers([]);
+    clearReply();
     typingSent.current = false;
   }
 
@@ -341,7 +342,7 @@ function SendMessage(
   const handleSendMessage = () => {
     const el = editorRef.current;
     const html = (el?.innerHTML || "").replace(/<br>/g, "\n");
-    const { message, raw_message, mentions } = htmlToPlainAndRaw(html);
+    const { message, mentions } = htmlToPlainAndRaw(html);
 
     if (message.trim().length === 0 && !file) return;
 
@@ -357,7 +358,6 @@ function SendMessage(
       tag_users: tagUsers,
       sendMessageMutation,
     } as any);
-    setReplyTo?.(null);
   };
 
   return (
@@ -473,6 +473,7 @@ function SendMessage(
         messageData={messageData}
         showMentionMenu={showMentionMenu}
         mentionSuggestions={mentionSuggestions}
+        replyTo={replyTo}
       />
     </div>
   );

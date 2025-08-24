@@ -86,7 +86,7 @@ function MessageContent({
   }
 
   // Default: render actual content (full)
-  return <>{rendered}</>;
+  return <div className="whitespace-pre-wrap break-words">{rendered}</div>;
 }
 
 MessageContent.propTypes = {

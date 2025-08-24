@@ -69,18 +69,20 @@ const ChatInterface = () => {
         </button>
 
         <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
-            style={{ backgroundColor: COLORS.avatarBg, color: "#FFF" }}
-          >
-            {chatUserData?.contact_name?.charAt(0) || "?"}
-          </div>
+          {chatUserData && (
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
+              style={{ backgroundColor: COLORS.avatarBg, color: "#FFF" }}
+            >
+              {chatUserData?.contact_name?.charAt(0) || "?"}
+            </div>
+          )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h2
                 className="text-base md:text-lg font-semibold truncate"
                 style={{ color: COLORS.headerText }}
-                title={chatUserData?.contact_name || "Chat"}
+                title={chatUserData?.contact_name ?? "Chat"}
               >
                 {chatUserData?.contact_name || "Chat"}
               </h2>

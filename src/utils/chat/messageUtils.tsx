@@ -95,7 +95,11 @@ export const renderMessageContent = (
     cleaned = cleaned.replace(atRegex, (match, before) => before || "");
   }
 
-  const normalized = cleaned.replace(/\s{2,}/g, " ").trim();
+  const normalized = cleaned
+    .replace(/[^\S\r\n]{2,}/g, " ") // collapse multiple spaces/tabs -> single space
+    .replace(/\r\n/g, "\n") // normalize CRLF -> LF
+    .replace(/\n{3,}/g, "\n\n") // optional: limit consecutive newlines
+    .trim();
 
   return <div>{parseHtml(normalized)}</div>;
 };

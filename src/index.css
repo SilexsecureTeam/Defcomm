@@ -215,5 +215,6 @@ html {
 }
 
 .bubble-parent {
-  background: rgba(42, 77, 44, 0.05);
+  background: rgba(22, 65, 24, 0.276);
+  transition: all 500ms ease;
 }

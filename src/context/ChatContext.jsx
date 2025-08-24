@@ -70,7 +70,6 @@ export const ChatProvider = ({ children }) => {
         return false;
       }
 
-      const targetNode = el?.parentElement || el;
       const bubble =
         el.querySelector?.(".message-bubble") ||
         el.querySelector?.(".p-2") ||
@@ -83,6 +82,8 @@ export const ChatProvider = ({ children }) => {
         document.querySelector("[data-scroll-container]") ||
         // fallback to window
         null;
+
+      const targetNode = bubble.closest(".message");
 
       // compute targetTop only if we have a container with scrollTo
       let targetTop = null;
@@ -108,37 +109,10 @@ export const ChatProvider = ({ children }) => {
 
       // show highlight immediately on the parent (so user sees something during scroll)
       const highlightClass = "reply-highlight";
-      const removeClass = "reply-highlight-remove";
-
       if (bubble && bubble.classList) {
         targetNode.classList.add("bubble-parent");
-        if (!bubble.classList.contains("message-bubble"))
-          bubble.classList.add("message-bubble");
         bubble.classList.add(highlightClass);
         bubble.style.zIndex = 9999;
-        // fallback inline if CSS not applied quickly
-        setTimeout(() => {
-          const bg = getComputedStyle(bubble).backgroundColor;
-          if (!bg || bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
-            bubble.style.setProperty(
-              "background-color",
-              "rgba(0,0,0,0.06)",
-              "important"
-            );
-            bubble.style.setProperty(
-              "box-shadow",
-              "0 8px 24px rgba(0,0,0,0.08)",
-              "important"
-            );
-          }
-        }, 90);
-      } else if (bubble) {
-        bubble.style.setProperty(
-          "background-color",
-          "rgba(0,0,0,0.06)",
-          "important"
-        );
-        bubble.style.setProperty("transform", "scale(1.02)", "important");
       }
 
       // Wait until the element is actually visible in the container / viewport
@@ -191,18 +165,6 @@ export const ChatProvider = ({ children }) => {
         if (bubble && bubble.classList) {
           bubble.classList.remove(highlightClass);
           targetNode.classList.remove("bubble-parent");
-          bubble.classList.add(removeClass);
-          setTimeout(() => {
-            bubble.classList.remove(removeClass);
-            targetNode.classList.remove("bubble-parent");
-            bubble.style.zIndex = "";
-            bubble.style.removeProperty("background-color");
-            bubble.style.removeProperty("box-shadow");
-          }, 360);
-        } else if (bubble) {
-          // bubble inline cleanup
-          bubble.style.removeProperty("background-color");
-          bubble.style.removeProperty("transform");
         }
       } catch (err) {
         /* ignore */
