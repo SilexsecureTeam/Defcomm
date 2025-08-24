@@ -12,8 +12,7 @@ import SendMessage from "../SendMessage";
 import ChatMessageList from "../ChatMessageList";
 
 const ChatInterface = () => {
-  const { setSelectedChatUser, setMessages, typingUsers } =
-    useContext(ChatContext);
+  const { typingUsers } = useContext(ChatContext);
   const { fetchChatMessages } = useChat();
   const messageRef = useRef(null);
 

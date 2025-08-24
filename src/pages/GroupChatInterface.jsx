@@ -170,9 +170,8 @@ const GroupChatInterface = () => {
 
       {/* MESSAGES AREA */}
       <div
-        className="flex-1 overflow-y-auto px-6 py-4 space-y-4 scrollbar-thin"
+        className="flex-1 overflow-y-auto px-6 py-4 space-y-4"
         style={{
-          scrollbarColor: `${COLORS.scrollbarThumb} ${COLORS.scrollbarTrack}`,
           backgroundColor: COLORS.messagesBg,
         }}
       >

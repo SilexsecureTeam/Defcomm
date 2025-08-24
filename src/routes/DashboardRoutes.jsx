@@ -5,6 +5,7 @@ import Fallback from "../components/Fallback";
 import { ThemeProvider } from "../context/ThemeContext";
 import { CommProvider } from "../context/CommContext";
 import { GroupProvider } from "../context/GroupContext";
+import useMedia from "../utils/chat/useMedia";
 
 // Lazy-loaded pages
 const DashboardWrapper = lazy(() => import("../layout/DashboardWrapper"));
@@ -46,7 +47,7 @@ const DashboardRoutes = () => {
   if (authDetails?.user?.role !== "user") {
     return <Navigate to="/login" replace />;
   }
-
+  const isLarge = useMedia("(min-width: 1024px)");
   return (
     <ThemeProvider>
       <CommProvider>
@@ -58,29 +59,11 @@ const DashboardRoutes = () => {
 
                 <Route
                   path="user/:userId/chat"
-                  element={
-                    <div className="w-full h-full">
-                      <div className="block lg:hidden">
-                        <ChatInterface />
-                      </div>
-                      <div className="hidden lg:block">
-                        <SecureChatUI />
-                      </div>
-                    </div>
-                  }
+                  element={isLarge ? <SecureChatUI /> : <ChatInterface />}
                 />
                 <Route
                   path="chat"
-                  element={
-                    <div className="w-full h-full">
-                      <div className="block lg:hidden">
-                        <ChatInterface />
-                      </div>
-                      <div className="hidden lg:block">
-                        <SecureChatUI />
-                      </div>
-                    </div>
-                  }
+                  element={isLarge ? <SecureChatUI /> : <ChatInterface />}
                 />
 
                 <Route path="new-file" element={<DeffViewer />} />

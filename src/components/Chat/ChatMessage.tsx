@@ -15,8 +15,8 @@ import { parseHtml } from "../../utils/formmaters";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import {
   DIRECTION_LOCK_RATIO,
+  MAX_LENGTH,
   ReplyPreview,
-  resolveTaggedUsers,
   SWIPE_MAX_VISUAL,
   SWIPE_TRIGGER_PX,
 } from "../../utils/chat/messageUtils";
@@ -30,7 +30,7 @@ const ChatMessage = ({
   msg,
   selectedChatUser,
   messagesById = new Map(),
-  messageRefs = null, // optional useRef(Map) passed from parent list
+  messageRefs, // optional useRef(Map) passed from parent list
 }) => {
   const {
     chatVisibility,
@@ -40,9 +40,7 @@ const ChatMessage = ({
     setReplyTo,
     scrollToMessage,
   } = useContext(ChatContext);
-
   const { authDetails } = useContext(AuthContext) as any;
-
   const [isVisible, setIsVisible] = useState(Boolean(chatVisibility));
   const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
   const [isExpanded, setIsExpanded] = useState(false);
@@ -63,11 +61,6 @@ const ChatMessage = ({
   }, [msg?.id, msg?.updated_at]);
 
   const isMine = useMemo(() => msg?.is_my_chat === "yes", [msg]);
-
-  const taggedUsers = useMemo(
-    () => resolveTaggedUsers(msg, selectedChatUser),
-    [msg, selectedChatUser]
-  );
 
   const handleAcceptCall = useCallback(
     (m) => {
@@ -114,7 +107,6 @@ const ChatMessage = ({
         setOffsetX(0);
         return;
       }
-
       // allowed swipe: right for others (reply), left for mine
       const allowed = isMine ? dx < 0 : dx > 0;
       const visual = allowed
@@ -124,21 +116,18 @@ const ChatMessage = ({
     },
     [isMine]
   );
-
   const onPointerUp = useCallback(
     (e) => {
       setIsDragging(false);
       const dx = lastDeltaRef.current || 0;
       startRef.current = null;
       lastDeltaRef.current = 0;
-
       // trigger reply if threshold met
       if (!isMine && dx >= SWIPE_TRIGGER_PX) {
         doReply();
       } else if (isMine && dx <= -SWIPE_TRIGGER_PX) {
         doReply();
       }
-
       setOffsetX(0);
     },
     [isMine, doReply]
@@ -153,8 +142,6 @@ const ChatMessage = ({
     if (found) return found;
     return null;
   }, [msg, messagesById]);
-
-  const MAX_LENGTH = 100;
 
   // stable key used for this message DOM node
   const messageKey = useMemo(() => {
@@ -255,8 +242,9 @@ const ChatMessage = ({
                 if (!showToggleSwitch) setIsVisible((v) => !v);
               }}
               title={
-                !showToggleSwitch &&
-                (isVisible ? "click to show" : "toggle to show")
+                !showToggleSwitch && isVisible
+                  ? "Click to hide"
+                  : "Click to show"
               }
             >
               {/* Reply preview */}
@@ -273,15 +261,13 @@ const ChatMessage = ({
                   myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
                   onPreviewClick={(target) => {
                     const key = target?.id;
-
-                    if (key && typeof scrollToMessage === "function")
-                      console.log(key);
-                    scrollToMessage(key);
+                    if (key && typeof scrollToMessage === "function") {
+                      scrollToMessage(String(key));
+                    }
                   }}
                   type="user"
                 />
               )}
-
               <div>
                 <AnimatePresence mode="wait">
                   {isVisible ? (
@@ -355,7 +341,7 @@ const ChatMessage = ({
                       }}
                       className={`${
                         showToggleSwitch ? "" : "cursor-pointer"
-                      } w-full max-w-60 md:max-w-80 rounded-md flex items-center justify-center relative font-bold tracking-widest break-all`}
+                      } w-full max-w-60 md:max-w-80 rounded-md flex items-center relative font-bold tracking-widest break-all`}
                       title={
                         !showToggleSwitch ? "click to show" : "toggle to show"
                       }

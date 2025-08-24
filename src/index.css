@@ -189,3 +189,31 @@ html {
   opacity: 0.6;
   pointer-events: none;
 }
+.reply-highlight {
+  /* darken by reducing brightness */
+  filter: brightness(60%);
+  transform: scale(1.02);
+  transition: transform 260ms ease, filter 260ms ease;
+  z-index: 5;
+}
+
+/* remove highlight smoothly */
+.reply-highlight-remove {
+  filter: brightness(100%);
+  transform: scale(1);
+  transition: transform 360ms ease, filter 360ms ease;
+}
+
+/* Accessibility: honor reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reply-highlight,
+  .reply-highlight-remove {
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+.bubble-parent {
+  background: rgba(42, 77, 44, 0.05);
+}

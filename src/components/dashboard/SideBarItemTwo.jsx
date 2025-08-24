@@ -70,7 +70,7 @@ function SideBarItemTwo({ data, setIsOpen }) {
         <p>{data?.contact_name}</p>
         <small>{data?.contact_phone}</small>
         {typingUsers[Number(data?.contact_id)] && (
-          <div className="text-green-400 text-xs">Typing...</div>
+          <div className="text-green-400 text-[10px]">Typing...</div>
         )}
       </div>
       <button

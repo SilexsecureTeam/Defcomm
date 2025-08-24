@@ -29,7 +29,6 @@ export const ChatProvider = ({ children }) => {
 
   const [modalTitle, setModalTitle] = useState("Defcomm");
   const [members, setMembers] = useState();
-
   // messageRefs container (will be set by GroupMessageList)
   const messageRefsRef = useRef(null);
 
@@ -38,32 +37,180 @@ export const ChatProvider = ({ children }) => {
   }, []);
 
   // scroll helper: accepts the same stable key you use for refs: client_id ?? id_en ?? id_en
-  const scrollToMessage = useCallback((key) => {
+  const scrollToMessage = useCallback(async (key, opts = {}) => {
+    const {
+      waitTimeout = 1200, // wait for element to mount
+      waitInterval = 30,
+      scrollTimeout = 3000, // max wait for the scroll to bring the element into view
+      visibilityThresholdPx = 12, // how many px of margin to consider 'visible'
+      nudge = 90,
+      linger = 600, // keep highlight visible after element is in view
+    } = opts;
+
     try {
-      const map = messageRefsRef.current?.current ?? null;
-      if (!map) return false;
-      const el = map.get(String(key));
-      if (!el) return false;
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (key == null) return false;
 
-      // optional highlight
-      const prevTransition = el.style.transition;
-      const prevBox = el.style.boxShadow;
-      const prevBg = el.style.backgroundColor;
+      // wait for element in refs map (robust to remounts)
+      const waitForElement = (timeout = waitTimeout, interval = waitInterval) =>
+        new Promise((resolve) => {
+          const start = Date.now();
+          const tryFind = () => {
+            const map = messageRefsRef.current?.current ?? null;
+            const el = map ? map.get(String(key)) : null;
+            if (el) return resolve(el);
+            if (Date.now() - start > timeout) return resolve(null);
+            setTimeout(tryFind, interval);
+          };
+          tryFind();
+        });
 
-      el.style.transition =
-        "box-shadow 320ms ease, background-color 320ms ease";
-      el.style.boxShadow = "0 0 0 3px rgba(250,184,28,0.18)";
-      el.style.backgroundColor = "rgba(250,184,28,0.06)";
+      const el = await waitForElement();
+      if (!el) {
+        console.warn("scrollToMessage: element not found for key", key);
+        return false;
+      }
 
-      setTimeout(() => {
-        el.style.boxShadow = prevBox || "";
-        el.style.backgroundColor = prevBg || "";
-        el.style.transition = prevTransition || "";
-      }, 1200);
+      const targetNode = el?.parentElement || el;
+      const bubble =
+        el.querySelector?.(".message-bubble") ||
+        el.querySelector?.(".p-2") ||
+        el;
+
+      const container =
+        (typeof scrollContainerRef !== "undefined" &&
+          scrollContainerRef?.current) ||
+        el.closest("[data-scroll-container]") ||
+        document.querySelector("[data-scroll-container]") ||
+        // fallback to window
+        null;
+
+      // compute targetTop only if we have a container with scrollTo
+      let targetTop = null;
+      if (container && typeof container.scrollTo === "function") {
+        let elTop = 0;
+        let node = el;
+        while (node && node !== container && node !== document.body) {
+          elTop += node.offsetTop || 0;
+          node = node.offsetParent;
+        }
+        const elHeight =
+          el.offsetHeight || (bubble && bubble.offsetHeight) || 32;
+        const center = Math.max(
+          elTop - container.clientHeight / 2 + elHeight / 2,
+          0
+        );
+        targetTop = Math.max(center - nudge, 0);
+        container.scrollTo({ top: targetTop, behavior: "smooth" });
+      } else {
+        // fallback: container-less scroll into view (window)
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // show highlight immediately on the parent (so user sees something during scroll)
+      const highlightClass = "reply-highlight";
+      const removeClass = "reply-highlight-remove";
+
+      if (bubble && bubble.classList) {
+        targetNode.classList.add("bubble-parent");
+        if (!bubble.classList.contains("message-bubble"))
+          bubble.classList.add("message-bubble");
+        bubble.classList.add(highlightClass);
+        bubble.style.zIndex = 9999;
+        // fallback inline if CSS not applied quickly
+        setTimeout(() => {
+          const bg = getComputedStyle(bubble).backgroundColor;
+          if (!bg || bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
+            bubble.style.setProperty(
+              "background-color",
+              "rgba(0,0,0,0.06)",
+              "important"
+            );
+            bubble.style.setProperty(
+              "box-shadow",
+              "0 8px 24px rgba(0,0,0,0.08)",
+              "important"
+            );
+          }
+        }, 90);
+      } else if (bubble) {
+        bubble.style.setProperty(
+          "background-color",
+          "rgba(0,0,0,0.06)",
+          "important"
+        );
+        bubble.style.setProperty("transform", "scale(1.02)", "important");
+      }
+
+      // Wait until the element is actually visible in the container / viewport
+      const isElementVisible = () => {
+        // if we have a specific container (scrollable element)
+        if (container) {
+          const cRect = container.getBoundingClientRect();
+          const eRect = el.getBoundingClientRect();
+          // eRect must be at least partly inside cRect with threshold
+          return (
+            eRect.bottom >= cRect.top + visibilityThresholdPx &&
+            eRect.top <= cRect.bottom - visibilityThresholdPx
+          );
+        } else {
+          // fallback to viewport
+          const eRect = el.getBoundingClientRect();
+          return (
+            eRect.bottom >= visibilityThresholdPx &&
+            eRect.top <=
+              (window.innerHeight || document.documentElement.clientHeight) -
+                visibilityThresholdPx
+          );
+        }
+      };
+
+      const waitForVisibility = (timeout = scrollTimeout) =>
+        new Promise((resolve) => {
+          const start = Date.now();
+          let stableFrames = 0;
+          const tick = () => {
+            if (isElementVisible()) return resolve(true);
+            // if we are not visible but scroll has basically stopped, we may still resolve to avoid infinite wait
+            if (Date.now() - start > timeout) return resolve(true);
+            requestAnimationFrame(() => {
+              stableFrames++;
+              if (stableFrames > 3000) return resolve(true); // safety
+              tick();
+            });
+          };
+          requestAnimationFrame(tick);
+        });
+
+      await waitForVisibility(scrollTimeout);
+
+      // the element is visible (or timeout), keep highlight for a moment so user notices it
+      await new Promise((r) => setTimeout(r, linger));
+
+      // cleanup highlight (remove both classes and inline fallbacks)
+      try {
+        if (bubble && bubble.classList) {
+          bubble.classList.remove(highlightClass);
+          targetNode.classList.remove("bubble-parent");
+          bubble.classList.add(removeClass);
+          setTimeout(() => {
+            bubble.classList.remove(removeClass);
+            targetNode.classList.remove("bubble-parent");
+            bubble.style.zIndex = "";
+            bubble.style.removeProperty("background-color");
+            bubble.style.removeProperty("box-shadow");
+          }, 360);
+        } else if (bubble) {
+          // bubble inline cleanup
+          bubble.style.removeProperty("background-color");
+          bubble.style.removeProperty("transform");
+        }
+      } catch (err) {
+        /* ignore */
+      }
 
       return true;
     } catch (err) {
+      console.error("scrollToMessage error:", err);
       return false;
     }
   }, []);
