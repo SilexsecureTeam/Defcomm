@@ -2,24 +2,36 @@ import { toast } from "react-toastify";
 import { FaCommentDots, FaPhoneAlt, FaUsers } from "react-icons/fa";
 import audioController from "../audioController";
 import notificationSound from "../../assets/audio/bell.mp3";
+import { useContext } from "react";
+import { ChatContext } from "../../context/ChatContext";
+
 export const onNewNotificationToast = ({
   groupName,
   senderName,
   message,
   type = "message", // "message" | "call"
   onClick = () => {},
+  isChatVisible = false,
 }) => {
   const isCall = type === "call";
   const isGroup = Boolean(groupName);
 
   audioController.playRingtone(notificationSound);
 
+  // 👇 if chat is visible, mask the message
+  const safeMessage =
+    isChatVisible && !isCall
+      ? "**********"
+      : isCall
+      ? "📞 Incoming Secure Call"
+      : message || "New encrypted message";
+
   const toastComponent = (
     <div
       className="flex items-start gap-3 cursor-pointer w-[380px] max-w-full p-4 rounded-lg shadow-lg bg-[#1b1f1b] border border-[#3a4a3a] hover:bg-[#232823] transition"
       onClick={onClick}
     >
-      {/* Avatar / Icon section */}
+      {/* Avatar / Icon */}
       <div className="flex-shrink-0">
         {isCall ? (
           <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-900 border border-green-600">
@@ -38,22 +50,18 @@ export const onNewNotificationToast = ({
 
       {/* Content */}
       <div className="flex flex-col leading-snug overflow-hidden">
-        {/* Group name */}
         {isGroup && (
           <p className="text-[12px] uppercase tracking-wide font-bold text-gray-400 mb-1">
             {groupName}
           </p>
         )}
 
-        {/* Sender + message */}
         <div className="flex flex-col">
           <span className="font-semibold text-sm text-green-300">
             {senderName}
           </span>
           <span className="text-sm text-gray-200 break-words line-clamp-2">
-            {isCall
-              ? "📞 Incoming Secure Call"
-              : message || "New encrypted message"}
+            {safeMessage}
           </span>
         </div>
       </div>

@@ -17,8 +17,12 @@ const usePusherChannel = ({
   const pusherRef = useRef(null);
   const navigate = useNavigate();
 
-  const { selectedChatUser, setSelectedChatUser, setCallMessage } =
-    useContext(ChatContext);
+  const {
+    selectedChatUser,
+    setSelectedChatUser,
+    setCallMessage,
+    chatVisibility,
+  } = useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
 
   // Maintain latest selectedChatUser in a ref
@@ -86,6 +90,8 @@ const usePusherChannel = ({
         // Number(currentUser?.contact_id) !== Number(newMessage?.data?.user_id) &&
         data?.data?.user_id !== userId;
 
+      console.log(newMessage);
+
       if (shouldToast) {
         addNotification(newMessage);
         onNewNotificationToast({
@@ -101,6 +107,7 @@ const usePusherChannel = ({
                 contact_id: newMessage?.sender?.id,
                 contact_name: newMessage?.sender?.name,
               },
+              isChatVisible: chatVisibility,
             });
           },
         });

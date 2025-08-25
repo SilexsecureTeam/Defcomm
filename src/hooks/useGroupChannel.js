@@ -6,11 +6,13 @@ import { GroupContext } from "../context/GroupContext";
 import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
 import { NotificationContext } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { ChatContext } from "../context/ChatContext";
 
 const useGroupChannels = ({ groups, token }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
   const { authDetails } = useContext(AuthContext);
+  const { chatVisibility } = useContext(ChatContext);
   const { setGroupUserTyping, setGroupConnections } = useContext(GroupContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
   const queryClient = useQueryClient();
@@ -87,6 +89,7 @@ const useGroupChannels = ({ groups, token }) => {
               markAsSeen(data?.data?.id);
               navigate(`/dashboard/group/${data?.data?.user_to}/chat`);
             },
+            isChatVisible: chatVisibility,
           });
         }
 

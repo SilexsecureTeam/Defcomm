@@ -271,6 +271,7 @@ function GroupMessage({
                     if (key && typeof scrollToMessage === "function")
                       scrollToMessage(key);
                   }}
+                  type="group"
                 />
               )}
               <MessageContent

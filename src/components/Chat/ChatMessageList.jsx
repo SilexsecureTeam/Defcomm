@@ -47,7 +47,7 @@ const ChatMessageList = ({ desktop = false, messages = [] }) => {
       {/* Sticky date header for this day */}
       <div
         className={`sticky z-50 ${
-          desktop ? "top-0" : "top-0"
+          desktop ? "top-16" : "-top-4"
         } flex justify-center py-1 w-max pointer-events-none mx-auto`}
       >
         <span

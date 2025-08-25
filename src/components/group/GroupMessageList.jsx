@@ -60,7 +60,7 @@ const GroupMessageList = ({ messages = [], participants = [] }) => {
       {Object.entries(groupedMessages).map(([dateKey, dayMessages]) => (
         <div key={dateKey} className="relative">
           {/* Sticky date header */}
-          <div className="sticky top-0 z-10 flex justify-center py-1">
+          <div className="sticky -top-4 z-10 flex justify-center py-1">
             <span
               className="px-3 py-1 text-xs rounded-full shadow-sm"
               style={{
