@@ -82,7 +82,8 @@ const ChatInterface = () => {
       {chatUserData && (
         <SendMessage
           messageData={messages?.chat_meta}
-          scrollRef={messagesEndRef}
+          scrollRef={messageRef}
+          messagesEndRef={messagesEndRef}
         />
       )}
     </div>

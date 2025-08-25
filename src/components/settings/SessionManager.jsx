@@ -34,43 +34,40 @@ const osIconMap = {
 };
 
 const SessionManager = () => {
-  const {
-    getDeviceLogsQuery,
-    getActiveDevicesQuery,
-    updateDeviceStatusMutation,
-  } = useDeviceSettings();
-
+  const { getDeviceLogsQuery, getDevicesQuery, updateDeviceStatusMutation } =
+    useDeviceSettings();
   const {
     data: allDevices = [],
     isLoading: logsLoading,
     isError: logsError,
   } = getDeviceLogsQuery;
-  const {
-    data: activeDevices = [],
-    isLoading: activeLoading,
-    isError: activeError,
-  } = getActiveDevicesQuery;
 
   const [filter, setFilter] = useState("active");
   const [updatingDevices, setUpdatingDevices] = useState({});
 
-  const devices = (() => {
+  // Single query for all devices (active, blocked, removed)
+  const {
+    data: filteredDevices = [],
+    isLoading: devicesLoading,
+    isError: devicesError,
+  } = getDevicesQuery(filter === "all" ? null : filter);
+
+  // Determine which devices to show
+  const devicesToShow = (() => {
     switch (filter) {
-      case "active":
-        return activeDevices;
       case "all":
         return allDevices;
-      case "blocked":
-        return allDevices.filter((d) => d.status === "blocked");
-      case "removed":
-        return allDevices.filter((d) => d.status === "removed");
+      case "block":
+        return filteredDevices.filter((d) => d.status === "block");
+      case "remove":
+        return filteredDevices.filter((d) => d.status === "remove");
       default:
-        return activeDevices;
+        return filteredDevices;
     }
   })();
 
-  const isLoading = logsLoading || activeLoading;
-  const isError = logsError || activeError;
+  const isLoading = logsLoading || devicesLoading;
+  const isError = logsError || devicesError;
 
   const getDeviceIcon = (device) => {
     const os = device.os?.toLowerCase() || "";
@@ -135,16 +132,16 @@ const SessionManager = () => {
         )}
 
         {/* Device List */}
-        {!isLoading && !isError && devices.length === 0 && (
+        {!isLoading && !isError && devicesToShow.length === 0 && (
           <p className="text-center text-gray-500 py-20">
             No sessions found for this filter.
           </p>
         )}
 
-        {!isLoading && !isError && devices.length > 0 && (
+        {!isLoading && !isError && devicesToShow.length > 0 && (
           <div className="flex flex-col gap-4">
             <AnimatePresence>
-              {devices.map((device) => (
+              {devicesToShow.map((device) => (
                 <motion.div
                   key={device.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -184,6 +181,8 @@ const SessionManager = () => {
                     >
                       {device.is_current_session
                         ? "Active"
+                        : device.status === "block"
+                        ? "Blocked"
                         : device.status
                         ? device.status.charAt(0).toUpperCase() +
                           device.status.slice(1)
@@ -207,17 +206,34 @@ const SessionManager = () => {
                       </motion.button>
                     )}
 
-                    {device.status !== "" && !device.is_current_session && (
+                    {device.status !== "" &&
+                      device.status !== "block" &&
+                      !device.is_current_session && (
+                        <motion.button
+                          onClick={() => handleUpdate(device.id, "block")}
+                          className="px-4 py-2 bg-[#d97706] text-white rounded-full text-sm font-medium hover:bg-[#b45309] flex items-center gap-1 transition-colors duration-200"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          disabled={updatingDevices[device.id] === "block"}
+                        >
+                          <XCircle size={16} />
+                          Block
+                          {updatingDevices[device.id] === "block" && (
+                            <FaSpinner className="animate-spin ml-2" />
+                          )}
+                        </motion.button>
+                      )}
+                    {device.status === "block" && (
                       <motion.button
-                        onClick={() => handleUpdate(device.id, "block")}
+                        onClick={() => handleUpdate(device.id, "active")}
                         className="px-4 py-2 bg-[#d97706] text-white rounded-full text-sm font-medium hover:bg-[#b45309] flex items-center gap-1 transition-colors duration-200"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        disabled={updatingDevices[device.id] === "block"}
+                        disabled={updatingDevices[device.id] === "active"}
                       >
                         <XCircle size={16} />
-                        Block
-                        {updatingDevices[device.id] === "block" && (
+                        Unblock
+                        {updatingDevices[device.id] === "active" && (
                           <FaSpinner className="animate-spin ml-2" />
                         )}
                       </motion.button>

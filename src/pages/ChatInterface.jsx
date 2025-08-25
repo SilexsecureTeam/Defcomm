@@ -43,7 +43,7 @@ const ChatInterface = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsers[chatUserData?.contact_id]]);
+  }, []);
 
   const COLORS = {
     headerBg: "#3B3B3B",
@@ -164,7 +164,8 @@ const ChatInterface = () => {
         <div className="border-t border-gray-300">
           <SendMessage
             messageData={messages?.chat_meta}
-            scrollRef={messagesEndRef}
+            scrollRef={messageRef}
+            messagesEndRef={messagesEndRef}
           />
         </div>
       )}

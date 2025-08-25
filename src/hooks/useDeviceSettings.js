@@ -22,16 +22,17 @@ const useDeviceSettings = () => {
   });
 
   // ✅ Fetch active devices
-  const getActiveDevicesQuery = useQuery({
-    queryKey: ["activeDevices"],
-    queryFn: async () => {
-      const { data } = await client.get("/auth/logindevice/active");
-      return data?.data || [];
-    },
-    enabled: !!authDetails,
-    refetchOnMount: true,
-    staleTime: 0,
-  });
+  const getDevicesQuery = (type) =>
+    useQuery({
+      queryKey: [`${type}Devices`],
+      queryFn: async () => {
+        const { data } = await client.get(`/auth/logindevice/${type}`);
+        return data?.data || [];
+      },
+      enabled: !!authDetails && !!type,
+      refetchOnMount: true,
+      staleTime: 0,
+    });
 
   // ✅ Mutation to update device status
   const updateDeviceStatusMutation = useMutation({
@@ -41,10 +42,10 @@ const useDeviceSettings = () => {
       );
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       // Refetch queries to refresh UI
       queryClient.invalidateQueries(["deviceLogs"]);
-      queryClient.invalidateQueries(["activeDevices"]);
+      queryClient.invalidateQueries([`${variables?.status}Devices`]);
     },
     onError: (error) => {
       console.error(error);
@@ -53,7 +54,7 @@ const useDeviceSettings = () => {
 
   return {
     getDeviceLogsQuery,
-    getActiveDevicesQuery,
+    getDevicesQuery,
     updateDeviceStatusMutation, // ✅ added mutation
   };
 };

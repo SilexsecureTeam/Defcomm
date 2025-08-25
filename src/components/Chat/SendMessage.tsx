@@ -15,11 +15,12 @@ import { FaTimes } from "react-icons/fa";
 import { htmlToPlainAndRaw } from "../../utils/chat/messageUtils";
 import ScrollToBottomButton from "./ScrollToBottom";
 
-function SendMessage(
-  { messageData, desktop = false }: SendMessageProps,
+function SendMessage({
+  messageData,
+  desktop = false,
   scrollRef,
-  sentinelRef
-) {
+  messagesEndRef,
+}: SendMessageProps) {
   const { authDetails } = useContext(AuthContext) as any;
   const {
     file,
@@ -455,9 +456,7 @@ function SendMessage(
       {file && <FileToSendPreview desktop={desktop} />}
       <ScrollToBottomButton
         containerRef={scrollRef}
-        // sentinelRef={sentinelRef}
-        threshold={64}
-        unreadCount={0 /* or a state value */}
+        messagesEndRef={messagesEndRef}
       />
 
       <InputBox

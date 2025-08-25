@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Users, Send } from "lucide-react";
+import { useState, useEffect, useRef, useContext, useMemo } from "react";
+import { AnimatePresence } from "framer-motion";
+import { Users } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../context/AuthContext";
@@ -29,7 +29,6 @@ const GroupChatInterface = () => {
   const { data: groupInfo, isLoading } = useFetchGroupInfo(groupId);
   const mergedGroupInfo = useMemo(() => {
     if (!groupInfo) return null;
-
     const members = groupInfo?.data || [];
     const alreadyMember = members.some(
       (m) => m.contact_id === authDetails?.user?.id // adapt key if different
@@ -170,6 +169,7 @@ const GroupChatInterface = () => {
 
       {/* MESSAGES AREA */}
       <div
+        ref={messageRef}
         className="flex-1 overflow-y-auto px-6 py-4 space-y-4"
         style={{
           backgroundColor: COLORS.messagesBg,
@@ -205,6 +205,7 @@ const GroupChatInterface = () => {
       <SendMessage
         messageData={{ ...messages?.chat_meta, members: mergedGroupInfo?.data }}
         scrollRef={messageRef}
+        messagesEndRef={messagesEndRef}
       />
 
       {/* GROUP INFO MODAL */}

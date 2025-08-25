@@ -20,6 +20,8 @@ export interface MessageData {
 export interface SendMessageProps {
   messageData: MessageData;
   desktop?: boolean;
+  scrollRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
 // Participant type

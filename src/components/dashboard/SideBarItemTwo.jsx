@@ -5,6 +5,7 @@ import logoIcon from "../../assets/logo-icon.png";
 import { MdDelete } from "react-icons/md";
 import useGroups from "../../hooks/useGroup";
 import { FaSpinner } from "react-icons/fa";
+import { maskPhone } from "../../utils/formmaters";
 
 function SideBarItemTwo({ data, setIsOpen }) {
   const navigate = useNavigate();
@@ -67,8 +68,8 @@ function SideBarItemTwo({ data, setIsOpen }) {
         ></span>
       </figure>
       <div>
-        <p>{data?.contact_name}</p>
-        <small>{data?.contact_phone}</small>
+        <p className="text-sm">{data?.contact_name}</p>
+        <small className="text-xs">{maskPhone(data?.contact_phone)}</small>
         {typingUsers[Number(data?.contact_id)] && (
           <div className="text-green-400 text-[10px]">Typing...</div>
         )}

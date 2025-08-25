@@ -1,9 +1,16 @@
 import { motion } from "framer-motion";
 
+const tabLabels = {
+  active: "Active",
+  all: "All",
+  block: "Blocked",
+  remove: "Removed",
+};
+
 const SelectionTab = ({ setFilter, filter }) => {
   return (
     <div className="flex flex-wrap justify-center gap-2 mb-10">
-      {["active", "all", "blocked", "removed"].map((tab) => (
+      {Object.keys(tabLabels).map((tab) => (
         <motion.button
           key={tab}
           onClick={() => setFilter(tab)}
@@ -15,7 +22,7 @@ const SelectionTab = ({ setFilter, filter }) => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          {tabLabels[tab]}
         </motion.button>
       ))}
     </div>

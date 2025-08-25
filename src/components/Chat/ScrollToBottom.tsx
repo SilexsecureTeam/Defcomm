@@ -1,103 +1,59 @@
-// components/Chat/ScrollToBottomButton.tsx
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { FaChevronDown } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaAnglesDown } from "react-icons/fa6";
 
 type Props = {
-  containerRef: React.RefObject<HTMLElement | null>; // the scrollable element (overflow-y-auto)
-  threshold?: number; // px from bottom considered "at bottom"
-  className?: string;
-  unreadCount?: number;
-  debug?: boolean;
+  messagesEndRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement>;
+  threshold?: number;
 };
 
 export default function ScrollToBottomButton({
+  messagesEndRef,
   containerRef,
   threshold = 48,
-  className = "",
-  unreadCount = 0,
-  debug = false,
 }: Props) {
   const [visible, setVisible] = useState(false);
-  const rafRef = useRef<number | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const compute = useCallback(() => {
-    const el = containerRef?.current;
-    if (!el) {
-      setVisible(false);
-      return;
-    }
-    const scrollTop = el.scrollTop;
-    const clientHeight = el.clientHeight;
-    const scrollHeight = el.scrollHeight;
-    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+  // Check if user is at bottom
+  const checkIfAtBottom = () => {
+    const container = containerRef.current;
+    if (!container) return true;
+    const distanceFromBottom =
+      container.scrollHeight - (container.scrollTop + container.clientHeight);
+    return distanceFromBottom <= threshold;
+  };
 
-    if (debug) {
-      // helpful values while debugging
-      // eslint-disable-next-line no-console
-      console.debug("ScrollToBottomButton.compute", {
-        scrollTop,
-        clientHeight,
-        scrollHeight,
-        distanceFromBottom,
-        threshold,
-      });
-    }
+  // Scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setVisible(false);
+  };
 
-    setVisible(distanceFromBottom > threshold);
-  }, [containerRef, threshold, debug]);
-
-  // rAF throttle wrapper
-  const scheduleCompute = useCallback(() => {
-    if (rafRef.current !== null) return;
-    rafRef.current = window.requestAnimationFrame(() => {
-      compute();
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-    });
-  }, [compute]);
-
+  // Observe scroll
   useEffect(() => {
-    const el = containerRef?.current;
-    // run one initial check
-    compute();
-    if (!el) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const onScroll = () => scheduleCompute();
-    const onResize = () => scheduleCompute();
-
-    el.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-
-    // cleanup
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
+    const handleScroll = () => {
+      if (checkIfAtBottom()) {
+        setVisible(false);
+      } else {
+        setVisible(true);
       }
     };
-  }, [containerRef, compute, scheduleCompute]);
 
-  const scrollToBottom = useCallback(() => {
-    const el = containerRef?.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    // optimistically hide button while scroll animates
-    setVisible(false);
-    // schedule a final compute shortly after to ensure accurate state
-    window.setTimeout(() => {
-      try {
-        const distance = el.scrollHeight - (el.scrollTop + el.clientHeight);
-        setVisible(distance > threshold);
-      } catch {
-        /* ignore */
-      }
-    }, 300);
-  }, [containerRef, threshold]);
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [containerRef]);
+
+  // Increment unread count when new messages arrive
+  useEffect(() => {
+    if (!checkIfAtBottom()) {
+      setVisible(true);
+    }
+  }, [messagesEndRef]); // trigger when new message renders
 
   return (
     <AnimatePresence>
@@ -107,24 +63,26 @@ export default function ScrollToBottomButton({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 18 }}
           transition={{ duration: 0.18 }}
-          className={`fixed right-4 bottom-28 z-50 ${className}`}
+          className="absolute right-4 bottom-24 z-50"
         >
           <div className="flex items-center gap-2">
-            {unreadCount ? (
-              <div className="flex-none -mr-3">
-                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-rose-600 text-white text-xs font-medium shadow">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </div>
+            {unreadCount > 0 && (
+              <div
+                className="inline-flex items-center justify-center w-9 h-9 rounded-full 
+                   bg-[#556B2F] text-[#F5F5F5] text-xs font-bold shadow-md 
+                   border border-[#3B4422] tracking-widest"
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
               </div>
-            ) : null}
-
+            )}
             <button
               onClick={scrollToBottom}
               aria-label="Scroll to latest message"
-              title="Go to latest"
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-oliveDark text-white shadow-lg hover:scale-105 active:scale-95 focus:outline-none"
+              className="flex items-center justify-center w-10 h-10 rounded-full 
+                 bg-[#2f3719] text-[#F5F5F5] shadow-lg border-2 border-[#556B2F] 
+                 hover:bg-[#496021] hover:scale-105 transition-all duration-200"
             >
-              <FaChevronDown />
+              <FaAnglesDown className="w-4 h-4" />
             </button>
           </div>
         </motion.div>
