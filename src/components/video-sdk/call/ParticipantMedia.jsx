@@ -87,7 +87,7 @@ const ParticipantMedia = ({
           isSpeakerOn={isSpeakerEnabled}
         />
         <button
-          onClick={handleLeave}
+          onClick={() => handleLeave("manual")}
           className="bg-red-500 text-white p-2 rounded-full mt-4 min-w-40 font-bold flex items-center justify-center gap-2"
         >
           <MdCallEnd /> End Call

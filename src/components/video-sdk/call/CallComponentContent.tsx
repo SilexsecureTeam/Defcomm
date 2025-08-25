@@ -9,12 +9,15 @@ import { onFailure } from "../../../utils/notifications/OnFailure";
 import { onPrompt } from "../../../utils/notifications/onPrompt";
 import { onSuccess } from "../../../utils/notifications/OnSuccess";
 import audioController from "../../../utils/audioController";
+import callerTone from "../../../assets/audio/caller.mp3";
 import ParticipantMedia from "./ParticipantMedia";
 import CallSetupPanel from "./CallSetupPanel";
 import { formatCallDuration } from "../../../utils/formmaters";
 import useChat from "../../../hooks/useChat";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
+  type LeaveAction = "manual" | "auto";
+
   const { authDetails } = useContext<any>(AuthContext);
   const {
     callMessage,
@@ -46,7 +49,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
       //   if (prev?.status !== "on") return { ...prev, status: "on" };
       //   return prev;
       // });
-
+      audioController.playRingtone(callerTone, true);
       if (!localMicOn) toggleMic();
     },
 
@@ -85,42 +88,12 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     onError: (err) => onFailure({ message: "Call Error", error: err.message }),
   });
 
-  const handleLeave = async () => {
-    console.log("Leaving call...", callDuration);
+  const handleLeave = async (action: LeaveAction = "auto") => {
+    console.log(`Leaving call by ${action}...`, callDuration);
 
     if (callTimer.current) clearInterval(callTimer.current);
 
-    const isMissed = callDuration === 0;
-
-    // 👇 Prevent double logging from both parties
-    if (!callLogUpdatedRef.current && callMessage?.id) {
-      try {
-        await updateCallLog.mutateAsync({
-          mss_id: callMessage?.id,
-          call_duration: formatCallDuration(callDuration),
-          call_state: isMissed ? "miss" : "pick",
-          recieve_user_id: callMessage?.user_id,
-        } as any);
-
-        callLogUpdatedRef.current = true; // ✅ Mark as logged
-
-        if (isMissed) {
-          onPrompt({
-            title: "Call Missed",
-            message: "No response from the other user. You have left the call.",
-          });
-        } else {
-          onSuccess({
-            message: "Call Ended",
-            success: "You have successfully left the call.",
-          });
-        }
-      } catch (error) {
-        console.warn("Call log update failed:", error);
-      }
-    }
-
-    // Clean up regardless
+    // Clean up UI & state immediately
     leave();
     setIsMeetingActive(false);
     setMeetingId(null);
@@ -129,6 +102,49 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     setIsInitiator(false);
     setProviderMeetingId(null);
     setShowSummary(true);
+
+    if (!callLogUpdatedRef.current && callMessage?.id) {
+      try {
+        // Determine call state
+        let callState: "miss" | "end" | "pick";
+        if (action === "manual") {
+          callState = "end"; // user manually ended the call
+        } else if (callDuration > 0) {
+          callState = "pick"; // user answered the call
+        } else {
+          callState = "miss"; // auto-missed
+        }
+
+        await updateCallLog.mutateAsync({
+          mss_id: callMessage?.id,
+          call_duration: formatCallDuration(callDuration),
+          call_state: callState,
+          recieve_user_id: callMessage?.user_id,
+        } as any);
+
+        callLogUpdatedRef.current = true;
+
+        // Notify user
+        if (callState === "miss") {
+          onPrompt({
+            title: "Call Missed",
+            message: "No response from the other user. You have left the call.",
+          });
+        } else if (callState === "pick") {
+          onSuccess({
+            message: "Call Ended",
+            success: "You answered and ended the call successfully.",
+          });
+        } else {
+          onSuccess({
+            message: "Call Ended",
+            success: "You manually ended the call.",
+          });
+        }
+      } catch (error) {
+        console.warn("Call log update failed:", error);
+      }
+    }
   };
 
   useEffect(() => {

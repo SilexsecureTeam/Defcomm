@@ -3,20 +3,18 @@ import { AxiosInstance } from "axios";
 import { onFailure } from "../notifications/OnFailure";
 
 interface SendMessageParams {
-  client: AxiosInstance;
   message: string;
   file: File | null;
   chat_user_type: string;
   chat_user_id: string;
-  chat_id: string;
+  chat_id: string | null;
   mss_type: string;
   sendMessageMutation: UseMutationResult<any, unknown, FormData, unknown>;
-  tag_users: any;
-  tag_mess: string;
+  tag_users: any | null;
+  tag_mess: string | null;
 }
 
 export const sendMessageUtil = async ({
-  client,
   message,
   file,
   chat_user_type = "user",
@@ -24,8 +22,8 @@ export const sendMessageUtil = async ({
   chat_id,
   sendMessageMutation,
   mss_type = "text",
-  tag_users,
-  tag_mess,
+  tag_users = null,
+  tag_mess = null,
 }: SendMessageParams) => {
   if (!message.trim() && !file) return; // Prevent empty message submission
 

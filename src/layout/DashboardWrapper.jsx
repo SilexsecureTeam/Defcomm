@@ -118,6 +118,8 @@ const DashboardWrapper = ({ children }) => {
       const existingData = queryClient.getQueryData(["chatMessages", senderId]);
 
       if (newMessage?.state === "callUpdate") {
+        console.log(newMessage);
+
         if (newMessage?.mss?.id === callMessage?.msg_id) {
           setCallMessage((prev) => ({
             ...prev,

@@ -15,6 +15,7 @@ import {
   extractErrorMessage,
   formatCallDuration,
 } from "../../../utils/formmaters";
+import { useLocation } from "react-router-dom";
 
 const CallSetupPanel = ({
   meetingId,
@@ -27,15 +28,16 @@ const CallSetupPanel = ({
   isInitiator = false,
   setIsInitiator,
 }: any) => {
-  const { selectedChatUser, callMessage, setModalTitle } =
-    useContext(ChatContext);
+  const { callMessage, setModalTitle } = useContext(ChatContext);
   const { updateCallLog } = useChat();
   const { authDetails } = useContext<any>(AuthContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const chatUserData = location?.state;
 
-  const messageData = selectedChatUser?.chat_meta;
+  const messageData = chatUserData?.chat_meta;
   const client = axiosClient(authDetails?.access_token);
   const sendMessageMutation = useSendMessageMutation(client);
 
@@ -69,14 +71,15 @@ const CallSetupPanel = ({
     setIsLoading(true);
     try {
       const messageSent = await sendMessageUtil({
-        client,
         message: `CALL_INVITE:${meetingId}`,
         file: null,
-        chat_user_type: messageData?.chat_user_type || "user",
-        chat_user_id: messageData?.chat_user_id,
-        chat_id: messageData?.chat_id,
+        chat_user_type: "user",
+        chat_user_id: chatUserData?.contact_id_encrypt,
+        chat_id: null,
         mss_type: "call",
         sendMessageMutation,
+        tag_mess: null,
+        tag_users: null,
       });
 
       if (!messageSent) {
@@ -129,8 +132,8 @@ const CallSetupPanel = ({
         <CallSummary
           callSummary={{
             duration: callDuration,
-            caller: isInitiator ? "You" : selectedChatUser?.contact_name,
-            receiver: !isInitiator ? "You" : selectedChatUser?.contact_name,
+            caller: isInitiator ? "You" : chatUserData?.contact_name,
+            receiver: !isInitiator ? "You" : chatUserData?.contact_name,
           }}
         />
       )}
