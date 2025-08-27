@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useMemo } from "react";
 import { MdCall, MdCallEnd, MdCallMissed } from "react-icons/md";
-import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import audioController from "../../utils/audioController";
 import callerTone from "../../assets/audio/caller.mp3";
@@ -52,25 +51,18 @@ function ChatCallInvite({
 }: ChatCallInviteProps) {
   const { callMessage } = useContext(ChatContext);
 
-  const msgId = msg?.id ?? null;
   const msgIdEn = msg?.id_en ?? null;
   const msgMeetingId = useMemo(
     () => extractMeetingIdFromMessage(msg?.message),
     [msg]
   );
 
-  // does callMessage reference this chat message? check many candidate ids
   const callMsgMatches = useMemo(() => {
     if (!callMessage) return false;
     try {
       const cm: any = callMessage;
       return (
-        (cm.msg_id && msgId && Number(cm.msg_id) === Number(msgId)) ||
-        (cm.msg_id && msgIdEn && String(cm.msg_id) === String(msgIdEn)) ||
         (cm.id && msgIdEn && String(cm.id) === String(msgIdEn)) ||
-        (cm.mss_chat_id &&
-          msg?.mss_chat?.id &&
-          Number(cm.mss_chat_id) === Number(msg.mss_chat.id)) ||
         (cm.meetingId &&
           msgMeetingId &&
           String(cm.meetingId) === String(msgMeetingId))
@@ -78,32 +70,28 @@ function ChatCallInvite({
     } catch {
       return false;
     }
-  }, [callMessage, msgId, msgIdEn, msgMeetingId, msg]);
+  }, [callMessage, msgIdEn, msgMeetingId]);
 
-  // priority: 1) transient callMessage.status (if it references this msg)
-  // 2) server msg.call_state (miss/pick)
-  // 3) timestamp heuristic -> ringing vs miss
-  // 4) CALL_INVITE fallback -> ringing
   const inferredState = useMemo(() => {
     if (callMessage && callMsgMatches) {
-      // prefer transient UI status from pusher
       return callMessage.status || "ringing";
     }
-
-    if (msg?.call_state) return msg.call_state;
-
-    const ts = parseTimestamp(msg?.updated_at ?? msg?.created_at ?? null);
-    if (ts) {
-      const secondsAgo = (Date.now() - ts) / 1000;
-      const RINGING_THRESHOLD_SECONDS = 60;
-      return secondsAgo <= RINGING_THRESHOLD_SECONDS ? "ringing" : "miss";
+    if (msg?.call_state === "pick" || msg?.call_state === "miss") {
+      return msg.call_state;
     }
-
     if (
+      msg?.mss_type === "call" &&
       typeof msg?.message === "string" &&
       msg.message.startsWith("CALL_INVITE")
-    )
+    ) {
+      const ts = parseTimestamp(msg?.updated_at ?? msg?.created_at ?? null);
+      if (ts) {
+        const secondsAgo = (Date.now() - ts) / 1000;
+        const RINGING_THRESHOLD_SECONDS = 60;
+        return secondsAgo <= RINGING_THRESHOLD_SECONDS ? "ringing" : "miss";
+      }
       return "ringing";
+    }
     return "miss";
   }, [callMessage, callMsgMatches, msg]);
 
@@ -120,7 +108,8 @@ function ChatCallInvite({
 
   useEffect(() => {
     const isRinging =
-      inferredState === "ringing" && !(callMessage?.status === "on");
+      inferredState === "ringing" &&
+      !(callMsgMatches && callMessage?.status === "on");
     if (isRinging) {
       const ringtone = isMyChat ? callerTone : receiverTone;
       audioController.playRingtone(ringtone, true);
@@ -130,29 +119,13 @@ function ChatCallInvite({
     return () => {
       audioController.stopRingtone();
     };
-  }, [inferredState, callMessage, isMyChat]);
-
-  // (optional) debug: remove in prod
-  useEffect(() => {
-    console.debug("ChatCallInvite debug", {
-      msgId,
-      msgIdEn,
-      msgMeetingId,
-      callMessage,
-      callMsgMatches,
-      inferredState,
-    });
-  }, [
-    msgId,
-    msgIdEn,
-    msgMeetingId,
-    callMessage,
-    callMsgMatches,
-    inferredState,
-  ]);
+  }, [inferredState, callMessage, callMsgMatches, isMyChat]);
 
   const getMessageText = () => {
-    if (callMessage?.status === "on" || inferredState === "on")
+    if (
+      callMsgMatches &&
+      (callMessage?.status === "on" || inferredState === "on")
+    )
       return isMyChat
         ? "You are in the call"
         : `${caller || "They"} is in the call`;
@@ -172,7 +145,10 @@ function ChatCallInvite({
   };
 
   const getStatusText = () => {
-    if (callMessage?.status === "on" || inferredState === "on")
+    if (
+      callMsgMatches &&
+      (callMessage?.status === "on" || inferredState === "on")
+    )
       return "Call Ongoing";
     if (inferredState === "pick") return "Call Ended";
     if (inferredState === "miss") return "Missed Call";
@@ -180,7 +156,10 @@ function ChatCallInvite({
   };
 
   const getIcon = () => {
-    if (callMessage?.status === "on" || inferredState === "on")
+    if (
+      callMsgMatches &&
+      (callMessage?.status === "on" || inferredState === "on")
+    )
       return <MdCall size={24} className="text-green-500 animate-pulse" />;
     if (inferredState === "miss")
       return <MdCallMissed size={24} className="text-red-500" />;
@@ -220,20 +199,22 @@ function ChatCallInvite({
         )}
       </div>
 
-      {inferredState === "ringing" && !(callMessage?.status === "on") && (
-        <button
-          onClick={onAcceptCall}
-          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-        >
-          {isMyChat ? "Join" : "Accept"}
-        </button>
-      )}
+      {inferredState === "ringing" &&
+        !(callMsgMatches && callMessage?.status === "on") && (
+          <button
+            onClick={onAcceptCall}
+            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+          >
+            {isMyChat ? "Join" : "Accept"}
+          </button>
+        )}
 
-      {(callMessage?.status === "on" || inferredState === "on") && (
-        <button className="bg-olive/80 hover:bg-olive text-white px-3 py-1 rounded text-sm">
-          Return
-        </button>
-      )}
+      {callMsgMatches &&
+        (callMessage?.status === "on" || inferredState === "on") && (
+          <button className="bg-olive/80 hover:bg-olive text-white px-3 py-1 rounded text-sm">
+            Return
+          </button>
+        )}
     </div>
   );
 }

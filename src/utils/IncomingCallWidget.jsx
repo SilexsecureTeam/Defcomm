@@ -5,11 +5,13 @@ import { MdCall, MdCallEnd, MdVolumeOff, MdVolumeUp } from "react-icons/md";
 import audioController from "../utils/audioController";
 import { formatCallDuration } from "../utils/formmaters";
 import useChat from "../hooks/useChat";
+import { AuthContext } from "../context/AuthContext";
 
 const IncomingCallWidget = () => {
   const { callMessage, setCallMessage, setShowCall, setMeetingId } =
     useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
+  const { authDetails } = useContext(AuthContext);
   const { updateCallLog } = useChat();
 
   const [show, setShow] = useState(false);
@@ -18,7 +20,10 @@ const IncomingCallWidget = () => {
   const callHandledRef = useRef(false); // Prevent multiple triggers
 
   useEffect(() => {
-    if (callMessage?.status === "ringing") {
+    if (
+      callMessage?.status === "ringing" &&
+      callMessage?.user_id !== authDetails?.user_enid
+    ) {
       setShow(true);
       callHandledRef.current = false;
       audioController.playRingtone();
@@ -33,7 +38,7 @@ const IncomingCallWidget = () => {
       setShow(false);
       audioController.stopRingtone();
     }
-
+    // console.log("callmessage", callMessage);
     return () => {
       clearTimeout(timeoutRef.current);
     };

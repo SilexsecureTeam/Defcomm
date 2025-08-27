@@ -2,6 +2,9 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { axiosClient } from "../services/axios-client";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { onFailure } from "../utils/notifications/OnFailure";
+import { extractErrorMessage } from "../utils/formmaters";
+import { onSuccess } from "../utils/notifications/OnSuccess";
 
 const useDeviceSettings = () => {
   const { authDetails } = useContext(AuthContext);
@@ -52,10 +55,48 @@ const useDeviceSettings = () => {
     },
   });
 
+  const updateUserSettingsMutation = useMutation({
+    mutationFn: async (formData) => {
+      const { data } = await client.post("/user/setting", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      // ✅ Refetch the latest settings
+      queryClient.invalidateQueries(["userSettings"]);
+      onSuccess({
+        title: "Setting Updated",
+        message: "settings updated successfully",
+      });
+    },
+    onError: (error) => {
+      onFailure({
+        title: "Setting Update Error",
+        message: extractErrorMessage(error) || "Failed to update settings",
+      });
+    },
+  });
+
+  const getLanguagesQuery = useQuery({
+    queryKey: [`languageCodes`],
+    queryFn: async () => {
+      const { data } = await client.get("/user/languagecode");
+      return data?.data || [];
+    },
+    enabled: !!authDetails,
+    refetchOnMount: true,
+    staleTime: 0,
+  });
+
   return {
     getDeviceLogsQuery,
     getDevicesQuery,
-    updateDeviceStatusMutation, // ✅ added mutation
+    updateDeviceStatusMutation,
+    updateUserSettingsMutation,
+    getLanguagesQuery,
   };
 };
 
