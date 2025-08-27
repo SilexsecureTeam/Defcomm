@@ -14,6 +14,7 @@ import ParticipantMedia from "./ParticipantMedia";
 import CallSetupPanel from "./CallSetupPanel";
 import { formatCallDuration } from "../../../utils/formmaters";
 import useChat from "../../../hooks/useChat";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const { authDetails } = useContext<any>(AuthContext);
@@ -37,20 +38,15 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const callStartRef = useRef<number | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callLogUpdatedRef = useRef(false);
+  const queryClient = useQueryClient();
 
   const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
     onMeetingJoined: () => {
       setIsMeetingActive(true);
       onSuccess({ message: "Call Started", success: "Joined successfully." });
-
-      // setCallMessage((prev) => {
-      //   if (prev?.status !== "on") return { ...prev, status: "on" };
-      //   return prev;
-      // });
       audioController.playRingtone(callerTone);
       if (!localMicOn) toggleMic();
     },
-
     onMeetingLeft: () => {
       setIsMeetingActive(false);
       if (callTimer.current) clearInterval(callTimer.current);
@@ -92,18 +88,75 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     if (callTimer.current) clearInterval(callTimer.current);
 
     const isMissed = callDuration === 0;
+    const newState = isMissed ? "miss" : "pick";
+    const newDuration = formatCallDuration(callDuration);
 
-    // 👇 Prevent double logging from both parties
+    // derive the mss id from possible callMessage shapes
+    const mssId = callMessage?.id || null;
+
+    // --- LOCAL CACHE UPDATE: mark message as 'pick' / 'miss' in any cached convo that contains it ---
+    try {
+      if (mssId) {
+        // get all cached queries that start with ["chatMessages", ...]
+        // getQueriesData returns [[queryKey, data], ...]
+        const cached = queryClient.getQueriesData(["chatMessages"]);
+
+        if (Array.isArray(cached)) {
+          cached.forEach(([queryKey, data]) => {
+            try {
+              // queryKey is an array like ["chatMessages", "<contact_key>"]
+              if (!Array.isArray(queryKey) || queryKey[0] !== "chatMessages")
+                return;
+
+              // Only update keys that look like your convo caches and have data
+              queryClient.setQueryData(queryKey, (old: any) => {
+                if (!old || !old.data || !Array.isArray(old.data)) return old;
+                const found = old.data.some((m: any) => m.id_en === mssId);
+                if (!found) return old;
+                return {
+                  ...old,
+                  data: old.data.map((m: any) =>
+                    m.id_en === mssId
+                      ? {
+                          ...m,
+                          call_state: newState,
+                          call_duration: newDuration,
+                        }
+                      : m
+                  ),
+                };
+              });
+            } catch (err) {
+              console.warn(
+                "chatMessages cache update inner fail for key",
+                queryKey,
+                err
+              );
+            }
+          });
+        } else {
+          console.debug("No cached chatMessages found to update");
+        }
+      } else {
+        console.debug(
+          "No mssId found on callMessage; skipping local cache update"
+        );
+      }
+    } catch (err) {
+      console.warn("Failed to update chatMessages cache after call end:", err);
+    }
+
+    // 👇 Prevent double logging from both parties (server-side)
     if (!callLogUpdatedRef.current && callMessage?.id) {
       try {
         await updateCallLog.mutateAsync({
           mss_id: callMessage?.id,
-          call_duration: formatCallDuration(callDuration),
+          call_duration: newDuration,
           call_state: isMissed ? "miss" : "pick",
           recieve_user_id: callMessage?.user_id,
         } as any);
 
-        callLogUpdatedRef.current = true; // ✅ Mark as logged
+        callLogUpdatedRef.current = true; // mark as logged
 
         if (isMissed) {
           onPrompt({
@@ -122,7 +175,11 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     }
 
     // Clean up regardless
-    leave();
+    try {
+      leave();
+    } catch (e) {
+      console.warn("leave() threw:", e);
+    }
     setIsMeetingActive(false);
     setMeetingId(null);
     audioController.stopRingtone();

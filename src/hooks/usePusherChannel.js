@@ -63,6 +63,8 @@ const usePusherChannel = ({
 
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
+      console.log(newMessage);
+
       const isCall = data?.state === "call";
       onNewMessage(newMessage);
 

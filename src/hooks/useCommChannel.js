@@ -1,17 +1,19 @@
-import { useContext, useEffect, useRef, useCallback } from "react";
+import { useContext, useEffect, useRef } from "react";
 import Pusher from "pusher-js";
 import { toast } from "react-toastify";
 import { CommContext } from "../context/CommContext";
 import { AuthContext } from "../context/AuthContext";
 import { formatLocalTime } from "../utils/formmaters";
 import { useRadioHiss } from "../utils/walkie-talkie/useRadioHiss";
-import { useTranscribeAudio } from "./useTranscribeAudio";
+import useTrans from "../hooks/useTrans";
 
 const useCommChannel = ({ channelId, token }) => {
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
   const audioRef = useRef(null); // currently playing voice
   const queueRef = useRef([]); // queued messages
+
+  const { speechToText } = useTrans();
 
   const { startRadioHiss, stopRadioHiss } = useRadioHiss();
 
@@ -41,8 +43,9 @@ const useCommChannel = ({ channelId, token }) => {
       name:
         nextMsg.sender?.id === user?.id
           ? "You"
-          : nextMsg.user_name || "Unknown",
+          : nextMsg.user_name || nextMsg.display_name || "Unknown",
       time: formatLocalTime(),
+      transcript: nextMsg.transcript || null,
     });
 
     // Start background hiss before voice
@@ -106,26 +109,36 @@ const useCommChannel = ({ channelId, token }) => {
             : data.mss_chat.user_name || "Unknown",
       };
 
+      // update message lists immediately (so UI shows the incoming message item)
       setWalkieMessages((prev) => [...prev, msg]);
       setRecentMessages((prev) => [msg, ...prev].slice(0, 2));
 
+      // only transcribe & queue remote audio (not self-sent)
       if (msg?.record && data.sender?.id !== user?.id) {
+        const audioUrl = `/secure/${msg.record}`;
+
+        try {
+          // fetch as blob
+          const res = await fetch(audioUrl);
+          if (!res.ok)
+            throw new Error("Failed to fetch audio for transcription");
+          const blob = await res.blob();
+
+          const transcript = await speechToText.mutateAsync({
+            audio: blob,
+            language: "en-US",
+          });
+
+          // attach transcript to message object
+          msg.transcript = transcript?.text ?? transcript ?? null;
+        } catch (err) {
+          // transcription failed — still queue the audio so user hears it
+          console.warn("Transcription failed, will still queue audio:", err);
+          msg.transcript = null;
+        }
+
+        // enqueue (now we have transcript or null)
         queueRef.current.push(msg);
-
-        // Transcribe message using Whisper
-        // try {
-        //   const audioUrl = `${import.meta.env.VITE_BASE_URL}/${msg.record}`;
-        //   const response = await fetch(audioUrl);
-        //   const audioBlob = await response.blob();
-        //   const file = new File([audioBlob], "audio.webm", {
-        //     type: audioBlob.type || "audio/webm",
-        //   });
-
-        //   await transcribe(file);
-        //   console.log("Transcript:", transcript);
-        // } catch (err) {
-        //   console.warn("Error during transcription:", err);
-        // }
         if (!audioRef.current) playNextInQueue();
       }
     });
@@ -157,5 +170,4 @@ const useCommChannel = ({ channelId, token }) => {
     }
   };
 };
-
 export default useCommChannel;

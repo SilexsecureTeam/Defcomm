@@ -1,5 +1,5 @@
 import { useContext, useMemo, useLayoutEffect, useState } from "react";
-import { Outlet, useLocation, useParams } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   utilOptions,

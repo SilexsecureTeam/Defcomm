@@ -21,6 +21,8 @@ import {
   SWIPE_TRIGGER_PX,
 } from "../../utils/chat/messageUtils";
 import { AuthContext } from "../../context/AuthContext";
+import audioController from "../../utils/audioController";
+import { MeetingContext } from "../../context/MeetingContext";
 const timeFormatter = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
@@ -40,6 +42,7 @@ const ChatMessage = ({
     setReplyTo,
     scrollToMessage,
   } = useContext(ChatContext);
+  const { setProviderMeetingId } = useContext(MeetingContext);
   const { authDetails } = useContext(AuthContext) as any;
   const [isVisible, setIsVisible] = useState(Boolean(chatVisibility));
   const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
@@ -64,8 +67,11 @@ const ChatMessage = ({
 
   const handleAcceptCall = useCallback(
     (m) => {
+      const meetingId = m?.message?.split("CALL_INVITE:")[1];
+      audioController.stopRingtone();
+      setMeetingId(meetingId);
+      setProviderMeetingId(meetingId);
       setShowCall(true);
-      setMeetingId(m?.message?.split("CALL_INVITE:")[1]);
     },
     [setShowCall, setMeetingId]
   );
@@ -290,27 +296,12 @@ const ChatMessage = ({
                           fileName={msg?.file_name}
                         />
                       ) : msg?.message?.startsWith?.("CALL_INVITE") ? (
-                        (() => {
-                          const callTimestamp = new Date(
-                            msg?.updated_at
-                          ).getTime();
-                          const currentTime = Date.now();
-                          const timeDifference =
-                            (currentTime - callTimestamp) / 1000;
-                          return (
-                            <ChatCallInvite
-                              msg={msg}
-                              isMyChat={isMine}
-                              onAcceptCall={() => handleAcceptCall(msg)}
-                              status={
-                                timeDifference <= 30
-                                  ? "Ringing..."
-                                  : "Call Ended"
-                              }
-                              caller={selectedChatUser?.contact_name}
-                            />
-                          );
-                        })()
+                        <ChatCallInvite
+                          msg={msg}
+                          isMyChat={isMine}
+                          onAcceptCall={() => handleAcceptCall(msg)}
+                          caller={selectedChatUser?.contact_name}
+                        />
                       ) : (
                         <div className="whitespace-pre-wrap break-words">
                           {msg?.message?.length > MAX_LENGTH && !isExpanded ? (
