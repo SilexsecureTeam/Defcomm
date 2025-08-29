@@ -6,6 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import { formatLocalTime } from "../utils/formmaters";
 import { useRadioHiss } from "../utils/walkie-talkie/useRadioHiss";
 import useTrans from "../hooks/useTrans";
+import { onSuccess } from "../utils/notifications/OnSuccess";
 
 const useCommChannel = ({ channelId, token }) => {
   const pusherRef = useRef(null);
@@ -95,7 +96,12 @@ const useCommChannel = ({ channelId, token }) => {
     const channel = pusher.subscribe(channelName);
 
     channel.bind("pusher:subscription_succeeded", () => {
-      toast.success(`Connected to ${activeChannel?.name || channelName}`);
+      onSuccess({
+        message: "Channel Connected",
+        success: `You are now subscribed to ${
+          activeChannel?.name || channelName
+        }.`,
+      });
       setIsCommActive(true);
       setConnectingChannelId(null);
     });

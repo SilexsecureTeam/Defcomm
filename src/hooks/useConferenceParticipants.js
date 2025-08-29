@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useContext, useState } from "react";
 import { useMeeting, Constants } from "@videosdk.live/react-sdk";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { MeetingContext } from "../context/MeetingContext";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import audioController from "../utils/audioController";
 import messageSound from "../assets/audio/message.mp3";
+import { onPrompt } from "../utils/notifications/onPrompt";
+import { onSuccess } from "../utils/notifications/OnSuccess";
 
 export default function useConferenceParticipants() {
   const { authDetails } = useContext(AuthContext);
@@ -55,55 +56,80 @@ export default function useConferenceParticipants() {
       if (!joinedParticipantsRef.current.has(id)) {
         joinedParticipantsRef.current.add(id);
         audioController.playRingtone(messageSound);
-        toast.info(
-          `${participant.displayName || "A participant"} has joined the meeting`
-        );
+        onPrompt({
+          title: "Participant joined!",
+          message: `${
+            participant?.displayName || "A participant"
+          } is now in the meeting`,
+        });
       }
     },
     onParticipantLeft: (participant) => {
       if (removedParticipantsRef.current.has(participant.id)) {
-        toast.info(
-          `${
+        onPrompt({
+          title: "Participant Removed!",
+          message: `${
             participant.displayName || "A participant"
-          } was removed from the meeting`
-        );
+          } has been removed from the meeting`,
+        });
         removedParticipantsRef.current.delete(participant.id);
       } else {
-        toast.info(
-          `${participant.displayName || "A participant"} just left the meeting`
-        );
+        onPrompt({
+          title: "Participant Left!",
+          message: `${
+            participant.displayName || "A participant"
+          } has left the meeting`,
+        });
       }
     },
     onPresenterChanged: (newPresenterId) => {
       if (!newPresenterId) {
-        toast.info("Screen sharing has stopped.");
+        onPrompt({
+          title: "Screen Sharing Stopped!",
+          message: "The participant has stopped sharing their screen",
+        });
         setIsScreenSharing(false);
         return;
       }
       const presenter = participants.get(newPresenterId);
       const isSelf = Number(newPresenterId) === Number(me?.id);
-      toast.info(
-        isSelf
-          ? "You started sharing your screen."
+      onPrompt({
+        message: "Screen Sharing Started!",
+        success: isSelf
+          ? "You are now sharing your screen"
           : `${
               presenter?.displayName || "A participant"
-            } started sharing their screen.`
-      );
+            } has started sharing their screen`,
+      });
       audioController.playRingtone(messageSound);
       setIsScreenSharing(true);
     },
     onRecordingStateChanged: ({ status }) => {
       if (status === Constants.recordingEvents.RECORDING_STARTING) {
-        toast.info("Recording is starting...");
+        onPrompt({
+          title: "Recording Starting",
+          message: "The recording process is initializing",
+        });
       } else if (status === Constants.recordingEvents.RECORDING_STARTED) {
-        toast.success("Recording started.");
         setRecordingStartedAt(Date.now());
+
+        onSuccess({
+          message: "Recording Started",
+          success: "The meeting is now being recorded",
+        });
       } else if (status === Constants.recordingEvents.RECORDING_STOPPING) {
-        toast.info("Recording is stopping...");
+        onPrompt({
+          title: "Recording Stopping",
+          message: "The recording process is ending",
+        });
       } else if (status === Constants.recordingEvents.RECORDING_STOPPED) {
-        toast.success("Recording stopped.");
         setRecordingStartedAt(null);
         setRecordingTimer("00:00");
+
+        onSuccess({
+          message: "Recording Stopped",
+          success: "The meeting recording has ended",
+        });
       }
     },
     onError: (error) => {
