@@ -43,7 +43,7 @@ const CommInterface = () => {
 
   return (
     <div
-      className="bg-oliveLight min-h-full w-full min-w-[320px] max-w-[500px] py-4 px-4 text-white flex flex-col items-center"
+      className="bg-oliveLight min-h-full w-80  md:w-96 py-4 px-4 text-white flex flex-col items-center"
       style={{
         background: `linear-gradient(to bottom, #36460A 10%, #000000 65%)`,
       }}

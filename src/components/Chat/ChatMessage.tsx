@@ -327,9 +327,6 @@ const ChatMessage = ({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.18 }}
-                      onClick={() => {
-                        if (!showToggleSwitch) setIsVisible(true);
-                      }}
                       className={`${
                         showToggleSwitch ? "" : "cursor-pointer"
                       } w-full max-w-60 md:max-w-80 rounded-md flex items-center relative font-bold tracking-widest break-all`}

@@ -143,49 +143,41 @@ const useTrans = () => {
       },
     });
 
-  const speechToSpeech: UseMutationResult<Blob, Error, SpeechToSpeechVars> =
-    useMutation<Blob, Error, SpeechToSpeechVars>({
-      mutationFn: async ({ audio, target_lang, source_lang }) => {
-        const fd = new FormData();
-        fd.append("audio", audio);
-        fd.append("target_lang", target_lang);
-        if (source_lang) fd.append("source_lang", source_lang);
+  const speechToSpeech: UseMutationResult = useMutation({
+    mutationFn: async ({ audio, target_lang, source_lang }) => {
+      const fd = new FormData();
+      fd.append("audio", audio);
+      fd.append("target_lang", target_lang);
+      if (source_lang) fd.append("source_lang", source_lang);
 
-        const res: AxiosResponse<MaybeWrappedBlobResponse> = await client.post(
-          "/trans/speech-to-speech",
-          fd,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            responseType: "blob",
-          }
-        );
+      const res = await client.post("/trans/speech-to-speech", fd, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-        const payload = res.data;
-        return payload instanceof Blob ? payload : (payload?.data as Blob);
-      },
-      onSuccess: () => {
-        onSuccess({
-          message: "Speech-to-speech conversion completed!",
-          success: "S2S ready",
-        });
-        // Optionally invalidate queries if you store results on server:
-        // queryClient.invalidateQueries(["transcripts"]);
-      },
-      onError: (err: unknown) => {
-        onFailure({
-          message: "Failed to convert speech",
-          error: extractErrorMessage(err),
-        });
-      },
-    });
+      return res?.data;
+    },
+    onError: (err: unknown) => {
+      onFailure({
+        message: "Failed to convert speech",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
 
   return {
-    speechToText,
-    textToSpeech,
-    translateText,
-    speechToSpeech,
+    speechToText: (vars: SpeechToTextVars) => speechToText.mutateAsync(vars),
+    textToSpeech: (vars: TextToSpeechVars) => textToSpeech.mutateAsync(vars),
+    translateText: (vars: TranslateTextVars) => translateText.mutateAsync(vars),
+    speechToSpeech: speechToSpeech.mutateAsync,
+    // expose states for UI
+    status: {
+      stt: speechToText.status,
+      tts: textToSpeech.status,
+      trans: translateText.status,
+      s2s: speechToSpeech.status,
+    },
   };
 };
 export default useTrans;

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && pnpm obfuscate",
+    "build": "vite build",
     "obfuscate": "javascript-obfuscator dist --output dist --compact true --self-defending true --control-flow-flattening true",
     "preview": "vite preview"
   },
@@ -17,8 +17,10 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "compression": "^1.8.1",
     "dompurify": "^3.2.4",
     "dotenv": "^16.4.7",
+    "express": "^5.1.0",
     "framer-motion": "^12.9.2",
     "libphonenumber-js": "^1.12.9",
     "lottie-react": "^2.4.1",
@@ -27,8 +29,8 @@
     "prop-types": "^15.8.1",
     "pusher-js": "^8.4.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-helmet": "^6.1.0",
+    "react-dom": "18",
+    "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.54.2",
     "react-icons": "^5.4.0",
     "react-markdown": "^10.1.0",
@@ -38,9 +40,11 @@
     "react-router-dom": "^7.1.5",
     "react-toastify": "^11.0.3",
     "remark-gfm": "^4.0.1",
+    "sirv": "^3.0.1",
     "swiper": "^11.2.5",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vite-plugin-ssr": "^0.4.142"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

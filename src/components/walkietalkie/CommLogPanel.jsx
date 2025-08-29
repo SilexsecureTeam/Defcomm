@@ -6,7 +6,6 @@ import { AuthContext } from "../../context/AuthContext";
 import AudioVisualizer from "../charts/AudioVisualizer";
 import { useRadioHiss } from "../../utils/walkie-talkie/useRadioHiss";
 import CommLogList from "./CommLogList";
-import { FiMaximize, FiMinimize } from "react-icons/fi";
 import CommLogFull from "./CommLogFull";
 
 const CommLogPanel = () => {
@@ -144,7 +143,7 @@ const CommLogPanel = () => {
             <motion.div
               key="logList"
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "170px", opacity: 1 }}
+              animate={{ height: "200px", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="overflow-y-auto px-3 py-2 text-xs space-y-2"
