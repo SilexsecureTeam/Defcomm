@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && pnpm obfuscate",
     "obfuscate": "javascript-obfuscator dist --output dist --compact true --self-defending true --control-flow-flattening true",
     "preview": "vite preview"
   },
