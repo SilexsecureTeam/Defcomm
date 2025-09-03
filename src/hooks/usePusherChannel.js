@@ -11,12 +11,7 @@ import { ChatContext } from "../context/ChatContext";
 import { NotificationContext } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
 
-const usePusherChannel = ({
-  userId,
-  token,
-  onNewMessage,
-  showToast = true,
-}) => {
+const usePusherChannel = ({ userId, token, showToast = true }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
 
@@ -59,9 +54,6 @@ const usePusherChannel = ({
       const newMessage = data;
       const isCall = data?.state === "call";
       console.log(newMessage);
-
-      // Callback for external usage
-      onNewMessage(newMessage);
 
       // 🔔 Handle call messages
       if (isCall) {
