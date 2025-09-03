@@ -12,12 +12,9 @@ const ChatMessageList = ({ desktop = false, messages = [] }) => {
   // Refs map for scroll-to-message (registered with ChatContext)
   const messageRefs = useRef(new Map());
 
-  if (!messages?.data?.length)
-    return <p className="text-gray-500 text-center">No messages yet.</p>;
-
   // Group messages by date (keeps original order within date)
   const groupMessagesByDate = (messages) => {
-    return messages.reduce((acc, msg) => {
+    return messages?.reduce((acc, msg) => {
       const dateKey = new Date(msg.updated_at).toDateString();
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(msg);
@@ -41,6 +38,9 @@ const ChatMessageList = ({ desktop = false, messages = [] }) => {
   }, [registerMessageRefs]);
 
   const groupedMessages = groupMessagesByDate(messages.data);
+
+  if (!messages?.data?.length)
+    return <p className="text-gray-500 text-center">No messages yet.</p>;
 
   return Object.entries(groupedMessages).map(([dateKey, dayMessages]) => (
     <div key={dateKey} className="relative">

@@ -4,33 +4,24 @@ import ToggleSwitch from "../ToggleSwitch";
 import useDeviceSettings from "../../hooks/useDeviceSettings";
 
 function MessageSettings() {
-  const {
-    chatVisibility,
-    setChatVisibility,
-    showToggleSwitch,
-    setShowToggleSwitch,
-  } = useContext(ChatContext);
+  const { showToggleSwitch, setShowToggleSwitch, settings, setSettings } =
+    useContext(ChatContext);
 
-  const { updateUserSettingsMutation, getLanguagesQuery } = useDeviceSettings();
-  const { data: languages } = getLanguagesQuery;
+  const { updateUserSettingsMutation, getLanguagesQuery, getSettingsQuery } =
+    useDeviceSettings();
 
-  const [settings, setSettings] = useState({
-    dragToRead: true,
-    doubleClickToRead: true,
-    pressAndHoldToRead: false,
-    visibility: chatVisibility,
-    toggleSwitch: showToggleSwitch,
-    hide_message: 0,
-    hide_message_style: "open_once",
-    chat_language: "en",
-    walkie_language: "en",
-    app_language: "en",
-  });
+  const { data: languages, isLoading: isLanguagesLoading } = getLanguagesQuery;
+  const { data: userSettings, isLoading: isSettingsLoading } = getSettingsQuery;
 
-  // Sync chat visibility with context
+  // Update settings when API data is ready
   useEffect(() => {
-    setSettings((prev) => ({ ...prev, visibility: chatVisibility }));
-  }, [chatVisibility]);
+    if (userSettings) {
+      setSettings((prev) => ({
+        ...prev,
+        ...userSettings,
+      }));
+    }
+  }, [userSettings]);
 
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings((prev) => ({
@@ -39,8 +30,7 @@ function MessageSettings() {
         typeof prev[key] === "boolean" ? !prev[key] : prev[key] === 1 ? 0 : 1,
     }));
 
-    if (key === "visibility") setChatVisibility(!chatVisibility);
-    else if (key === "toggleSwitch") setShowToggleSwitch(!showToggleSwitch);
+    if (key === "toggleSwitch") setShowToggleSwitch(!showToggleSwitch);
   };
 
   const handleChange = (key: keyof typeof settings, value: any) => {
@@ -49,8 +39,6 @@ function MessageSettings() {
 
   const handleSave = () => {
     const formData = new FormData();
-
-    // Only send expected fields to API
     [
       "hide_message",
       "hide_message_style",
@@ -60,9 +48,17 @@ function MessageSettings() {
     ].forEach((key) => {
       formData.append(key, String(settings[key as keyof typeof settings]));
     });
-
-    updateUserSettingsMutation.mutate(formData);
+    updateUserSettingsMutation.mutate(formData as any);
   };
+
+  // 🔹 Global loading state
+  if (isLanguagesLoading || isSettingsLoading) {
+    return (
+      <div className="w-full p-6 flex justify-center items-center">
+        <p className="text-gray-500">Loading settings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full p-3 md:p-6 space-y-6">

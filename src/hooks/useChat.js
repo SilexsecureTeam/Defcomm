@@ -51,6 +51,17 @@ const useChat = () => {
     const { data } = await client.get(`/user/chat/messages/${groupId}/group`);
     return data || [];
   };
+  const getChatMessages = (userId) => {
+    return useQuery({
+      queryKey: ["chatMessages", userId],
+      queryFn: async () => {
+        const { data } = await client.get(`/user/chat/messages/${userId}/user`);
+        return data || [];
+      },
+      enabled: !!authDetails && !!userId,
+      staleTime: Infinity,
+    });
+  };
 
   const getCallLogs = useQuery({
     queryKey: ["callLogs"],
@@ -93,6 +104,7 @@ const useChat = () => {
     fetchGroupMembers,
     fetchChatMessages,
     getCallLogs,
+    getChatMessages,
     updateCallLog,
     fetchGroupChatMessages,
     useFetchContacts,

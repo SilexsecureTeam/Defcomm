@@ -13,29 +13,26 @@ import ChatCallInvite from "./ChatCallInvite";
 import { ChatContext } from "../../context/ChatContext";
 import { parseHtml } from "../../utils/formmaters";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
-import {
-  DIRECTION_LOCK_RATIO,
-  MAX_LENGTH,
-  ReplyPreview,
-  SWIPE_MAX_VISUAL,
-  SWIPE_TRIGGER_PX,
-} from "../../utils/chat/messageUtils";
+import { ReplyPreview } from "../../utils/chat/messageUtils";
 import { AuthContext } from "../../context/AuthContext";
-import audioController from "../../utils/audioController";
 import { MeetingContext } from "../../context/MeetingContext";
+import audioController from "../../utils/audioController";
+
 const timeFormatter = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
 });
 
+const MAX_LENGTH = 200; // adjust based on your previous value
+
 const ChatMessage = ({
   msg,
   selectedChatUser,
   messagesById = new Map(),
-  messageRefs, // optional useRef(Map) passed from parent list
+  messageRefs,
 }) => {
   const {
-    chatVisibility,
+    settings,
     setShowCall,
     setMeetingId,
     showToggleSwitch,
@@ -43,23 +40,26 @@ const ChatMessage = ({
     scrollToMessage,
   } = useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
-  const { authDetails } = useContext(AuthContext) as any;
-  const [isVisible, setIsVisible] = useState(Boolean(chatVisibility));
-  const [userToggled, setUserToggled] = useState(false); // Tracks manual toggle
+  const { authDetails } = useContext(AuthContext);
+
+  const [isVisible, setIsVisible] = useState(
+    Boolean(settings?.hide_message === 1)
+  );
+  const [userToggled, setUserToggled] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // swipe / drag state
-  const startRef = useRef<any>(null);
+  // Swipe/drag state
+  const startRef = useRef(null);
   const lastDeltaRef = useRef(0);
   const [offsetX, setOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Always run effects/hooks
   useEffect(() => {
-    if (!userToggled) setIsVisible(Boolean(chatVisibility));
-  }, [chatVisibility, userToggled]);
+    if (!userToggled) setIsVisible(Boolean(settings?.hide_message === 1));
+  }, [settings.hide_message, userToggled]);
 
   useEffect(() => {
-    // if message changes, collapse expanded text
     setIsExpanded(false);
   }, [msg?.id, msg?.updated_at]);
 
@@ -73,10 +73,9 @@ const ChatMessage = ({
       setProviderMeetingId(meetingId);
       setShowCall(true);
     },
-    [setShowCall, setMeetingId]
+    [setShowCall, setMeetingId, setProviderMeetingId]
   );
 
-  // Reply action (from swipe)
   const doReply = useCallback(() => {
     if (typeof setReplyTo === "function")
       setReplyTo({
@@ -86,9 +85,8 @@ const ChatMessage = ({
         contact_name: selectedChatUser?.contact_name,
         user_type: "user",
       });
-  }, [msg, setReplyTo]);
+  }, [msg, selectedChatUser, setReplyTo]);
 
-  // Pointer handlers
   const onPointerDown = useCallback((e) => {
     startRef.current = { x: e.clientX, y: e.clientY };
     lastDeltaRef.current = 0;
@@ -96,9 +94,7 @@ const ChatMessage = ({
     try {
       if (e.pointerId && e.target.setPointerCapture)
         e.target.setPointerCapture(e.pointerId);
-    } catch (err) {
-      /* ignore */
-    }
+    } catch {}
   }, []);
 
   const onPointerMove = useCallback(
@@ -107,67 +103,79 @@ const ChatMessage = ({
       const dx = e.clientX - startRef.current.x;
       const dy = e.clientY - startRef.current.y;
       lastDeltaRef.current = dx;
-
       // direction lock: horizontal must dominate vertical
-      if (Math.abs(dx) < Math.abs(dy) * (1 + DIRECTION_LOCK_RATIO)) {
+      if (Math.abs(dx) < Math.abs(dy) * 1.2) {
         setOffsetX(0);
         return;
       }
-      // allowed swipe: right for others (reply), left for mine
       const allowed = isMine ? dx < 0 : dx > 0;
-      const visual = allowed
-        ? Math.max(Math.min(dx, SWIPE_MAX_VISUAL), -SWIPE_MAX_VISUAL)
-        : 0;
+      const visual = allowed ? Math.max(Math.min(dx, 80), -80) : 0;
       setOffsetX(visual);
     },
     [isMine]
   );
-  const onPointerUp = useCallback(
-    (e) => {
-      setIsDragging(false);
-      const dx = lastDeltaRef.current || 0;
-      startRef.current = null;
-      lastDeltaRef.current = 0;
-      // trigger reply if threshold met
-      if (!isMine && dx >= SWIPE_TRIGGER_PX) {
-        doReply();
-      } else if (isMine && dx <= -SWIPE_TRIGGER_PX) {
-        doReply();
-      }
-      setOffsetX(0);
-    },
-    [isMine, doReply]
-  );
 
-  // Resolve replied message (if any) — same logic as GroupMessage
+  const onPointerUp = useCallback(() => {
+    setIsDragging(false);
+    const dx = lastDeltaRef.current || 0;
+    startRef.current = null;
+    lastDeltaRef.current = 0;
+    if (!isMine && dx >= 50) doReply();
+    else if (isMine && dx <= -50) doReply();
+    setOffsetX(0);
+  }, [isMine, doReply]);
+
   const repliedMsg = useMemo(() => {
     const tag = msg?.tag_mess;
-    if (!tag) return null;
-    if (!messagesById || typeof messagesById.get !== "function") return null;
-    const found = messagesById.get(tag);
-    if (found) return found;
-    return null;
+    return tag && messagesById?.get ? messagesById.get(tag) : null;
   }, [msg, messagesById]);
 
-  // stable key used for this message DOM node
-  const messageKey = useMemo(() => {
-    return String(msg?.id);
-  }, [msg]);
+  const messageKey = useMemo(() => String(msg?.id), [msg]);
 
-  // attach/unregister DOM node in parent's messageRefs map
   const attachRef = useCallback(
     (el) => {
-      try {
-        const map = messageRefs?.current;
-        if (!map) return;
-        if (el) map.set(messageKey, el);
-        else map.delete(messageKey);
-      } catch (err) {
-        // ignore
-      }
+      if (!messageRefs?.current) return;
+      if (el) messageRefs.current.set(messageKey, el);
+      else messageRefs.current.delete(messageKey);
     },
     [messageKey, messageRefs]
   );
+
+  // Safe render function to avoid conditional hooks
+  const renderMessageContent = () => {
+    if (msg?.mss_type === "audio") return <CustomAudioMessage msg={msg} />;
+    if (msg?.is_file === "yes" && msg?.message)
+      return (
+        <ChatFilePreview
+          isMyChat={isMine}
+          fileType={(msg?.message || "").split(".").pop()}
+          fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${msg?.message}`}
+          fileName={msg?.file_name}
+        />
+      );
+    if (msg?.message?.startsWith?.("CALL_INVITE"))
+      return (
+        <ChatCallInvite
+          msg={msg}
+          isMyChat={isMine}
+          onAcceptCall={() => handleAcceptCall(msg)}
+          caller={selectedChatUser?.contact_name}
+        />
+      );
+    return msg?.message?.length > MAX_LENGTH && !isExpanded ? (
+      <>
+        {msg?.message.slice(0, MAX_LENGTH)}...
+        <button
+          className="text-oliveHover ml-1"
+          onClick={() => setIsExpanded(true)}
+        >
+          Read More
+        </button>
+      </>
+    ) : (
+      parseHtml(msg?.message)
+    );
+  };
 
   return (
     <div
@@ -175,7 +183,7 @@ const ChatMessage = ({
         isMine ? "items-end" : "items-start"
       } space-y-1 text-sm`}
     >
-      {/* Toggle Switch */}
+      {/* Toggle */}
       {showToggleSwitch && (
         <div className="flex items-center gap-2">
           <label className="relative inline-flex items-center cursor-pointer">
@@ -206,7 +214,7 @@ const ChatMessage = ({
         </div>
       )}
 
-      {/* Message bubble container (attachRef used for scroll & highlight) */}
+      {/* Message */}
       <div
         className="relative p-0 max-w-[75%] text-sm leading-relaxed"
         style={{ width: "fit-content" }}
@@ -214,11 +222,7 @@ const ChatMessage = ({
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={
-              msg?.client_id ??
-              msg?.id ??
-              `tmp-${msg?.tempIdx ?? Math.random()}`
-            }
+            key={msg?.client_id ?? msg?.id ?? `tmp-${Math.random()}`}
             layout
             initial={{ opacity: 0.6, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1, x: offsetX }}
@@ -235,7 +239,6 @@ const ChatMessage = ({
             className="relative"
           >
             <div
-              ref={attachRef}
               className={`p-2 pr-3 pb-4 rounded-xl shadow-md ${
                 isMine ? "bg-oliveDark text-white" : "bg-white text-black"
               }`}
@@ -244,17 +247,15 @@ const ChatMessage = ({
                 borderTopRightRadius: isMine ? "4px" : "12px",
                 borderTopLeftRadius: isMine ? "12px" : "4px",
               }}
-              onClick={() => {
-                if (!showToggleSwitch) setIsVisible((v) => !v);
-              }}
+              onClick={() => !showToggleSwitch && setIsVisible((v) => !v)}
               title={
                 !showToggleSwitch && isVisible
                   ? "Click to hide"
                   : "Click to show"
               }
             >
-              {/* Reply preview */}
-              {msg?.tag_mess && (
+              {/* Reply Preview */}
+              {msg?.tag_mess && repliedMsg && (
                 <ReplyPreview
                   target={repliedMsg}
                   participants={[
@@ -265,102 +266,65 @@ const ChatMessage = ({
                     },
                   ]}
                   myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
-                  onPreviewClick={(target) => {
-                    const key = target?.id;
-                    if (key && typeof scrollToMessage === "function") {
-                      scrollToMessage(String(key));
-                    }
-                  }}
+                  onPreviewClick={(target) =>
+                    target?.id && scrollToMessage?.(String(target.id))
+                  }
                   type="user"
                 />
               )}
-              <div>
-                <AnimatePresence mode="wait">
-                  {isVisible ? (
-                    <motion.div
-                      key="content-visible"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.18 }}
-                    >
-                      {msg?.mss_type === "audio" ? (
-                        <CustomAudioMessage msg={msg} />
-                      ) : msg?.is_file === "yes" && msg?.message ? (
-                        <ChatFilePreview
-                          isMyChat={msg?.is_my_chat}
-                          fileType={(msg?.message || "").split(".").pop()}
-                          fileUrl={`${import.meta.env.VITE_BASE_URL}secure/${
-                            msg?.message
-                          }`}
-                          fileName={msg?.file_name}
-                        />
-                      ) : msg?.message?.startsWith?.("CALL_INVITE") ? (
-                        <ChatCallInvite
-                          msg={msg}
-                          isMyChat={isMine}
-                          onAcceptCall={() => handleAcceptCall(msg)}
-                          caller={selectedChatUser?.contact_name}
-                        />
-                      ) : (
-                        <div className="whitespace-pre-wrap break-words">
-                          {msg?.message?.length > MAX_LENGTH && !isExpanded ? (
-                            <>
-                              {msg?.message.slice(0, MAX_LENGTH)}...
-                              <button
-                                className="text-oliveHover ml-1"
-                                onClick={() => setIsExpanded(true)}
-                              >
-                                Read More
-                              </button>
-                            </>
-                          ) : (
-                            parseHtml(msg?.message)
-                          )}
-                        </div>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="content-hidden"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.18 }}
-                      className={`${
-                        showToggleSwitch ? "" : "cursor-pointer"
-                      } w-full max-w-60 md:max-w-80 rounded-md flex items-center relative font-bold tracking-widest break-all`}
-                      title={
-                        !showToggleSwitch ? "click to show" : "toggle to show"
-                      }
-                    >
-                      {msg?.message
-                        ? "*".repeat(Math.min(msg.message.length, 300))
-                        : "****"}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
 
-              {/* read receipts */}
-              {isMine && (
-                <span className="ml-1 absolute bottom-1 right-1">
-                  {msg?.is_read === "yes" ? (
-                    <IoCheckmarkDone size={14} className="text-oliveHover" />
-                  ) : (
-                    <IoCheckmark size={14} className="text-gray-400" />
-                  )}
-                </span>
-              )}
+              {/* Message content */}
+              <AnimatePresence mode="wait">
+                {isVisible ? (
+                  <motion.div
+                    key="content-visible"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    {renderMessageContent()}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="content-hidden"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.18 }}
+                    className={`${
+                      showToggleSwitch ? "" : "cursor-pointer"
+                    } w-full max-w-60 md:max-w-80 rounded-md flex items-center relative font-bold tracking-widest break-all`}
+                    title={
+                      !showToggleSwitch ? "click to show" : "toggle to show"
+                    }
+                  >
+                    {msg?.message
+                      ? "*".repeat(Math.min(msg.message.length, 300))
+                      : "****"}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Message Timestamp */}
+      {/* Timestamp */}
       <div className="text-xs text-gray-500">
         {timeFormatter.format(new Date(msg?.updated_at || Date.now()))}
       </div>
+
+      {/* Read receipts */}
+      {isMine && (
+        <span className="ml-1 absolute bottom-1 right-1">
+          {msg?.is_read === "yes" ? (
+            <IoCheckmarkDone size={14} className="text-oliveHover" />
+          ) : (
+            <IoCheckmark size={14} className="text-gray-400" />
+          )}
+        </span>
+      )}
     </div>
   );
 };

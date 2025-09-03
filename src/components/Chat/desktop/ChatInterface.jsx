@@ -13,7 +13,7 @@ import ChatMessageList from "../ChatMessageList";
 
 const ChatInterface = () => {
   const { typingUsers } = useContext(ChatContext);
-  const { fetchChatMessages } = useChat();
+  const { getChatMessages } = useChat();
   const messageRef = useRef(null);
 
   const location = useLocation();
@@ -23,13 +23,7 @@ const ChatInterface = () => {
     data: messages,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["chatMessages", chatUserData?.contact_id_encrypt],
-    queryFn: () => fetchChatMessages(chatUserData?.contact_id_encrypt),
-    enabled: !!chatUserData?.contact_id,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-  });
+  } = getChatMessages(chatUserData?.contact_id_encrypt);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

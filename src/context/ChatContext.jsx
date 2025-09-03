@@ -9,14 +9,10 @@ import React, {
 export const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-  // Retrieve and parse stored boolean value
-  const initialVisibility =
-    JSON.parse(sessionStorage.getItem("chatVisibility")) ?? false;
   const [message, setMessage] = useState("");
   const [file, setFile] = useState(null);
   const [callType, setCallType] = useState("audio"); // Default call type
   const [selectedChatUser, setSelectedChatUser] = useState(null);
-  const [chatVisibility, setChatVisibility] = useState(initialVisibility);
   const [showCall, setShowCall] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [callMessage, setCallMessage] = useState("");
@@ -29,8 +25,25 @@ export const ChatProvider = ({ children }) => {
 
   const [modalTitle, setModalTitle] = useState("Defcomm");
   const [members, setMembers] = useState();
+  const initialShowToggleSwitch =
+    JSON.parse(sessionStorage.getItem("showToggleSwitch")) ?? true;
+
+  const [showToggleSwitch, setShowToggleSwitch] = useState(
+    initialShowToggleSwitch
+  );
   // messageRefs container (will be set by GroupMessageList)
   const messageRefsRef = useRef(null);
+  const [settings, setSettings] = useState({
+    dragToRead: true,
+    doubleClickToRead: true,
+    pressAndHoldToRead: false,
+    toggleSwitch: showToggleSwitch,
+    hide_message: 1,
+    hide_message_style: "open_once",
+    chat_language: "en",
+    walkie_language: "en",
+    app_language: "en",
+  });
 
   const registerMessageRefs = useCallback((refs) => {
     messageRefsRef.current = refs;
@@ -177,25 +190,11 @@ export const ChatProvider = ({ children }) => {
     }
   }, []);
 
-  // Store the boolean value correctly when it changes
-  useEffect(() => {
-    sessionStorage.setItem("chatVisibility", JSON.stringify(chatVisibility));
-  }, [chatVisibility]);
-
-  const initialShowToggleSwitch =
-    JSON.parse(sessionStorage.getItem("showToggleSwitch")) ?? true;
-
-  const [showToggleSwitch, setShowToggleSwitch] = useState(
-    initialShowToggleSwitch
-  );
-
   return (
     <ChatContext.Provider
       value={{
         selectedChatUser,
         setSelectedChatUser,
-        setChatVisibility,
-        chatVisibility,
         showCall,
         setShowCall,
         showSettings,
@@ -229,6 +228,8 @@ export const ChatProvider = ({ children }) => {
         messageRefsRef,
         registerMessageRefs,
         scrollToMessage,
+        settings,
+        setSettings,
       }}
     >
       {children}

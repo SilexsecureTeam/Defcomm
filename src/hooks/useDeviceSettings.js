@@ -12,6 +12,17 @@ const useDeviceSettings = () => {
   const client = axiosClient(token);
   const queryClient = useQueryClient();
 
+  const getSettingsQuery = useQuery({
+    queryKey: [`userSettings`],
+    queryFn: async () => {
+      const { data } = await client.get("/user/getsetting");
+      return data?.data || [];
+    },
+    enabled: !!authDetails,
+    refetchOnMount: true,
+    staleTime: 0,
+  });
+
   // ✅ Fetch device login logs
   const getDeviceLogsQuery = useQuery({
     queryKey: ["deviceLogs"],
@@ -97,6 +108,7 @@ const useDeviceSettings = () => {
     updateDeviceStatusMutation,
     updateUserSettingsMutation,
     getLanguagesQuery,
+    getSettingsQuery,
   };
 };
 

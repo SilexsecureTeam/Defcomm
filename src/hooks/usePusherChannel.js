@@ -1,12 +1,15 @@
 import { useEffect, useRef, useContext } from "react";
-import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
-import receiverTone from "../assets/audio/receiver.mp3";
-import audioController from "../utils/audioController";
 import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
 
+import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
+import receiverTone from "../assets/audio/receiver.mp3";
+import audioController from "../utils/audioController";
+import { queryClient } from "../services/query-client";
+
 import { ChatContext } from "../context/ChatContext";
 import { NotificationContext } from "../context/NotificationContext";
+import { AuthContext } from "../context/AuthContext";
 
 const usePusherChannel = ({
   userId,
@@ -17,19 +20,10 @@ const usePusherChannel = ({
   const pusherRef = useRef(null);
   const navigate = useNavigate();
 
-  const {
-    selectedChatUser,
-    setSelectedChatUser,
-    setCallMessage,
-    chatVisibility,
-  } = useContext(ChatContext);
+  const { authDetails } = useContext(AuthContext);
+  const { setTypingUsers, setCallMessage, chatVisibility } =
+    useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
-
-  // Maintain latest selectedChatUser in a ref
-  const selectedChatUserRef = useRef(selectedChatUser);
-  useEffect(() => {
-    selectedChatUserRef.current = selectedChatUser;
-  }, [selectedChatUser]);
 
   useEffect(() => {
     if (!userId || !token) return;
@@ -63,11 +57,13 @@ const usePusherChannel = ({
 
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
+      const isCall = data?.state === "call";
       console.log(newMessage);
 
-      const isCall = data?.state === "call";
+      // Callback for external usage
       onNewMessage(newMessage);
 
+      // 🔔 Handle call messages
       if (isCall) {
         const meetingId = newMessage?.message?.split("CALL_INVITE:")[1];
         setCallMessage({
@@ -80,19 +76,56 @@ const usePusherChannel = ({
           status: "ringing",
         });
         audioController.playRingtone(receiverTone, true);
-        return;
       }
 
-      const currentUser = selectedChatUserRef.current;
+      const senderId = newMessage?.sender?.id_en;
+
+      const isMyChat = newMessage.data.user_id === authDetails?.user?.id;
+      const cacheKeyUserId = isMyChat
+        ? newMessage?.receiver?.id_en // I sent it → save under receiver
+        : senderId; // They sent it → save under sender
+
+      // ✅ Cache update always (multi-device sync)
+      queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
+        if (!old || !Array.isArray(old.data)) {
+          return {
+            data: [
+              {
+                ...newMessage.data,
+                message: newMessage?.message,
+                is_my_chat: isMyChat ? "yes" : "no",
+              },
+            ],
+          };
+        }
+
+        const exists = old.data.some((msg) => msg.id === newMessage.data.id);
+        if (exists) return old;
+
+        return {
+          ...old,
+          data: [
+            ...old.data,
+            {
+              ...newMessage.data,
+              message: newMessage?.message,
+              is_my_chat: isMyChat ? "yes" : "no",
+            },
+          ].sort(
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime()
+          ),
+        };
+      });
+
+      // 🔔 Show toast only if not my message
       const shouldToast =
         showToast &&
         data?.state !== "not_typing" &&
         data?.state !== "is_typing" &&
         data?.state !== "callUpdate" &&
-        // Number(currentUser?.contact_id) !== Number(newMessage?.data?.user_id) &&
-        data?.data?.user_id !== userId;
-
-      console.log(newMessage);
+        !isMyChat;
 
       if (shouldToast) {
         addNotification(newMessage);
@@ -114,6 +147,41 @@ const usePusherChannel = ({
           },
         });
       }
+
+      // Typing indicators
+      if (newMessage?.state === "is_typing") {
+        setTypingUsers((prev) => {
+          if (prev[newMessage?.sender_id]) return prev;
+          return { ...prev, [newMessage?.sender_id]: true };
+        });
+        return;
+      } else if (newMessage?.state === "not_typing") {
+        setTypingUsers((prev) => {
+          if (!prev[newMessage?.sender_id]) return prev;
+          return { ...prev, [newMessage?.sender_id]: false };
+        });
+        return;
+      }
+
+      // Handle call updates
+      if (newMessage?.state === "callUpdate") {
+        queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
+          if (!old || !Array.isArray(old.data)) return old;
+          return {
+            ...old,
+            data: old.data.map((msg) =>
+              msg.id === newMessage?.mss?.id
+                ? {
+                    ...msg,
+                    call_state: newMessage?.call?.call_state,
+                    call_duration: newMessage?.call?.call_duration,
+                  }
+                : msg
+            ),
+          };
+        });
+        return;
+      }
     });
 
     channel.bind("pusher:subscription_error", (status) => {
@@ -127,7 +195,7 @@ const usePusherChannel = ({
         console.warn("Cleanup error:", e);
       }
     };
-  }, [userId, token]); // Only re-run when userId or token changes
+  }, [userId, token]);
 };
 
 export default usePusherChannel;

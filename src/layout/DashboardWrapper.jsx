@@ -1,6 +1,6 @@
 import { useContext, useMemo, useLayoutEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   utilOptions,
   dashboardOptions,
@@ -31,15 +31,10 @@ import AddContactInterface from "../components/dashboard/AddContactInterface";
 import useCommChannel from "../hooks/useCommChannel";
 import { CommContext } from "../context/CommContext";
 import useGroupChannel from "../hooks/useGroupChannel";
-import { GroupContext } from "../context/GroupContext";
-import SecureAccessGuard from "../routes/security/SecureAccessGuard";
 import useGroups from "../hooks/useGroup";
 
 const DashboardWrapper = ({ children }) => {
-  const queryClient = useQueryClient();
   const { authDetails } = useContext(AuthContext);
-
-  const userId = authDetails?.user?.id;
 
   const {
     conference,
@@ -49,8 +44,6 @@ const DashboardWrapper = ({ children }) => {
   } = useContext(MeetingContext);
 
   const {
-    setSelectedChatUser,
-    setTypingUsers,
     showCall,
     setShowCall,
     showSettings,
@@ -62,7 +55,6 @@ const DashboardWrapper = ({ children }) => {
     meetingId,
     setCallDuration,
   } = useContext(ChatContext);
-  const { activeGroup } = useContext(GroupContext);
   const { useFetchGroups } = useGroups();
   const { data: groups } = useFetchGroups();
 
@@ -96,94 +88,6 @@ const DashboardWrapper = ({ children }) => {
   usePusherChannel({
     userId: authDetails?.user_enid,
     token: authDetails?.access_token,
-    onNewMessage: (newMessage) => {
-      const senderId = newMessage?.sender?.id_en;
-
-      if (newMessage?.state === "is_typing") {
-        setTypingUsers((prev) => {
-          if (prev[newMessage?.sender_id]) return prev;
-          return { ...prev, [newMessage?.sender_id]: true };
-        });
-        return;
-      } else if (newMessage?.state === "not_typing") {
-        setTypingUsers((prev) => {
-          if (!prev[newMessage?.sender_id]) return prev;
-          return { ...prev, [newMessage?.sender_id]: false };
-        });
-        return;
-      }
-
-      if (!senderId) return;
-
-      const existingData = queryClient.getQueryData(["chatMessages", senderId]);
-
-      if (newMessage?.state === "callUpdate") {
-        console.log(newMessage);
-
-        if (newMessage?.mss?.id === callMessage?.msg_id) {
-          setCallMessage((prev) => ({
-            ...prev,
-            ...newMessage?.mss,
-            call_state: newMessage?.call?.call_state,
-          }));
-
-          setCallDuration(newMessage?.call?.call_duration || 0);
-        }
-
-        queryClient.setQueryData(["chatMessages", senderId], (old) => {
-          if (!old || !Array.isArray(old.data)) return old;
-          return {
-            ...old,
-            data: old.data.map((msg) =>
-              msg.id === newMessage?.mss?.id
-                ? {
-                    ...msg,
-                    call_state: newMessage?.call?.call_state,
-                    call_duration: newMessage?.call?.call_duration,
-                  }
-                : msg
-            ),
-          };
-        });
-
-        // Handle missed call for receiver
-        if (
-          newMessage?.call?.call_state === "miss" &&
-          newMessage?.call?.receiver_id === userId
-        ) {
-          setShowCall(false);
-          setCallMessage(null);
-          setProviderMeetingId(null);
-          audioController.stopRingtone();
-        }
-
-        return;
-      }
-
-      if (!existingData) {
-        queryClient.invalidateQueries(["chatMessages", senderId]);
-        return;
-      }
-
-      queryClient.setQueryData(["chatMessages", senderId], (old) => {
-        if (!old || !Array.isArray(old.data)) return old;
-        const exists = old.data.some((msg) => msg.id === newMessage.data.id);
-        const isMyChat = newMessage.data.user_id === authDetails?.user?.id;
-        return exists
-          ? old
-          : {
-              ...old,
-              data: [
-                ...old.data,
-                {
-                  ...newMessage.data,
-                  message: newMessage?.message,
-                  is_my_chat: isMyChat ? "yes" : "no",
-                },
-              ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
-            };
-      });
-    },
   });
 
   const toggleIsOpen = () => setIsOpen((prev) => !prev);
