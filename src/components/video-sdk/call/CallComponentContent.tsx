@@ -209,10 +209,10 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   useEffect(() => {
     if (participants && isMeetingActive) {
       const myParticipant = [...participants.values()].find(
-        (p) => Number(p.id) === Number(authDetails?.user?.id)
+        (p) => p.id === authDetails?.user?.id
       );
       const otherParticipant = [...participants.values()].find(
-        (p) => Number(p.id) !== Number(authDetails?.user?.id)
+        (p) => p.id !== authDetails?.user?.id
       );
       setMe(myParticipant);
       setOther(otherParticipant);

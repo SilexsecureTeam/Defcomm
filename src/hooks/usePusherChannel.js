@@ -52,6 +52,8 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
 
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
+      const newChatMessage =
+        newMessage.state === "callUpdate" ? newMessage?.mss : newMessage?.data;
       const isCall = data?.state === "call";
       console.log(newMessage);
 
@@ -72,54 +74,54 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
 
       const senderId = newMessage?.sender?.id_en;
 
-      const isMyChat = newMessage.data.user_id === authDetails?.user?.id;
+      const isMyChat = newMessage?.sender?.id_en === authDetails?.user?.id;
       const cacheKeyUserId = isMyChat
         ? newMessage?.receiver?.id_en // I sent it → save under receiver
         : senderId; // They sent it → save under sender
 
-      // ✅ Cache update always (multi-device sync)
-      queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
-        if (!old || !Array.isArray(old.data)) {
+      // Cache update always (multi-device sync)
+      if (newMessage.state !== "callUpdate") {
+        queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
+          // No cache yet
+          if (!old || !Array.isArray(old.data)) {
+            // Invalidate so it refetches instead of building wrong local state
+            queryClient.invalidateQueries(["chatMessages", cacheKeyUserId]);
+            return undefined; // let query refetch
+          }
+
+          const exists = old.data.some((msg) => msg.id === newChatMessage.id);
+          if (exists) return old;
+
+          // Append new message in sorted order
           return {
+            ...old,
             data: [
+              ...old.data,
               {
-                ...newMessage.data,
+                ...newChatMessage,
                 message: newMessage?.message,
                 is_my_chat: isMyChat ? "yes" : "no",
               },
-            ],
+            ].sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime()
+            ),
           };
-        }
-
-        const exists = old.data.some((msg) => msg.id === newMessage.data.id);
-        if (exists) return old;
-
-        return {
-          ...old,
-          data: [
-            ...old.data,
-            {
-              ...newMessage.data,
-              message: newMessage?.message,
-              is_my_chat: isMyChat ? "yes" : "no",
-            },
-          ].sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime()
-          ),
-        };
-      });
+        });
+      }
 
       // 🔔 Show toast only if not my message
       const shouldToast =
-        showToast &&
         data?.state !== "not_typing" &&
         data?.state !== "is_typing" &&
         data?.state !== "callUpdate" &&
+        data?.state !== "call" &&
         !isMyChat;
 
       if (shouldToast) {
+        console.log("toast");
+
         addNotification(newMessage);
         onNewNotificationToast({
           message: newMessage?.message,

@@ -69,7 +69,6 @@ const IncomingCallWidget = () => {
         call_duration: formatCallDuration(0),
         call_state: "miss",
         recieve_user_id: callMessage?.user_id,
-        auto_miss: autoMiss,
       });
     } catch (error) {
       console.warn("Call rejection log failed:", error);
