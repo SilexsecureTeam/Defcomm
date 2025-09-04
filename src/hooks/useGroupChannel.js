@@ -59,6 +59,7 @@ const useGroupChannels = ({ groups, token }) => {
 
       channel.bind("group.message.sent", ({ data }) => {
         const senderId = data?.data?.user_id;
+        console.log("Group message received:", data);
 
         // Typing indicator
         if (data?.state === "is_typing") {
@@ -90,6 +91,9 @@ const useGroupChannels = ({ groups, token }) => {
               navigate(`/dashboard/group/${data?.data?.user_to}/chat`);
             },
             isChatVisible: chatVisibility,
+            tagMess: data?.data?.tag_mess,
+            tagUser: data?.data?.tag_user,
+            myId: authDetails?.user_enid,
           });
         }
 

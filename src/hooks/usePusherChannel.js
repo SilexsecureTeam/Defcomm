@@ -120,8 +120,6 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         !isMyChat;
 
       if (shouldToast) {
-        console.log("toast");
-
         addNotification(newMessage);
         onNewNotificationToast({
           message: newMessage?.message,
@@ -139,6 +137,8 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
               isChatVisible: chatVisibility,
             });
           },
+          tagMess: newMessage?.data?.tag_mess,
+          tagUser: newMessage?.data?.tag_user,
         });
       }
 

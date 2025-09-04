@@ -35,7 +35,7 @@ function GroupMessage({
 }) {
   const { authDetails } = useContext(AuthContext) as any;
   const {
-    chatVisibility,
+    settings: { hide_message: chatVisibility },
     setShowCall,
     setMeetingId,
     showToggleSwitch,

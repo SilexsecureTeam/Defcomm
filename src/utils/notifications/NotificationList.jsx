@@ -2,26 +2,41 @@ import React, { useContext, useState, useMemo } from "react";
 import { NotificationContext } from "../../context/NotificationContext";
 import { MdCall, MdMessage } from "react-icons/md";
 import { HiOutlineExclamation } from "react-icons/hi";
+import { FaReply, FaAt } from "react-icons/fa"; // icons for reply + mention
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { AuthContext } from "../../context/AuthContext";
 
-// Icon mapping
+// Icon mapping for notification type
 const getIcon = (type) => {
   switch (type) {
     case "call":
-      return <MdCall className="text-[#2E7D32] text-xl" />; // green
+      return <MdCall className="text-[#2E7D32] text-xl" />;
     case "text":
-      return <MdMessage className="text-[#1565C0] text-xl" />; // blue
+      return <MdMessage className="text-[#1565C0] text-xl" />;
     default:
-      return <HiOutlineExclamation className="text-[#FBC02D] text-xl" />; // yellow
+      return <HiOutlineExclamation className="text-[#FBC02D] text-xl" />;
   }
+};
+
+// Badge component (reusable + professional)
+const Badge = ({ icon, text, color }) => {
+  return (
+    <span
+      className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide ${color}`}
+    >
+      {icon && <span className="text-xs">{icon}</span>}
+      {text}
+    </span>
+  );
 };
 
 const NotificationList = () => {
   const { notifications, markAsSeen, clearNotifications, setNotificationOpen } =
     useContext(NotificationContext);
+  const { authDetails } = useContext(AuthContext);
 
-  const [filter, setFilter] = useState("all"); // all | read | unread
+  const [filter, setFilter] = useState("all");
   const navigate = useNavigate();
 
   const filteredNotifications = useMemo(() => {
@@ -51,22 +66,18 @@ const NotificationList = () => {
 
   return (
     <div
-      className="p-4 w-80 md:w-[500px] rounded-xl shadow-md border"
-      style={{ backgroundColor: "#ffffff", borderColor: "#cfd8dc" }}
+      className="p-4 w-80 md:w-[500px] rounded-xl shadow-md border bg-white"
+      style={{ borderColor: "#cfd8dc" }}
     >
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2
-          className="text-lg font-bold uppercase tracking-wider"
-          style={{ color: "#556b2f" }}
-        >
+        <h2 className="text-lg font-bold uppercase tracking-wider text-[#556b2f]">
           Notifications
         </h2>
         {notifications.length > 0 && (
           <button
             onClick={clearNotifications}
-            className="text-sm font-medium"
-            style={{ color: "#d32f2f" }}
+            className="text-sm font-medium text-[#d32f2f]"
           >
             Clear All
           </button>
@@ -79,11 +90,11 @@ const NotificationList = () => {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className="px-3 py-1 rounded-full text-xs font-semibold transition"
-            style={{
-              backgroundColor: filter === f ? "#556b2f" : "#eceff1",
-              color: filter === f ? "#ffffff" : "#455a64",
-            }}
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+              filter === f
+                ? "bg-[#556b2f] text-white"
+                : "bg-[#eceff1] text-[#455a64]"
+            }`}
           >
             {f.toUpperCase()}
           </button>
@@ -92,7 +103,7 @@ const NotificationList = () => {
 
       {/* Notification list */}
       {filteredNotifications.length === 0 ? (
-        <p className="text-sm text-center py-10" style={{ color: "#607d8b" }}>
+        <p className="text-sm text-center py-10 text-[#607d8b]">
           No notifications to show.
         </p>
       ) : (
@@ -101,12 +112,12 @@ const NotificationList = () => {
             {filteredNotifications.map((n) => {
               const isGroup = n.user_type === "group";
               const borderColor = n.seen
-                ? "#90a4ae" // gray for read
+                ? "#90a4ae"
                 : isGroup
-                ? "#1976d2" // blue for unread group
-                : "#388e3c"; // olive green for unread user
+                ? "#1976d2"
+                : "#388e3c";
 
-              const bgColor = n.seen ? "#ffffff" : "#f1f8e9"; // light green for unread
+              const bgColor = n.seen ? "#ffffff" : "#f1f8e9";
 
               return (
                 <motion.li
@@ -123,30 +134,39 @@ const NotificationList = () => {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <div>{getIcon(n.state)}</div>
                       <span
-                        className="font-semibold"
-                        style={{ color: n.seen ? "#607d8b" : "#263238" }}
+                        className={`font-semibold ${
+                          n.seen ? "text-[#607d8b]" : "text-[#263238]"
+                        }`}
                       >
                         {n.sender?.name || "System"}
                       </span>
+
+                      {/* Badges */}
                       {isGroup && (
-                        <span
-                          className="text-xs px-2 py-0.5 rounded-full ml-2"
-                          style={{
-                            backgroundColor: "#bbdefb",
-                            color: "#0d47a1",
-                          }}
-                        >
-                          GROUP
-                        </span>
+                        <Badge text="GROUP" color="bg-blue-100 text-blue-700" />
+                      )}
+
+                      {n?.data?.tag_mess && (
+                        <Badge
+                          icon={<FaReply />}
+                          text="REPLY"
+                          color="bg-green-100 text-green-700"
+                        />
+                      )}
+
+                      {n?.data?.tag_user?.includes(authDetails?.user_enid) && (
+                        <Badge
+                          icon={<FaAt />}
+                          text="MENTIONED"
+                          color="bg-purple-100 text-purple-700"
+                        />
                       )}
                     </div>
-                    <span
-                      className="text-xs font-mono"
-                      style={{ color: "#78909c" }}
-                    >
+
+                    <span className="text-xs font-mono text-[#78909c]">
                       {new Date(n?.data?.created_at).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -154,10 +174,7 @@ const NotificationList = () => {
                     </span>
                   </div>
 
-                  <p
-                    className="text-sm line-clamp-2"
-                    style={{ color: "#37474f" }}
-                  >
+                  <p className="text-sm line-clamp-2 text-[#37474f]">
                     {n.message}
                   </p>
                 </motion.li>
