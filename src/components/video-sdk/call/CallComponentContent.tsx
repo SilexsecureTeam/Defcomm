@@ -104,7 +104,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
           mss_id: callMessage?.id,
           call_duration: newDuration,
           call_state: isMissed ? "miss" : "pick",
-          recieve_user_id: callMessage?.user_id,
         } as any);
 
         callLogUpdatedRef.current = true; // mark as logged

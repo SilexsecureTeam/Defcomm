@@ -21,6 +21,7 @@ import SecureAccessGuard from "./routes/security/SecureAccessGuard";
 
 // Lazy load components
 const DefcommLogin = lazy(() => import("./pages/DefcommLogin"));
+const UserVerification = lazy(() => import("./pages/UserVerification"));
 const Dashboard = lazy(() => import("./routes/DashboardRoutes"));
 const DeffViewer = lazy(() => import("./pages/DeffViewer"));
 const SecureChatUI = lazy(() => import("./pages/SecureChatUI"));
@@ -41,7 +42,10 @@ const App = () => {
                     <Suspense fallback={<FallBack />}>
                       <Routes>
                         <Route path="/login" element={<DefcommLogin />} />
-                        <Route path="/onboarding" element={<DefcommLogin />} />
+                        <Route
+                          path="/onboarding"
+                          element={<UserVerification />}
+                        />
                         <Route path="/" element={<DefcommLogin />} />
                         <Route path="web" element={<DeffViewer />} />
 

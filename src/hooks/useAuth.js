@@ -7,6 +7,7 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import { onSuccess } from "../utils/notifications/OnSuccess";
 import { queryClient } from "../services/query-client";
 import { extractErrorMessage } from "../utils/formmaters";
+import axios from "axios";
 
 const useAuth = () => {
   const navigate = useNavigate();
@@ -154,6 +155,30 @@ const useAuth = () => {
     },
   });
 
+  const verifyUser = useMutation({
+    mutationFn: async (otpData) => {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}userVerify`,
+        otpData
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      updateAuth(null);
+
+      onSuccess({
+        message: "Verification successful",
+        success: "You can now log in.",
+      });
+    },
+    onError: (err) => {
+      onFailure({
+        message: "Verification Failed!",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
   // ⏳ Loading states
   const isLoading = {
     login: loginMutation.isPending,
@@ -175,8 +200,9 @@ const useAuth = () => {
     verifyOtp: verifyOtpMutation.mutate,
     requestOtp: requestOtpMutation.mutateAsync,
     logout: logoutMutation.mutate,
+    verifyUser,
     isLoading,
-    profileQuery, // <-- added here
+    profileQuery,
   };
 };
 

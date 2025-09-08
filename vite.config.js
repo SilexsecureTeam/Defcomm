@@ -14,7 +14,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/secure/, ""),
       },
     },
-    //strictPort: true,
-    //allowedHosts: true,  allow all external hosts
+    strictPort: true,
+    allowedHosts: true, //allow all external hosts
   },
 });
