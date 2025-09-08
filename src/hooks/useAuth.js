@@ -7,7 +7,6 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import { onSuccess } from "../utils/notifications/OnSuccess";
 import { queryClient } from "../services/query-client";
 import { extractErrorMessage } from "../utils/formmaters";
-import axios from "axios";
 
 const useAuth = () => {
   const navigate = useNavigate();
@@ -157,10 +156,7 @@ const useAuth = () => {
 
   const verifyUser = useMutation({
     mutationFn: async (otpData) => {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}userVerify`,
-        otpData
-      );
+      const { data } = await client.post(`/userVerify`, otpData);
       return data.data;
     },
     onSuccess: () => {

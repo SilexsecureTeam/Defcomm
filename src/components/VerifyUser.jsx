@@ -3,26 +3,32 @@ import { useLocation, useNavigate } from "react-router-dom";
 import OtpInput from "react-otp-input";
 import { FaSpinner } from "react-icons/fa";
 import useAuth from "../hooks/useAuth";
+import { useEffect } from "react";
 
 const VerifyUser = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const encrypt = queryParams.get("auth");
-
   const { verifyUser } = useAuth();
-
   const [otp, setOtp] = useState("");
   const [isVerified, setIsVerified] = useState(false);
+
+  // redirect if no auth param
+  useEffect(() => {
+    if (!encrypt) {
+      navigate("/login", { replace: true });
+    }
+  }, [encrypt, navigate]);
 
   const handleVerify = async () => {
     if (otp.length !== 4) return;
 
     try {
-      const res = await verifyUser.mutateAsync({ otp, encrypt });
-      if (res?.success) {
-        setIsVerified(true);
-      }
+      await verifyUser.mutateAsync(
+        { otp, encrypt },
+        { onSuccess: () => setIsVerified(true) }
+      );
     } catch (err) {
       console.error(err);
     }
