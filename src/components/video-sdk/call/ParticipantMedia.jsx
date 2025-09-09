@@ -169,7 +169,7 @@ const ParticipantMedia = ({
 
         {/* End Call Button */}
         <button
-          onClick={handleLeave}
+          onClick={() => handleLeave("manual")}
           className="bg-red-500 text-white p-4 rounded-full shadow-lg transition-transform scale-[1.2] active:scale-95 flex items-center justify-center gap-2"
         >
           <MdCallEnd className="text-2xl" />

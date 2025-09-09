@@ -54,6 +54,7 @@ const DashboardWrapper = ({ children }) => {
     setMeetingId,
     meetingId,
     setCallDuration,
+    setFinalCallData,
   } = useContext(ChatContext);
   const { useFetchGroups } = useGroups();
   const { data: groups } = useFetchGroups();
@@ -218,6 +219,7 @@ const DashboardWrapper = ({ children }) => {
             setProviderMeetingId(null);
             setMeetingId(null);
             setCallDuration(0);
+            setFinalCallData(null);
             audioController.stopRingtone();
           }}
           canMinimize={true}

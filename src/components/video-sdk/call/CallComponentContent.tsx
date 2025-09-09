@@ -87,22 +87,18 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const handleLeave = async (reason) => {
     if (callTimer.current) clearInterval(callTimer.current);
 
-    if (callStartRef.current) {
-      const now = Date.now();
-      const finalDuration = Math.floor((now - callStartRef.current) / 1000);
-      setCallDuration(finalDuration);
-    }
     console.log(callMessage, callDuration, callLogUpdatedRef.current);
 
     const isMissed = !callStartRef.current; // truly missed if never connected
-    const newDuration = formatCallDuration(callDuration || 0);
 
     // 👇 Prevent double logging from both parties (server-side)
     if (reason === "manual" && callMessage?.id) {
       try {
         await updateCallLog.mutateAsync({
           mss_id: callMessage?.id,
-          call_duration: newDuration,
+          call_duration: callDuration
+            ? formatCallDuration(callDuration)
+            : "00:00",
           call_state: isMissed ? "miss" : "pick",
         } as any);
 
@@ -134,7 +130,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     setMeetingId(null);
     audioController.stopRingtone();
     setCallMessage(null);
-    setIsInitiator(false);
     setProviderMeetingId(null);
     setShowSummary(true);
   };
@@ -144,7 +139,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     if (isInitiator && isRinging && !callStartRef.current) {
       ringTimeoutRef.current = setTimeout(() => {
         console.warn("Auto-leaving call due to no response after 10s");
-        handleLeave(); // this will mark as missed
+        handleLeave("auto"); // this will mark as missed
       }, 30000); // 30 seconds
     }
 

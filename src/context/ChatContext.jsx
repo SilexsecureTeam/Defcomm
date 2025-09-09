@@ -23,6 +23,8 @@ export const ChatProvider = ({ children }) => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
 
+  const [finalCallData, setFinalCallData] = useState(null);
+
   const [modalTitle, setModalTitle] = useState("Defcomm");
   const [members, setMembers] = useState();
   const initialShowToggleSwitch =
@@ -230,6 +232,8 @@ export const ChatProvider = ({ children }) => {
         scrollToMessage,
         settings,
         setSettings,
+        finalCallData,
+        setFinalCallData,
       }}
     >
       {children}

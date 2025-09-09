@@ -16,7 +16,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
   const navigate = useNavigate();
 
   const { authDetails } = useContext(AuthContext);
-  const { setTypingUsers, setCallMessage, chatVisibility } =
+  const { setTypingUsers, setCallMessage, chatVisibility, setFinalCallData } =
     useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
 
@@ -61,7 +61,6 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
       if (isCall) {
         const meetingId = newMessage?.message?.split("CALL_INVITE:")[1];
         setCallMessage({
-          msg_id: newMessage?.data?.id,
           ...data?.mss_chat,
           meetingId,
           name: newMessage?.sender?.name || `User ${newMessage?.data?.user_id}`,
@@ -80,7 +79,10 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         : senderId; // They sent it → save under sender
 
       // Cache update always (multi-device sync)
-      if (newMessage.state !== "callUpdate") {
+      if (
+        newMessage.state !== "is_typing" &&
+        newMessage.state !== "not_typing"
+      ) {
         queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
           // No cache yet
           if (!old || !Array.isArray(old.data)) {
@@ -159,6 +161,22 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
 
       // Handle call updates
       if (newMessage?.state === "callUpdate") {
+        setFinalCallData({
+          id: newMessage?.mss?.id,
+          duration: newMessage?.call?.call_duration,
+          state: newMessage?.call?.call_state,
+        });
+
+        // // 🔇 If another device picked the call, stop ringtone + clear callMessage
+        // if (newMessage?.call?.call_state === "pick") {
+        //   audioController.stopRingtone();
+        //   setCallMessage((prev) => {
+        //     if (prev?.user_id === newMessage?.mss?.user_id) {
+        //       return { ...prev, status: "picked" };
+        //     }
+        //     return prev;
+        //   });
+        // }
         queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
           if (!old || !Array.isArray(old.data)) return old;
           return {

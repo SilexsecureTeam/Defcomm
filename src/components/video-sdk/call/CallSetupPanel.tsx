@@ -28,7 +28,8 @@ const CallSetupPanel = ({
   isInitiator = false,
   setIsInitiator,
 }: any) => {
-  const { callMessage, setModalTitle } = useContext(ChatContext);
+  const { callMessage, setModalTitle, finalCallData, setFinalCallData } =
+    useContext(ChatContext);
   const { updateCallLog } = useChat();
   const { authDetails } = useContext<any>(AuthContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
@@ -49,6 +50,7 @@ const CallSetupPanel = ({
       setMeetingId(newMeetingId);
       setIsInitiator(true);
       setShowSummary(false);
+      setFinalCallData(null);
       setCallDuration(0);
       setModalTitle("Call Setup");
     } catch (error) {
@@ -112,7 +114,6 @@ const CallSetupPanel = ({
     try {
       await updateCallLog.mutateAsync({
         mss_id: callMessage?.id,
-        recieve_user_id: callMessage?.user_id,
         duration: formatCallDuration(callDuration),
         call_state: "pick",
       } as any);
@@ -131,7 +132,8 @@ const CallSetupPanel = ({
       {showSummary && (
         <CallSummary
           callSummary={{
-            duration: callDuration,
+            duration:
+              finalCallData?.duration || formatCallDuration(callDuration),
             caller: isInitiator ? "You" : chatUserData?.contact_name,
             receiver: !isInitiator ? "You" : chatUserData?.contact_name,
           }}

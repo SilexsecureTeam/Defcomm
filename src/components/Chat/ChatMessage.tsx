@@ -153,7 +153,7 @@ const ChatMessage = ({
           fileName={msg?.file_name}
         />
       );
-    if (msg?.message?.startsWith?.("CALL_INVITE"))
+    if (msg?.mss_type === "call")
       return (
         <ChatCallInvite
           msg={msg}
