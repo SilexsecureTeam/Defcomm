@@ -4,6 +4,7 @@ import MessageSettings from "../components/settings/MessageSettings";
 import Profile from "./Profile";
 import { settingsManagement } from "../utils/formFields";
 import SessionManager from "../components/settings/SessionManager";
+import ApproveUser from "../components/settings/ApproveUser";
 
 const Settings = () => {
   const [setting, setSetting] = useState("message");
@@ -80,6 +81,16 @@ const Settings = () => {
               transition={{ duration: 0.3 }}
             >
               <SessionManager />
+            </motion.div>
+          ) : setting === "approveUsers" ? (
+            <motion.div
+              key={setting?.key}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ApproveUser />
             </motion.div>
           ) : (
             <motion.div

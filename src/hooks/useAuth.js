@@ -175,6 +175,28 @@ const useAuth = () => {
     },
   });
 
+  const approveUser = useMutation({
+    mutationFn: async (code) => {
+      if (!code) throw new Error("Invalid QR code");
+      const { data } = await client.post(`/qr/${code}/approve`, {
+        confirm: true,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      onSuccess({
+        message: "User approved successfully!",
+        success: "The user can now access their account.",
+      });
+    },
+    onError: (err) => {
+      onFailure({
+        message: "User approval failed",
+        error: extractErrorMessage(err),
+      });
+    },
+  });
+
   // ⏳ Loading states
   const isLoading = {
     login: loginMutation.isPending,
@@ -196,6 +218,7 @@ const useAuth = () => {
     verifyOtp: verifyOtpMutation.mutate,
     requestOtp: requestOtpMutation.mutateAsync,
     logout: logoutMutation.mutate,
+    approveUser,
     verifyUser,
     isLoading,
     profileQuery,

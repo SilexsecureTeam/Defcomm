@@ -1,5 +1,5 @@
 import { AiOutlineBell, AiOutlineLock, AiOutlineUser } from "react-icons/ai";
-import { MdDevices, MdMessage } from "react-icons/md";
+import { MdDevices, MdMessage, MdVerifiedUser } from "react-icons/md";
 
 export const getProfileFormConfig = ({
   fullName,
@@ -144,5 +144,11 @@ export const settingsManagement = [
     icon: MdDevices,
     content:
       "Manage all devices logged into your account, view active sessions, and control login history for enhanced security.",
+  },
+  {
+    label: "Approve Users",
+    key: "approveUsers",
+    icon: MdVerifiedUser,
+    content: "Approve or reject pending users waiting for access.",
   },
 ];
