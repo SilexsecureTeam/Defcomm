@@ -18,7 +18,7 @@ export default function ScrollToBottomButton({
 
   // Check if user is at bottom
   const checkIfAtBottom = () => {
-    const container = containerRef.current;
+    const container = containerRef?.current;
     if (!container) return true;
     const distanceFromBottom =
       container.scrollHeight - (container.scrollTop + container.clientHeight);
@@ -33,7 +33,7 @@ export default function ScrollToBottomButton({
 
   // Observe scroll
   useEffect(() => {
-    const container = containerRef.current;
+    const container = containerRef?.current;
     if (!container) return;
 
     const handleScroll = () => {

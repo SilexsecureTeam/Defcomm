@@ -21,8 +21,7 @@ const DashboardLayout = () => {
   const { pathname } = useLocation();
 
   const isChatPage =
-    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
-    pathname === "/dashboard/chat";
+    pathname.startsWith("/dashboard/user/") || pathname.endsWith("/chat");
 
   const isWalkieTalkiePage = pathname.includes("/comm");
 

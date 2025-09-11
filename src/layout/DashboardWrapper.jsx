@@ -93,8 +93,7 @@ const DashboardWrapper = ({ children }) => {
 
   const toggleIsOpen = () => setIsOpen((prev) => !prev);
   const isChatPage =
-    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
-    pathname === "/dashboard/chat";
+    pathname.startsWith("/dashboard/user/") || pathname.endsWith("/chat");
   const { SidebarComponent, SidebarItemComponent, optionList } = useMemo(() => {
     let Sidebar = SideBar;
     let SidebarItem = SideBarItem;

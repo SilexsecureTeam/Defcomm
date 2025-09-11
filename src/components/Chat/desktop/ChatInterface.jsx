@@ -34,7 +34,7 @@ const ChatInterface = () => {
       <SEOHelmet title="Secure Chat" />
       <div
         ref={messageRef}
-        className="w-full h-full overflow-y-auto flex flex-col space-y-4 p-4 pb-20"
+        className="w-full h-full overflow-y-auto flex flex-col space-y-4 p-4 py-20"
       >
         {chatUserData ? (
           isLoading ? (

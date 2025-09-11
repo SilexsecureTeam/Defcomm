@@ -193,7 +193,11 @@ function ChatCallInvite({
           {getStatusText()}
         </span>
         {inferredState === "pick" && callDuration && (
-          <span className="text-xs text-gray-600">
+          <span
+            className={`text-xs ${
+              isMyChat ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
             Duration: {callDuration}
           </span>
         )}

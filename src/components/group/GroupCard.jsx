@@ -66,7 +66,7 @@ export default function GroupCard({ group }) {
     : null;
 
   // Determine sender name
-  let senderName = "Admin";
+  let senderName = "";
   if (lastMessageData) {
     const match =
       groupMembers.find(

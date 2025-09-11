@@ -82,7 +82,7 @@ const GroupChatInterface = () => {
 
   return (
     <div
-      className="flex flex-col h-[80vh] text-white"
+      className="flex flex-col h-[80vh] lg:h-full text-white"
       style={{
         backgroundColor: "#1A1F16", // deep greenish-black base
         backgroundImage: `

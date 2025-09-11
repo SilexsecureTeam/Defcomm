@@ -11,8 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 function NavBar({ user, title, isMenuOpen, toogleIsOpen }) {
   const { pathname } = useLocation();
   const isChatPage =
-    (pathname.startsWith("/dashboard/user/") && pathname.endsWith("/chat")) ||
-    pathname === "/dashboard/chat";
+    pathname.startsWith("/dashboard/user/") || pathname.endsWith("/chat");
   const { unseenCount, notificationOpen, toggleNotificationModal } =
     useContext(NotificationContext);
 

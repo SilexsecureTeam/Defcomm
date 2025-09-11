@@ -220,7 +220,7 @@ const ChatMessage = ({
         style={{ width: "fit-content" }}
         ref={attachRef}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={msg?.client_id ?? msg?.id ?? `tmp-${Math.random()}`}
             layout
@@ -274,7 +274,7 @@ const ChatMessage = ({
               )}
 
               {/* Message content */}
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 {isVisible ? (
                   <motion.div
                     key="content-visible"
@@ -304,27 +304,29 @@ const ChatMessage = ({
                       : "****"}
                   </motion.div>
                 )}
+                {/* read receipts for mine */}
+                {isMine && (
+                  <span className="ml-1 absolute bottom-1 right-1">
+                    {msg?.is_read === "yes" ? (
+                      <IoCheckmarkDone size={14} className="text-oliveHover" />
+                    ) : (
+                      <IoCheckmark size={14} className="text-gray-400" />
+                    )}
+                  </span>
+                )}
               </AnimatePresence>
             </div>
           </motion.div>
+          {/* Timestamp */}
+          <div
+            className={`mt-1 text-xs text-gray-600 lg:text-gray-400 ${
+              isMine ? "text-right" : "text-left"
+            }`}
+          >
+            {timeFormatter.format(new Date(msg?.updated_at || Date.now()))}
+          </div>
         </AnimatePresence>
       </div>
-
-      {/* Timestamp */}
-      <div className="text-xs text-gray-500">
-        {timeFormatter.format(new Date(msg?.updated_at || Date.now()))}
-      </div>
-
-      {/* Read receipts */}
-      {isMine && (
-        <span className="ml-1 absolute bottom-1 right-1">
-          {msg?.is_read === "yes" ? (
-            <IoCheckmarkDone size={14} className="text-oliveHover" />
-          ) : (
-            <IoCheckmark size={14} className="text-gray-400" />
-          )}
-        </span>
-      )}
     </div>
   );
 };
