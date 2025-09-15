@@ -9,7 +9,7 @@ import { formatLocalTime } from "../../utils/formmaters";
 import CommLogPanel from "./CommLogPanel";
 import CommHeader from "./CommHeader";
 
-const CommInterface = () => {
+const CommInterface = ({ modal = false }) => {
   const {
     isCommActive,
     activeChannel,
@@ -32,7 +32,9 @@ const CommInterface = () => {
 
   if (connectingChannelId) {
     return (
-      <div className="bg-black text-white min-w-[320px] max-w-[400px] flex flex-col justify-center items-center min-h-96">
+      <div
+        className={`bg-black text-white min-w-[320px] max-w-[400px] flex flex-col justify-center items-center min-h-96`}
+      >
         <div className="loader border-4 border-oliveLight border-t-transparent rounded-full w-10 h-10 animate-spin"></div>
         <p className="mt-4 text-sm text-gray-300">
           Connecting to {activeChannel?.name || "channel"}...
@@ -43,7 +45,9 @@ const CommInterface = () => {
 
   return (
     <div
-      className="bg-oliveLight min-h-full w-80  md:w-96 py-4 px-4 text-white flex flex-col items-center"
+      className={`bg-oliveLight min-h-full ${
+        modal ? "w-80  md:w-96" : " min-w-[320px] max-w-[400px]"
+      } py-4 px-4 text-white flex flex-col items-center`}
       style={{
         background: `linear-gradient(to bottom, #36460A 10%, #000000 65%)`,
       }}

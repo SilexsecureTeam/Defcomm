@@ -136,6 +136,7 @@ const useAuth = () => {
   // 🚪 Logout
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      await client.post("/auth/logout");
       queryClient.clear(); // Clear cache
     },
     onSuccess: () => {

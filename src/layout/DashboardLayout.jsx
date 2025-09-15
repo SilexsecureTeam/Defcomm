@@ -82,7 +82,7 @@ const DashboardLayout = () => {
               }
               title="Walkie Talkie Communication"
             >
-              <CommInterface />
+              <CommInterface modal={true} />
             </Modal>
           )}
         </main>

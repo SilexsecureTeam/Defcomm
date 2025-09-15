@@ -4,10 +4,11 @@ import { MdAccountCircle } from "react-icons/md"; // Bolder avatar icon
 import { FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { FaSpinner } from "react-icons/fa";
 
 const ProfileDropdown = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -68,10 +69,16 @@ const ProfileDropdown = ({ user }) => {
               <FiSettings size={16} /> Settings
             </li>
             <li
+              disable={isLoading?.logout}
               className="px-4 py-2 flex items-center gap-2 text-red-500 hover:bg-gray-100 cursor-pointer"
               onClick={() => logout()} // Call logout function
             >
-              <FiLogOut size={16} /> Logout
+              {isLoading?.logout ? (
+                <FaSpinner className="animate-spin" size={16} />
+              ) : (
+                <FiLogOut size={16} />
+              )}{" "}
+              Logout
             </li>
           </ul>
         </div>
