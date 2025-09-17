@@ -1,10 +1,19 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { QrReader } from "@blackbox-vision/react-qr-reader";
 import { toast } from "react-toastify";
-import { FaQrcode, FaUserCheck, FaTimes } from "react-icons/fa";
+import {
+  FaQrcode,
+  FaUserCheck,
+  FaTimes,
+  FaUserCircle,
+  FaLock,
+} from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 const ApproveUser = () => {
+  const { authDetails } = useContext(AuthContext);
   const [scanning, setScanning] = useState(false);
   const [scannedCode, setScannedCode] = useState(null);
   const [scannerKey, setScannerKey] = useState(0);
@@ -25,9 +34,7 @@ const ApproveUser = () => {
 
   useEffect(() => {
     if (!scanning) stopCamera();
-    return () => {
-      stopCamera();
-    };
+    return () => stopCamera();
   }, [scanning]);
 
   const approveUserCode = async () => {
@@ -42,7 +49,6 @@ const ApproveUser = () => {
   const handleScan = (result) => {
     if (result?.text && !capturedRef.current && scanning) {
       capturedRef.current = true;
-
       try {
         const code = JSON.parse(result.text)?.code || result.text;
         setScannedCode(code);
@@ -58,20 +64,20 @@ const ApproveUser = () => {
 
   const handleCancel = () => {
     stopCamera();
-
     capturedRef.current = false;
     setScannedCode(null);
     setScanning(false);
-    setScannerKey((k) => k + 1); // new instance on next scan
+    setScannerKey((k) => k + 1);
   };
 
   const handleStartScan = () => {
-    stopCamera(); // ensure no leftover tracks
+    stopCamera();
     capturedRef.current = false;
     setScannedCode(null);
-    setScannerKey((k) => k + 1); // ensures QrReader remounts clean
+    setScannerKey((k) => k + 1);
     setScanning(true);
   };
+
   const qrReader = useMemo(
     () =>
       scanning && !scannedCode ? (
@@ -80,10 +86,8 @@ const ApproveUser = () => {
             key={scannerKey}
             videoRef={videoRef}
             onResult={(result, error) => {
-              // ✅ extra guard: if not scanning, ignore all results
               if (!scanning) return;
               if (scannedCode || capturedRef.current) return;
-
               if (result) handleScan(result);
             }}
             constraints={{ facingMode: "environment" }}
@@ -108,7 +112,7 @@ const ApproveUser = () => {
           <FaQrcode className="text-oliveDark" /> Approve User
         </h2>
         <p className="text-sm text-gray-500">
-          Scan the user's QR code to automatically capture and grant access.
+          Scan the user's QR code to capture details and grant access.
         </p>
       </div>
 
@@ -125,13 +129,33 @@ const ApproveUser = () => {
 
       {scannedCode && (
         <div className="space-y-4">
-          <div className="p-4 bg-gray-50 border rounded-lg">
-            <p className="text-sm text-gray-700 break-words">
-              <span className="font-medium">Captured Code:</span>{" "}
-              <span className="font-mono text-gray-900">{scannedCode}</span>
+          {/* Approval Card */}
+          <div className="p-5 bg-gray-50 border rounded-xl shadow-sm space-y-3">
+            <div className="flex items-center gap-3">
+              <FaUserCircle className="text-4xl text-gray-400" />
+              <div>
+                <p className="font-semibold text-gray-800">
+                  {authDetails?.user?.name}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {authDetails?.user?.email}
+                </p>
+                <p className="text-xs text-gray-400">Role: Guest</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <FaLock className="text-oliveDark" />
+              <span>Requesting access to Secure Dashboard</span>
+            </div>
+
+            <p className="text-xs text-gray-400">
+              Captured Code:{" "}
+              <span className="font-mono text-gray-800">{scannedCode}</span>
             </p>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex gap-3">
             <button
               onClick={approveUserCode}
@@ -139,13 +163,13 @@ const ApproveUser = () => {
               className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <FaUserCheck />
-              {approveUser.isPending ? "Approving..." : "Approve User"}
+              {approveUser.isPending ? "Approving..." : "Approve Access"}
             </button>
             <button
               onClick={handleCancel}
               className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center gap-2"
             >
-              <FaTimes /> Cancel
+              <FaTimes /> Deny
             </button>
           </div>
         </div>
