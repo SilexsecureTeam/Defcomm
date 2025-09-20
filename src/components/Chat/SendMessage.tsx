@@ -14,6 +14,7 @@ import { onPrompt } from "../../utils/notifications/onPrompt";
 import { FaTimes } from "react-icons/fa";
 import { htmlToPlainAndRaw } from "../../utils/chat/messageUtils";
 import ScrollToBottomButton from "./ScrollToBottom";
+import { checkIfAtBottom } from "../../utils/programs";
 
 function SendMessage({
   messageData,
@@ -340,14 +341,14 @@ function SendMessage({
     typingSent.current = false;
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const el = editorRef.current;
     const html = (el?.innerHTML || "").replace(/<br>/g, "\n");
     const { message, mentions } = htmlToPlainAndRaw(html);
 
     if (message.trim().length === 0 && !file) return;
 
-    sendMessageUtil({
+    await sendMessageUtil({
       client,
       message,
       file,
@@ -359,6 +360,9 @@ function SendMessage({
       tag_users: tagUsers,
       sendMessageMutation,
     } as any);
+    if (!checkIfAtBottom(scrollRef, 200)) {
+      messagesEndRef.current?.scrollIntoView();
+    }
   };
 
   return (

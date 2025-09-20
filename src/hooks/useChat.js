@@ -1,5 +1,10 @@
 import { useContext, useEffect, useRef } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { axiosClient } from "../services/axios-client";
 import { AuthContext } from "../context/AuthContext";
 
@@ -51,15 +56,44 @@ const useChat = () => {
     const { data } = await client.get(`/user/chat/messages/${groupId}/group`);
     return data || [];
   };
-  const getChatMessages = (userId) => {
-    return useQuery({
-      queryKey: ["chatMessages", userId],
-      queryFn: async () => {
-        const { data } = await client.get(`/user/chat/messages/${userId}/user`);
-        return data || [];
+
+  const getChatMessages = (peerId) => {
+    return useInfiniteQuery({
+      queryKey: ["chatMessages", peerId],
+      queryFn: async ({ pageParam = 1 }) => {
+        // ✅ Check cache first before hitting API
+        const cached = queryClient.getQueryData(["chatMessages", peerId]);
+
+        if (cached) {
+          const alreadyFetched = cached.pages.find(
+            (page) => page?.chat_meta?.current_page === pageParam
+          );
+          if (alreadyFetched) {
+            return alreadyFetched; // return cached page, no refetch
+          }
+        }
+
+        // Otherwise, fetch from API
+        let url = `/user/chat/messages/${peerId}/user`;
+        if (pageParam > 1) {
+          url += `?page=${pageParam}`;
+        }
+
+        const { data } = await client.get(url);
+        return data; // { chat_meta, data: [...] }
       },
-      enabled: !!authDetails && !!userId,
-      staleTime: Infinity,
+      getNextPageParam: (lastPage) => {
+        if (!lastPage?.chat_meta) return undefined;
+
+        const { current_page, last_page } = lastPage.chat_meta;
+        return current_page < last_page ? current_page + 1 : undefined;
+      },
+      enabled: !!authDetails && !!peerId,
+      staleTime: Infinity, // never stale
+      cacheTime: Infinity, // keep cached forever
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     });
   };
 

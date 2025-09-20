@@ -30,14 +30,20 @@ const ChatInterface = () => {
   const messagesEndRef = useRef(null);
 
   const {
-    data: messages,
-    isLoading,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     error,
+    isLoading,
   } = getChatMessages(chatUserData?.contact_id_encrypt);
 
+  const messages = data?.pages.flatMap((page) => page.data) ?? [];
+  const chatMeta = data?.pages?.[0]?.chat_meta;
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsers[Number(chatUserData?.contact_id)]]);
+    messagesEndRef.current?.scrollIntoView();
+  }, [typingUsers[Number(chatUserData?.contact_id)]]);
 
   const COLORS = {
     headerBg: "#3B3B3B",
@@ -128,7 +134,14 @@ const ChatInterface = () => {
             </p>
           ) : (
             <>
-              <ChatMessageList messages={messages} />
+              <ChatMessageList
+                messages={messages}
+                fetchNextPage={fetchNextPage}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                messagesContainerRef={messageRef}
+              />
+
               {typingUsers[chatUserData?.contact_id] && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -157,7 +170,7 @@ const ChatInterface = () => {
       {chatUserData && (
         <div className="border-t border-gray-300">
           <SendMessage
-            messageData={messages?.chat_meta}
+            messageData={chatMeta}
             scrollRef={messageRef}
             messagesEndRef={messagesEndRef}
           />

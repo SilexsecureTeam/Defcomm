@@ -24,7 +24,7 @@ export const useSendMessageMutation = (
     },
 
     onSuccess: async (response, variables) => {
-      // queryClient.invalidateQueries("chat-history");
+      //queryClient.invalidateQueries("chat-history");
       const messageData = {
         ...response?.data?.data,
         mss_type: response?.data?.data?.mss_type,

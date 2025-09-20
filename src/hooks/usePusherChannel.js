@@ -119,6 +119,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         data?.state !== "is_typing" &&
         data?.state !== "callUpdate" &&
         data?.state !== "call" &&
+        data?.state !== "logout" &&
         !isMyChat;
 
       if (shouldToast) {

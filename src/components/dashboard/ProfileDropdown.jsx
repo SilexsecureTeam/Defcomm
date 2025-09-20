@@ -68,17 +68,21 @@ const ProfileDropdown = ({ user }) => {
             >
               <FiSettings size={16} /> Settings
             </li>
-            <li
-              disable={isLoading?.logout}
-              className="px-4 py-2 flex items-center gap-2 text-red-500 hover:bg-gray-100 cursor-pointer"
-              onClick={() => logout()} // Call logout function
-            >
-              {isLoading?.logout ? (
-                <FaSpinner className="animate-spin" size={16} />
-              ) : (
-                <FiLogOut size={16} />
-              )}{" "}
-              Logout
+            <li>
+              <button
+                disabled={isLoading?.logout}
+                onClick={() => logout()}
+                className={`w-full text-left px-4 py-2 flex items-center gap-2 text-red-500 hover:bg-gray-100 ${
+                  isLoading?.logout ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {isLoading?.logout ? (
+                  <FaSpinner className="animate-spin" size={16} />
+                ) : (
+                  <FiLogOut size={16} />
+                )}
+                Logout
+              </button>
             </li>
           </ul>
         </div>
