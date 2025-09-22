@@ -37,18 +37,29 @@ export const useSendMessageMutation = (
       // If already fetched, append new message to existing messages
       queryClient.setQueryData(
         ["chatMessages", variables.get("current_chat_user")],
-        (old) => {
-          if (!old || !Array.isArray(old?.data)) return old;
+        (old: any) => {
+          if (!old || !Array.isArray(old.pages)) return old;
 
-          const exists = old.data.find((msg) => msg.id === messageData?.id);
+          // put new message at the end of the last page
+          const lastPageIndex = old.pages.length - 1;
+          const lastPage = old.pages[lastPageIndex];
+
+          // avoid duplicates
+          const exists = lastPage.data.find(
+            (msg: any) => msg.id === messageData.id
+          );
           if (exists) return old;
 
-          return {
-            ...old,
-            data: [...old.data, messageData],
+          const newPages = [...old.pages];
+          newPages[lastPageIndex] = {
+            ...lastPage,
+            data: [...lastPage.data, messageData],
           };
+
+          return { ...old, pages: newPages };
         }
       );
+
       // If it's a call message, store the message in context
       if (variables?.get("mss_type") === "call") {
         setCallMessage({

@@ -107,6 +107,7 @@ const useCommChannel = ({ channelId, token }) => {
     });
 
     channel.bind("walkie.message.sent", async ({ data }) => {
+      console.log(data);
       const msg = {
         ...data.mss_chat,
         display_name:

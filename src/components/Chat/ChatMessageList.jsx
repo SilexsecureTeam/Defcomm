@@ -42,7 +42,7 @@ const ChatMessageList = ({
   // Lookup map for reply/tag resolution
   const messagesById = useMemo(() => {
     const map = new Map();
-    (messages || []).forEach((m) => {
+    (messages || [])?.forEach((m) => {
       if (m?.id) map.set(String(m.id), m);
     });
     return map;

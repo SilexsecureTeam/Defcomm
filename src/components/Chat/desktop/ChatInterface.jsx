@@ -20,21 +20,26 @@ const ChatInterface = () => {
   const chatUserData = location?.state;
   const messagesEndRef = useRef(null);
   const {
-    data: messages,
-    isLoading,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     error,
+    isLoading,
   } = getChatMessages(chatUserData?.contact_id_encrypt);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsers[chatUserData?.contact_id]]);
+  const messages = data?.pages.flatMap((page) => page.data) ?? [];
+  const chatMeta = data?.pages?.[0]?.chat_meta;
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, [typingUsers[Number(chatUserData?.contact_id)]]);
   return (
     <div className="flex-1 relative gap-4 h-full">
       <SEOHelmet title="Secure Chat" />
       <div
         ref={messageRef}
-        className="w-full h-full overflow-y-auto flex flex-col space-y-4 p-4 py-20"
+        className="w-full h-full overflow-y-auto flex flex-col p-4 pt-20"
       >
         {chatUserData ? (
           isLoading ? (
@@ -47,7 +52,14 @@ const ChatInterface = () => {
             </p>
           ) : (
             <>
-              <ChatMessageList desktop={true} messages={messages} />
+              <ChatMessageList
+                desktop={true}
+                messages={messages}
+                fetchNextPage={fetchNextPage}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                messagesContainerRef={messageRef}
+              />
 
               {/* 🔹 Typing indicator as a new bubble */}
               {typingUsers[chatUserData?.contact_id] && (
