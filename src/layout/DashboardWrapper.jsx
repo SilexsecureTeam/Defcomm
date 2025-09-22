@@ -32,6 +32,7 @@ import useCommChannel from "../hooks/useCommChannel";
 import { CommContext } from "../context/CommContext";
 import useGroupChannel from "../hooks/useGroupChannel";
 import useGroups from "../hooks/useGroup";
+import useAuth from "../hooks/useAuth";
 
 const DashboardWrapper = ({ children }) => {
   const { authDetails } = useContext(AuthContext);
@@ -57,6 +58,7 @@ const DashboardWrapper = ({ children }) => {
     setFinalCallData,
   } = useContext(ChatContext);
   const { useFetchGroups } = useGroups();
+  const { isLoading: logoutLoading } = useAuth();
   const { data: groups } = useFetchGroups();
 
   const { state, dispatch } = useContext(DashboardContext);

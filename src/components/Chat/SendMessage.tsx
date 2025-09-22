@@ -15,6 +15,7 @@ import { FaTimes } from "react-icons/fa";
 import { htmlToPlainAndRaw } from "../../utils/chat/messageUtils";
 import ScrollToBottomButton from "./ScrollToBottom";
 import { checkIfAtBottom } from "../../utils/programs";
+import { useEffect } from "react";
 
 function SendMessage({
   messageData,
@@ -64,6 +65,11 @@ function SendMessage({
     clearReply();
     typingSent.current = false;
   }
+
+  useEffect(() => {
+    clearMessageInput();
+    setReplyTo(null);
+  }, [messageData]);
 
   const clearReply = () => setReplyTo?.(null);
 

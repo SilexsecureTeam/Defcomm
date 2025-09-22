@@ -213,7 +213,7 @@ export const ReplyPreview = ({
           (p) =>
             String(p.member_id) === String(target.user_id) ||
             String(p.member_id_encrpt) === String(target.user_id)
-        )?.member_name ?? "Unknown";
+        )?.member_name ?? "Anonymous";
 
   let preview = "";
   if (target.mss_type === "text")

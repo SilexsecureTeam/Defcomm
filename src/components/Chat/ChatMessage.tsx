@@ -126,8 +126,15 @@ const ChatMessage = ({
   }, [isMine, doReply]);
 
   const repliedMsg = useMemo(() => {
-    const tag = msg?.tag_mess;
-    return tag && messagesById?.get ? messagesById.get(tag) : null;
+    const tag = {
+      id: msg?.tag_mess_id,
+      message: msg?.tag_mess,
+      user_id:
+        msg?.tag_mess_is_my_chat == "yes"
+          ? authDetails?.user_enid
+          : selectedChatUser?.contact_id_encrypt,
+    };
+    return tag; //&& messagesById?.get ? messagesById.get(tag) : null;
   }, [msg, messagesById]);
 
   const messageKey = useMemo(() => String(msg?.id), [msg]);
@@ -255,7 +262,7 @@ const ChatMessage = ({
               }
             >
               {/* Reply Preview */}
-              {msg?.tag_mess && repliedMsg && (
+              {msg?.tag_mess && (
                 <ReplyPreview
                   target={repliedMsg}
                   participants={[

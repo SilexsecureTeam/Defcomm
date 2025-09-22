@@ -84,10 +84,7 @@ const ChatMessageList = ({
     return <p className="text-gray-500 text-center">No messages yet.</p>;
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="flex-1 overflow-y-auto px-4 space-y-6"
-    >
+    <div ref={scrollContainerRef} className="flex-1 px-4 space-y-6">
       {/* Loader at top */}
       {isFetchingNextPage && (
         <div className="text-center py-3 text-gray-500 text-sm">

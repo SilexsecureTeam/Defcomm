@@ -10,10 +10,11 @@ import { queryClient } from "../services/query-client";
 import { ChatContext } from "../context/ChatContext";
 import { NotificationContext } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
-
+import useAuth from "./useAuth";
 const usePusherChannel = ({ userId, token, showToast = true }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const { authDetails } = useContext(AuthContext);
   const { setTypingUsers, setCallMessage, chatVisibility, setFinalCallData } =
@@ -56,6 +57,10 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         newMessage.state === "callUpdate" ? newMessage?.mss : newMessage?.data;
       const isCall = data?.state === "call";
       console.log(newMessage);
+
+      if (data?.state === "logout") {
+        logout();
+      }
 
       // 🔔 Handle call messages
       if (isCall) {
