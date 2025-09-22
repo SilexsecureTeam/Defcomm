@@ -71,11 +71,11 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         audioController.playRingtone(receiverTone, true);
       }
 
-      const senderId = newMessage?.sender?.id_en;
+      const senderId = newMessage?.sender?.id;
 
-      const isMyChat = newMessage?.sender?.id_en === authDetails?.user?.id;
+      const isMyChat = newMessage?.sender?.id === authDetails?.user?.id;
       const cacheKeyUserId = isMyChat
-        ? newMessage?.receiver?.id_en // I sent it → save under receiver
+        ? newMessage?.receiver?.id // I sent it → save under receiver
         : senderId; // They sent it → save under sender
 
       // Cache update always (multi-device sync)
@@ -133,7 +133,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
             markAsSeen(newMessage?.data?.id);
             navigate(`/dashboard/user/${newMessage?.data?.user_id}/chat`, {
               state: {
-                contact_id_encrypt: newMessage?.sender?.id_en,
+                contact_id_encrypt: newMessage?.sender?.id,
                 contact_id: newMessage?.sender?.id,
                 contact_name: newMessage?.sender?.name,
               },
