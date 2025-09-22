@@ -156,17 +156,26 @@ function GroupMessage({
 
   // Resolve replied message (if any)
   const repliedMsg = useMemo(() => {
-    const tag = msg?.tag_mess;
-    if (!tag) return null;
-    if (!messagesById || typeof messagesById.get !== "function") return null;
-    // try id_en first, then id, then client_id
-    const found = messagesById.get(String(tag));
-    if (found) return found;
-    // fallback: try numeric id
-    for (const key of [String(tag)]) {
-      if (messagesById.has(key)) return messagesById.get(key);
-    }
-    return null;
+    // const tag = msg?.tag_mess;
+    // if (!tag) return null;
+    // if (!messagesById || typeof messagesById.get !== "function") return null;
+    // // try id_en first, then id, then client_id
+    // const found = messagesById.get(String(tag));
+    // if (found) return found;
+    // // fallback: try numeric id
+    // for (const key of [String(tag)]) {
+    //   if (messagesById.has(key)) return messagesById.get(key);
+    // }
+    // return null;
+    const tag = {
+      id: msg?.tag_mess_id,
+      message: msg?.tag_mess,
+      user_id:
+        msg?.tag_mess_is_my_chat == "yes"
+          ? authDetails?.user_enid
+          : msg?.tag_mess_user,
+    };
+    return tag;
   }, [msg, messagesById]);
 
   // stable key used for this message DOM node

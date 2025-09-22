@@ -129,10 +129,7 @@ const ChatMessage = ({
     const tag = {
       id: msg?.tag_mess_id,
       message: msg?.tag_mess,
-      user_id:
-        msg?.tag_mess_is_my_chat == "yes"
-          ? authDetails?.user_enid
-          : selectedChatUser?.contact_id_encrypt,
+      user_id: msg?.tag_mess_user,
     };
     return tag; //&& messagesById?.get ? messagesById.get(tag) : null;
   }, [msg, messagesById]);

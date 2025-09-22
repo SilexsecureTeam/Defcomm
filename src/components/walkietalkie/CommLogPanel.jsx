@@ -13,7 +13,7 @@ const CommLogPanel = () => {
     useContext(CommContext);
   const { authDetails } = useContext(AuthContext);
   const currentUserId = authDetails?.user?.id;
-  const { startRadioHiss, stopRadioHiss } = useRadioHiss();
+  const { startRadioHiss, stopRadioHiss } = useRadioHiss(0.01);
 
   const [expanded, setExpanded] = useState(false);
   const [newMessageAlert, setNewMessageAlert] = useState(false);

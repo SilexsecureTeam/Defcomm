@@ -67,9 +67,11 @@ function SendMessage({
   }
 
   useEffect(() => {
-    clearMessageInput();
-    setReplyTo(null);
-  }, [messageData]);
+    if (messageData?.chat_id) {
+      clearMessageInput();
+      setReplyTo(null);
+    }
+  }, [messageData?.chat_id]);
 
   const clearReply = () => setReplyTo?.(null);
 
@@ -416,7 +418,7 @@ function SendMessage({
                       ? authDetails?.user?.name
                       : replyTo?.user_type === "user"
                       ? replyTo?.contact_name
-                      : `User ${id}`);
+                      : `Anonymous`);
                   const parts = (name || "U").trim().split(" ");
                   return (
                     parts.length > 1
@@ -436,7 +438,7 @@ function SendMessage({
                   ? replyTo?.contact_name
                   : ctxMembers?.find(
                       (m) => m.member_id_encrpt === replyTo?.user_id
-                    )?.member_name || `User ${replyTo?.user_id}`}
+                    )?.member_name || `Anonymous`}
               </div>
 
               <div

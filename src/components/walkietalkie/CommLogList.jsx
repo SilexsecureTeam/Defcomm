@@ -22,11 +22,30 @@ const CommLogList = ({
   const [expanded, setExpanded] = useState({});
   const [loadingId, setLoadingId] = useState(null);
   const [s2sLang, setS2sLang] = useState("fr");
+  // Add extra state for tracking playing translation
+  const [playingTranslationId, setPlayingTranslationId] = useState(null);
 
-  const playUrl = (url) => {
-    if (localAudioRef.current) localAudioRef.current.pause();
-    localAudioRef.current = new Audio(url);
-    localAudioRef.current.play();
+  const playTranslationUrl = (url, i) => {
+    // if same translation is already playing → pause it
+    if (playingTranslationId === i && localAudioRef.current) {
+      localAudioRef.current.pause();
+      setPlayingTranslationId(null);
+      return;
+    }
+
+    // stop any previous audio
+    if (localAudioRef.current) {
+      localAudioRef.current.pause();
+    }
+
+    const audio = new Audio(url);
+    localAudioRef.current = audio;
+
+    audio.play();
+    setPlayingTranslationId(i);
+
+    // reset when playback ends
+    audio.onended = () => setPlayingTranslationId(null);
   };
 
   const handleS2S = async (msg, i) => {
@@ -50,7 +69,9 @@ const CommLogList = ({
       setExpanded((prev) => ({ ...prev, [i]: true }));
 
       if (res.audio_file_url) {
-        playUrl(`${import.meta.env.VITE_BASE_URL}${res.audio_file_url}`);
+        playTranslationUrl(
+          `${import.meta.env.VITE_BASE_URL}${res.audio_file_url}`
+        );
       }
     } catch (err) {
       console.error("S2S error:", err);
@@ -174,10 +195,20 @@ const CommLogList = ({
                     </p>
                     {translations[i].audioUrl && (
                       <button
-                        onClick={() => playUrl(translations[i].audioUrl)}
+                        onClick={() =>
+                          playTranslationUrl(translations[i].audioUrl, i)
+                        }
                         className="flex items-center gap-1 p-1 rounded border border-lime-400 hover:bg-lime-500 hover:text-black"
                       >
-                        <FaPlay size={10} /> Play translated audio
+                        {playingTranslationId === i ? (
+                          <>
+                            <FaPause size={10} /> Pause translated audio
+                          </>
+                        ) : (
+                          <>
+                            <FaPlay size={10} /> Play translated audio
+                          </>
+                        )}
                       </button>
                     )}
                   </div>

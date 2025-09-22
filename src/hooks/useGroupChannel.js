@@ -20,12 +20,10 @@ const useGroupChannels = ({ groups, token }) => {
   useEffect(() => {
     if (!token || !groups?.length) return;
 
-    // Disconnect previous instance
     if (pusherRef.current) {
       pusherRef.current.disconnect();
     }
 
-    // Create Pusher instance
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
       cluster: "mt1",
       wsHost: import.meta.env.VITE_PUSHER_HOST,
@@ -36,32 +34,26 @@ const useGroupChannels = ({ groups, token }) => {
       auth: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Subscribe to all joined groups
     groups.forEach((group) => {
       const channelName = `private-group.${group.group_id}`;
       const channel = pusher.subscribe(channelName);
 
-      channel.bind("pusher:subscription_succeeded", () => {
+      const handleSubSuccess = () =>
         setGroupConnections((prev) => ({
           ...prev,
           [group.group_id]: "connected",
         }));
-        //toast.success(`Connected to ${group.group_name}`);
-      });
 
-      channel.bind("pusher:subscription_error", () => {
+      const handleSubError = () =>
         setGroupConnections((prev) => ({
           ...prev,
           [group.group_id]: "error",
         }));
-        //toast.error(`Failed to connect to ${group.group_name}`);
-      });
 
-      channel.bind("group.message.sent", ({ data }) => {
+      const handleMessage = ({ data }) => {
         const senderId = data?.data?.user_id;
         console.log("Group message received:", data);
 
-        // Typing indicator
         if (data?.state === "is_typing") {
           setGroupUserTyping?.((prev) => ({
             ...prev,
@@ -78,7 +70,6 @@ const useGroupChannels = ({ groups, token }) => {
 
         if (!senderId) return;
 
-        // Show toast if not my message
         if (senderId !== authDetails?.user_enid) {
           addNotification(data);
           onNewNotificationToast({
@@ -97,7 +88,6 @@ const useGroupChannels = ({ groups, token }) => {
           });
         }
 
-        // Cache management for that group's messages
         queryClient.setQueryData(["groupMessages", group.group_id], (old) => {
           if (!old?.data) return old;
           const exists = old.data.some((msg) => msg.id === data.data.id);
@@ -118,15 +108,32 @@ const useGroupChannels = ({ groups, token }) => {
                 ),
               };
         });
-      });
+      };
+
+      // ✅ Bind with named handlers
+      channel.bind("pusher:subscription_succeeded", handleSubSuccess);
+      channel.bind("pusher:subscription_error", handleSubError);
+      channel.bind("group.message.sent", handleMessage);
+
+      // ✅ Cleanup for this group
+      return () => {
+        channel.unbind("pusher:subscription_succeeded", handleSubSuccess);
+        channel.unbind("pusher:subscription_error", handleSubError);
+        channel.unbind("group.message.sent", handleMessage);
+        pusher.unsubscribe(channelName);
+      };
     });
 
     pusherRef.current = pusher;
 
-    // Cleanup
     return () => {
       groups.forEach((group) => {
-        pusher.unsubscribe(`private-group.${group.group_id}`);
+        const channelName = `private-group.${group.group_id}`;
+        const channel = pusher.channel(channelName);
+        if (channel) {
+          channel.unbind_all();
+          pusher.unsubscribe(channelName);
+        }
       });
       pusher.disconnect();
     };
