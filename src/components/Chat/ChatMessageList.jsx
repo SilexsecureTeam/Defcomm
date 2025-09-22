@@ -63,11 +63,12 @@ const ChatMessageList = ({
 
     if (container.scrollTop <= 100 && hasNextPage) {
       const prevHeight = container.scrollHeight;
+
       fetchNextPage().then(() => {
-        // Maintain scroll position after loading more
         requestAnimationFrame(() => {
           const newHeight = container.scrollHeight;
-          container.scrollTop = newHeight - prevHeight + container.scrollTop;
+          const scrollDiff = newHeight - prevHeight;
+          container.scrollTop = container.scrollTop + scrollDiff;
         });
       });
     }
@@ -84,11 +85,15 @@ const ChatMessageList = ({
     return <p className="text-gray-500 text-center">No messages yet.</p>;
 
   return (
-    <div ref={scrollContainerRef} className="flex-1 px-4 space-y-6">
+    <div ref={scrollContainerRef} className="flex-1 px-4 gap-y-6">
       {/* Loader at top */}
       {isFetchingNextPage && (
-        <div className="text-center py-3 text-gray-500 text-sm">
-          Loading more messages...
+        <div className="flex justify-center items-center py-2">
+          <div className="flex space-x-1">
+            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]"></span>
+            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]"></span>
+          </div>
         </div>
       )}
       {Object.entries(groupedMessages).map(([dateKey, dayMessages]) => (

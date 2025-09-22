@@ -24,6 +24,16 @@ import { groupMessageType } from "../../utils/types/chat";
 import ToggleSwitch from "../ToggleSwitch";
 import MessageContent from "./MessageContent";
 import TaggedRow from "./TaggedRow";
+interface GroupMessageProps {
+  msg: any;
+  sender?: any;
+  showAvatar?: boolean;
+  isLastInGroup?: boolean;
+  participants?: any[];
+  messagesById?: Map<string, any>;
+  messageRefs: React.RefObject<Map<string, HTMLElement>>;
+}
+
 function GroupMessage({
   msg,
   sender = {} as any,
@@ -32,7 +42,7 @@ function GroupMessage({
   participants = [],
   messagesById = new Map(),
   messageRefs,
-}) {
+}: GroupMessageProps) {
   const { authDetails } = useContext(AuthContext) as any;
   const {
     settings: { hide_message: chatVisibility },
@@ -97,20 +107,20 @@ function GroupMessage({
   }, [setReplyTo, msg]);
 
   // Pointer handlers for entire bubble
-  const onPointerDown = useCallback((e) => {
+  const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     startRef.current = { x: e.clientX, y: e.clientY };
     lastDeltaRef.current = 0;
     setIsDragging(true);
     try {
-      if (e.pointerId && e.target.setPointerCapture)
-        e.target.setPointerCapture(e.pointerId);
+      if (e.pointerId && (e.target as Element).setPointerCapture)
+        (e.target as Element).setPointerCapture(e.pointerId);
     } catch (err) {
       /* ignore capture errors on some browsers */
     }
   }, []);
 
   const onPointerMove = useCallback(
-    (e) => {
+    (e: { clientX: number; clientY: number }) => {
       if (!startRef.current) return;
       const dx = e.clientX - startRef.current.x;
       const dy = e.clientY - startRef.current.y;
@@ -133,7 +143,7 @@ function GroupMessage({
   );
 
   const onPointerUp = useCallback(
-    (e) => {
+    (e: any) => {
       setIsDragging(false);
       const dx = lastDeltaRef.current || 0;
       startRef.current = null;
@@ -185,7 +195,7 @@ function GroupMessage({
 
   // attach/unregister DOM node in parent's messageRefs map
   const attachRef = useCallback(
-    (el) => {
+    (el: any) => {
       try {
         const map = messageRefs?.current;
         if (!map) return;
@@ -209,6 +219,7 @@ function GroupMessage({
         isMine={isMine}
         showAvatar={showAvatar}
         senderName={sender?.member_name}
+        senderId={sender?.id}
         authName={authDetails?.user?.name}
       />
 
@@ -216,15 +227,7 @@ function GroupMessage({
         <div
           className={`flex items-center gap-2 mb-1 ${isMine ? "pl-1" : "pr-1"}`}
         >
-          <ToggleSwitch
-            isChecked={isVisible}
-            onToggle={toggleVisibility}
-            infoLabel={
-              isMine
-                ? "Toggle my message visibility"
-                : "Toggle message visibility"
-            }
-          />
+          <ToggleSwitch isChecked={isVisible} onToggle={toggleVisibility} />
         </div>
       )}
 
@@ -274,9 +277,8 @@ function GroupMessage({
                   target={repliedMsg}
                   participants={participants}
                   myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
-                  onPreviewClick={(target) => {
-                    const key = target?.id;
-
+                  onPreviewClick={() => {
+                    const key = repliedMsg?.id;
                     if (key && typeof scrollToMessage === "function")
                       scrollToMessage(key);
                   }}

@@ -36,7 +36,9 @@ function SendMessage({
     () =>
       (ctxMembers &&
         Array.isArray(ctxMembers) &&
-        ctxMembers.filter((m) => m?.member_id !== authDetails?.user?.id)) ||
+        ctxMembers.filter(
+          (m) => m?.member_id !== authDetails?.user?.id && m?.member_name
+        )) ||
       [],
     [ctxMembers]
   );
@@ -158,7 +160,7 @@ function SendMessage({
     if (!mentionQuery) return groupMembers.slice(0, 6);
     const q = mentionQuery.toLowerCase();
     return groupMembers
-      .filter((m) => m.member_name.toLowerCase().includes(q))
+      .filter((m) => m.member_name && m.member_name?.toLowerCase()?.includes(q))
       .slice(0, 6);
   }, [mentionQuery, groupMembers]);
 
@@ -411,7 +413,10 @@ function SendMessage({
                 {(() => {
                   const id = replyTo?.user_id;
                   const member =
-                    ctxMembers?.find((m) => m.member_id_encrpt === id) || null;
+                    ctxMembers?.find(
+                      (m: { member_id_encrpt: any }) =>
+                        m.member_id_encrpt === id
+                    ) || null;
                   const name =
                     member?.member_name ||
                     (id === authDetails?.user_enid
@@ -437,7 +442,8 @@ function SendMessage({
                   : replyTo?.user_type === "user"
                   ? replyTo?.contact_name
                   : ctxMembers?.find(
-                      (m) => m.member_id_encrpt === replyTo?.user_id
+                      (m: { member_id_encrpt: any }) =>
+                        m.member_id_encrpt === replyTo?.user_id
                     )?.member_name || `Anonymous`}
               </div>
 

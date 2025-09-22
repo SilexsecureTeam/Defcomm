@@ -61,3 +61,12 @@ export const groupMessageType = {
   isLastInGroup: PropTypes.bool,
   participants: PropTypes.array,
 };
+
+declare global {
+  interface ImportMeta {
+    env: {
+      VITE_BASE_URL: string;
+      [key: string]: any;
+    };
+  }
+}

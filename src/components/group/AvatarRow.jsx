@@ -1,8 +1,10 @@
 import PropTypes from "prop-types";
 import { COLORS, getInitials } from "../../utils/chat/messageUtils";
-const AvatarRow = ({ isMine, showAvatar, senderName, authName }) => {
+const AvatarRow = ({ isMine, showAvatar, senderName, authName, senderId }) => {
   if (!showAvatar) return null;
-  const nameToShow = isMine ? authName || "You" : senderName || "Anonymous";
+  const nameToShow = isMine
+    ? authName || "You"
+    : senderName || `Anonymous ${getInitials(senderId)}`;
 
   return (
     <div
@@ -18,7 +20,7 @@ const AvatarRow = ({ isMine, showAvatar, senderName, authName }) => {
           border: `1px solid ${COLORS.brass}`,
         }}
       >
-        {getInitials(isMine ? authName : senderName)}
+        {getInitials(isMine ? authName : senderName ?? senderId)}
       </div>
       <span className="text-xs font-semibold" style={{ color: COLORS.muted }}>
         {isMine ? "You" : nameToShow}

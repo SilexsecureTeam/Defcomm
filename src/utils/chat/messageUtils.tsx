@@ -2,6 +2,7 @@
 import React from "react";
 import { parseHtml } from "../formmaters";
 import { ChatMessage, Participant } from "../types/chat";
+import { JSX } from "react/jsx-runtime";
 export const MENTION_TOKEN_REGEX = /@\[(.+?)\]\(user:([^)]+)\)/g;
 
 export const resolveTaggedUsers = (
@@ -125,7 +126,7 @@ export const getInitials = (name = "") => {
   }
 };
 
-export const getPreviewText = (renderedElement) => {
+export const getPreviewText = (renderedElement: JSX.Element) => {
   try {
     const children = renderedElement?.props?.children;
     if (typeof children === "string") return children;
@@ -140,7 +141,7 @@ export const getPreviewText = (renderedElement) => {
   }
 };
 
-export const isRecent = (dateString, seconds = 30) => {
+export const isRecent = (dateString: string | number | Date, seconds = 30) => {
   try {
     const diff = Date.now() - new Date(dateString).getTime();
     return diff / 1000 <= seconds;
@@ -148,7 +149,8 @@ export const isRecent = (dateString, seconds = 30) => {
     return false;
   }
 };
-export const safeString = (value) => (typeof value === "string" ? value : "");
+export const safeString = (value: any) =>
+  typeof value === "string" ? value : "";
 
 export function htmlToPlainAndRaw(html: string) {
   const div = document.createElement("div");
@@ -180,13 +182,21 @@ export function htmlToPlainAndRaw(html: string) {
   };
 }
 
+type ReplyPreviewProps = {
+  target: ChatMessage | null | undefined;
+  myId: string;
+  participants: Participant[];
+  onPreviewClick?: (target: ChatMessage) => void;
+  type?: string;
+};
+
 export const ReplyPreview = ({
   target,
   myId,
   participants,
   onPreviewClick,
   type,
-}) => {
+}: ReplyPreviewProps) => {
   if (!target) {
     return (
       <div

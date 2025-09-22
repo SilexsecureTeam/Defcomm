@@ -6,7 +6,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import CustomAudioMessage from "./CustomAudioMessage";
 import ChatFilePreview from "./ChatFilePreview";
 import ChatCallInvite from "./ChatCallInvite";
@@ -25,7 +25,14 @@ const timeFormatter = new Intl.DateTimeFormat("en-GB", {
 
 const MAX_LENGTH = 200; // adjust based on your previous value
 
-const ChatMessage = ({
+interface ChatMessageProps {
+  msg: any;
+  selectedChatUser: any;
+  messagesById?: Map<any, any>;
+  messageRefs: React.RefObject<Map<string, HTMLElement>>;
+}
+
+const ChatMessage: React.FC<ChatMessageProps> = ({
   msg,
   selectedChatUser,
   messagesById = new Map(),
@@ -40,7 +47,7 @@ const ChatMessage = ({
     scrollToMessage,
   } = useContext(ChatContext);
   const { setProviderMeetingId } = useContext(MeetingContext);
-  const { authDetails } = useContext(AuthContext);
+  const { authDetails } = useContext(AuthContext) as any;
 
   const [isVisible, setIsVisible] = useState(
     Boolean(settings?.hide_message === 1)
@@ -49,7 +56,7 @@ const ChatMessage = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Swipe/drag state
-  const startRef = useRef(null);
+  const startRef = useRef<{ x: number; y: number } | null>(null);
   const lastDeltaRef = useRef(0);
   const [offsetX, setOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -66,7 +73,7 @@ const ChatMessage = ({
   const isMine = useMemo(() => msg?.is_my_chat === "yes", [msg]);
 
   const handleAcceptCall = useCallback(
-    (m) => {
+    (m: { message: string }) => {
       const meetingId = m?.message?.split("CALL_INVITE:")[1];
       audioController.stopRingtone();
       setMeetingId(meetingId);
@@ -87,18 +94,18 @@ const ChatMessage = ({
       });
   }, [msg, selectedChatUser, setReplyTo]);
 
-  const onPointerDown = useCallback((e) => {
+  const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     startRef.current = { x: e.clientX, y: e.clientY };
     lastDeltaRef.current = 0;
     setIsDragging(true);
     try {
-      if (e.pointerId && e.target.setPointerCapture)
-        e.target.setPointerCapture(e.pointerId);
+      if (e.pointerId && (e.target as Element).setPointerCapture)
+        (e.target as Element).setPointerCapture(e.pointerId);
     } catch {}
   }, []);
 
   const onPointerMove = useCallback(
-    (e) => {
+    (e: React.PointerEvent<HTMLDivElement>) => {
       if (!startRef.current) return;
       const dx = e.clientX - startRef.current.x;
       const dy = e.clientY - startRef.current.y;
@@ -115,15 +122,18 @@ const ChatMessage = ({
     [isMine]
   );
 
-  const onPointerUp = useCallback(() => {
-    setIsDragging(false);
-    const dx = lastDeltaRef.current || 0;
-    startRef.current = null;
-    lastDeltaRef.current = 0;
-    if (!isMine && dx >= 50) doReply();
-    else if (isMine && dx <= -50) doReply();
-    setOffsetX(0);
-  }, [isMine, doReply]);
+  const onPointerUp = useCallback(
+    (e?: React.PointerEvent<HTMLDivElement>) => {
+      setIsDragging(false);
+      const dx = lastDeltaRef.current || 0;
+      startRef.current = null;
+      lastDeltaRef.current = 0;
+      if (!isMine && dx >= 50) doReply();
+      else if (isMine && dx <= -50) doReply();
+      setOffsetX(0);
+    },
+    [isMine, doReply]
+  );
 
   const repliedMsg = useMemo(() => {
     const tag = {
@@ -137,7 +147,7 @@ const ChatMessage = ({
   const messageKey = useMemo(() => String(msg?.id), [msg]);
 
   const attachRef = useCallback(
-    (el) => {
+    (el: any) => {
       if (!messageRefs?.current) return;
       if (el) messageRefs.current.set(messageKey, el);
       else messageRefs.current.delete(messageKey);
@@ -147,7 +157,8 @@ const ChatMessage = ({
 
   // Safe render function to avoid conditional hooks
   const renderMessageContent = () => {
-    if (msg?.mss_type === "audio") return <CustomAudioMessage msg={msg} />;
+    if (msg?.mss_type === "audio")
+      return <CustomAudioMessage audioSrc={msg?.audio} />;
     if (msg?.is_file === "yes" && msg?.message)
       return (
         <ChatFilePreview
@@ -185,7 +196,7 @@ const ChatMessage = ({
     <div
       className={`message flex flex-col ${
         isMine ? "items-end" : "items-start"
-      } space-y-1 text-sm`}
+      } gap-y-1 text-sm`}
     >
       {/* Toggle */}
       {showToggleSwitch && (
@@ -224,112 +235,104 @@ const ChatMessage = ({
         style={{ width: "fit-content" }}
         ref={attachRef}
       >
-        <AnimatePresence>
-          <motion.div
-            key={msg?.client_id ?? msg?.id ?? `tmp-${Math.random()}`}
-            layout
-            initial={{ opacity: 0.6, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1, x: offsetX }}
-            exit={{ opacity: 0.6, scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            style={{
-              touchAction: "pan-y",
-              userSelect: isDragging ? "none" : "auto",
-              display: "block",
-            }}
-            className="relative"
-          >
-            <div
-              className={`p-2 pr-3 pb-4 rounded-xl shadow-md ${
-                isMine ? "bg-oliveDark text-white" : "bg-white text-black"
-              }`}
-              style={{
-                border: `1px solid rgba(255,255,255,0.04)`,
-                borderTopRightRadius: isMine ? "4px" : "12px",
-                borderTopLeftRadius: isMine ? "12px" : "4px",
-              }}
-              onClick={() => !showToggleSwitch && setIsVisible((v) => !v)}
-              title={
-                !showToggleSwitch && isVisible
-                  ? "Click to hide"
-                  : "Click to show"
-              }
-            >
-              {/* Reply Preview */}
-              {msg?.tag_mess && (
-                <ReplyPreview
-                  target={repliedMsg}
-                  participants={[
-                    {
-                      member_id: selectedChatUser?.contact_id,
-                      member_id_encrpt: selectedChatUser?.contact_id_encrypt,
-                      member_name: selectedChatUser?.contact_name,
-                    },
-                  ]}
-                  myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
-                  onPreviewClick={(target) =>
-                    target?.id && scrollToMessage?.(String(target.id))
-                  }
-                  type="user"
-                />
-              )}
-
-              {/* Message content */}
-              <AnimatePresence mode="wait" initial={false}>
-                {isVisible ? (
-                  <motion.div
-                    key="content-visible"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.18 }}
-                  >
-                    {renderMessageContent()}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="content-hidden"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.18 }}
-                    className={`${
-                      showToggleSwitch ? "" : "cursor-pointer"
-                    } w-full max-w-60 md:max-w-80 rounded-md flex items-center relative font-bold tracking-widest break-all`}
-                    title={
-                      !showToggleSwitch ? "click to show" : "toggle to show"
-                    }
-                  >
-                    {msg?.message
-                      ? "*".repeat(Math.min(msg.message.length, 300))
-                      : "****"}
-                  </motion.div>
-                )}
-                {/* read receipts for mine */}
-                {isMine && (
-                  <span className="ml-1 absolute bottom-1 right-1">
-                    {msg?.is_read === "yes" ? (
-                      <IoCheckmarkDone size={14} className="text-oliveHover" />
-                    ) : (
-                      <IoCheckmark size={14} className="text-gray-400" />
-                    )}
-                  </span>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-          {/* Timestamp */}
+        <motion.div
+          key={msg?.client_id ?? msg?.id ?? `tmp-${Math.random()}`}
+          layout
+          initial={{ opacity: 0.6, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1, x: offsetX }}
+          exit={{ opacity: 0.6, scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 300, damping: 28 }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          style={{
+            touchAction: "pan-y",
+            userSelect: isDragging ? "none" : "auto",
+            display: "block",
+          }}
+          className="relative"
+        >
           <div
-            className={`mt-1 text-xs text-gray-600 lg:text-gray-400 ${
-              isMine ? "text-right" : "text-left"
+            className={`p-2 pr-3 pb-4 rounded-xl shadow-md ${
+              isMine ? "bg-oliveDark text-white" : "bg-white text-black"
             }`}
+            style={{
+              border: `1px solid rgba(255,255,255,0.04)`,
+              borderTopRightRadius: isMine ? "4px" : "12px",
+              borderTopLeftRadius: isMine ? "12px" : "4px",
+            }}
+            onClick={() => !showToggleSwitch && setIsVisible((v) => !v)}
+            title={
+              !showToggleSwitch && isVisible ? "Click to hide" : "Click to show"
+            }
           >
-            {timeFormatter.format(new Date(msg?.updated_at || Date.now()))}
+            {/* Reply Preview */}
+            {msg?.tag_mess && (
+              <ReplyPreview
+                target={repliedMsg}
+                participants={[
+                  {
+                    member_id: selectedChatUser?.contact_id,
+                    member_id_encrpt: selectedChatUser?.contact_id_encrypt,
+                    member_name: selectedChatUser?.contact_name,
+                  },
+                ]}
+                myId={authDetails?.user_enid ?? authDetails?.user?.id ?? null}
+                onPreviewClick={() =>
+                  repliedMsg?.id && scrollToMessage?.(String(repliedMsg.id))
+                }
+                type="user"
+              />
+            )}
+
+            {/* Message content */}
+            {isVisible ? (
+              <motion.div
+                key="content-visible"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.18 }}
+              >
+                {renderMessageContent()}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="content-hidden"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.18 }}
+                className={`${
+                  showToggleSwitch ? "" : "cursor-pointer"
+                } w-full max-w-60 md:max-w-80 rounded-md flex items-center relative font-bold tracking-widest break-all`}
+                title={!showToggleSwitch ? "click to show" : "toggle to show"}
+              >
+                {msg?.message
+                  ? "*".repeat(Math.min(msg.message.length, 300))
+                  : "****"}
+              </motion.div>
+            )}
+            {/* read receipts for mine */}
+            {isMine && (
+              <span className="ml-1 absolute bottom-1 right-1">
+                {msg?.is_read === "yes" ? (
+                  <IoCheckmarkDone size={14} className="text-oliveHover" />
+                ) : (
+                  <IoCheckmark size={14} className="text-gray-400" />
+                )}
+              </span>
+            )}
           </div>
-        </AnimatePresence>
+        </motion.div>
+        {/* Timestamp */}
+        <div
+          className={`mt-1 text-xs text-gray-600 lg:text-gray-400 ${
+            isMine ? "text-right" : "text-left"
+          }`}
+        >
+          {timeFormatter.format(new Date(msg?.updated_at || Date.now()))}
+        </div>
       </div>
     </div>
   );

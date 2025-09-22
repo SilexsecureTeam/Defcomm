@@ -14,6 +14,7 @@ import SendMessage from "../components/Chat/SendMessage";
 import CallInterface from "../components/Chat/CallInterface";
 import ChatMessageList from "../components/Chat/ChatMessageList";
 import { IoArrowBack } from "react-icons/io5";
+import { useAutoScroll } from "../utils/chat/useAutoScroll";
 
 const ChatInterface = () => {
   const { userId } = useParams();
@@ -41,9 +42,12 @@ const ChatInterface = () => {
   const messages = data?.pages.flatMap((page) => page.data) ?? [];
   const chatMeta = data?.pages?.[0]?.chat_meta;
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView();
-  }, [typingUsers[Number(chatUserData?.contact_id)]]);
+  useAutoScroll({
+    messages, // pass chat messages
+    containerRef: messageRef,
+    endRef: messagesEndRef,
+    typing: typingUsers[Number(chatUserData?.contact_id)],
+  });
 
   const COLORS = {
     headerBg: "#3B3B3B",
@@ -120,7 +124,7 @@ const ChatInterface = () => {
       {/* BODY */}
       <div
         ref={messageRef}
-        className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4"
+        className="flex-1 overflow-y-auto px-4 md:px-6 py-4 gap-y-4"
         style={{ backgroundColor: COLORS.surface }}
       >
         {chatUserData ? (
