@@ -36,15 +36,27 @@ export const useSendMessageMutation = (
 
       // If already fetched, append new message to existing messages
       queryClient.setQueryData(
-        ["chatMessages", variables.get("current_chat_user")],
+        [
+          `${
+            variables.get("current_chat_user_type") === "group"
+              ? "groupMessages"
+              : "chatMessages"
+          }`,
+          variables.get("current_chat_user"),
+        ],
         (old: any) => {
-          if (!old || !Array.isArray(old.pages)) return old;
+          if (!old || !Array.isArray(old.pages)) {
+            // First message: create initial page structure
+            return {
+              pages: [{ data: [messageData] }],
+              pageParams: [undefined],
+            };
+          }
 
-          // put new message at the end of the last page
           const lastPageIndex = old.pages.length - 1;
           const lastPage = old.pages[lastPageIndex];
 
-          // avoid duplicates
+          // Avoid duplicates
           const exists = lastPage.data.find(
             (msg: any) => msg.id === messageData.id
           );

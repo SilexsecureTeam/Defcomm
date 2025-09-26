@@ -209,7 +209,7 @@ const GroupChatInterface = () => {
 
       {/* INPUT BAR - FIXED */}
       <SendMessage
-        messageData={{ ...messages?.chat_meta, members: mergedGroupInfo?.data }}
+        messageData={{ ...chatMeta, members: mergedGroupInfo?.data }}
         scrollRef={messageRef}
         messagesEndRef={messagesEndRef}
       />
