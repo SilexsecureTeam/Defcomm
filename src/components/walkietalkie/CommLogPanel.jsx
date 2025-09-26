@@ -35,10 +35,21 @@ const CommLogPanel = () => {
   useEffect(() => {
     if (walkieMessages.length > lastMsgCount.current) {
       const latest = walkieMessages[walkieMessages.length - 1];
-      const latestUser = latest.display_name || latest.user_name || "Unknown";
-      setAlertUser(latestUser);
+      const user = latest.display_name || latest.user_name || "Unknown";
+
+      const alertMessage =
+        latest.type === "join"
+          ? `${user} joined`
+          : latest.type === "leave"
+          ? `${user} left`
+          : latest.type === "voice"
+          ? `${user} sent voice`
+          : `Activity from ${user}`;
+
+      setAlertUser(alertMessage);
       setNewMessageAlert(true);
     }
+
     lastMsgCount.current = walkieMessages.length;
   }, [walkieMessages, showCommLog, currentUserId]);
 

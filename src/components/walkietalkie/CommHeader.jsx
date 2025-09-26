@@ -7,6 +7,8 @@ import {
   MdTouchApp,
 } from "react-icons/md";
 import VoiceModeModal from "./VoiceModeModal";
+import useComm from "../../hooks/useComm";
+import { FaSpinner } from "react-icons/fa";
 
 const formatTime = (sec) => {
   const m = String(Math.floor(sec / 60)).padStart(2, "0");
@@ -25,6 +27,7 @@ const CommHeader = () => {
     voiceMode,
   } = useContext(CommContext);
   const [seconds, setSeconds] = useState(0);
+  const { subscriberLeave } = useComm();
 
   const [showVoiceModeModal, setShowVoiceModeModal] = useState(false);
   // Timer for connection time
@@ -58,9 +61,15 @@ const CommHeader = () => {
         {/* End Button */}
         <button
           onClick={leaveChannel}
+          disabled={subscriberLeave.isPending}
           className="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded-full shadow-lg flex items-center gap-1 font-bold tracking-wide uppercase border border-red-900 transition-all duration-150 active:scale-95"
         >
-          <MdPowerSettingsNew className="text-base" /> Leave
+          {subscriberLeave.isPending ? (
+            <FaSpinner className="text-base animate-spin" />
+          ) : (
+            <MdPowerSettingsNew className="text-base" />
+          )}{" "}
+          Leave
         </button>
       </div>
 

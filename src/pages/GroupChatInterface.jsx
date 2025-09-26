@@ -13,6 +13,7 @@ import GroupMessageList from "../components/group/GroupMessageList";
 import { FaCog } from "react-icons/fa";
 import { ChatContext } from "../context/ChatContext";
 import { IoArrowBack } from "react-icons/io5";
+import { useAutoScroll } from "../utils/chat/useAutoScroll";
 
 const GroupChatInterface = () => {
   const { groupId } = useParams();
@@ -24,7 +25,7 @@ const GroupChatInterface = () => {
   const connectionStatus = groupConnections?.[groupId];
 
   const { useFetchGroupInfo } = useGroups();
-  const { fetchGroupChatMessages } = useChat();
+  const { getGroupChatMessages } = useChat();
 
   const { data: groupInfo, isLoading } = useFetchGroupInfo(groupId);
   const mergedGroupInfo = useMemo(() => {
@@ -56,20 +57,31 @@ const GroupChatInterface = () => {
     setActiveGroup(mergedGroupInfo);
   }, [mergedGroupInfo]);
 
-  const { data: messages = [], isLoading: isMessagesLoading } = useQuery({
-    queryKey: ["groupMessages", mergedGroupInfo?.group_meta?.id],
-    queryFn: () => fetchGroupChatMessages(mergedGroupInfo?.group_meta?.id),
-    enabled: !!groupId,
-    //refetchInterval: 5000,
-  });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    error,
+    isLoading: isMessagesLoading,
+  } = getGroupChatMessages(mergedGroupInfo?.group_meta?.id ?? null);
+
+  const messages = data?.pages.flatMap((page) => page.data) ?? [];
+  const chatMeta = data?.pages?.[0]?.chat_meta;
 
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const messagesEndRef = useRef(null);
   const messageRef = useRef(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     setMembers(mergedGroupInfo?.data);
   }, [messages]);
+
+  useAutoScroll({
+    messages, // pass chat messages
+    containerRef: messageRef,
+    endRef: messagesEndRef,
+    //typing: typingUsers[Number(chatUserData?.contact_id)],
+  });
 
   const COLORS = {
     header: "#1C1C1C",
@@ -183,20 +195,14 @@ const GroupChatInterface = () => {
             ></div>
           </div>
         ) : (
-          <AnimatePresence>
-            {messages?.data?.length > 0 ? (
-              <GroupMessageList
-                messages={messages?.data}
-                participants={mergedGroupInfo?.data}
-              />
-            ) : (
-              <div className="flex justify-center items-center h-full">
-                <p className="italic" style={{ color: COLORS.muted }}>
-                  Start the conversation!
-                </p>
-              </div>
-            )}
-          </AnimatePresence>
+          <GroupMessageList
+            messages={messages}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            messagesContainerRef={messageRef}
+            participants={mergedGroupInfo?.data}
+          />
         )}
         <div ref={messagesEndRef} />
       </div>

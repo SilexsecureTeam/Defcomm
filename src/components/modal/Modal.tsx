@@ -1,7 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MdClose, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { ChatContext } from "../../context/ChatContext";
+import { useEffect } from "react";
+import { DashboardContext } from "../../context/DashboardContext";
 
 interface MinimizableModalProps {
   isOpen: boolean;
@@ -9,6 +11,7 @@ interface MinimizableModalProps {
   children: React.ReactNode;
   canMinimize?: boolean;
   minimizedContent?: React.ReactNode;
+  forceMaximize?: boolean;
 }
 
 const Modal = ({
@@ -18,7 +21,7 @@ const Modal = ({
   canMinimize = false,
   minimizedContent,
 }: MinimizableModalProps) => {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const { isMinimized, setIsMinimized } = useContext(DashboardContext);
   const { setModalTitle, modalTitle } = useContext(ChatContext);
 
   if (!isOpen && !isMinimized) return null;

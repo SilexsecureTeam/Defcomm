@@ -8,6 +8,8 @@ import VoiceRecordButton from "./VoiceRecordButton";
 import { formatLocalTime } from "../../utils/formmaters";
 import CommLogPanel from "./CommLogPanel";
 import CommHeader from "./CommHeader";
+import { useMemo } from "react";
+import useComm from "../../hooks/useComm";
 
 const CommInterface = ({ modal = false }) => {
   const {
@@ -17,6 +19,11 @@ const CommInterface = ({ modal = false }) => {
     currentSpeaker,
     walkieMessages,
   } = useContext(CommContext);
+  const { getSubscriberActive } = useComm();
+  const { data: activeSubscribers, isLoading } = getSubscriberActive(
+    activeChannel?.channel_id,
+    { enabled: !!isCommActive }
+  );
 
   const [seconds, setSeconds] = useState(0);
   const logEndRef = useRef(null);
@@ -25,6 +32,37 @@ const CommInterface = ({ modal = false }) => {
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [walkieMessages]);
+
+  // Compute live users with useMemo
+  const liveUsers = useMemo(() => {
+    const liveMap = {};
+
+    // Add subscribers from the query first
+    activeSubscribers?.forEach((user) => {
+      liveMap[user?.user_id] = {
+        name: user?.user_name,
+        id: user?.user_id,
+        type: "join",
+      };
+    });
+
+    // 2️⃣ Update based on walkieMessages
+    walkieMessages.forEach((msg) => {
+      if (msg.type === "join") {
+        liveMap[msg.user_id] = { name: msg.user_name, type: "join" };
+      }
+      if (msg.type === "leave") {
+        delete liveMap[msg.user_id];
+      }
+    });
+
+    // Convert to array for rendering
+    return Object.entries(liveMap).map(([id, info]) => ({
+      id,
+      name: info.name,
+      type: info.type,
+    }));
+  }, [walkieMessages, activeSubscribers]);
 
   if (!isCommActive && !activeChannel && !connectingChannelId) {
     return <InitComm />;
@@ -42,6 +80,8 @@ const CommInterface = ({ modal = false }) => {
       </div>
     );
   }
+
+  const liveCount = liveUsers.length;
 
   return (
     <div
@@ -104,20 +144,60 @@ const CommInterface = ({ modal = false }) => {
 
       {/* Group Info */}
       <div className="flex items-center gap-3 my-4">
-        <div className="mt-3 relative flex justify-center w-[77px]">
-          <div className="w-10 h-10 bg-green-600 rounded-full border border-oliveHover absolute bottom-0 right-0"></div>
-          <div className="w-9 h-9 bg-gray-600 rounded-full border border-gray-400 absolute bottom-3 left-0"></div>
-          <div className="w-9 h-9 bg-gray-400 rounded-full border border-gray-400 absolute top-0"></div>
-          <div className="w-8 h-8 bg-gray-300 flex items-center justify-center text-black rounded-full border border-gray-400 absolute -bottom-5 left-3">
-            <FiPlus size={12} />
-          </div>
+        {/* Avatars */}
+        <div className="mt-3 relative flex justify-center w-[70px] h-[50px]">
+          {isLoading ? (
+            // Loader while fetching active subscribers
+            <div className="w-10 h-10 border-4 border-oliveLight border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <>
+              {liveUsers.slice(0, 4).map((user, idx) => {
+                let position = {};
+                let bgColor = "bg-gray-400";
+                if (idx === 0) {
+                  position = { top: 0, left: "0" };
+                  bgColor = "bg-gray-400";
+                }
+                if (idx === 1) {
+                  position = { bottom: 0, right: "0" };
+                  bgColor = "bg-green-600";
+                }
+                if (idx === 2) {
+                  position = { bottom: "3px", left: "0" };
+                  bgColor = "bg-gray-600";
+                }
+                if (idx === 3) {
+                  position = { top: "3px", right: "3px" };
+                  bgColor = "bg-gray-300";
+                }
+
+                return (
+                  <div
+                    key={user?.id}
+                    className={`w-9 h-9 rounded-full border border-gray-400 flex items-center justify-center text-black text-xs absolute ${bgColor}`}
+                    style={position}
+                    title={user?.name}
+                  >
+                    {user?.name?.charAt(0)}
+                  </div>
+                );
+              })}
+
+              {liveUsers.length > 4 && (
+                <div className="w-8 h-8 bg-gray-300 flex items-center justify-center text-black rounded-full border border-gray-400 absolute -bottom-5 left-3">
+                  <FiPlus size={12} />
+                </div>
+              )}
+            </>
+          )}
         </div>
 
+        {/* Group Info */}
         <div>
           <p className="text-sm mt-1">
             {activeChannel?.description || "Emergency Situation Room"}
           </p>
-          <p className="text-xs text-gray-400">+ 70 Live *************</p>
+          <p className="text-xs text-gray-400">+ {liveCount} Live Users</p>
         </div>
       </div>
 

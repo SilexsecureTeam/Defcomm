@@ -103,119 +103,121 @@ const CommLogList = ({
         {walkieMessages.length === 0 ? (
           <p className="text-gray-400 italic">Awaiting transmission...</p>
         ) : (
-          walkieMessages.map((msg, i) => {
-            const isMine = msg.display_name === "You";
-            const isLoading = loadingId === i;
+          walkieMessages
+            ?.filter((msg) => msg.type === "voice")
+            ?.map((msg, i) => {
+              const isMine = msg.display_name === "You";
+              const isLoading = loadingId === i;
 
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: isMine ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`flex flex-col gap-2 p-3 rounded-md max-w-96
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: isMine ? -20 : 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex flex-col gap-2 p-3 rounded-md max-w-96
                   ${isMine ? "ml-auto text-right" : ""}
                   ${
                     isMine
                       ? "bg-gradient-to-br from-lime-500/30 to-green-400/10 border border-lime-400/50"
                       : "bg-gradient-to-r from-gray-800/30 to-gray-900/20 border border-lime-400/20"
                   }`}
-              >
-                {/* 🏷 Header */}
-                <div
-                  className={`flex justify-between items-center ${
-                    isMine ? "flex-row-reverse" : ""
-                  }`}
                 >
+                  {/* 🏷 Header */}
                   <div
-                    className={`flex items-center gap-2 ${
+                    className={`flex justify-between items-center ${
                       isMine ? "flex-row-reverse" : ""
                     }`}
                   >
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-full text-[0.7rem] font-bold shadow
+                      className={`flex items-center gap-2 ${
+                        isMine ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <div
+                        className={`w-6 h-6 flex items-center justify-center rounded-full text-[0.7rem] font-bold shadow
                         ${
                           isMine
                             ? "bg-lime-400 text-black"
                             : "bg-gradient-to-br from-lime-400 to-green-700 text-black"
                         }`}
-                    >
-                      {(msg.user_name || "?").charAt(0)}
+                      >
+                        {(msg.user_name || "?").charAt(0)}
+                      </div>
+                      <span className="text-lime-300 font-semibold">
+                        {isMine ? "You" : msg?.display_name || "Anonymous"}
+                      </span>
                     </div>
-                    <span className="text-lime-300 font-semibold">
-                      {isMine ? "You" : msg?.display_name || "Anonymous"}
+                    <span className="text-gray-400 text-[0.65rem]">
+                      {msg.time || formatLocalTime()}
                     </span>
                   </div>
-                  <span className="text-gray-400 text-[0.65rem]">
-                    {msg.time || formatLocalTime()}
-                  </span>
-                </div>
 
-                {/* 🎤 Original voice */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePlayPause(msg, i)}
-                    className="p-1 rounded-full border border-lime-400 hover:bg-lime-500 hover:text-black transition"
-                  >
-                    {isPlayingId === i ? (
-                      <FaPause size={12} />
-                    ) : (
-                      <FaPlay size={12} />
-                    )}
-                  </button>
-                  <MdMic size={12} />
-                  <span>Original voice</span>
-                </div>
-
-                {/* 🔘 Actions */}
-                <div className="flex items-center gap-3 text-xs text-lime-300">
-                  <button
-                    onClick={() => handleS2S(msg, i)}
-                    disabled={isLoading}
-                    className="flex items-center gap-1 hover:text-white"
-                  >
-                    <BiTransferAlt />
-                    {isLoading ? "Translating..." : "Translate"}
-                  </button>
-                  <button
-                    onClick={() =>
-                      setExpanded((prev) => ({ ...prev, [i]: !prev[i] }))
-                    }
-                    className="ml-auto text-gray-400 hover:text-white flex items-center"
-                  >
-                    {expanded[i] ? <FaChevronUp /> : <FaChevronDown />}
-                  </button>
-                </div>
-
-                {/* 🌐 Collapsible result */}
-                {expanded[i] && translations[i] && (
-                  <div className="mt-2 p-2 bg-black/30 rounded text-gray-200 text-xs space-y-2 text-start">
-                    <p className="italic text-gray-300">
-                      🌐 {translations[i].translated}
-                    </p>
-                    {translations[i].audioUrl && (
-                      <button
-                        onClick={() =>
-                          playTranslationUrl(translations[i].audioUrl, i)
-                        }
-                        className="flex items-center gap-1 p-1 rounded border border-lime-400 hover:bg-lime-500 hover:text-black"
-                      >
-                        {playingTranslationId === i ? (
-                          <>
-                            <FaPause size={10} /> Pause translated audio
-                          </>
-                        ) : (
-                          <>
-                            <FaPlay size={10} /> Play translated audio
-                          </>
-                        )}
-                      </button>
-                    )}
+                  {/* 🎤 Original voice */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePlayPause(msg, i)}
+                      className="p-1 rounded-full border border-lime-400 hover:bg-lime-500 hover:text-black transition"
+                    >
+                      {isPlayingId === i ? (
+                        <FaPause size={12} />
+                      ) : (
+                        <FaPlay size={12} />
+                      )}
+                    </button>
+                    <MdMic size={12} />
+                    <span>Original voice</span>
                   </div>
-                )}
-              </motion.div>
-            );
-          })
+
+                  {/* 🔘 Actions */}
+                  <div className="flex items-center gap-3 text-xs text-lime-300">
+                    <button
+                      onClick={() => handleS2S(msg, i)}
+                      disabled={isLoading}
+                      className="flex items-center gap-1 hover:text-white"
+                    >
+                      <BiTransferAlt />
+                      {isLoading ? "Translating..." : "Translate"}
+                    </button>
+                    <button
+                      onClick={() =>
+                        setExpanded((prev) => ({ ...prev, [i]: !prev[i] }))
+                      }
+                      className="ml-auto text-gray-400 hover:text-white flex items-center"
+                    >
+                      {expanded[i] ? <FaChevronUp /> : <FaChevronDown />}
+                    </button>
+                  </div>
+
+                  {/* 🌐 Collapsible result */}
+                  {expanded[i] && translations[i] && (
+                    <div className="mt-2 p-2 bg-black/30 rounded text-gray-200 text-xs space-y-2 text-start">
+                      <p className="italic text-gray-300">
+                        🌐 {translations[i].translated}
+                      </p>
+                      {translations[i].audioUrl && (
+                        <button
+                          onClick={() =>
+                            playTranslationUrl(translations[i].audioUrl, i)
+                          }
+                          className="flex items-center gap-1 p-1 rounded border border-lime-400 hover:bg-lime-500 hover:text-black"
+                        >
+                          {playingTranslationId === i ? (
+                            <>
+                              <FaPause size={10} /> Pause translated audio
+                            </>
+                          ) : (
+                            <>
+                              <FaPlay size={10} /> Play translated audio
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })
         )}
         <div ref={logEndRef} />
       </div>

@@ -21,6 +21,7 @@ import AddUsersToMeeting from "../dashboard/AddUsersToMeeting";
 import LoaderCard from "./LoaderCard";
 import EmptyState from "./EmptyState";
 import { onPrompt } from "../../utils/notifications/onPrompt";
+import { DashboardContext } from "../../context/DashboardContext";
 
 const Broadcast = () => {
   const {
@@ -31,6 +32,7 @@ const Broadcast = () => {
     setConnectingChannelId,
     leaveChannel,
   } = useContext(CommContext);
+  const { setIsMinimized } = useContext(DashboardContext);
 
   const { getChannelList, getInvitedChannelList, deleteChannel } = useComm();
   const { data: channels, isLoading, isError, refetch } = getChannelList;
@@ -43,10 +45,15 @@ const Broadcast = () => {
 
   const handleChannelClick = (channel) => {
     if (activeChannel?.frequency === channel.frequency) {
-      // Already active, do nothing
+      setIsMinimized(false);
       return;
     }
-    leaveChannel(); // Cleanup previous state
+
+    if (activeChannel) {
+      // Only leave if there was a previous channel
+      leaveChannel();
+    }
+
     setConnectingChannelId(channel.channel_id);
     setActiveChannel(channel);
   };

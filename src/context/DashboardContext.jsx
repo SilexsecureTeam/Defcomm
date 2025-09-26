@@ -5,6 +5,7 @@ import {
   utilOptions,
   dashboardTabs,
 } from "../utils/constants";
+import { useState } from "react";
 
 // Create the context
 export const DashboardContext = createContext();
@@ -13,9 +14,12 @@ export const DashboardContext = createContext();
 export const DashboardContextProvider = ({ children }) => {
   const options = [...dashboardOptions, ...utilOptions, ...dashboardTabs];
   const [state, dispatch] = useReducer(DashboardReducer, options[0]);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   return (
-    <DashboardContext.Provider value={{ state, dispatch }}>
+    <DashboardContext.Provider
+      value={{ state, dispatch, isMinimized, setIsMinimized }}
+    >
       {children}
     </DashboardContext.Provider>
   );

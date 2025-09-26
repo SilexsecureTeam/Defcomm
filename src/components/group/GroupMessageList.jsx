@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import GroupMessage from "./GroupMessage";
-import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
+import { COLORS } from "../../utils/chat/messageUtils";
+import ChatLoader from "../ChatLoader";
 
 const formatDateLabel = (date) => {
   const today = new Date();
@@ -19,7 +20,6 @@ const formatDateLabel = (date) => {
   });
 };
 
-// Group messages by date
 const groupMessagesByDate = (messages = []) => {
   const sorted = [...messages].sort(
     (a, b) => new Date(a.created_at) - new Date(b.created_at)
@@ -32,11 +32,17 @@ const groupMessagesByDate = (messages = []) => {
   }, {});
 };
 
-const GroupMessageList = ({ messages = [], participants = [] }) => {
+const GroupMessageList = ({
+  messages = [],
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+  messagesContainerRef,
+  participants = [],
+}) => {
   const { registerMessageRefs } = useContext(ChatContext);
   const groupedMessages = groupMessagesByDate(messages);
 
-  // refs map for scroll-to-message: key -> DOM element
   const messageRefs = useRef(new Map());
   useEffect(() => {
     if (typeof registerMessageRefs === "function") {
@@ -44,7 +50,6 @@ const GroupMessageList = ({ messages = [], participants = [] }) => {
     }
   }, [registerMessageRefs]);
 
-  // build lookup map for quick tag_mess resolution
   const messagesById = useMemo(() => {
     const map = new Map();
     (messages || []).forEach((m) => {
@@ -55,8 +60,104 @@ const GroupMessageList = ({ messages = [], participants = [] }) => {
     return map;
   }, [messages]);
 
+  // Loader sentinel for infinite scroll
+  const topLoaderRef = useRef(null);
+
+  useEffect(() => {
+    if (!topLoaderRef.current || !messagesContainerRef.current) return;
+
+    const container = messagesContainerRef.current;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        const firstEntry = entries[0];
+        if (firstEntry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          const prevHeight = container.scrollHeight;
+          await fetchNextPage();
+
+          requestAnimationFrame(() => {
+            const newHeight = container.scrollHeight;
+            container.scrollTop =
+              container.scrollTop + (newHeight - prevHeight);
+          });
+        }
+      },
+      { root: messagesContainerRef.current, threshold: 0.1 }
+    );
+
+    observer.observe(topLoaderRef.current);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, messagesContainerRef]);
+
+  // --- Pull-to-refresh (mobile) ---
+  const [pulling, setPulling] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const startY = useRef(0);
+
+  useEffect(() => {
+    if (!topLoaderRef.current || !messagesContainerRef.current) return;
+    if (!messages?.length) return; // 👈 prevents triggering on first load
+
+    const container = messagesContainerRef.current;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        const firstEntry = entries[0];
+        if (firstEntry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          const prevHeight = container.scrollHeight;
+          await fetchNextPage();
+          requestAnimationFrame(() => {
+            const newHeight = container.scrollHeight;
+            container.scrollTop =
+              container.scrollTop + (newHeight - prevHeight);
+          });
+        }
+      },
+      { root: messagesContainerRef.current, threshold: 0.1 }
+    );
+
+    observer.observe(topLoaderRef.current);
+    return () => observer.disconnect();
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    messagesContainerRef,
+    messages,
+  ]);
+
+  if (!messages?.length) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <p className="italic" style={{ color: COLORS.muted }}>
+          Start the conversation!
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col px-4 py-4 space-y-1 hide-scrollbar relative">
+    <div className="flex flex-col px-4 py-4 hide-scrollbar relative">
+      {/* Pull-to-refresh loader (mobile only) */}
+      <div
+        className="bg-red-200 flex justify-center items-center absolute top-0 left-0 right-0 z-[60]"
+        style={{
+          transform: `translateY(${pullDistance}px)`,
+          transition: pulling ? "none" : "transform 0.3s ease",
+        }}
+      >
+        {!isFetchingNextPage && pulling && pullDistance > 20 && (
+          <span className="text-xs text-gray-600 bg-white/80 px-3 py-1 rounded-full shadow">
+            {pullDistance > 60 ? "Release to load more" : "Pull to load"}
+          </span>
+        )}
+      </div>
+
+      {/* Infinite scroll loader sentinel */}
+      <div ref={topLoaderRef} className="flex justify-center py-3">
+        {isFetchingNextPage && <ChatLoader />}
+      </div>
+
       {Object.entries(groupedMessages).map(([dateKey, dayMessages]) => (
         <div key={dateKey} className="relative">
           {/* Sticky date header */}
@@ -72,8 +173,7 @@ const GroupMessageList = ({ messages = [], participants = [] }) => {
             </span>
           </div>
 
-          {/* Messages of this day */}
-          <div className="space-y-1">
+          <div className="gap-y-1">
             {dayMessages.map((msg, index) => {
               const sender =
                 participants.find(
@@ -97,7 +197,7 @@ const GroupMessageList = ({ messages = [], participants = [] }) => {
                   isLastInGroup={isLastInGroup}
                   participants={participants}
                   messagesById={messagesById}
-                  messageRefs={messageRefs} // pass refs map
+                  messageRefs={messageRefs}
                 />
               );
             })}
