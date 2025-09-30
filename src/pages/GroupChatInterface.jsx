@@ -77,10 +77,11 @@ const GroupChatInterface = () => {
   }, [messages]);
 
   useAutoScroll({
-    messages, // pass chat messages
+    messages,
     containerRef: messageRef,
     endRef: messagesEndRef,
-    //typing: typingUsers[Number(chatUserData?.contact_id)],
+    typing: false,
+    pauseAutoScroll: isFetchingNextPage, // pause when fetching older pages
   });
 
   const COLORS = {

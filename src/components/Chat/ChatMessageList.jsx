@@ -194,7 +194,7 @@ const ChatMessageList = ({
 
               return (
                 <ChatMessage
-                  key={msg.id ?? index}
+                  key={`${msg.id}-${msg.created_at}`}
                   msg={msg}
                   selectedChatUser={chatUserData}
                   isLastMessageFromUser={isLastMessageFromUser}

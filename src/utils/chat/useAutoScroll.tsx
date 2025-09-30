@@ -1,12 +1,12 @@
 // hooks/useAutoScroll.ts
 import { useEffect, useRef, RefObject } from "react";
-
 interface UseAutoScrollOptions {
   messages: any[];
   containerRef: RefObject<HTMLElement>;
   endRef: RefObject<HTMLElement>;
   typing?: boolean;
-  threshold?: number; // px distance from bottom to still auto-scroll
+  threshold?: number;
+  pauseAutoScroll?: boolean; // new
 }
 
 export function useAutoScroll({
@@ -15,6 +15,7 @@ export function useAutoScroll({
   endRef,
   typing = false,
   threshold = 100,
+  pauseAutoScroll = false,
 }: UseAutoScrollOptions) {
   const initialLoad = useRef(true);
 
@@ -30,6 +31,7 @@ export function useAutoScroll({
 
   // Scroll when new messages arrive (if user is near bottom)
   useEffect(() => {
+    if (pauseAutoScroll) return; // 👈 don't scroll when fetching older messages
     const container = containerRef.current;
     if (!container || !messages?.length) return;
 
@@ -42,11 +44,11 @@ export function useAutoScroll({
         endRef.current?.scrollIntoView({ behavior: "smooth" });
       });
     }
-  }, [messages, containerRef, endRef, threshold]);
+  }, [messages, containerRef, endRef, threshold, pauseAutoScroll]);
 
   // Scroll when typing indicator appears (but only if near bottom)
   useEffect(() => {
-    if (!typing) return;
+    if (!typing || pauseAutoScroll) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -59,5 +61,5 @@ export function useAutoScroll({
         endRef.current?.scrollIntoView({ behavior: "smooth" });
       });
     }
-  }, [typing, containerRef, endRef, threshold]);
+  }, [typing, containerRef, endRef, threshold, pauseAutoScroll]);
 }

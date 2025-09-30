@@ -62,69 +62,88 @@ const GroupMessageList = ({
 
   // Loader sentinel for infinite scroll
   const topLoaderRef = useRef(null);
-
-  useEffect(() => {
-    if (!topLoaderRef.current || !messagesContainerRef.current) return;
-
-    const container = messagesContainerRef.current;
-
-    const observer = new IntersectionObserver(
-      async (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          const prevHeight = container.scrollHeight;
-          await fetchNextPage();
-
-          requestAnimationFrame(() => {
-            const newHeight = container.scrollHeight;
-            container.scrollTop =
-              container.scrollTop + (newHeight - prevHeight);
-          });
-        }
-      },
-      { root: messagesContainerRef.current, threshold: 0.1 }
-    );
-
-    observer.observe(topLoaderRef.current);
-    return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, messagesContainerRef]);
-
   // --- Pull-to-refresh (mobile) ---
   const [pulling, setPulling] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const startY = useRef(0);
 
   useEffect(() => {
-    if (!topLoaderRef.current || !messagesContainerRef.current) return;
-    if (!messages?.length) return; // 👈 prevents triggering on first load
-
-    const container = messagesContainerRef.current;
+    if (!hasNextPage || isFetchingNextPage || pulling) return;
 
     const observer = new IntersectionObserver(
-      async (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          const container = messagesContainerRef.current;
+          if (!container) return;
+
           const prevHeight = container.scrollHeight;
-          await fetchNextPage();
-          requestAnimationFrame(() => {
-            const newHeight = container.scrollHeight;
-            container.scrollTop =
-              container.scrollTop + (newHeight - prevHeight);
+
+          fetchNextPage().then(() => {
+            requestAnimationFrame(() => {
+              const newHeight = container.scrollHeight;
+              const scrollDiff = newHeight - prevHeight;
+              container.scrollTop = container.scrollTop + scrollDiff;
+            });
           });
         }
       },
       { root: messagesContainerRef.current, threshold: 0.1 }
     );
 
-    observer.observe(topLoaderRef.current);
-    return () => observer.disconnect();
+    if (topLoaderRef.current) {
+      observer.observe(topLoaderRef.current);
+    }
+
+    return () => {
+      if (topLoaderRef.current) observer.unobserve(topLoaderRef.current);
+    };
   }, [
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     messagesContainerRef,
-    messages,
+    pulling,
   ]);
+
+  // Pull-to-refresh style for mobile
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (e) => {
+      if (container.scrollTop <= 0) {
+        startY.current = e.touches[0].clientY;
+        setPulling(true);
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (!pulling) return;
+      const delta = e.touches[0].clientY - startY.current;
+      if (delta > 0) {
+        setPullDistance(Math.min(delta, 100)); // limit to 100px
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (pullDistance > 60 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+      setPullDistance(0);
+      setPulling(false);
+    };
+
+    container.addEventListener("touchstart", handleTouchStart);
+    container.addEventListener("touchmove", handleTouchMove);
+    container.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [pulling, pullDistance, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (!messages?.length) {
     return (
@@ -138,22 +157,22 @@ const GroupMessageList = ({
 
   return (
     <div className="flex flex-col px-4 py-4 hide-scrollbar relative">
-      {/* Pull-to-refresh loader (mobile only) */}
+      {/* Pull to refresh loader (mobile only) */}
       <div
-        className="bg-red-200 flex justify-center items-center absolute top-0 left-0 right-0 z-[60]"
+        className="flex justify-center items-center absolute top-0 left-0 right-0 z-[60]"
         style={{
           transform: `translateY(${pullDistance}px)`,
           transition: pulling ? "none" : "transform 0.3s ease",
         }}
       >
-        {!isFetchingNextPage && pulling && pullDistance > 20 && (
+        {pulling && !isFetchingNextPage && pullDistance > 20 && (
           <span className="text-xs text-gray-600 bg-white/80 px-3 py-1 rounded-full shadow">
             {pullDistance > 60 ? "Release to load more" : "Pull to load"}
           </span>
         )}
       </div>
 
-      {/* Infinite scroll loader sentinel */}
+      {/* Infinite scroll loader (inline like WhatsApp) */}
       <div ref={topLoaderRef} className="flex justify-center py-3">
         {isFetchingNextPage && <ChatLoader />}
       </div>

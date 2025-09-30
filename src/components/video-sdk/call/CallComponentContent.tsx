@@ -38,7 +38,6 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
   const callStartRef = useRef<number | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callLogUpdatedRef = useRef(false);
-  const queryClient = useQueryClient();
 
   const { join, leave, participants, localMicOn, toggleMic } = useMeeting({
     onMeetingJoined: () => {
@@ -84,7 +83,7 @@ const CallComponentContent = ({ meetingId, setMeetingId }: any) => {
     onError: (err) => onFailure({ message: "Call Error", error: err.message }),
   });
 
-  const handleLeave = async (reason) => {
+  const handleLeave = async (reason: string) => {
     if (callTimer.current) clearInterval(callTimer.current);
 
     console.log(callMessage, callDuration, callLogUpdatedRef.current);

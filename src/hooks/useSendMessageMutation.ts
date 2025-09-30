@@ -76,7 +76,7 @@ export const useSendMessageMutation = (
       if (variables?.get("mss_type") === "call") {
         setCallMessage({
           ...messageData,
-          id: messageData?.id_en,
+          id: messageData?.id,
           msg_id: messageData?.id,
           status: "ringing",
         });

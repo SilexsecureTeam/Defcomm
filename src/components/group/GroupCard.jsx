@@ -39,7 +39,10 @@ export default function GroupCard({ group }) {
   const { data: messagesData, isLoading } = getGroupChatMessages(groupId);
 
   // Flatten all pages into a single array of messages
-  const messagesCache = messagesData?.pages?.flatMap((page) => page.data) || [];
+  const messagesCache =
+    messagesData?.pages
+      ?.flatMap((page) => page.data)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)) || [];
 
   const lastMessageData = messagesCache.length
     ? messagesCache[messagesCache.length - 1]
@@ -69,8 +72,6 @@ export default function GroupCard({ group }) {
         minute: "2-digit",
       })
     : "";
-  console.log(lastMessageData);
-
   return (
     <div
       onClick={() => navigate(`/dashboard/group/${groupId}/chat`)}
