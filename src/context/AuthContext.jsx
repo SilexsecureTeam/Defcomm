@@ -6,6 +6,7 @@ export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
 
+  const [logoutSignal, setLogoutSignal] = useState(false);
   // Read from sessionStorage on mount
   const [authDetails, setAuthDetails] = useState(() => {
     const storedUser = sessionStorage.getItem("authUser");
@@ -38,7 +39,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ authDetails, updateAuth }}>
+    <AuthContext.Provider
+      value={{ authDetails, updateAuth, logoutSignal, setLogoutSignal }}
+    >
       {children}
     </AuthContext.Provider>
   );

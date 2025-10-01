@@ -11,12 +11,13 @@ import { ChatContext } from "../context/ChatContext";
 import { NotificationContext } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
 import useAuth from "./useAuth";
+import { onLogoutToast } from "../utils/notifications/onLogoutToast";
 const usePusherChannel = ({ userId, token, showToast = true }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const { authDetails } = useContext(AuthContext);
+  const { authDetails, setLogoutSignal } = useContext(AuthContext);
   const { setTypingUsers, setCallMessage, chatVisibility, setFinalCallData } =
     useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
@@ -59,7 +60,10 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
       console.log(newMessage);
 
       if (data?.state === "logout") {
-        logout();
+        setLogoutSignal(true);
+        setTimeout(() => {
+          logout();
+        }, 3000); // give user 3s to read the message
       }
 
       // 🔔 Handle call messages

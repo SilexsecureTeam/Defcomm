@@ -7,6 +7,7 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import { onSuccess } from "../utils/notifications/OnSuccess";
 import { queryClient } from "../services/query-client";
 import { extractErrorMessage } from "../utils/formmaters";
+import { onLogoutToast } from "../utils/notifications/onLogoutToast";
 
 const useAuth = () => {
   const navigate = useNavigate();
@@ -135,23 +136,38 @@ const useAuth = () => {
 
   // 🚪 Logout
   const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await client.post("/auth/logout");
-      queryClient.clear(); // Clear cache
+    mutationFn: async (mode) => {
+      const payload = mode === "all" ? {} : { device: authDetails?.device_id };
+      await client.post("/auth/logout", payload);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Clear auth state
       updateAuth(null);
+
+      // Selectively clear cache (safer than full clear)
+      queryClient.removeQueries();
+
+      // Redirect
       navigate("/login", {
         state: { from: null, fromLogout: true },
         replace: true,
       });
-      onSuccess({
-        message: "Logout successful",
-        success: "You have been logged out.",
-      });
+
+      // UI feedback
+      if (variables !== "all") {
+        onLogoutToast();
+      } else {
+        onSuccess({
+          message: "Logout successful",
+          success: "You have been logged out.",
+        });
+      }
     },
     onError: (err) => {
-      onFailure({ message: "Logout Failed", error: extractErrorMessage(err) });
+      onFailure({
+        message: "Logout Failed",
+        error: extractErrorMessage(err),
+      });
     },
   });
 
