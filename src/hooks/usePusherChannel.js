@@ -58,7 +58,11 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         newMessage.state === "callUpdate" ? newMessage?.mss : newMessage?.data;
       const isCall = data?.state === "call";
       console.log(newMessage);
-      if (data?.state === "logout" && data?.device === "all") {
+      if (
+        data?.state === "logout" &&
+        data?.device === "all" &&
+        authDetails?.device_id !== data?.device
+      ) {
         setLogoutSignal(true);
         // Clear auth state
         updateAuth(null);
