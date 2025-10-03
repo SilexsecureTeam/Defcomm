@@ -7,7 +7,6 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import { onSuccess } from "../utils/notifications/OnSuccess";
 import { queryClient } from "../services/query-client";
 import { extractErrorMessage } from "../utils/formmaters";
-import { onLogoutToast } from "../utils/notifications/onLogoutToast";
 
 const useAuth = () => {
   const navigate = useNavigate();
@@ -153,15 +152,10 @@ const useAuth = () => {
         replace: true,
       });
 
-      // UI feedback
-      if (variables === "remote") {
-        onLogoutToast();
-      } else {
-        onSuccess({
-          message: "Logout successful",
-          success: "You have been logged out.",
-        });
-      }
+      onSuccess({
+        message: "Logout successful",
+        success: "You have been logged out.",
+      });
     },
     onError: (err) => {
       onFailure({

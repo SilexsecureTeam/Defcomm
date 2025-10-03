@@ -17,7 +17,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const { authDetails, setLogoutSignal } = useContext(AuthContext);
+  const { authDetails, setLogoutSignal, updateAuth } = useContext(AuthContext);
   const { setTypingUsers, setCallMessage, chatVisibility, setFinalCallData } =
     useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
@@ -60,8 +60,19 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
       console.log(newMessage);
       if (data?.state === "logout" && data?.device === "all") {
         setLogoutSignal(true);
+        // Clear auth state
+        updateAuth(null);
+        // Selectively clear cache (safer than full clear)
+        queryClient.removeQueries();
+
         setTimeout(() => {
-          logout("remote");
+          // Redirect
+          navigate("/login", {
+            state: { from: null, fromLogout: true },
+            replace: true,
+          });
+
+          onLogoutToast();
         }, 3000); // give user 3s to read the message
       }
 
