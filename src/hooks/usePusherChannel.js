@@ -58,7 +58,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         newMessage.state === "callUpdate" ? newMessage?.mss : newMessage?.data;
       const isCall = data?.state === "call";
       console.log(newMessage);
-      if (data?.state === "logout" && data?.device === authDetails?.device_id) {
+      if (data?.state === "logout" && data?.device === "all") {
         setLogoutSignal(true);
         setTimeout(() => {
           logout("remote");
