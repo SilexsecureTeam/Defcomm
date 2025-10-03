@@ -154,7 +154,7 @@ const useAuth = () => {
       });
 
       // UI feedback
-      if (variables !== "all") {
+      if (variables === "remote") {
         onLogoutToast();
       } else {
         onSuccess({

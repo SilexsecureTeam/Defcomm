@@ -68,12 +68,14 @@ const ProfileDropdown = ({ user }) => {
             >
               <FiSettings size={16} /> Settings
             </li>
-            <li>
+            <li className="border-t">
               <button
                 disabled={isLoading?.logout}
-                onClick={() => logout("all")}
-                className={`w-full text-left px-4 py-2 flex items-center gap-2 text-red-500 hover:bg-gray-100 ${
-                  isLoading?.logout ? "opacity-50 cursor-not-allowed" : ""
+                onClick={() => logout("current")}
+                className={`w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 ${
+                  isLoading?.logout
+                    ? "opacity-50 cursor-not-allowed"
+                    : "text-gray-700"
                 }`}
               >
                 {isLoading?.logout ? (
@@ -81,8 +83,30 @@ const ProfileDropdown = ({ user }) => {
                 ) : (
                   <FiLogOut size={16} />
                 )}
-                Logout
+                Sign out
               </button>
+            </li>
+
+            <li className="">
+              <button
+                disabled={isLoading?.logoutAll}
+                onClick={() => logout("all")}
+                className={`w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-red-50 ${
+                  isLoading?.logoutAll
+                    ? "opacity-50 cursor-not-allowed"
+                    : "text-red-600"
+                }`}
+              >
+                {isLoading?.logoutAll ? (
+                  <FaSpinner className="animate-spin" size={16} />
+                ) : (
+                  <FiLogOut size={16} />
+                )}
+                Sign out of all devices
+              </button>
+              <p className="px-4 pb-2 text-xs text-gray-400">
+                This will sign you out everywhere
+              </p>
             </li>
           </ul>
         </div>
