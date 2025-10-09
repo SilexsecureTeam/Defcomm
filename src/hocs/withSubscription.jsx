@@ -1,8 +1,8 @@
 // hoc/withSubscription.js
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
 import { FaSpinner } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { AuthContext } from "../../../tauri-app/src/context/AuthContext";
 
 /**
  * HOC to enforce subscription-based access to features.

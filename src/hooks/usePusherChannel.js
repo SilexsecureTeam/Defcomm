@@ -190,34 +190,50 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
           duration: newMessage?.call?.call_duration,
           state: newMessage?.call?.call_state,
         });
-
-        // // 🔇 If another device picked the call, stop ringtone + clear callMessage
-        // if (newMessage?.call?.call_state === "pick") {
-        //   audioController.stopRingtone();
-        //   setCallMessage((prev) => {
-        //     if (prev?.user_id === newMessage?.mss?.user_id) {
-        //       return { ...prev, status: "picked" };
-        //     }
-        //     return prev;
-        //   });
-        // }
-        queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
-          if (!old || !Array.isArray(old.data)) return old;
-          return {
-            ...old,
-            data: old.data.map((msg) =>
-              msg.id === newMessage?.mss?.id
-                ? {
-                    ...msg,
-                    call_state: newMessage?.call?.call_state,
-                    call_duration: newMessage?.call?.call_duration,
-                  }
-                : msg
-            ),
-          };
-        });
         return;
       }
+
+      // // 🔇 If another device picked the call, stop ringtone + clear callMessage
+      // if (newMessage?.call?.call_state === "pick") {
+      //   audioController.stopRingtone();
+      //   setCallMessage((prev) => {
+      //     if (prev?.user_id === newMessage?.mss?.user_id) {
+      //       return { ...prev, status: "picked" };
+      //     }
+      //     return prev;
+      //   });
+      // }
+      console.log(cacheKeyUserId);
+
+      queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
+        if (!old || !Array.isArray(old.pages)) return old;
+        console.log(old);
+
+        const lastPage = old.pages[old.pages.length - 1];
+
+        // Avoid duplicates
+        const exists = lastPage.data.some(
+          (msg) => msg.id === newChatMessage.id
+        );
+        if (exists) return old;
+
+        const newPage = {
+          ...lastPage,
+          data: [
+            ...lastPage.data,
+            {
+              ...newChatMessage,
+              message: newMessage.message,
+              is_my_chat: isMyChat ? "yes" : "no",
+            },
+          ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
+        };
+
+        return {
+          ...old,
+          pages: [...old.pages.slice(0, -1), newPage],
+        };
+      });
     });
 
     channel.bind("pusher:subscription_error", (status) => {
