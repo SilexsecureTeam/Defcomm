@@ -51,7 +51,9 @@ const useGroupChannels = ({ groups, token }) => {
         }));
 
       const handleMessage = ({ data }) => {
-        const senderId = data?.data?.user_id;
+        const incomingMsg = data.data;
+        const senderId = incomingMsg.user_id;
+
         console.log("Group message received:", data);
 
         if (data?.state === "is_typing") {
@@ -70,7 +72,9 @@ const useGroupChannels = ({ groups, token }) => {
 
         if (!senderId) return;
 
-        if (senderId !== authDetails?.user_enid) {
+        const isMyChat = senderId === authDetails?.user?.id;
+
+        if (!isMyChat) {
           addNotification(data);
           onNewNotificationToast({
             senderName: data?.sender?.name,
@@ -78,35 +82,41 @@ const useGroupChannels = ({ groups, token }) => {
             type: "group",
             groupName: group.group_name,
             onClick: () => {
-              markAsSeen(data?.data?.id);
-              navigate(`/dashboard/group/${data?.data?.user_to}/chat`);
+              markAsSeen(incomingMsg.id);
+              navigate(`/dashboard/group/${incomingMsg.user_to}/chat`);
             },
             isChatVisible: chatVisibility,
-            tagMess: data?.data?.tag_mess,
-            tagUser: data?.data?.tag_user,
+            tagMess: incomingMsg.tag_mess,
+            tagUser: incomingMsg.tag_user,
             myId: authDetails?.user_enid,
           });
         }
 
         queryClient.setQueryData(["groupMessages", group.group_id], (old) => {
-          if (!old?.data) return old;
-          const exists = old.data.some((msg) => msg.id === data.data.id);
-          const isMyChat = data.data.user_id === authDetails?.user?.id;
-          return exists
-            ? old
-            : {
-                ...old,
-                data: [
-                  ...old.data,
-                  {
-                    ...data.data,
-                    message: data?.message,
-                    is_my_chat: isMyChat ? "yes" : "no",
-                  },
-                ].sort(
-                  (a, b) => new Date(a.created_at) - new Date(b.created_at)
-                ),
-              };
+          if (!old || !Array.isArray(old.pages)) return old;
+
+          const lastPage = old.pages[old.pages.length - 1];
+
+          // Avoid duplicates
+          const exists = lastPage.data.some((msg) => msg.id === incomingMsg.id);
+          if (exists) return old;
+
+          const newPage = {
+            ...lastPage,
+            data: [
+              ...lastPage.data,
+              {
+                ...incomingMsg,
+                message: data.message, // ensure latest message is set
+                is_my_chat: isMyChat ? "yes" : "no",
+              },
+            ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
+          };
+
+          return {
+            ...old,
+            pages: [...old.pages.slice(0, -1), newPage],
+          };
         });
       };
 

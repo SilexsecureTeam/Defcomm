@@ -15,7 +15,7 @@ const DashboardLayout = () => {
     setIsOpenComm,
     isCommActive,
     activeChannel,
-    currentSpeaker, // 🆕 comes from context
+    currentSpeaker,
   } = useContext(CommContext);
 
   const { pathname } = useLocation();

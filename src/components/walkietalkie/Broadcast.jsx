@@ -34,9 +34,13 @@ const Broadcast = () => {
   } = useContext(CommContext);
   const { setIsMinimized } = useContext(DashboardContext);
 
-  const { getChannelList, getInvitedChannelList, deleteChannel } = useComm();
-  const { data: channels, isLoading, isError, refetch } = getChannelList;
-  const { data: invitedChannels } = getInvitedChannelList;
+  const { getInvitedChannelList, deleteChannel } = useComm();
+  const {
+    data: activeChannels,
+    isLoading,
+    isError,
+    refetch,
+  } = getInvitedChannelList;
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState(null);
@@ -65,10 +69,7 @@ const Broadcast = () => {
   };
   const handleDeleteClick = (e, channel) => {
     e.stopPropagation();
-    if (
-      channel.channel_id_un === activeChannel?.channel_id_un &&
-      isCommActive
-    ) {
+    if (channel.channel_id === activeChannel?.channel_id && isCommActive) {
       onPrompt({
         title: "Cannot Delete Active Channel",
         message:
@@ -94,15 +95,6 @@ const Broadcast = () => {
       },
     });
   };
-
-  // Combine channels and invitedChannels while avoiding duplicates
-  const combinedChannels = [
-    ...(channels || []),
-    ...(invitedChannels?.filter(
-      (inv) =>
-        !(channels || []).some((ch) => ch.channel_id_un === inv.channel_id_un)
-    ) || []),
-  ];
 
   return (
     <div className="p-2">
@@ -137,7 +129,7 @@ const Broadcast = () => {
       )}
 
       {/* Channel List */}
-      {!isLoading && !isError && combinedChannels.length === 0 && (
+      {!isLoading && !isError && activeChannels.length === 0 && (
         <EmptyState
           title="No Channels Available"
           description="You haven't joined or created any broadcast channels yet. Once available, they'll show up here."
@@ -145,11 +137,9 @@ const Broadcast = () => {
       )}
       {!isLoading &&
         !isError &&
-        combinedChannels.map((item) => {
+        activeChannels.map((item) => {
           const isActive = activeChannel?.frequency === item.frequency;
-          const isInvited = invitedChannels?.some(
-            (inv) => inv.channel_id_un === item.channel_id_un
-          );
+          const isInvited = item?.userType !== "creator";
 
           return (
             <div

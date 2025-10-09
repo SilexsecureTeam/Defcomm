@@ -102,11 +102,12 @@ const ChatInterface = () => {
 
         <div className="flex items-center gap-2">
           <button
+            disabled={!chatUserData}
             onClick={() => {
               setShowCall(true);
-              setModalTitle("Place a Call");
+              setModalTitle(`Call ${chatUserData?.contact_name}`);
             }}
-            className="p-2 rounded-full hover:bg-gray-700/60 transition"
+            className="p-2 rounded-full hover:bg-gray-700/60 transition disabled:opacity-50 disabled:cursor-not-allowed"
             title="Call"
           >
             <MdCall size={22} color={COLORS.headerText} />

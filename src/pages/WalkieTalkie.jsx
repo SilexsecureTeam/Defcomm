@@ -1,11 +1,11 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import Broadcast from "../components/walkietalkie/Broadcast";
 import RecentCalls from "../components/walkietalkie/RecentCalls";
 import SEOHelmet from "../engine/SEOHelmet";
-import { FaBarsStaggered } from "react-icons/fa6";
 import { IoFlash } from "react-icons/io5";
 import CommInterface from "../components/walkietalkie/CommInterface";
 import { CommContext } from "../context/CommContext";
+import { MdOutlinePodcasts } from "react-icons/md";
 
 const WalkieTalkie = () => {
   const { setIsOpenComm } = useContext(CommContext);
@@ -23,10 +23,11 @@ const WalkieTalkie = () => {
           <IoFlash className="text-yellow" />{" "}
           <span className="hidden md:block">Upgrade to Premium</span>
         </button>
-        <FaBarsStaggered
+        {/* Better Comm Icon */}
+        <MdOutlinePodcasts
           aria-label="Open Communication Panel"
-          size={24}
-          className="cursor-pointer"
+          size={28}
+          className="cursor-pointer text-white hover:text-yellow transition-colors"
           onClick={() => setIsOpenComm(true)}
         />
       </div>

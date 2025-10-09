@@ -17,7 +17,7 @@ import useGroups from "../hooks/useGroup";
 
 const ContactList = () => {
   const { authDetails } = useContext(AuthContext);
-  const { setSelectedChatUser, setShowCall, setCallType, setShowContactModal } =
+  const { setShowCall, setShowContactModal, setModalTitle } =
     useContext(ChatContext);
 
   const [selectedContactForLogs, setSelectedContactForLogs] = useState(null);
@@ -43,18 +43,6 @@ const ContactList = () => {
     staleTime: 0,
   });
 
-  const handleCall = (user, call) => {
-    setSelectedChatUser({
-      ...user,
-      chat_meta: {
-        chat_user_type: user?.contact_type || "user",
-        chat_user_id: user.contact_id,
-        chat_id: "null",
-      },
-    });
-    setShowCall(true);
-    setCallType(call);
-  };
   const handleDeleteContact = async (contactId) => {
     setDeletingContactId(contactId);
     try {
@@ -197,7 +185,10 @@ const ContactList = () => {
                         <img src={defIcon} alt="icon" className="w-6 h-6" />
                       </span>
                       <div className="flex gap-2">
-                        <div className="font-medium">
+                        <div
+                          className="font-medium line-clamp-1"
+                          title={contact?.contact_name}
+                        >
                           {contact?.contact_name}
                         </div>
                         <div className="flex gap-2 text-xs mt-1">
@@ -234,7 +225,10 @@ const ContactList = () => {
                         whileTap={{ scale: 0.95 }}
                         title="Call"
                         className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700"
-                        onClick={() => handleCall(contact, "audio")}
+                        onClick={() => {
+                          setShowCall(true);
+                          setModalTitle(`Call ${contact.contact_name}`);
+                        }}
                       >
                         <FiPhone />
                       </motion.button>
@@ -243,7 +237,10 @@ const ContactList = () => {
                         whileTap={{ scale: 0.95 }}
                         title="Video Call"
                         className="p-2 rounded-full bg-gray-100 hover:bg-oliveLight/80 hover:text-white text-gray-700"
-                        onClick={() => handleCall(contact, "video")}
+                        onClick={() => {
+                          setShowCall(true);
+                          setModalTitle(`Video Call ${contact.contact_name}`);
+                        }}
                       >
                         <FiVideo />
                       </motion.button>
