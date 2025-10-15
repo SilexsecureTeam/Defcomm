@@ -34,7 +34,7 @@ export const MeetingProvider = ({ children }) => {
           meetingId: providerMeetingId,
           name: authDetails?.user?.name || "You",
           participantId: authDetails?.user?.id,
-          micEnabled: true,
+          micEnabled: false,
           webcamEnabled: false,
           mode: "SEND_AND_RECV",
           chatEnabled: true,

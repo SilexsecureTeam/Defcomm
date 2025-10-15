@@ -4,6 +4,7 @@ import HeaderBar from "./HeaderBar";
 import { useNavigate } from "react-router-dom";
 import { MeetingContext } from "../../../context/MeetingContext";
 import { useMeeting } from "@videosdk.live/react-sdk";
+import { formatUtcToLocal } from "../../../utils/formmaters";
 
 type WaitingScreenProps = {
   waitingScreen: {
@@ -71,21 +72,29 @@ const WaitingScreen = ({
   }, [startTime]);
 
   const handleJoinClick = () => {
-    const now = new Date().getTime();
-    const meetingStart = new Date(waitingScreen.startdatetime).getTime();
+    const now = Date.now();
+
+    // Ensure consistent UTC parsing
+    const meetingStart = new Date(
+      waitingScreen.startdatetime + " UTC"
+    ).getTime();
+
     const meetingDurationMs = (waitingScreen.duration || 0) * 60 * 1000;
     const meetingEnd = meetingStart + meetingDurationMs;
 
+    // Meeting hasn't started yet
     if (now < meetingStart) {
-      alert("You can't join yet. The meeting has not started.");
+      alert("You can't join yet. The meeting hasn't started.");
       return;
     }
 
+    // Meeting already ended
     if (meetingDurationMs > 0 && now > meetingEnd) {
       alert("You can no longer join. The meeting has ended.");
       return;
     }
 
+    // If user is already in another meeting
     if (conference && providerMeetingId) {
       setShowEndMeetingModal(true);
     } else {
@@ -102,42 +111,50 @@ const WaitingScreen = ({
 
   return (
     <>
-      <HeaderBar onBack={() => navigate("/dashboard/conference")} />
-      <div className="h-screen bg-gray-900 text-white flex items-center justify-center z-50">
-        <div className="bg-[#1F2937] p-8 rounded-2xl shadow-2xl max-w-md w-[90%] text-center space-y-5 border border-gray-700">
-          <div className="text-sm text-gray-400 mb-2">
-            Meeting ID: {waitingScreen.meeting_id}
-          </div>
-          <h2 className="text-3xl font-bold">{waitingScreen.title}</h2>
-          {waitingScreen.agenda && (
-            <p className="text-gray-300 text-base italic">
-              {waitingScreen.agenda}
-            </p>
-          )}
+      <HeaderBar onBack={() => navigate("/dashboard/conference/my-meetings")} />
+      <div className="h-screen bg-gradient-to-br from-[#0A0F0A] via-[#111C11] to-[#0B130B] text-white flex items-center justify-center relative overflow-hidden">
+        {/* Subtle grid background */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.3)_1px,transparent_1px)] bg-[length:24px_24px]" />
+
+        <div className="relative bg-[#111A11]/90 border border-oliveGreen/40 shadow-2xl p-8 rounded-2xl max-w-md w-[90%] text-center backdrop-blur-sm">
+          <h2 className="text-3xl font-extrabold text-green-300 mb-2">
+            {waitingScreen.title}
+          </h2>
+
           {waitingScreen.subject && (
-            <p className="text-gray-400 text-sm">
-              Subject: {waitingScreen.subject}
+            <p className="text-green-300/70 font-medium mb-1">
+              {waitingScreen.subject}
             </p>
           )}
+
+          {waitingScreen.agenda && (
+            <p className="text-gray-400 italic mb-3">{waitingScreen.agenda}</p>
+          )}
+
           <p className="text-gray-400 text-sm">
-            Starts at: {new Date(waitingScreen.startdatetime).toLocaleString()}
+            Starts at:{" "}
+            <span className="text-green-300 font-semibold">
+              {formatUtcToLocal(waitingScreen.startdatetime)}
+            </span>
           </p>
 
-          <div className="text-lg font-semibold mt-2">
-            <CountdownTimer startTime={waitingScreen.startdatetime} />
+          <div className="mt-4">
+            <div className="text-lg font-semibold text-green-400">
+              <CountdownTimer startTime={waitingScreen.startdatetime} />
+            </div>
           </div>
 
-          <div className="flex justify-center gap-4 mt-6">
+          <div className="flex justify-center gap-4 mt-8">
             <button
-              className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-semibold transition"
               onClick={handleJoinClick}
               disabled={isJoining || pendingJoin}
+              className="px-6 py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white shadow-lg shadow-green-800/40 disabled:opacity-70"
             >
               {isJoining || pendingJoin ? "Joining..." : "Join Meeting"}
             </button>
             <button
-              className="bg-gray-600 hover:bg-gray-700 px-6 py-2 rounded-lg font-semibold transition"
               onClick={onCancel}
+              className="px-6 py-2 rounded-lg font-semibold border border-green-700/50 text-green-300 hover:bg-green-900/40 transition-all"
             >
               Cancel
             </button>
@@ -146,24 +163,26 @@ const WaitingScreen = ({
       </div>
 
       {showEndMeetingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white text-black p-6 rounded-lg max-w-sm w-full space-y-4 shadow-xl">
-            <h3 className="text-xl font-semibold">Leave Current Meeting?</h3>
-            <p>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1A231A] border border-green-800/50 text-white p-6 rounded-lg max-w-sm w-full space-y-4 shadow-2xl">
+            <h3 className="text-xl font-semibold text-green-300">
+              Leave Current Meeting?
+            </h3>
+            <p className="text-gray-300">
               You are already in another meeting. Do you want to end it and join
               this one?
             </p>
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={() => setShowEndMeetingModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEndAndJoin}
                 disabled={isJoining || pendingJoin}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white transition"
               >
                 End and Join
               </button>

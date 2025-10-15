@@ -1,50 +1,47 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
 import useConference from "../hooks/useConference";
-import JoinMeetingForm from "../components/video-sdk/conference/JoinMeetingForm";
 import MeetingList from "../components/video-sdk/conference/MeetingList";
 import HeaderBar from "../components/video-sdk/conference/HeaderBar";
-const MyMeetings = () => {
+
+const MyMeetings = ({ all = false }) => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
-  const { getMeetingByIdQuery, getMyMeetingsQuery, getMeetingInviteQuery } =
-    useConference(); // <-- Make sure this exists in your hook
-  const [showJoinForm, setShowJoinForm] = useState(false);
-  const {
-    register: registerJoin,
-    handleSubmit: handleSubmitJoin,
-    formState: { errors: errorsJoin },
-  } = useForm({
-    defaultValues: {
-      meetingId: meetingId || "",
-    },
-  });
-  const { data: meeting, isLoading } = getMeetingByIdQuery(meetingId);
+  const { getMyMeetingsQuery, getMeetingInviteQuery } = useConference();
 
   const { data: createdMeetings = [], isLoading: loadingCreated } =
     getMyMeetingsQuery;
   const { data: invitedMeetings = [], isLoading: loadingInvited } =
     getMeetingInviteQuery;
-  const now = new Date();
+
   const labelMeetings = (meetings, source) =>
     meetings.map((m) => ({ ...m, _source: source }));
 
-  const allMeetings = useMemo(() => {
-    return [
-      ...labelMeetings(createdMeetings, "You"),
-      ...labelMeetings(invitedMeetings, "Invited"),
-    ].sort((a, b) => new Date(b.startdatetime) - new Date(a.startdatetime)); // sort with latest first
-  }, [createdMeetings, invitedMeetings]);
+  const meetingsToShow = useMemo(() => {
+    if (all) {
+      // All meetings: created + invited
+      return [
+        ...labelMeetings(createdMeetings, "You"),
+        ...labelMeetings(invitedMeetings, "Invited"),
+      ].sort((a, b) => new Date(b.startdatetime) - new Date(a.startdatetime));
+    } else {
+      // Only your meetings
+      return labelMeetings(createdMeetings, "You").sort(
+        (a, b) => new Date(b.startdatetime) - new Date(a.startdatetime)
+      );
+    }
+  }, [all, createdMeetings, invitedMeetings]);
+  const headerTitle = all ? "All Meetings" : "My Meetings";
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto text-white">
       <HeaderBar />
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Meetings</h2>
+        <h2 className="text-xl font-bold">{headerTitle}</h2>
       </div>
 
       <MeetingList
-        meetings={allMeetings}
+        meetings={meetingsToShow}
         showCountdown={true}
         onMeetingClick={(meeting) => {
           navigate(`/dashboard/conference/waiting/${meeting?.id}`);

@@ -7,6 +7,7 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import audioController from "../utils/audioController";
 import messageSound from "../assets/audio/message.mp3";
+import startRecordSound from "../assets/audio/start-recording.mp3";
 import { onPrompt } from "../utils/notifications/onPrompt";
 import { onSuccess } from "../utils/notifications/OnSuccess";
 
@@ -30,6 +31,9 @@ export default function useConferenceParticipants() {
 
   const joinedParticipantsRef = useRef(new Set());
   const removedParticipantsRef = useRef(new Set());
+  const leftParticipantsRef = useRef(new Set());
+
+  const recordingStateHandledRef = useRef(null);
 
   const {
     participants,
@@ -65,6 +69,9 @@ export default function useConferenceParticipants() {
       }
     },
     onParticipantLeft: (participant) => {
+      if (leftParticipantsRef.current.has(participant.id)) return; // ignore duplicates
+      leftParticipantsRef.current.add(participant.id);
+
       if (removedParticipantsRef.current.has(participant.id)) {
         onPrompt({
           title: "Participant Removed!",
@@ -105,14 +112,17 @@ export default function useConferenceParticipants() {
       setIsScreenSharing(true);
     },
     onRecordingStateChanged: ({ status }) => {
+      if (recordingStateHandledRef.current === status) return; // ignore duplicates
+      recordingStateHandledRef.current = status;
+
       if (status === Constants.recordingEvents.RECORDING_STARTING) {
         onPrompt({
           title: "Recording Starting",
           message: "The recording process is initializing",
         });
       } else if (status === Constants.recordingEvents.RECORDING_STARTED) {
+        audioController.playRingtone(startRecordSound);
         setRecordingStartedAt(Date.now());
-
         onSuccess({
           message: "Recording Started",
           success: "The meeting is now being recorded",
@@ -123,14 +133,19 @@ export default function useConferenceParticipants() {
           message: "The recording process is ending",
         });
       } else if (status === Constants.recordingEvents.RECORDING_STOPPED) {
+        audioController.playRingtone(startRecordSound);
         setRecordingStartedAt(null);
         setRecordingTimer("00:00");
-
         onSuccess({
           message: "Recording Stopped",
           success: "The meeting recording has ended",
         });
       }
+
+      // reset after 1s so state changes are captured again
+      setTimeout(() => {
+        recordingStateHandledRef.current = null;
+      }, 1000);
     },
     onError: (error) => {
       onFailure({

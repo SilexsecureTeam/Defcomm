@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import CountdownTimer from "./CountdownTimer";
 import { FaVideo } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { formatUtcToLocal } from "../../../utils/formmaters";
 
 const MyMeetingsSlider = ({
   title,
@@ -116,14 +117,16 @@ const MyMeetingsSlider = ({
 
                   <div className="flex items-center gap-2 mb-1 pr-2">
                     <FaVideo className="text-green-400 text-2xl" />
-                    <p className="font-semibold text-lg truncate">
+                    <p className="font-semibold text-lg line-clamp-1">
                       {meeting.title}
                     </p>
                   </div>
 
-                  <p className="text-sm text-gray-400 mb-1">{meeting.agenda}</p>
+                  <p className="text-sm text-gray-400 mb-1 line-clamp-1">
+                    {meeting.agenda}
+                  </p>
                   <p className="text-sm text-white mb-1">
-                    {new Date(meeting.startdatetime).toLocaleString()}
+                    {formatUtcToLocal(meeting.startdatetime)}
                   </p>
 
                   {showCountdown && (

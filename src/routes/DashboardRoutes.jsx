@@ -143,6 +143,10 @@ const DashboardRoutes = () => {
                   element={<ProtectedMyMeetings />}
                 />
                 <Route
+                  path="conference/meetings"
+                  element={<ProtectedMyMeetings all={true} />}
+                />
+                <Route
                   path="conference/create"
                   element={<ProtectedCreateMeeting />}
                 />

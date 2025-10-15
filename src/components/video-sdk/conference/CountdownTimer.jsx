@@ -1,55 +1,45 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { FiLoader } from "react-icons/fi";
 
 const CountdownTimer = ({ startTime, durationMinutes = 60 }) => {
-  const [status, setStatus] = useState("countdown"); // "countdown" | "ongoing" | "ended"
   const [timeLeft, setTimeLeft] = useState("");
-  const [statusColor, setStatusColor] = useState("text-green-400");
+  const [status, setStatus] = useState("loading");
+  const [statusColor, setStatusColor] = useState("text-gray-400");
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    const [datePart, timePart] = startTime.split(" ");
-    // Force UTC by appending "Z" (or you could append +01:00 for Nigeria time)
-    const startUTC = new Date(`${datePart}T${timePart}Z`);
+    let mounted = true;
+
+    // --- Parse backend UTC properly ---
+    // Ensure it's treated as UTC
+    const startUTC = new Date(startTime.replace(" ", "T") + "Z");
     const endUTC = new Date(startUTC.getTime() + durationMinutes * 60000);
 
-    const interval = setInterval(() => {
-      const nowUTC = new Date(
-        Date.UTC(
-          new Date().getUTCFullYear(),
-          new Date().getUTCMonth(),
-          new Date().getUTCDate(),
-          new Date().getUTCHours(),
-          new Date().getUTCMinutes(),
-          new Date().getUTCSeconds()
-        )
-      );
+    const updateCountdown = () => {
+      if (!mounted) return;
+      const now = new Date(); // user's local time
 
-      if (nowUTC < startUTC) {
-        const diff = startUTC - nowUTC;
-
-        const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
-        const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 7);
+      if (now < startUTC) {
+        const diff = startUTC - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
 
         const parts = [];
-        if (weeks > 0) parts.push(`${weeks}w`);
         if (days > 0) parts.push(`${days}d`);
         if (hours > 0) parts.push(`${hours}h`);
         if (minutes > 0) parts.push(`${minutes}m`);
-        if (seconds >= 0) parts.push(`${seconds}s`);
+        parts.push(`${seconds}s`);
 
         setStatus("countdown");
         setTimeLeft(parts.join(" "));
-
-        if (weeks === 0 && days === 0 && hours === 0 && minutes <= 5) {
-          setStatusColor("text-red-400 font-bold");
-        } else if (weeks === 0 && days === 0 && hours === 0) {
-          setStatusColor("text-yellow");
-        } else {
-          setStatusColor("text-green-400");
-        }
-      } else if (nowUTC >= startUTC && nowUTC < endUTC) {
+        setStatusColor(
+          days === 0 && hours === 0 && minutes <= 5
+            ? "text-red-400 font-bold"
+            : "text-green-400"
+        );
+      } else if (now >= startUTC && now < endUTC) {
         setStatus("ongoing");
         setTimeLeft("Ongoing");
         setStatusColor("text-blue-400 font-semibold");
@@ -57,15 +47,29 @@ const CountdownTimer = ({ startTime, durationMinutes = 60 }) => {
         setStatus("ended");
         setTimeLeft("Ended");
         setStatusColor("text-gray-400 font-medium");
-        clearInterval(interval);
+        clearInterval(intervalRef.current);
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(interval);
+    updateCountdown();
+    intervalRef.current = setInterval(updateCountdown, 1000);
+
+    return () => {
+      mounted = false;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [startTime, durationMinutes]);
 
+  if (status === "loading") {
+    return (
+      <div className="flex items-center gap-2 text-gray-400 text-sm mt-2">
+        <FiLoader className="animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <p className={`text-sm mt-2 ${statusColor}`}>
+    <p className={`text-sm mt-2 transition-colors duration-300 ${statusColor}`}>
       {status === "countdown" ? `Starts in: ${timeLeft}` : timeLeft}
     </p>
   );

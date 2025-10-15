@@ -1,18 +1,19 @@
 import { useContext, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaSpinner } from "react-icons/fa";
 
 import { onFailure } from "../../../utils/notifications/OnFailure";
 import {
   extractErrorMessage,
   formatDateTimeForBackend,
+  formatDateTimeForInput,
 } from "../../../utils/formmaters";
 import { createMeeting } from "../Api";
 import { MeetingContext } from "../../../context/MeetingContext";
 import GroupSelectorModal from "../../dashboard/GroupSelectorModal";
 import useConference from "../../../hooks/useConference";
 import HeaderBar from "./HeaderBar";
+import Spinner from "../../common/Spinner";
 
 const CreateMeetingForm = () => {
   const location = useLocation();
@@ -33,7 +34,6 @@ const CreateMeetingForm = () => {
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm({
     defaultValues: {
       meeting_id: "",
@@ -52,7 +52,7 @@ const CreateMeetingForm = () => {
         subject: editData.subject || "",
         title: editData.title || "",
         agenda: editData.agenda || "",
-        startdatetime: editData.startdatetime?.slice(0, 16) || "",
+        startdatetime: formatDateTimeForInput(editData?.startdatetime) || "",
         group_user_id: editData.group_user_id || "",
       });
 
@@ -118,22 +118,22 @@ const CreateMeetingForm = () => {
       <HeaderBar />
       <form
         onSubmit={handleSubmit(onCreateMeeting)}
-        className="w-full text-white"
+        className="w-full text-white my-5"
       >
-        <h2 className="text-2xl font-semibold mb-6">
+        <h2 className="text-2xl font-semibold mb-6 text-[#A7C957]">
           {isEditing ? "Update Meeting" : "Create a New Meeting"}
         </h2>
 
-        {["subject", "title", "agenda"].map((field) => (
+        {["title", "subject", "agenda"].map((field) => (
           <div key={field}>
-            <label className="block mb-1 font-semibold capitalize">
+            <label className="block mb-1 font-semibold capitalize text-[#A7C957]">
               {field}
             </label>
             <input
               type="text"
               placeholder={field}
               {...register(field, { required: `${field} is required` })}
-              className="p-3 border border-gray-300 bg-transparent rounded-md w-full mb-3 text-gray-300"
+              className="p-3 border border-[#4e6220] bg-[#1A1A1A] rounded-md w-full mb-3 text-gray-200 placeholder:text-gray-400 focus:border-[#A7C957] outline-none transition-all"
             />
             {errors[field] && (
               <p className="text-red-500 mb-3">{errors[field].message}</p>
@@ -142,13 +142,15 @@ const CreateMeetingForm = () => {
         ))}
 
         {/* Start Datetime */}
-        <label className="block mb-1 font-semibold">Start Date & Time</label>
+        <label className="block mb-1 font-semibold text-[#A7C957]">
+          Start Date & Time
+        </label>
         <input
           type="datetime-local"
           {...register("startdatetime", {
             required: "Start datetime is required",
           })}
-          className="p-3 border border-gray-300 bg-transparent rounded-md w-full mb-6 text-gray-300 placeholder:text-gray-300"
+          className="p-3 border border-[#4e6220] bg-[#1A1A1A] rounded-md w-full mb-3 text-gray-200 placeholder:text-gray-400 focus:border-[#A7C957] outline-none transition-all"
         />
         {errors.startdatetime && (
           <p className="text-red-500 mb-3">{errors.startdatetime.message}</p>
@@ -157,12 +159,14 @@ const CreateMeetingForm = () => {
         {/* Group Selection */}
         {!isEditing && (
           <>
-            <label className="block mb-1 font-semibold">Select Group</label>
+            <label className="block mb-1 font-semibold text-[#A7C957]">
+              Select Group
+            </label>
             <div className="flex items-center gap-2 mb-3">
               <button
                 type="button"
                 onClick={() => setIsGroupModalOpen(true)}
-                className="px-3 py-2 bg-[#5C7C2A] rounded-md"
+                className="px-3 py-2 bg-[#5C7C2A] rounded-md hover:bg-[#4e6220] transition-all"
               >
                 {selectedGroup?.group_name || "Choose Group"}
               </button>
@@ -181,23 +185,32 @@ const CreateMeetingForm = () => {
         )}
 
         {/* Meeting ID */}
-        <label className="mb-1 font-semibold flex justify-between items-center">
-          Meeting ID
+        <div className="flex justify-between items-center mb-1">
+          <label className="font-semibold text-[#A7C957]">Meeting ID</label>
           <button
             type="button"
             onClick={generateMeetingId}
-            className="text-sm bg-[#5C7C2A] px-3 py-1 rounded-md hover:bg-[#4e6220] flex items-center gap-2"
+            disabled={isGeneratingId}
+            className="text-sm bg-[#5C7C2A] px-3 py-1 rounded-md hover:bg-[#4e6220] flex items-center gap-2 disabled:opacity-50"
           >
-            Generate ID{" "}
-            {isGeneratingId && <FaSpinner className="animate-spin text-xs" />}
+            {isGeneratingId ? (
+              <>
+                <Spinner size="text-sm" />
+                Generating...
+              </>
+            ) : (
+              "Generate ID"
+            )}
           </button>
-        </label>
+        </div>
+
         <input
           type="text"
           placeholder="Meeting ID"
           {...register("meeting_id", { required: "Meeting ID is required" })}
-          className="p-3 border border-gray-300 bg-transparent rounded-md w-full mb-3 text-gray-300"
+          className="p-3 border border-gray-600 bg-[#1A1A1A] rounded-md w-full mb-3 text-gray-200 placeholder:text-gray-400 focus:border-[#5C7C2A] outline-none transition-all"
         />
+
         {errors.meeting_id && (
           <p className="text-red-500 mb-3">{errors.meeting_id.message}</p>
         )}
@@ -206,13 +219,20 @@ const CreateMeetingForm = () => {
         <button
           type="submit"
           disabled={isCreatingMeeting}
-          className="w-full bg-oliveGreen p-3 rounded-md font-semibold hover:bg-olive disabled:opacity-50 flex justify-center items-center gap-2"
+          className="w-full bg-[#5C7C2A] p-3 rounded-md font-semibold hover:bg-[#4e6220] disabled:opacity-60 flex justify-center items-center gap-2 transition-all duration-200"
         >
-          {isEditing ? "Update Meeting" : "Create Meeting"}
-          {isCreatingMeeting && <FaSpinner className="animate-spin" />}
+          {isCreatingMeeting ? (
+            <>
+              <Spinner size="text-sm" />
+              {isEditing ? "Updating..." : "Creating..."}
+            </>
+          ) : (
+            <>{isEditing ? "Update Meeting" : "Create Meeting"}</>
+          )}
         </button>
       </form>
 
+      {/* Group Modal */}
       <GroupSelectorModal
         selectedGroup={selectedGroup}
         onSelectGroup={(group) => {
