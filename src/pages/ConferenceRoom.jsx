@@ -14,9 +14,11 @@ import { Info, Calendar, Clock, ClipboardList, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
 import { MdStop } from "react-icons/md";
+import { AuthContext } from "../context/AuthContext";
 
 const ConferenceRoom = () => {
   const { pathname } = useLocation();
+  const { authDetails } = useContext(AuthContext);
   const { conference } = useContext(MeetingContext);
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -83,7 +85,7 @@ const ConferenceRoom = () => {
       : startRecording(null, null, config, transcription);
   };
 
-  const isMyMeeting = true;
+  const isMyMeeting = authDetails?.user?.id === conference?.creator_id;
 
   return pathname === "/dashboard/conference/room" ? (
     <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
@@ -114,18 +116,22 @@ const ConferenceRoom = () => {
                 <span className="text-xs font-semibold text-gray-800">
                   Recording
                 </span>
-                <span className="text-xs font-mono font-bold text-red-600">
-                  {recordingTimer}
-                </span>
+                {isMyMeeting && (
+                  <span className="text-xs font-mono font-bold text-red-600">
+                    {recordingTimer}
+                  </span>
+                )}
 
                 {/* Stop Recording Icon Button */}
-                <button
-                  onClick={stopRecording}
-                  className="ml-2 p-1 text-red-600 hover:text-red-800 rounded-full transition"
-                  title="Stop Recording"
-                >
-                  <MdStop size={18} />
-                </button>
+                {isMyMeeting && (
+                  <button
+                    onClick={stopRecording}
+                    className="ml-2 p-1 text-red-600 hover:text-red-800 rounded-full transition"
+                    title="Stop Recording"
+                  >
+                    <MdStop size={18} />
+                  </button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -278,7 +284,6 @@ const ConferenceRoom = () => {
               )}
             </div>
 
-            {/* Footer */}
             {/* Footer */}
             <div className="mt-8 flex justify-between items-center">
               {/* Recording Toggle */}

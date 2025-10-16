@@ -111,7 +111,7 @@ const WaitingScreen = ({
 
   return (
     <>
-      <HeaderBar onBack={() => navigate("/dashboard/conference/my-meetings")} />
+      <HeaderBar onBack={() => navigate("/dashboard/conference/meetings")} />
       <div className="h-screen bg-gradient-to-br from-[#0A0F0A] via-[#111C11] to-[#0B130B] text-white flex items-center justify-center relative overflow-hidden">
         {/* Subtle grid background */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.3)_1px,transparent_1px)] bg-[length:24px_24px]" />
