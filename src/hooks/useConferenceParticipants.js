@@ -62,12 +62,12 @@ export default function useConferenceParticipants() {
       if (!joinedParticipantsRef.current.has(id)) {
         joinedParticipantsRef.current.add(id);
         audioController.playRingtone(messageSound);
-        onPrompt({
-          title: "Participant joined!",
-          message: `${
-            participant?.displayName || "A participant"
-          } is now in the meeting`,
-        });
+        // onPrompt({
+        //   title: "Participant joined!",
+        //   message: `${
+        //     participant?.displayName || "A participant"
+        //   } is now in the meeting`,
+        // });
       }
     },
     onParticipantLeft: (participant) => {
