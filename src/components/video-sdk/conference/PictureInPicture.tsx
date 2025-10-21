@@ -31,6 +31,7 @@ const PictureInPicture = ({
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const [dragConstraints, setDragConstraints] = useState(null);
+  const [showControls, setShowControls] = useState(false);
 
   const { authDetails } = useContext(AuthContext);
   const myId = me?.id;
@@ -39,6 +40,10 @@ const PictureInPicture = ({
   const [handRaised, setHandRaised] = useState(false);
   const [raisedHands, setRaisedHands] = useState([]);
 
+  // Detect touch devices
+  const isTouchDevice = useMemo(() => {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  }, []);
   // Determine active speaker
   const activeSpeaker = useMemo(() => {
     if (!activeSpeakerId) return me;
@@ -89,6 +94,22 @@ const PictureInPicture = ({
     }
   }, [handMessages, myId]);
 
+  useEffect(() => {
+    if (!isTouchDevice) return;
+
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowControls(false);
+      }
+    };
+
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isTouchDevice]);
+
   /** Raise hand toggle */
   const toggleRaiseHand = () => {
     const newState = !handRaised;
@@ -138,6 +159,9 @@ const PictureInPicture = ({
                  backdrop-blur-md flex items-center justify-center
                  cursor-grab active:cursor-grabbing
                  select-none"
+      onMouseEnter={() => setShowControls(true)}
+      onMouseLeave={() => setShowControls(false)}
+      onClick={() => isTouchDevice && setShowControls(true)}
     >
       {/* Active Speaker */}
       <div className="flex-1 relative h-full rounded-xl overflow-hidden">
@@ -206,10 +230,14 @@ const PictureInPicture = ({
       {/* Hover Controls */}
       <motion.div
         initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1 }}
-        className="absolute inset-0 z-[50] flex items-end justify-center
-             gap-4 pb-3 bg-black/30  rounded-xl
-             transition-opacity duration-300"
+        animate={{ opacity: showControls || !isTouchDevice ? 1 : 0 }}
+        className={`absolute inset-0 z-[50] flex items-end justify-center gap-4 pb-3
+              bg-black/30 rounded-xl transition-opacity duration-300
+              ${
+                showControls || !isTouchDevice
+                  ? "pointer-events-auto"
+                  : "pointer-events-none"
+              }`}
       >
         <button
           onClick={() => navigate("/dashboard/conference/room")}

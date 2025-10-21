@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import Modal from '../modal/Modal';
+import { useState } from "react";
+import Modal from "../modal/Modal";
 
 function EmergencyBanner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,10 +16,13 @@ function EmergencyBanner() {
     <div className="bg-oliveGreen text-gray-900 p-6 min-h-64 flex flex-col md:flex-row md:flex-wrap justify-between gap-2">
       <div className="flex-1 flex flex-col md:w-1/2 gap-2 justify-between">
         <h2 className="text-xl md:text-2xl font-bold flex items-center space-x-2">
-          <span>DEFCOMM Presentation With Nigeria Army Signal Corp Lagos</span>
+          <span>GED Global Encryption Day 2025 - Hosted by DEFCOMM</span>
         </h2>
         <p className="text-sm opacity-70 font-medium max-w-[90%]">
-          The presentation scheduled for April 22, 2025, is confirmed at 11:00 AM, and a notification has been sent accordingly.
+          Join cybersecurity professionals and defense experts worldwide for the
+          Global Encryption Day (GED) on October 21, 2025. Discover the latest
+          advancements in encryption, data sovereignty, and digital defense
+          strategies.
         </p>
         <button
           onClick={handleExploreClick}
@@ -33,24 +36,30 @@ function EmergencyBanner() {
         <Modal isOpen={isModalOpen} closeModal={handleCloseModal}>
           <div className="max-w-[600px] p-4 space-y-4 text-gray-800 bg-white">
             <h3 className="text-xl font-bold">
-              Defcomm Unveils Innovative End-to-End Encryption System to Nigerian Army Signal Corps
+              Global Encryption Day 2025 – Strengthening Digital Trust{" "}
             </h3>
             <p className="text-sm">
-              Defcomm will be officially presenting its groundbreaking end-to-end Encryption System to the Nigerian Army Signal Corps,
-              marking a major step forward in secure military communications.
+              Hosted by <strong>DEFCOMM Solutions</strong>, GED 2025 brings
+              together leaders in cybersecurity, cryptography, and defense
+              communications to explore the evolution of encryption technologies
+              in a hyperconnected world.
             </p>
             <p className="text-sm">
-              Designed with military-grade encryption protocols, the end-to-end system ensures full-spectrum protection for voice, data,
-              and digital transmissions—offering end-to-end security with enhanced speed, reliability, and resilience against modern cyber threats.
+              The hybrid event—held both virtually and physically—will showcase
+              key innovations in end-to-end encryption, national defense-grade
+              communication systems, and global data protection frameworks.
             </p>
             <p className="text-sm">
-              During the presentation, Defcomm’s technical team will demonstrate the system’s capabilities, highlighting real-time secure messaging,
-              encrypted data transfer, and seamless integration with existing military infrastructure.
+              Attendees will experience live demonstrations, expert panel
+              discussions, and collaborative sessions on securing the digital
+              future through innovation and policy alignment.
             </p>
             <p className="text-sm">
-              Defcomm remains committed to supporting national defense with cutting-edge communication solutions built for the challenges of today and the future.
+              <strong>Date:</strong> Tuesday, October 21, 2025 <br />
+              <strong>Venue:</strong> Hybrid (Physical + Virtual) <br />
+              <strong>Host:</strong> DEFCOMM Solutions <br />
+              <strong>Theme:</strong> “Strong Encryption, Stronger Future”
             </p>
-            
           </div>
         </Modal>
       )}

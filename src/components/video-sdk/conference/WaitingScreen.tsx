@@ -34,7 +34,6 @@ const WaitingScreen = ({
 }: WaitingScreenProps) => {
   const { authDetails } = useContext(AuthContext);
   const startTime = new Date(waitingScreen.startdatetime).getTime();
-  const [countdown, setCountdown] = useState("");
   const [showEndMeetingModal, setShowEndMeetingModal] = useState(false);
   const [pendingJoin, setPendingJoin] = useState(false);
   const { leave } = useMeeting();
@@ -62,12 +61,10 @@ const WaitingScreen = ({
 
       if (distance <= 0) {
         clearInterval(interval);
-        setCountdown("Meeting is starting...");
       } else {
         const hours = Math.floor(distance / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        setCountdown(`${hours}h ${minutes}m ${seconds}s`);
       }
     }, 1000);
 
