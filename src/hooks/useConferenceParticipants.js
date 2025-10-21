@@ -100,16 +100,18 @@ export default function useConferenceParticipants() {
         setIsScreenSharing(false);
         return;
       }
-      const presenter = participants.get(newPresenterId);
+
+      const presenter = participants?.get(newPresenterId);
+      const presenterName = presenter?.displayName || "A participant";
       const isSelf = Number(newPresenterId) === Number(me?.id);
+
       onPrompt({
         message: "Screen Sharing Started!",
         success: isSelf
           ? "You are now sharing your screen"
-          : `${
-              presenter?.displayName || "A participant"
-            } has started sharing their screen`,
+          : `${presenterName} has started sharing their screen`,
       });
+
       audioController.playRingtone(messageSound);
       setIsScreenSharing(true);
     },

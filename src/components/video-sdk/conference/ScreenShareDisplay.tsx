@@ -131,7 +131,7 @@ const ScreenShareDisplay = ({ participantId, isUser }) => {
     >
       {/* Header */}
       <div className="absolute top-0 left-0 w-full flex justify-between items-center px-4 py-2 bg-black bg-opacity-50 z-20">
-        <span className="text-white font-semibold">
+        <span className="text-white font-semibold truncate">
           {isUser ? "You" : displayName || "Presenter"}
         </span>
         <button

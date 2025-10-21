@@ -15,6 +15,7 @@ import ParticipantVideo from "./ParticipantVideo";
 import { AuthContext } from "../../../context/AuthContext";
 import audioController from "../../../utils/audioController";
 import messageSound from "../../../assets/audio/message.mp3";
+import ScreenShareDisplay from "./ScreenShareDisplay";
 
 const AUTO_LOWER_TIMEOUT = 60000;
 
@@ -24,6 +25,8 @@ const PictureInPicture = ({
   handleLeaveMeeting,
   removedParticipantsRef,
   activeSpeakerId,
+  isScreenSharing,
+  presenterId,
 }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
@@ -146,6 +149,14 @@ const PictureInPicture = ({
           onToggleMaximize={() => {}}
         />
 
+        {isScreenSharing && presenterId && (
+          <div className="absolute top-0 left-0 w-full h-full z-40 rounded-xl overflow-hidden pointer-events-none">
+            <ScreenShareDisplay
+              participantId={presenterId}
+              isUser={presenterId === me?.id}
+            />
+          </div>
+        )}
         {!isSelfActive && (
           <motion.div
             initial={{ opacity: 0, y: -6 }}
@@ -164,7 +175,7 @@ const PictureInPicture = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.3 }}
-            className="absolute top-2 right-2 flex items-center gap-1
+            className="absolute z-[50] top-2 right-2 flex items-center gap-1
                bg-gray-900/90 text-white px-3 py-1 rounded-xl
                shadow-lg text-xs font-semibold backdrop-blur-md"
           >
@@ -196,19 +207,22 @@ const PictureInPicture = ({
       <motion.div
         initial={{ opacity: 0 }}
         whileHover={{ opacity: 1 }}
-        className="absolute inset-0 bg-black/30 flex flex-col items-center
-                   justify-end gap-3 pb-3 transition-opacity duration-300 rounded-xl"
+        className="absolute inset-0 z-[50] flex items-end justify-center
+             gap-4 pb-3 bg-black/30  rounded-xl
+             transition-opacity duration-300"
       >
         <button
           onClick={() => navigate("/dashboard/conference/room")}
-          className="bg-white/90 hover:bg-white text-black p-2 rounded-full shadow-lg transition-transform hover:scale-110"
+          className="bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-lg
+               transition-transform duration-200 hover:scale-110 flex items-center justify-center"
           title="Back to full view"
         >
-          <CgMaximizeAlt size={18} />
+          <CgMaximizeAlt size={20} />
         </button>
         <button
           onClick={handleLeaveMeeting}
-          className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110"
+          className="bg-red-600/80 hover:bg-red-700 text-white p-3 rounded-full shadow-lg
+               transition-transform duration-200 hover:scale-110 flex items-center justify-center"
           title="End Call"
         >
           <FaPhone size={20} />

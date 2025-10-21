@@ -162,7 +162,7 @@ const ConferenceRoom = () => {
         <div className="w-full h-[60vh] mb-6 bg-black rounded-md p-2">
           <ScreenShareDisplay
             participantId={presenterId}
-            isUser={Number(me?.id) === Number(presenterId)}
+            isUser={me?.id === presenterId}
           />
         </div>
       )}
@@ -241,6 +241,8 @@ const ConferenceRoom = () => {
       remoteParticipants={remoteParticipants}
       handleLeaveMeeting={handleLeaveMeeting}
       activeSpeakerId={activeSpeakerId}
+      isScreenSharing={isScreenSharing}
+      presenterId={presenterId}
     />
   );
 };
