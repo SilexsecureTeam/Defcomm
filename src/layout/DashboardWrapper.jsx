@@ -11,7 +11,6 @@ import { DashboardContext } from "../context/DashboardContext";
 import { ChatContext } from "../context/ChatContext";
 import { MeetingContext } from "../context/MeetingContext";
 import useChat from "../hooks/useChat";
-import DashboardLayout from "./DashboardLayout";
 
 // Sidebar Components
 import SideBar from "../components/dashboard/SideBar";
@@ -33,6 +32,7 @@ import { CommContext } from "../context/CommContext";
 import useGroupChannel from "../hooks/useGroupChannel";
 import useGroups from "../hooks/useGroup";
 import useAuth from "../hooks/useAuth";
+import { useRef } from "react";
 
 const DashboardWrapper = ({ children }) => {
   const { authDetails } = useContext(AuthContext);
@@ -43,6 +43,7 @@ const DashboardWrapper = ({ children }) => {
     setShowConference,
     setProviderMeetingId,
   } = useContext(MeetingContext);
+  const scrollContainerRef = useRef();
 
   const {
     showCall,
@@ -200,13 +201,12 @@ const DashboardWrapper = ({ children }) => {
           user={authDetails?.user}
         />
         <div
+          ref={scrollContainerRef}
           className={`${
             isChatPage ? "lg:!px-0 h-full" : "lg:px-4"
           } w-full h-[92%] overflow-y-auto px-2 lg:px-4 bg-transparent`}
         >
-          <DashboardLayout>
-            <Outlet />
-          </DashboardLayout>
+          <Outlet context={{ scrollContainerRef }} />
           {children}
         </div>
       </div>

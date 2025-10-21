@@ -90,7 +90,7 @@ const useAuth = () => {
     onSuccess: (data) => {
       onSuccess({
         message: "OTP Requested!",
-        success: `Here is the otp- ${data?.otp}`,
+        success: "Check your email for the verification code.", //`Here is the otp- ${data?.otp}`,
       });
     },
     onError: (err) => {

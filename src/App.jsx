@@ -78,9 +78,9 @@ const App = () => {
         </NotificationProvider>
       </AuthProvider>
 
-      {import.meta.env.VITE_MODE === "development" && (
+      {/* {import.meta.env.VITE_MODE === "development" && (
         <ReactQueryDevtools initialIsOpen={false} position="right" />
-      )}
+      )} */}
     </QueryClientProvider>
     //</SecureAccessGuard>
   );

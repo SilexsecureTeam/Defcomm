@@ -3,19 +3,19 @@ import ParticipantVideo from "../components/video-sdk/conference/ParticipantVide
 import ScreenShareDisplay from "../components/video-sdk/conference/ScreenShareDisplay";
 import PictureInPicture from "../components/video-sdk/conference/PictureInPicture";
 import ConferenceControl from "../components/video-sdk/conference/ConferenceControl";
-import RecordingControlButton from "../components/video-sdk/conference/RecordingControlButton";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import { useContext, useState } from "react";
 import { Constants } from "@videosdk.live/react-sdk";
 import { MeetingContext } from "../context/MeetingContext";
 import Modal from "../components/modal/Modal";
 import AddUsersToMeeting from "../components/dashboard/AddUsersToMeeting";
-import { Info, Calendar, Clock, ClipboardList, X } from "lucide-react";
+import { Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
 import { MdStop } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
-
+import ConferenceDetails from "../components/video-sdk/conference/ConferenceDetails";
+import ConferenceScrollBtn from "../components/ConferenceScrollBtn";
 const ConferenceRoom = () => {
   const { pathname } = useLocation();
   const { authDetails } = useContext(AuthContext);
@@ -23,7 +23,7 @@ const ConferenceRoom = () => {
   const [maximizedParticipantId, setMaximizedParticipantId] = useState(null);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-
+  const { scrollContainerRef } = useOutletContext();
   const {
     me,
     remoteParticipants,
@@ -38,6 +38,7 @@ const ConferenceRoom = () => {
     startRecording,
     stopRecording,
     removedParticipantsRef,
+    activeSpeakerId,
   } = useConferenceParticipants();
 
   const handleLeaveMeeting = async () => {
@@ -89,6 +90,7 @@ const ConferenceRoom = () => {
 
   return pathname === "/dashboard/conference/room" ? (
     <div className="flex flex-col flex-1 p-6 text-white bg-transparent min-h-screen relative">
+      <ConferenceScrollBtn scrollRef={scrollContainerRef} />
       {/* Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
@@ -208,13 +210,6 @@ const ConferenceRoom = () => {
         isScreenSharing={isScreenSharing}
         me={me}
       />
-      {/* {isMyMeeting && recordingStartedAt && (
-        <RecordingControlButton
-          toggleRecording={toggleRecording}
-          recordingState={recordingState}
-          recordingTimer={recordingTimer}
-        />
-      )} */}
       {showAddUserModal && (
         <Modal
           isOpen={showAddUserModal}
@@ -228,115 +223,13 @@ const ConferenceRoom = () => {
           isOpen={showDetailsModal}
           closeModal={() => setShowDetailsModal(false)}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.3 }}
-            className="bg-[#0b1a0b] shadow-2xl border border-green-800/10 p-6 text-white max-w-lg w-80 mx-auto relative"
-          >
-            {/* Header */}
-            <div className="pb-4 border-b border-green-800/40">
-              <h3 className="text-2xl font-bold text-green-300 tracking-wide">
-                {conference?.title || "Meeting Details"}
-              </h3>
-              {conference?.subject && (
-                <p className="text-sm text-gray-400 mt-1">
-                  {conference.subject}
-                </p>
-              )}
-            </div>
-
-            {/* Details */}
-            <div className="mt-5 space-y-4 text-sm">
-              {conference?.agenda && (
-                <div className="flex items-start gap-3">
-                  <ClipboardList className="text-green-500 mt-0.5" size={18} />
-                  <div>
-                    <p className="font-semibold text-green-400">Agenda</p>
-                    <p className="text-gray-200 mt-0.5 leading-relaxed">
-                      {conference.agenda}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {conference?.startdatetime && (
-                <div className="flex items-start gap-3">
-                  <Clock className="text-green-500 mt-0.5" size={18} />
-                  <div>
-                    <p className="font-semibold text-green-400">Start Time</p>
-                    <p className="text-gray-200 mt-0.5">
-                      {new Date(conference.startdatetime).toLocaleString(
-                        undefined,
-                        {
-                          weekday: "short",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="mt-8 flex justify-between items-center">
-              {/* Recording Toggle */}
-              {isMyMeeting && (
-                <button
-                  onClick={toggleRecording}
-                  disabled={
-                    recordingState ===
-                      Constants.recordingEvents.RECORDING_STARTING ||
-                    recordingState ===
-                      Constants.recordingEvents.RECORDING_STOPPING
-                  }
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all shadow-md ${
-                    recordingState ===
-                    Constants.recordingEvents.RECORDING_STARTED
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-green-600 hover:bg-green-700 text-white"
-                  } ${
-                    recordingState ===
-                      Constants.recordingEvents.RECORDING_STARTING ||
-                    recordingState ===
-                      Constants.recordingEvents.RECORDING_STOPPING
-                      ? "opacity-70 cursor-not-allowed"
-                      : ""
-                  }`}
-                >
-                  {recordingState ===
-                    Constants.recordingEvents.RECORDING_STARTING && (
-                    <span className="animate-pulse">Starting...</span>
-                  )}
-                  {recordingState ===
-                    Constants.recordingEvents.RECORDING_STOPPING && (
-                    <span className="animate-pulse">Stopping...</span>
-                  )}
-                  {recordingState ===
-                    Constants.recordingEvents.RECORDING_STARTED &&
-                    "Stop Recording"}
-                  {recordingState ===
-                    Constants.recordingEvents.RECORDING_STOPPED &&
-                    "Start Recording"}
-                </button>
-              )}
-
-              {/* Close Button */}
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="flex items-center gap-2 px-5 py-2.5 bg-green-700 hover:bg-green-800 rounded-md text-sm font-medium transition-all shadow-md hover:shadow-lg"
-              >
-                <Calendar size={16} />
-                Close
-              </button>
-            </div>
-          </motion.div>
+          <ConferenceDetails
+            conference={conference}
+            setShowDetailsModal={setShowDetailsModal}
+            toggleRecording={toggleRecording}
+            isMyMeeting={isMyMeeting}
+            recordingState={recordingState}
+          />
         </Modal>
       )}
     </div>
@@ -347,6 +240,7 @@ const ConferenceRoom = () => {
       me={me}
       remoteParticipants={remoteParticipants}
       handleLeaveMeeting={handleLeaveMeeting}
+      activeSpeakerId={activeSpeakerId}
     />
   );
 };

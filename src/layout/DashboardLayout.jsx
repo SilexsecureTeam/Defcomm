@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useOutletContext } from "react-router-dom";
 import DashTabs from "../components/dashboard/DashTabs";
 import { MeetingContext } from "../context/MeetingContext";
 import SecureConference from "../pages/SecureConference";
@@ -17,7 +17,7 @@ const DashboardLayout = () => {
     activeChannel,
     currentSpeaker,
   } = useContext(CommContext);
-
+  const wrapperContext = useOutletContext(); // receive from DashboardWrapper
   const { pathname } = useLocation();
 
   const isChatPage =
@@ -48,7 +48,7 @@ const DashboardLayout = () => {
             isChatPage ? "lg:p-0" : "lg:p-6"
           } flex-1 p-0 py-3 md:p-6`}
         >
-          <Outlet />
+          <Outlet context={wrapperContext} />
 
           {showConference && <SecureConference />}
 

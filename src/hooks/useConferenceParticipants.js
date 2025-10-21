@@ -7,7 +7,7 @@ import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import audioController from "../utils/audioController";
 import messageSound from "../assets/audio/message.mp3";
-import startRecordSound from "../assets/audio/start-recording.mp3";
+import startRecordSound from "../assets/audio/radio-button.mp3";
 import { onPrompt } from "../utils/notifications/onPrompt";
 import { onSuccess } from "../utils/notifications/OnSuccess";
 
@@ -27,6 +27,7 @@ export default function useConferenceParticipants() {
   } = useContext(MeetingContext);
 
   const [recordingStartedAt, setRecordingStartedAt] = useState(null);
+  const [activeSpeakerId, setActiveSpeakerId] = useState(null);
   const [recordingTimer, setRecordingTimer] = useState("00:00");
 
   const joinedParticipantsRef = useRef(new Set());
@@ -45,6 +46,7 @@ export default function useConferenceParticipants() {
     startRecording,
     stopRecording,
     recordingState,
+    onSpeakerChanged,
   } = useMeeting({
     onMeetingLeft: () => {
       setConference(null);
@@ -110,6 +112,11 @@ export default function useConferenceParticipants() {
       });
       audioController.playRingtone(messageSound);
       setIsScreenSharing(true);
+    },
+    onSpeakerChanged: (speakerId) => {
+      if (speakerId) {
+        setActiveSpeakerId(speakerId);
+      }
     },
     onRecordingStateChanged: ({ status }) => {
       if (recordingStateHandledRef.current === status) return; // ignore duplicates
@@ -215,5 +222,6 @@ export default function useConferenceParticipants() {
     setRecordingStartedAt,
     joinedParticipantsRef,
     removedParticipantsRef,
+    activeSpeakerId,
   };
 }

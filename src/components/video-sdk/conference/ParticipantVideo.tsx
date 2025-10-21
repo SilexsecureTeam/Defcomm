@@ -42,7 +42,7 @@ const ParticipantVideo = ({
   const [handRaised, setHandRaised] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const micRef = useRef(null);
+  const micRef = useRef<HTMLAudioElement | null>(null);
 
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
@@ -70,8 +70,22 @@ const ParticipantVideo = ({
   }, [micOn, micStream, isLocal]);
   useEffect(() => {
     const latestMessage = messages[messages.length - 1];
-    if (latestMessage?.message?.id === participantId) {
-      setHandRaised(!!latestMessage?.message?.raised);
+    const raw = latestMessage?.message;
+    if (!raw) return;
+
+    // message may be a string (JSON or plain) or an object; normalize to an object
+    let parsed: any = raw;
+    if (typeof raw === "string") {
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        // fallback: treat the string as an id-only payload
+        parsed = { id: raw };
+      }
+    }
+
+    if (parsed?.id === participantId) {
+      setHandRaised(!!parsed?.raised);
     }
   }, [messages, participantId]);
 
@@ -82,7 +96,7 @@ const ParticipantVideo = ({
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`relative bg-gray-200 rounded overflow-hidden ${
         isMaximized
-          ? "col-span-full row-span-full w-full h-[60vh]"
+          ? "col-span-full row-span-full w-full h-full max-h-[60vh]"
           : "aspect-square"
       }`}
     >

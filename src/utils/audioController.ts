@@ -5,26 +5,37 @@ const audioController = {
   muted: false,
 
   playRingtone(ringtone: string, repeatFor30s: boolean = false) {
-    // Prevent duplicate play
-    if (this.isPlaying) return;
+    // Reuse existing audio if possible
+    if (!this.audio) {
+      this.audio = new Audio(ringtone);
+    } else if (this.audio.src !== ringtone) {
+      this.audio.src = ringtone;
+    }
 
-    this.stopRingtone(); // Clear any existing state
-
-    this.audio = new Audio(ringtone);
     this.audio.loop = repeatFor30s;
     this.audio.volume = this.muted ? 0 : 1;
 
-    this.isPlaying = true;
+    const startPlay = () => {
+      const playPromise = this.audio!.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn("Ringtone play interrupted:", error);
+        });
+      }
+      this.isPlaying = true;
+    };
 
-    const playPromise = this.audio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch((error) => {
-        console.warn("Ringtone play interrupted:", error);
-        this.isPlaying = false;
-      });
+    // Stop previous audio if still playing
+    if (this.isPlaying) {
+      this.stopRingtone();
+      // Add tiny delay to prevent AbortError
+      setTimeout(startPlay, 20);
+    } else {
+      startPlay();
     }
 
     if (repeatFor30s) {
+      if (this.timeoutId) clearTimeout(this.timeoutId);
       this.timeoutId = setTimeout(() => {
         this.stopRingtone();
       }, 30000);
@@ -39,7 +50,6 @@ const audioController = {
       } catch (e) {
         console.warn("Error stopping audio:", e);
       }
-      this.audio = null;
     }
 
     if (this.timeoutId) {

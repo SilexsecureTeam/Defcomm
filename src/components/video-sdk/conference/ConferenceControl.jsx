@@ -6,15 +6,14 @@ import {
 } from "@videosdk.live/react-sdk";
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
-import { toast } from "react-toastify";
 import audioController from "../../../utils/audioController";
 import messageSound from "../../../assets/audio/message.mp3";
 import { motion, AnimatePresence } from "framer-motion";
-
 import ToolbarControls from "./ToolbarControls";
 import ParticipantsPanel from "./ParticipantsPanel";
 import RaisedHandsPanel from "./RaisedHandsPanel";
 import CallMessagingModal from "./CallMessagingModal";
+import { onPrompt } from "../../../utils/notifications/onPrompt";
 
 const AUTO_LOWER_TIMEOUT = 60000;
 
@@ -93,7 +92,10 @@ const ConferenceControl = ({
         setRaisedHands((prev) => {
           const already = prev.some((u) => u.id === id);
           if (raised && !already) {
-            toast.info(`${name || "Someone"} raised their hand ✋`);
+            onPrompt({
+              title: "Hand Raised",
+              message: `${name || "Someone"} raised their hand ✋`,
+            });
             audioController.playRingtone(messageSound);
             return [...prev, { id, name, timestamp }];
           } else if (!raised) {
