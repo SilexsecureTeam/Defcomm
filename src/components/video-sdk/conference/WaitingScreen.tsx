@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { MeetingContext } from "../../../context/MeetingContext";
 import { useMeeting } from "@videosdk.live/react-sdk";
 import { formatUtcToLocal } from "../../../utils/formmaters";
+import { AuthContext } from "../../../context/AuthContext";
+import { onPrompt } from "../../../utils/notifications/onPrompt";
 
 type WaitingScreenProps = {
   waitingScreen: {
@@ -30,6 +32,7 @@ const WaitingScreen = ({
   onCancel,
   isJoining,
 }: WaitingScreenProps) => {
+  const { authDetails } = useContext(AuthContext);
   const startTime = new Date(waitingScreen.startdatetime).getTime();
   const [countdown, setCountdown] = useState("");
   const [showEndMeetingModal, setShowEndMeetingModal] = useState(false);
@@ -70,6 +73,7 @@ const WaitingScreen = ({
 
     return () => clearInterval(interval);
   }, [startTime]);
+  const isMyMeeting = authDetails?.user?.id === waitingScreen?.creator_id;
 
   const handleJoinClick = () => {
     const now = Date.now();
@@ -83,14 +87,30 @@ const WaitingScreen = ({
     const meetingEnd = meetingStart + meetingDurationMs;
 
     // Meeting hasn't started yet
-    if (now < meetingStart) {
-      alert("You can't join yet. The meeting hasn't started.");
-      return;
+
+    if (!isMyMeeting) {
+      if (now < meetingStart) {
+        onPrompt({
+          title: "Cannot Join Yet",
+          message: "You can't join yet. The meeting hasn't started.",
+        });
+        return;
+      }
+    } else {
+      if (now < meetingStart) {
+        onPrompt({
+          title: "Early Join",
+          message: "You are the creator, you can join early.",
+        });
+      }
     }
 
     // Meeting already ended
     if (meetingDurationMs > 0 && now > meetingEnd) {
-      alert("You can no longer join. The meeting has ended.");
+      onPrompt({
+        title: "Meeting Ended",
+        message: "You can no longer join. The meeting has ended.",
+      });
       return;
     }
 
@@ -119,6 +139,15 @@ const WaitingScreen = ({
         <div className="relative bg-[#111A11]/90 border border-oliveGreen/40 shadow-2xl p-8 rounded-2xl max-w-md w-[90%] text-center backdrop-blur-sm">
           <h2 className="text-3xl font-extrabold text-green-300 mb-2">
             {waitingScreen.title}
+            {isMyMeeting ? (
+              <span className="px-2 py-1 text-xs bg-green-700 text-white rounded-full ml-1">
+                Creator
+              </span>
+            ) : (
+              <span className="px-2 py-1 text-xs bg-gray-600 text-white rounded-full ml-1">
+                Guest
+              </span>
+            )}
           </h2>
 
           {waitingScreen.subject && (
