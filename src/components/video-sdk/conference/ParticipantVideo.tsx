@@ -21,6 +21,7 @@ const ParticipantVideo = ({
   onToggleMaximize,
   key = 0,
   removedParticipantsRef,
+  isMyMeeting,
 }: {
   participantId: string;
   label: string;
@@ -28,6 +29,7 @@ const ParticipantVideo = ({
   key?: number | string;
   onToggleMaximize: () => void;
   removedParticipantsRef: any;
+  isMyMeeting: boolean;
 }) => {
   const {
     webcamStream,
@@ -152,7 +154,7 @@ const ParticipantVideo = ({
         </motion.div>
       )}
       {/* Participant Options Menu */}
-      {!isLocal && (
+      {isMyMeeting && !isLocal && (
         <div className="absolute top-2 left-2">
           <div className="relative">
             <button

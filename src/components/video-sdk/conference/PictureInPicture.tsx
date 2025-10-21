@@ -150,7 +150,7 @@ const PictureInPicture = ({
         />
 
         {isScreenSharing && presenterId && (
-          <div className="absolute top-0 left-0 w-full h-full z-40 rounded-xl overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full z-40 rounded-xl overflow-hidden ">
             <ScreenShareDisplay
               participantId={presenterId}
               isUser={presenterId === me?.id}

@@ -189,6 +189,7 @@ const ConferenceRoom = () => {
               key={p.id || idx}
               participantId={p.id}
               label={p.displayName || "Guest"}
+              isMyMeeting={isMyMeeting}
               isMaximized={maximizedParticipantId === p.id}
               onToggleMaximize={() =>
                 setMaximizedParticipantId((prev) =>

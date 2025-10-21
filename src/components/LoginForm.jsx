@@ -44,6 +44,21 @@ const LoginForm = ({ version }) => {
     return () => clearInterval(interval);
   }, [otpRequested, timer]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (otpRequested) {
+        e.preventDefault();
+        e.returnValue = ""; // Some browsers require this
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [otpRequested]);
+
   const onSubmit = async (data) => {
     const formatted = { ...data, phone: "+" + data.phone };
     const response = await requestOtp(formatted);
