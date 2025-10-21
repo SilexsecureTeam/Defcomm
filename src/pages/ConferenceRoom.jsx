@@ -94,7 +94,7 @@ const ConferenceRoom = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
-          <p className="text-lg font-semibold">
+          <p className="text-sm md:text-lg font-semibold truncate">
             {conference?.title || "Conference"}
           </p>
 
@@ -141,7 +141,7 @@ const ConferenceRoom = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setShowAddUserModal(true)}
-            className="bg-[#5C7C2A] text-white text-sm px-2 md:px-4 py-2 rounded-md"
+            className="bg-[#5C7C2A] text-white text-xs md:text-sm px-2 md:px-4 py-2 rounded-md"
           >
             + Invite Member
           </button>
@@ -149,7 +149,7 @@ const ConferenceRoom = () => {
           {/* View Details Button — text on large screens, icon on small */}
           <button
             onClick={() => setShowDetailsModal(true)}
-            className="border border-green-700/50 text-green-300 text-sm px-2 py-2 rounded-md hover:bg-green-900/40 transition-all flex items-center justify-center"
+            className="border border-green-700/50 text-green-300 text-sm px-2 md:p-2 rounded-md hover:bg-green-900/40 transition-all flex items-center justify-center"
             title="View Details"
           >
             <Info size={18} />

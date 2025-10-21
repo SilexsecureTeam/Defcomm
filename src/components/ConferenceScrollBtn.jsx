@@ -41,7 +41,7 @@ const ConferenceScrollBtn = ({ scrollRef }) => {
             damping: 30,
             duration: 0.2,
           }}
-          className="fixed bottom-24 right-6 z-[9999]"
+          className="fixed bottom-20 right-6 z-[9999]"
         >
           <motion.button
             onClick={scrollToTop}
@@ -52,7 +52,7 @@ const ConferenceScrollBtn = ({ scrollRef }) => {
               backgroundColor: "rgba(101,163,13,0.95)",
             }}
             whileTap={{ scale: 0.95 }}
-            className="group relative w-10 h-10 flex items-center justify-center opacity-70
+            className="group relative w-10 h-10 flex items-center justify-center opacity-60
                        bg-olive/90 text-white rounded-lg
                        shadow-md hover:shadow-lg backdrop-blur-sm
                        border border-white/20 transition-all duration-200 hover:opacity-100
