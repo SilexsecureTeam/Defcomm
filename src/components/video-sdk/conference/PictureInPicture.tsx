@@ -152,7 +152,7 @@ const PictureInPicture = ({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: 20 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="fixed bottom-6 right-6 z-[9999] w-72 h-44
+      className="fixed bottom-6 right-6 z-[99999999999] w-72 h-44
                  bg-gradient-to-br from-gray-900/90 to-black/90
                  rounded-xl overflow-hidden
                  border border-gray-700 shadow-2xl
