@@ -8,11 +8,14 @@ import WaitingScreen from "../components/video-sdk/conference/WaitingScreen";
 import { extractErrorMessage } from "../utils/formmaters";
 import { FaSpinner } from "react-icons/fa"; // <- React icon for loader
 import SEOHelmet from "../engine/SEOHelmet";
+import { AuthContext } from "../context/AuthContext";
 
 const WaitingPage = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
-  const { setConference, setProviderMeetingId } = useContext(MeetingContext);
+  const { authDetails } = useContext(AuthContext);
+  const { setIsCreator, setConference, setProviderMeetingId } =
+    useContext(MeetingContext);
   const { join } = useMeeting();
   const { getMeetingByIdQuery, joinMeeting } = useConference();
 
@@ -26,10 +29,12 @@ const WaitingPage = () => {
   } = getMeetingByIdQuery(meetingId);
 
   useEffect(() => {
-    if (meeting) {
-      setProviderMeetingId(meeting?.meeting_id);
+    if (meeting?.meeting_id) {
+      setProviderMeetingId(meeting.meeting_id);
+      setIsCreator(meeting?.creator_id === authDetails?.user?.id);
+      console.log(meeting?.creator_id === authDetails?.user?.id);
     }
-  }, [meeting]);
+  }, [meeting?.meeting_id]);
 
   const confirmJoinMeeting = async () => {
     if (!meeting?.meeting_id) {

@@ -7,7 +7,7 @@ export const MeetingContext = createContext();
 
 export const MeetingProvider = ({ children }) => {
   const { authDetails } = useContext(AuthContext);
-
+  const [isCreator, setIsCreator] = useState(null);
   const [conference, setConference] = useState(null);
   const [me, setMe] = useState(null);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -17,13 +17,12 @@ export const MeetingProvider = ({ children }) => {
 
   const defaultToken = import.meta.env.VITE_VIDEOSDK_TOKEN;
 
-  // ✅ Automatically refetch token whenever user or conference changes
+  // Automatically refetch token whenever user or conference changes
   useEffect(() => {
     const fetchToken = async () => {
       try {
         if (authDetails?.user?.id) {
-          const isMyMeeting = conference?.creator_id === authDetails?.user?.id;
-          const role = isMyMeeting ? "host" : "guest";
+          const role = isCreator ? "host" : "guest";
 
           const response = await getAuthToken(authDetails.user.id, role);
           setToken(response?.token || response);
@@ -37,7 +36,7 @@ export const MeetingProvider = ({ children }) => {
     };
 
     fetchToken();
-  }, [authDetails?.user?.id, conference?.id]); // 👈 refetch when user or conference changes
+  }, [authDetails?.user?.id, isCreator]); // 👈 refetch when user or conference changes
 
   return (
     <MeetingContext.Provider
@@ -53,6 +52,8 @@ export const MeetingProvider = ({ children }) => {
         showConference,
         setShowConference,
         token,
+        isCreator,
+        setIsCreator,
       }}
     >
       {token && (
