@@ -173,7 +173,7 @@ const ParticipantVideo = ({
                   }}
                   className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
                 >
-                  Mute {label?.split(" ")[0]}
+                  Mute
                 </button>
                 <button
                   onClick={() => {
@@ -183,7 +183,7 @@ const ParticipantVideo = ({
                   }}
                   className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
                 >
-                  Remove {label?.split(" ")[0]}
+                  Remove
                 </button>
               </div>
             )}
