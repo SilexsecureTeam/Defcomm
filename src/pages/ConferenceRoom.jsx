@@ -94,7 +94,7 @@ const ConferenceRoom = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6 gap-2">
         <div>
-          <p className="text-sm md:text-lg font-semibold truncate">
+          <p className="text-sm md:text-lg font-semibold line-clamp-1">
             {conference?.title || "Conference"}
           </p>
 
