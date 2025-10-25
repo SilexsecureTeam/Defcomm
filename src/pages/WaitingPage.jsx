@@ -9,11 +9,13 @@ import { extractErrorMessage } from "../utils/formmaters";
 import { FaSpinner } from "react-icons/fa"; // <- React icon for loader
 import SEOHelmet from "../engine/SEOHelmet";
 import { AuthContext } from "../context/AuthContext";
+import { onPrompt } from "../utils/notifications/onPrompt";
 
 const WaitingPage = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
   const { authDetails } = useContext(AuthContext);
+  const { isTokenLoading } = useContext(MeetingContext);
   const { setIsCreator, setConference, setProviderMeetingId } =
     useContext(MeetingContext);
   const { join } = useMeeting();
@@ -37,6 +39,11 @@ const WaitingPage = () => {
   }, [meeting?.meeting_id]);
 
   const confirmJoinMeeting = async () => {
+    if (isTokenLoading) {
+      onPrompt({ message: "Please wait — initializing meeting token..." });
+      return;
+    }
+
     if (!meeting?.meeting_id) {
       onFailure({ message: "Meeting ID is missing" });
       return;
@@ -58,7 +65,7 @@ const WaitingPage = () => {
     navigate("/dashboard/conference");
   };
 
-  if (isLoading) {
+  if (isLoading || isTokenLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-80 text-white">
         <FaSpinner className="animate-spin text-5xl text-oliveHover mb-4" />
@@ -93,7 +100,7 @@ const WaitingPage = () => {
         waitingScreen={meeting}
         onJoin={confirmJoinMeeting}
         onCancel={handleCancel}
-        isJoining={isJoining}
+        isJoining={isJoining || isTokenLoading}
       />
     </>
   );

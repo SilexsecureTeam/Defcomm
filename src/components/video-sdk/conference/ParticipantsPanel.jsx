@@ -47,16 +47,9 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
   // 🔇 Mute all (host only)
   const handleMuteAll = async () => {
     if (!iAmHost) return;
-    try {
-      for (const participant of allParticipants) {
-        const isSelf = String(participant.id) === String(authDetails?.user?.id);
-        if (!isSelf && participant.micOn && participant.muteMic) {
-          await participant.muteMic();
-        }
-      }
-    } catch (error) {
-      console.error("Failed to mute all participants:", error);
-    }
+    participants.forEach((participant) => {
+      participant?.disableMic();
+    });
   };
 
   return (

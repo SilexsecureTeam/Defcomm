@@ -14,14 +14,16 @@ export const MeetingProvider = ({ children }) => {
   const [providerMeetingId, setProviderMeetingId] = useState(null);
   const [showConference, setShowConference] = useState(false);
   const [token, setToken] = useState(null);
+  const [isTokenLoading, setIsTokenLoading] = useState(true);
 
   const defaultToken = import.meta.env.VITE_VIDEOSDK_TOKEN;
 
   // Automatically refetch token whenever user or conference changes
   useEffect(() => {
     const fetchToken = async () => {
+      setIsTokenLoading(true);
       try {
-        if (authDetails?.user?.id) {
+        if (authDetails?.user?.id || isCreator) {
           const role = isCreator ? "host" : "guest";
 
           const response = await getAuthToken(authDetails.user.id, role);
@@ -32,6 +34,8 @@ export const MeetingProvider = ({ children }) => {
       } catch (error) {
         console.error("Failed to fetch VideoSDK token, using default:", error);
         setToken(defaultToken);
+      } finally {
+        setIsTokenLoading(false);
       }
     };
 
@@ -54,6 +58,7 @@ export const MeetingProvider = ({ children }) => {
         token,
         isCreator,
         setIsCreator,
+        isTokenLoading,
       }}
     >
       {token && (
