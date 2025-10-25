@@ -209,6 +209,7 @@ const ConferenceRoom = () => {
         handleLeaveMeeting={handleLeaveMeeting}
         handleScreenShare={handleScreenShare}
         isScreenSharing={isScreenSharing}
+        remoteParticipants={remoteParticipants}
         me={me}
       />
       {showAddUserModal && (

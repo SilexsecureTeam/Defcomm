@@ -175,10 +175,22 @@ export default function useConferenceParticipants() {
 
   const remoteParticipants = useMemo(() => {
     if (!participants) return [];
-    return [...participants.values()].filter(
-      (p) => String(p.id) !== String(authDetails?.user?.id)
-    );
-  }, [participants, authDetails?.user?.id]);
+
+    const userId = String(authDetails?.user?.id);
+
+    return [...participants.values()]
+      .filter((p) => String(p.id) !== userId)
+      .sort((a, b) => {
+        // Presenter first
+        if (a.id === presenterId) return -1;
+        if (b.id === presenterId) return 1;
+        // Active speaker next
+        if (a.id === activeSpeakerId) return -1;
+        if (b.id === activeSpeakerId) return 1;
+        // Then alphabetical (optional fallback)
+        return (a.displayName || "").localeCompare(b.displayName || "");
+      });
+  }, [participants, authDetails?.user?.id, presenterId, activeSpeakerId]);
 
   useEffect(() => {
     if (participants && conference) {

@@ -21,6 +21,7 @@ const ConferenceControl = ({
   handleLeaveMeeting,
   handleScreenShare,
   isScreenSharing,
+  remoteParticipants,
   me,
 }) => {
   const { toggleMic, toggleWebcam, presenterId, participants } = useMeeting();
@@ -191,7 +192,7 @@ const ConferenceControl = ({
 
       {showParticipants && (
         <ParticipantsPanel
-          participants={participants}
+          participants={[me, ...remoteParticipants]}
           raisedHands={raisedHands}
           onClose={() => setShowParticipants(false)}
         />
