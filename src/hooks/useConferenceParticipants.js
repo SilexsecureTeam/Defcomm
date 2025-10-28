@@ -24,15 +24,17 @@ export default function useConferenceParticipants() {
     setIsScreenSharing,
     setShowConference,
     providerMeetingId,
+    isCreator,
   } = useContext(MeetingContext);
 
   const [recordingStartedAt, setRecordingStartedAt] = useState(null);
   const [activeSpeakerId, setActiveSpeakerId] = useState(null);
   const [recordingTimer, setRecordingTimer] = useState("00:00");
-
+  const [connectionState, setConnectionState] = useState("CONNECTING");
   const joinedParticipantsRef = useRef(new Set());
   const removedParticipantsRef = useRef(new Set());
   const leftParticipantsRef = useRef(new Set());
+  const [pendingRequests, setPendingRequests] = useState([]);
 
   const recordingStateHandledRef = useRef(null);
 
@@ -154,6 +156,48 @@ export default function useConferenceParticipants() {
         recordingStateHandledRef.current = null;
       }, 1000);
     },
+    onEntryRequested: ({ participantId, name, deny, allow }) => {
+      setPendingRequests((prev) => {
+        // prevent duplicates if the same participant requests multiple times
+        const exists = prev.some((req) => req.id === participantId);
+        if (exists) return prev;
+        audioController.playRingtone(messageSound);
+
+        return [...prev, { id: participantId, name, allow, deny }];
+      });
+    },
+
+    onEntryResponded: (participantId, decision) => {
+      const isSelf = String(participantId) === String(authDetails?.user?.id);
+
+      // Host side: just update pending list, no notifications
+      if (isCreator) {
+        setPendingRequests((prev) =>
+          prev.filter((r) => r.id !== participantId)
+        );
+        return;
+      }
+      if (isSelf) {
+        if (decision === "allowed") {
+          onSuccess({
+            message: "Access Granted",
+            success: "Host has admitted you into the meeting.",
+          });
+          setPendingRequests((prev) =>
+            prev.filter((r) => r.id !== participantId)
+          );
+        } else {
+          onFailure({
+            message: "Access Denied",
+            error: "Host denied your request to join.",
+          });
+          leave();
+          setPendingRequests((prev) =>
+            prev.filter((r) => r.id !== participantId)
+          );
+        }
+      }
+    },
     onError: (error) => {
       onFailure({
         message: "Technical Error",
@@ -235,5 +279,7 @@ export default function useConferenceParticipants() {
     joinedParticipantsRef,
     removedParticipantsRef,
     activeSpeakerId,
+    connectionState,
+    pendingRequests,
   };
 }

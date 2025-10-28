@@ -2,11 +2,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 import { MeetingContext } from "../context/MeetingContext";
 import useConference from "../hooks/useConference";
-import { useMeeting } from "@videosdk.live/react-sdk";
 import { onFailure } from "../utils/notifications/OnFailure";
 import WaitingScreen from "../components/video-sdk/conference/WaitingScreen";
-import { extractErrorMessage } from "../utils/formmaters";
-import { FaSpinner } from "react-icons/fa"; // <- React icon for loader
+import { extractErrorMessage, loadingMessages } from "../utils/formmaters";
+import { FaSpinner } from "react-icons/fa";
 import SEOHelmet from "../engine/SEOHelmet";
 import { AuthContext } from "../context/AuthContext";
 import { onPrompt } from "../utils/notifications/onPrompt";
@@ -15,13 +14,17 @@ const WaitingPage = () => {
   const { meetingId } = useParams();
   const navigate = useNavigate();
   const { authDetails } = useContext(AuthContext);
-  const { isTokenLoading } = useContext(MeetingContext);
-  const { setIsCreator, setConference, setProviderMeetingId } =
-    useContext(MeetingContext);
-  const { join } = useMeeting();
+  const {
+    isTokenLoading,
+    token,
+    tokenError,
+    setIsCreator,
+    setConference,
+    setProviderMeetingId,
+  } = useContext(MeetingContext);
   const { getMeetingByIdQuery, joinMeeting } = useConference();
-
   const [isJoining, setIsJoining] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState(loadingMessages[0]);
 
   const {
     data: meeting,
@@ -30,22 +33,31 @@ const WaitingPage = () => {
     error,
   } = getMeetingByIdQuery(meetingId);
 
+  // cycle loading messages every few seconds
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      i = (i + 1) % loadingMessages.length;
+      setCurrentMessage(loadingMessages[i]);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (meeting?.meeting_id) {
       setProviderMeetingId(meeting.meeting_id);
       setIsCreator(meeting?.creator_id === authDetails?.user?.id);
-      console.log(meeting?.creator_id === authDetails?.user?.id);
     }
   }, [meeting?.meeting_id]);
 
   const confirmJoinMeeting = async () => {
-    if (isTokenLoading) {
-      onPrompt({ message: "Please wait — initializing meeting token..." });
+    if (isTokenLoading || !token) {
+      onPrompt({ message: "Please wait — initializing secure connection..." });
       return;
     }
 
-    if (!meeting?.meeting_id) {
-      onFailure({ message: "Meeting ID is missing" });
+    if (tokenError) {
+      onFailure({ message: tokenError });
       return;
     }
 
@@ -61,26 +73,25 @@ const WaitingPage = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate("/dashboard/conference");
-  };
+  const handleCancel = () => navigate("/dashboard/conference");
 
-  if (isLoading || isTokenLoading) {
+  if (isLoading || isTokenLoading || !token) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-80 text-white">
+      <div className="flex flex-col items-center justify-center min-h-80 text-white transition-all">
         <FaSpinner className="animate-spin text-5xl text-oliveHover mb-4" />
-        <p className="text-lg">Fetching meeting details...</p>
+        <p className="text-lg animate-pulse">{currentMessage}</p>
       </div>
     );
   }
 
-  if (isError || !meeting) {
+  if (isError || tokenError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-80 text-red-400 text-center px-4">
         <h2 className="text-2xl font-semibold mb-2">Unable to load meeting</h2>
         <p className="mb-4">
-          {extractErrorMessage(error) ||
-            "Meeting not found or an unexpected error occurred."}
+          {tokenError ||
+            extractErrorMessage(error) ||
+            "Meeting not found or token initialization failed."}
         </p>
         <button
           onClick={handleCancel}
@@ -91,11 +102,10 @@ const WaitingPage = () => {
       </div>
     );
   }
+
   return (
     <>
-      {/* SEO Content */}
       <SEOHelmet title={meeting?.title || "Meeting"} />
-
       <WaitingScreen
         waitingScreen={meeting}
         onJoin={confirmJoinMeeting}

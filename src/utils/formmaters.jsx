@@ -184,3 +184,10 @@ export function formatDateTimeForInput(datetime) {
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
+
+export const loadingMessages = [
+  "Preparing secure connection...",
+  "Generating meeting access token...",
+  "Setting up your conference environment...",
+  "Almost ready — please hold on...",
+];

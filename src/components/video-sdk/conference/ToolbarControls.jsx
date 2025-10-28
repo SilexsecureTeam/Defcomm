@@ -146,7 +146,6 @@ const ToolbarControls = ({
                 key={emoji}
                 onClick={() => {
                   sendReaction(emoji);
-                  setShowReactions(false);
                 }}
                 className="text-2xl hover:scale-125 transition-transform"
               >

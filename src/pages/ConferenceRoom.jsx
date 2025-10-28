@@ -16,6 +16,7 @@ import { MdStop } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import ConferenceDetails from "../components/video-sdk/conference/ConferenceDetails";
 import ConferenceScrollBtn from "../components/ConferenceScrollBtn";
+import RequestsPanel from "../components/video-sdk/conference/RequestsPanel";
 const ConferenceRoom = () => {
   const { pathname } = useLocation();
   const { authDetails } = useContext(AuthContext);
@@ -39,6 +40,8 @@ const ConferenceRoom = () => {
     stopRecording,
     removedParticipantsRef,
     activeSpeakerId,
+    connectionState,
+    pendingRequests,
   } = useConferenceParticipants();
 
   const handleLeaveMeeting = async () => {
@@ -199,9 +202,38 @@ const ConferenceRoom = () => {
             />
           ))
         ) : (
-          <p className="text-center col-span-full text-gray-400">
-            Waiting for participants to join...
-          </p>
+          <>
+            {isMyMeeting ? (
+              <div className="col-span-full flex flex-col items-center justify-center text-center py-12 text-gray-400">
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="w-4 h-4 bg-green-400 rounded-full mb-3 animate-pulse"
+                />
+                <p className="text-base font-medium">
+                  Waiting for participants...
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Your meeting is live. Others will appear as they join.
+                </p>
+              </div>
+            ) : (
+              <div className="col-span-full flex flex-col items-center justify-center text-center py-12 text-gray-400">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="w-4 h-4 bg-yellow-400 rounded-full mb-3 animate-pulse"
+                />
+                <p className="text-base font-medium">
+                  Waiting to be admitted...
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  The host will let you in soon. Please stay connected.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -233,6 +265,11 @@ const ConferenceRoom = () => {
             recordingState={recordingState}
           />
         </Modal>
+      )}
+
+      {/* Pending Join Requests Panel */}
+      {isMyMeeting && pendingRequests?.length > 0 && (
+        <RequestsPanel pendingRequests={pendingRequests} />
       )}
     </div>
   ) : (

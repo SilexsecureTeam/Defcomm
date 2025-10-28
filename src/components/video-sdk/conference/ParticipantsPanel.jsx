@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   FaMicrophone,
   FaMicrophoneSlash,
@@ -16,27 +16,47 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
   const { authDetails } = useContext(AuthContext);
   const { conference } = useContext(MeetingContext);
 
+  const [refresh, setRefresh] = useState(0);
+
+  // 🔄 Force re-render when mic/cam state changes
+  useEffect(() => {
+    const unsubscribers = [];
+
+    participants?.forEach((participant) => {
+      const handleStreamUpdate = () => setRefresh((r) => r + 1);
+
+      participant.on("stream-enabled", handleStreamUpdate);
+      participant.on("stream-disabled", handleStreamUpdate);
+
+      unsubscribers.push(() => {
+        participant.off("stream-enabled", handleStreamUpdate);
+        participant.off("stream-disabled", handleStreamUpdate);
+      });
+    });
+
+    return () => {
+      unsubscribers.forEach((unsub) => unsub());
+    };
+  }, [participants]);
+
   const allParticipants = useMemo(() => {
     if (!participants) return [];
     return [...participants.values()];
-  }, [participants]);
+  }, [participants, refresh]);
 
   const iAmHost =
     String(authDetails?.user?.id) === String(conference?.creator_id);
 
-  // 🔇 Host or self can toggle mic
   const handleToggleMic = async (participant) => {
     if (!participant) return;
     const isSelf = String(participant.id) === String(authDetails?.user?.id);
 
-    // Only host can mute others; participant can only mute/unmute self
     if (iAmHost || isSelf) {
       try {
-        if (participant.micOn && participant.muteMic) {
-          await participant.muteMic();
-        } else if (!participant.micOn && isSelf && participant.unmuteMic) {
-          // Only allow unmute for self
-          await participant.unmuteMic();
+        if (participant.micOn) {
+          await participant.disableMic();
+        } else if (!participant.micOn && isSelf) {
+          await participant.enableMic();
         }
       } catch (error) {
         console.error("Mic toggle failed:", error);
@@ -44,7 +64,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
     }
   };
 
-  // 🔇 Mute all (host only)
   const handleMuteAll = async () => {
     if (!iAmHost) return;
     participants.forEach((participant) => {
@@ -61,7 +80,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
         transition={{ type: "spring", stiffness: 280, damping: 30 }}
         className="fixed right-4 bottom-20 w-72 max-h-[50vh] overflow-y-auto bg-white border border-gray-200 shadow-xl rounded-2xl p-4 pt-0 z-50"
       >
-        {/* Header */}
         <div className="sticky top-0 pt-4 bg-white flex justify-between items-center mb-3 border-b pb-2">
           <h3 className="text-oliveLight font-semibold text-sm uppercase tracking-wide">
             Participants ({allParticipants.length})
@@ -71,7 +89,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
               <button
                 onClick={handleMuteAll}
                 className="text-xs text-gray-600 hover:text-red-500 transition flex items-center gap-1"
-                title="Mute all participants"
               >
                 <FaUserSlash className="text-red-400" />
                 <span>Mute All</span>
@@ -86,7 +103,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
           </div>
         </div>
 
-        {/* List */}
         <ul className="space-y-2 text-gray-800 text-sm">
           {allParticipants.map((participant) => {
             const isRaised = raisedHands.some((u) => u.id === participant.id);
@@ -113,7 +129,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Mic toggle (same icon) */}
                   <button
                     onClick={() => handleToggleMic(participant)}
                     disabled={!iAmHost && !isSelf}
@@ -137,7 +152,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
                     )}
                   </button>
 
-                  {/* Camera indicator */}
                   {participant.webcamOn ? (
                     <FaVideo className="text-green-500" title="Camera On" />
                   ) : (
@@ -147,7 +161,6 @@ const ParticipantsPanel = ({ participants, raisedHands, onClose }) => {
                     />
                   )}
 
-                  {/* Hand raised */}
                   {isRaised && (
                     <FaHandPaper
                       className="text-yellow-400"

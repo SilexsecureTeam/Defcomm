@@ -15,32 +15,31 @@ export const MeetingProvider = ({ children }) => {
   const [showConference, setShowConference] = useState(false);
   const [token, setToken] = useState(null);
   const [isTokenLoading, setIsTokenLoading] = useState(true);
-
-  const defaultToken = import.meta.env.VITE_VIDEOSDK_TOKEN;
-
+  const [tokenError, setTokenError] = useState(null);
   // Automatically refetch token whenever user or conference changes
   useEffect(() => {
     const fetchToken = async () => {
       setIsTokenLoading(true);
       try {
-        if (authDetails?.user?.id || isCreator) {
+        if (providerMeetingId) {
           const role = isCreator ? "host" : "guest";
 
           const response = await getAuthToken(authDetails.user.id, role);
           setToken(response?.token || response);
-        } else {
-          setToken(defaultToken);
+          console.log(role, response);
         }
       } catch (error) {
         console.error("Failed to fetch VideoSDK token, using default:", error);
-        setToken(defaultToken);
+        setTokenError(error?.message || "Failed to initialize meeting token");
+        setToken(null);
+        return;
       } finally {
         setIsTokenLoading(false);
       }
     };
 
     fetchToken();
-  }, [authDetails?.user?.id, isCreator]); // 👈 refetch when user or conference changes
+  }, [authDetails?.user?.id, providerMeetingId]);
 
   return (
     <MeetingContext.Provider
@@ -59,27 +58,27 @@ export const MeetingProvider = ({ children }) => {
         isCreator,
         setIsCreator,
         isTokenLoading,
+        tokenError,
       }}
     >
-      {token && (
-        <SDKMeetingProvider
-          config={{
-            meetingId:
-              conference?.meeting_id || providerMeetingId || "test-meeting",
-            name: authDetails?.user?.name || "Guest User",
-            participantId: authDetails?.user?.id || `guest-${Date.now()}`,
-            micEnabled: false,
-            webcamEnabled: false,
-            mode: "SEND_AND_RECV",
-            chatEnabled: true,
-            raiseHandEnabled: true,
-            debugMode: true,
-          }}
-          token={token}
-        >
-          {children}
-        </SDKMeetingProvider>
-      )}
+      <SDKMeetingProvider
+        key={`${token}-${providerMeetingId || "test"}`}
+        config={{
+          meetingId:
+            conference?.meeting_id || providerMeetingId || "test-meeting",
+          name: authDetails?.user?.name || "Guest User",
+          participantId: authDetails?.user?.id || `guest-${Date.now()}`,
+          micEnabled: false,
+          webcamEnabled: false,
+          mode: "SEND_AND_RECV",
+          chatEnabled: true,
+          raiseHandEnabled: true,
+          debugMode: true,
+        }}
+        token={token || "default"}
+      >
+        {children}
+      </SDKMeetingProvider>
     </MeetingContext.Provider>
   );
 };

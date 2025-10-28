@@ -38,7 +38,7 @@ const ConferenceControl = ({
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [lastSeenMessageId, setLastSeenMessageId] = useState(null);
   const [showRaisedPanel, setShowRaisedPanel] = useState(true);
-  const [activeReaction, setActiveReaction] = useState(null);
+  const [activeReactions, setActiveReactions] = useState([]);
 
   const { authDetails } = useContext(AuthContext);
   const { setShowSettings } = useContext(ChatContext);
@@ -71,15 +71,26 @@ const ConferenceControl = ({
 
   const sendReaction = (emoji) => {
     const name = authDetails?.user?.name || "Someone";
+    const reactionId = `${myId}-${emoji}-${Date.now()}`;
+
+    // Publish to others
     publishReaction({
       id: myId,
-      name,
       emoji,
+      name,
+      reactionId,
       timestamp: new Date().toISOString(),
     });
 
-    setActiveReaction({ emoji, name });
-    setTimeout(() => setActiveReaction(null), 3000);
+    // Show locally as "You"
+    setActiveReactions((prev) => [
+      ...prev,
+      { id: reactionId, emoji, name: "You" },
+    ]);
+
+    setTimeout(() => {
+      setActiveReactions((prev) => prev.filter((r) => r.id !== reactionId));
+    }, 2500);
   };
 
   useEffect(() => {
@@ -130,10 +141,17 @@ const ConferenceControl = ({
   useEffect(() => {
     if (reactionMessages.length) {
       const latest = reactionMessages[reactionMessages.length - 1];
-      const { emoji, id, name } = latest.message;
-      const isMe = id === myId;
-      setActiveReaction({ emoji, name: isMe ? "You" : name });
-      setTimeout(() => setActiveReaction(null), 3000);
+      const { emoji, id, name, reactionId } = latest.message;
+
+      // Skip if it's mine (already added locally)
+      if (id === myId) return;
+
+      // Show others' reactions
+      setActiveReactions((prev) => [...prev, { id: reactionId, emoji, name }]);
+
+      setTimeout(() => {
+        setActiveReactions((prev) => prev.filter((r) => r.id !== reactionId));
+      }, 2500);
     }
   }, [reactionMessages, myId]);
 
@@ -169,25 +187,30 @@ const ConferenceControl = ({
       />
 
       <AnimatePresence>
-        {activeReaction && (
+        {activeReactions.map(({ id, emoji, name }) => (
           <motion.div
-            key={activeReaction.emoji + activeReaction.name}
+            key={id}
             initial={{ opacity: 0, y: 0, scale: 0.8 }}
-            animate={{ opacity: 1, y: -60, scale: 1 }}
-            exit={{ opacity: 0, y: -100, scale: 0.5 }}
-            transition={{ duration: 0.8 }}
+            animate={{
+              opacity: [1, 1, 0],
+              y: -100 - Math.random() * 80,
+              scale: [1, 1.4, 1],
+              x: (Math.random() - 0.5) * 100,
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2, ease: "easeOut" }}
             className="fixed bottom-40 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none"
           >
-            <div className="text-6xl">{activeReaction.emoji}</div>
+            <div className="text-5xl">{emoji}</div>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-1 text-white bg-black/60 rounded px-3 py-1 text-sm shadow-lg"
+              className="mt-1 text-white bg-black/50 rounded px-3 py-1 text-xs shadow-lg"
             >
-              {activeReaction.name}
+              {name}
             </motion.div>
           </motion.div>
-        )}
+        ))}
       </AnimatePresence>
 
       {showParticipants && (

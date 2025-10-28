@@ -1,9 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  useParticipant,
-  useMeeting,
-  usePubSub,
-} from "@videosdk.live/react-sdk";
+import { useParticipant, usePubSub } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
 import { FaVideo, FaVideoSlash, FaExpand, FaCompress } from "react-icons/fa";
 import { AiOutlineAudioMuted, AiOutlineAudio } from "react-icons/ai";
@@ -98,9 +94,9 @@ const ParticipantVideo = ({
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`relative bg-gray-200 rounded overflow-hidden ${
         isMaximized
-          ? "col-span-full row-span-full w-full h-full max-h-[60vh]"
+          ? "col-span-full row-span-full w-full aspect-video"
           : "aspect-square"
-      }`}
+      } h-full max-h-[60vh]`}
     >
       <audio ref={micRef} autoPlay playsInline />
 
@@ -171,7 +167,7 @@ const ParticipantVideo = ({
                     disableMic(); // Mutes the specific participant
                     setShowMenu(false);
                   }}
-                  className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
+                  className="block w-full text-left truncate rounded-t-md px-4 py-2 text-xs hover:bg-gray-100"
                 >
                   Mute
                 </button>
@@ -181,7 +177,7 @@ const ParticipantVideo = ({
                     removedParticipantsRef.current.add(participantId);
                     setShowMenu(false);
                   }}
-                  className="block w-full text-left truncate px-4 py-2 text-xs hover:bg-gray-100"
+                  className="block w-full text-left truncate rounded-b-md px-4 py-2 text-xs hover:bg-gray-100"
                 >
                   Remove
                 </button>
