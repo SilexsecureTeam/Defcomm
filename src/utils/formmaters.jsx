@@ -191,3 +191,7 @@ export const loadingMessages = [
   "Setting up your conference environment...",
   "Almost ready — please hold on...",
 ];
+
+export const normalizeId = (obj) => {
+  return isNaN(obj?.id) ? obj?.id : obj?.id_en;
+};

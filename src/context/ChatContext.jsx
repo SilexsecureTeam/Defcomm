@@ -25,6 +25,8 @@ export const ChatProvider = ({ children }) => {
 
   const [finalCallData, setFinalCallData] = useState(null);
 
+  const [isInitiator, setIsInitiator] = useState(false);
+
   const [modalTitle, setModalTitle] = useState("Defcomm");
   const [members, setMembers] = useState();
   const initialShowToggleSwitch =
@@ -234,6 +236,8 @@ export const ChatProvider = ({ children }) => {
         setSettings,
         finalCallData,
         setFinalCallData,
+        isInitiator,
+        setIsInitiator,
       }}
     >
       {children}

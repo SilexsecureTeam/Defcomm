@@ -6,7 +6,7 @@ import { categories } from "../../utils/constants";
 function Categories() {
   const navigate = useNavigate();
   const { getCallLogs } = useChat();
-  const { data: callLogs } = getCallLogs;
+  const { data: callLogs } = getCallLogs();
 
   const missedCallsCount =
     callLogs?.filter((call) => call.call_state === "miss").length || 0;

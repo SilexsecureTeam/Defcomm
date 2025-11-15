@@ -12,6 +12,7 @@ import { NotificationContext } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
 import useAuth from "./useAuth";
 import { onLogoutToast } from "../utils/notifications/onLogoutToast";
+import { normalizeId } from "../utils/formmaters";
 const usePusherChannel = ({ userId, token, showToast = true }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
@@ -54,9 +55,24 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
 
     channel.bind("private.message.sent", ({ data }) => {
       const newMessage = data;
-      const newChatMessage =
-        newMessage.state === "callUpdate" ? newMessage?.mss : newMessage?.data;
       const isCall = data?.state === "call";
+      const senderUserId = normalizeId(newMessage?.sender);
+      const receiverUserId = normalizeId(newMessage.receiver);
+
+      const isMyChat = senderUserId === authDetails?.user?.id;
+      const cacheKeyUserId = isMyChat
+        ? receiverUserId // I sent it → save under receiver
+        : senderUserId; // They sent it → save under sender
+
+      // 🔔 Show toast only if not my message
+      const shouldToast =
+        data?.state !== "not_typing" &&
+        data?.state !== "is_typing" &&
+        data?.state !== "callUpdate" &&
+        data?.state !== "call" &&
+        data?.state !== "logout" &&
+        !isMyChat;
+
       console.log(newMessage);
       if (
         data?.state === "logout" &&
@@ -94,37 +110,58 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         audioController.playRingtone(receiverTone, true);
       }
 
-      const senderId = newMessage?.sender?.id;
-
-      const isMyChat = newMessage?.sender?.id === authDetails?.user?.id;
-      const cacheKeyUserId = isMyChat
-        ? newMessage?.receiver?.id // I sent it → save under receiver
-        : senderId; // They sent it → save under sender
-
       // Cache update always (multi-device sync)
       if (
         newMessage.state !== "is_typing" &&
         newMessage.state !== "not_typing"
       ) {
+        const base =
+          newMessage.state === "callUpdate" ? newMessage.mss : newMessage.data;
+
+        const messageToStore = {
+          ...base,
+          id: normalizeId(base),
+        };
+        console.log(messageToStore, cacheKeyUserId);
+
         queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
-          // No cache yet
-          if (!old || !Array.isArray(old.data)) {
-            // Invalidate so it refetches instead of building wrong local state
+          if (!old || !old.pages || old.pages.length === 0) {
             queryClient.invalidateQueries(["chatMessages", cacheKeyUserId]);
-            return undefined; // let query refetch
+            return old;
           }
 
-          const exists = old.data.some((msg) => msg.id === newChatMessage.id);
-          if (exists) return old;
+          const lastPage = old.pages[old.pages.length - 1];
 
-          // Append new message in sorted order
-          return {
-            ...old,
+          const existsIndex = lastPage.data.findIndex(
+            (msg) => msg.id === messageToStore.id
+          );
+
+          if (existsIndex !== -1) {
+            // UPDATE EXISTING MESSAGE (important for callUpdate)
+            const updatedMsg = {
+              ...lastPage.data[existsIndex],
+              ...messageToStore,
+            };
+
+            const updatedData = [...lastPage.data];
+            updatedData[existsIndex] = updatedMsg;
+
+            const newLastPage = {
+              ...lastPage,
+              data: updatedData,
+            };
+
+            return {
+              ...old,
+              pages: [...old.pages.slice(0, -1), newLastPage],
+            };
+          }
+          const newLastPage = {
+            ...lastPage,
             data: [
-              ...old.data,
+              ...lastPage.data,
               {
-                ...newChatMessage,
-                message: newMessage?.message,
+                ...messageToStore,
                 is_my_chat: isMyChat ? "yes" : "no",
               },
             ].sort(
@@ -133,17 +170,13 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
                 new Date(b.created_at).getTime()
             ),
           };
+
+          return {
+            ...old,
+            pages: [...old.pages.slice(0, -1), newLastPage],
+          };
         });
       }
-
-      // 🔔 Show toast only if not my message
-      const shouldToast =
-        data?.state !== "not_typing" &&
-        data?.state !== "is_typing" &&
-        data?.state !== "callUpdate" &&
-        data?.state !== "call" &&
-        data?.state !== "logout" &&
-        !isMyChat;
 
       if (shouldToast) {
         addNotification(newMessage);
@@ -186,54 +219,22 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
       // Handle call updates
       if (newMessage?.state === "callUpdate") {
         setFinalCallData({
-          id: newMessage?.mss?.id,
+          id: newMessage?.mss?.id_en,
           duration: newMessage?.call?.call_duration,
           state: newMessage?.call?.call_state,
         });
-        return;
       }
 
-      // // 🔇 If another device picked the call, stop ringtone + clear callMessage
-      // if (newMessage?.call?.call_state === "pick") {
-      //   audioController.stopRingtone();
-      //   setCallMessage((prev) => {
-      //     if (prev?.user_id === newMessage?.mss?.user_id) {
-      //       return { ...prev, status: "picked" };
-      //     }
-      //     return prev;
-      //   });
-      // }
-      console.log(cacheKeyUserId);
-
-      queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
-        if (!old || !Array.isArray(old.pages)) return old;
-        console.log(old);
-
-        const lastPage = old.pages[old.pages.length - 1];
-
-        // Avoid duplicates
-        const exists = lastPage.data.some(
-          (msg) => msg.id === newChatMessage.id
-        );
-        if (exists) return old;
-
-        const newPage = {
-          ...lastPage,
-          data: [
-            ...lastPage.data,
-            {
-              ...newChatMessage,
-              message: newMessage.message,
-              is_my_chat: isMyChat ? "yes" : "no",
-            },
-          ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
-        };
-
-        return {
-          ...old,
-          pages: [...old.pages.slice(0, -1), newPage],
-        };
-      });
+      // 🔇 If another device picked the call, stop ringtone + clear callMessage
+      if (newMessage?.call?.call_state === "pick") {
+        audioController.stopRingtone();
+        setCallMessage((prev) => {
+          if (prev?.user_id === newMessage?.mss?.user_id) {
+            return { ...prev, status: "picked" };
+          }
+          return prev;
+        });
+      }
     });
 
     channel.bind("pusher:subscription_error", (status) => {

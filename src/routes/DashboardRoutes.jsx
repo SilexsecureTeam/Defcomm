@@ -8,6 +8,7 @@ import { GroupProvider } from "../context/GroupContext";
 import useMedia from "../utils/chat/useMedia";
 import withSubscription from "../hocs/withSubscription";
 import DashboardLayout from "../layout/DashboardLayout";
+import { MeetingProvider } from "../context/MeetingContext";
 
 // Lazy-loaded pages
 const DashboardWrapper = lazy(() => import("../layout/DashboardWrapper"));
@@ -87,79 +88,87 @@ const DashboardRoutes = () => {
 
   return (
     <ThemeProvider>
-      <CommProvider>
-        <GroupProvider>
-          <Suspense fallback={<Fallback />}>
-            <Routes>
-              <Route path="/" element={<DashboardWrapper />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="home" element={<Home />} />
+      <MeetingProvider>
+        <CommProvider>
+          <GroupProvider>
+            <Suspense fallback={<Fallback />}>
+              <Routes>
+                <Route path="/" element={<DashboardWrapper />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route path="home" element={<Home />} />
 
-                  {/* Chat */}
-                  <Route path="user/:userId/chat" element={<ProtectedChat />} />
-                  <Route path="chat" element={<ProtectedChat />} />
+                    {/* Groups */}
+                    <Route path="groups" element={<ProtectedGroups />} />
+                    <Route path="group_list" element={<ProtectedGroupPage />} />
+                    <Route
+                      path="group/:groupId/chat"
+                      element={<ProtectedGroupChat />}
+                    />
 
-                  {/* Groups */}
-                  <Route path="groups" element={<ProtectedGroups />} />
-                  <Route path="group_list" element={<ProtectedGroupPage />} />
-                  <Route
-                    path="group/:groupId/chat"
-                    element={<ProtectedGroupChat />}
-                  />
+                    {/* Walkie Talkie */}
+                    <Route path="comm" element={<ProtectedWalkie />} />
 
-                  {/* Walkie Talkie */}
-                  <Route path="comm" element={<ProtectedWalkie />} />
+                    {/* File & Drive */}
+                    <Route path="file-manager" element={<FileManager />} />
+                    <Route path="file-sharing" element={<FileDashboard />} />
+                    <Route path="drive" element={<ProtectedDrive />} />
+                    <Route
+                      path="drive/:id"
+                      element={<ProtectedDriveContent />}
+                    />
 
-                  {/* File & Drive */}
-                  <Route path="file-manager" element={<FileManager />} />
-                  <Route path="file-sharing" element={<FileDashboard />} />
-                  <Route path="drive" element={<ProtectedDrive />} />
-                  <Route path="drive/:id" element={<ProtectedDriveContent />} />
+                    {/* Always accessible */}
+                    <Route path="new-file" element={<DeffViewer />} />
+                    <Route path="view/:fileId" element={<PDFViewer />} />
+                    <Route path="file-view/:fileUrl" element={<DeffViewer />} />
+                    <Route path="contacts" element={<ProtectedContacts />} />
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="isurvive" element={<DefcommAi />} />
+                    <Route path="isurvive/chat" element={<ChatBox />} />
+                    <Route path="isurvive/voice" element={<ChatBoxTwo />} />
+                    <Route path="settings" element={<Settings />} />
 
-                  {/* Always accessible */}
-                  <Route path="new-file" element={<DeffViewer />} />
-                  <Route path="view/:fileId" element={<PDFViewer />} />
-                  <Route path="file-view/:fileUrl" element={<DeffViewer />} />
-                  <Route path="contacts" element={<ProtectedContacts />} />
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="isurvive" element={<DefcommAi />} />
-                  <Route path="isurvive/chat" element={<ChatBox />} />
-                  <Route path="isurvive/voice" element={<ChatBoxTwo />} />
-                  <Route path="settings" element={<Settings />} />
+                    {/* Chat */}
+                    <Route
+                      path="user/:userId/chat"
+                      element={<ProtectedChat />}
+                    />
+                    <Route path="chat" element={<ProtectedChat />} />
 
-                  {/* Conference/Meetings */}
-                  <Route
-                    path="conference"
-                    element={<ProtectedInitConference />}
-                  />
-                  <Route
-                    path="conference/room"
-                    element={<ProtectedShowConference />}
-                  />
-                  <Route
-                    path="conference/waiting/:meetingId"
-                    element={<ProtectedWaitingPage />}
-                  />
-                  <Route
-                    path="conference/my-meetings"
-                    element={<ProtectedMyMeetings />}
-                  />
-                  <Route
-                    path="conference/meetings"
-                    element={<ProtectedMyMeetings all={true} />}
-                  />
-                  <Route
-                    path="conference/create"
-                    element={<ProtectedCreateMeeting />}
-                  />
+                    {/* Conference/Meetings */}
+                    <Route
+                      path="conference"
+                      element={<ProtectedInitConference />}
+                    />
+                    <Route
+                      path="conference/room"
+                      element={<ProtectedShowConference />}
+                    />
+                    <Route
+                      path="conference/waiting/:meetingId"
+                      element={<ProtectedWaitingPage />}
+                    />
+                    <Route
+                      path="conference/my-meetings"
+                      element={<ProtectedMyMeetings />}
+                    />
+                    <Route
+                      path="conference/meetings"
+                      element={<ProtectedMyMeetings all={true} />}
+                    />
+                    <Route
+                      path="conference/create"
+                      element={<ProtectedCreateMeeting />}
+                    />
 
-                  <Route path="*" element={<ComingSoon />} />
+                    <Route path="*" element={<ComingSoon />} />
+                  </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </Suspense>
-        </GroupProvider>
-      </CommProvider>
+              </Routes>
+            </Suspense>
+          </GroupProvider>
+        </CommProvider>
+      </MeetingProvider>
     </ThemeProvider>
   );
 };

@@ -17,14 +17,15 @@ const useChat = () => {
   const token = authDetails?.access_token;
   const client = axiosClient(token);
 
-  const useFetchContacts = useQuery({
-    queryKey: ["contacts"],
-    queryFn: async () => {
-      const { data } = await client.get("/user/contact");
-      return data?.data || [];
-    },
-    enabled: !!authDetails, // Fetch only when authenticated
-  });
+  const useFetchContacts = () =>
+    useQuery({
+      queryKey: ["contacts"],
+      queryFn: async () => {
+        const { data } = await client.get("/user/contact");
+        return data?.data || [];
+      },
+      enabled: !!authDetails, // Fetch only when authenticated
+    });
 
   // Fetch Contacts Manually
   const fetchContacts = async () => {
@@ -61,7 +62,7 @@ const useChat = () => {
     return useInfiniteQuery({
       queryKey: ["groupMessages", groupId],
       queryFn: async ({ pageParam = 1 }) => {
-        // ✅ Check cache first before hitting API
+        // Check cache first before hitting API
         const cached = queryClient.getQueryData(["groupMessages", groupId]);
 
         if (cached) {
@@ -101,7 +102,7 @@ const useChat = () => {
     return useInfiniteQuery({
       queryKey: ["chatMessages", peerId],
       queryFn: async ({ pageParam = 1 }) => {
-        // ✅ Check cache first before hitting API
+        // Check cache first before hitting API
         const cached = queryClient.getQueryData(["chatMessages", peerId]);
 
         if (cached) {
@@ -137,17 +138,16 @@ const useChat = () => {
     });
   };
 
-  const getCallLogs = useQuery({
-    queryKey: ["callLogs"],
-    queryFn: async () => {
-      const { data } = await client.get(`/user/chat/callLog`);
-      return data?.data || [];
-    },
-    enabled: !!authDetails,
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
+  const getCallLogs = () =>
+    useQuery({
+      queryKey: ["callLogs"],
+      queryFn: async () => {
+        const { data } = await client.get(`/user/chat/callLog`);
+        return data?.data || [];
+      },
+      enabled: !!authDetails,
+      staleTime: 0,
+    });
 
   const updateCallLog = useMutation({
     mutationFn: async (callLog) => {

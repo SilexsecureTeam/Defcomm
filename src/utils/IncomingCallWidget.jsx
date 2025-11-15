@@ -9,9 +9,14 @@ import { AuthContext } from "../context/AuthContext";
 import { FaSpinner } from "react-icons/fa";
 
 const IncomingCallWidget = () => {
-  const { callMessage, setCallMessage, setShowCall, setMeetingId } =
-    useContext(ChatContext);
-  const { setProviderMeetingId } = useContext(MeetingContext);
+  const {
+    callMessage,
+    setCallMessage,
+    setShowCall,
+    setMeetingId,
+    finalCallData,
+  } = useContext(ChatContext);
+  const { setProviderMeetingId, setIsCall } = useContext(MeetingContext);
   const { authDetails } = useContext(AuthContext);
   const { updateCallLog } = useChat();
 
@@ -45,6 +50,13 @@ const IncomingCallWidget = () => {
     };
   }, [callMessage]);
 
+  useEffect(() => {
+    if (finalCallData?.state === "pick") {
+      setShow(false);
+      audioController.stopRingtone();
+      setCallMessage(null);
+    }
+  }, [finalCallData]);
   const handleAccept = () => {
     if (callHandledRef.current) return;
     callHandledRef.current = true;
@@ -52,6 +64,7 @@ const IncomingCallWidget = () => {
     audioController.stopRingtone();
     setMeetingId(callMessage?.meetingId);
     setProviderMeetingId(callMessage?.meetingId);
+    setIsCall(true);
     setShowCall(true);
     setShow(false);
   };
@@ -76,6 +89,7 @@ const IncomingCallWidget = () => {
     } finally {
       setCallMessage(null);
       setShow(false);
+      setShowCall(false);
     }
   };
 

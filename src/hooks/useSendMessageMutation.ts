@@ -5,7 +5,6 @@ import { queryClient } from "../services/query-client";
 import { onFailure } from "../utils/notifications/OnFailure";
 import { extractErrorMessage } from "../utils/formmaters";
 import { ChatContext } from "../context/ChatContext";
-import { m } from "framer-motion";
 
 export const useSendMessageMutation = (
   client: AxiosInstance,

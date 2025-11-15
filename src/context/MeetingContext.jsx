@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { MeetingProvider as SDKMeetingProvider } from "@videosdk.live/react-sdk";
 import { AuthContext } from "./AuthContext";
 import { getAuthToken } from "../components/video-sdk/Api";
+import { useRef } from "react";
 
 export const MeetingContext = createContext();
 
@@ -14,32 +15,43 @@ export const MeetingProvider = ({ children }) => {
   const [providerMeetingId, setProviderMeetingId] = useState(null);
   const [showConference, setShowConference] = useState(false);
   const [token, setToken] = useState(null);
-  const [isTokenLoading, setIsTokenLoading] = useState(true);
+  const [isTokenLoading, setIsTokenLoading] = useState(false);
   const [tokenError, setTokenError] = useState(null);
+  const [isCall, setIsCall] = useState(false);
+  const tokenFetchedRef = useRef(false);
+
   // Automatically refetch token whenever user or conference changes
   useEffect(() => {
-    const fetchToken = async () => {
-      setIsTokenLoading(true);
-      try {
-        if (providerMeetingId) {
-          const role = isCreator ? "host" : "guest";
+    console.log(isCreator, conference);
 
-          const response = await getAuthToken(authDetails.user.id, role);
-          setToken(response?.token || response);
-          console.log(role, response);
-        }
+    if (!providerMeetingId) return;
+
+    const fetchToken = async () => {
+      // if (isCall && tokenFetchedRef.current) {
+      //   setIsTokenLoading(false);
+      //   return;
+      // }
+
+      try {
+        setIsTokenLoading(true);
+        const role = !isCall ? (isCreator ? "host" : "guest") : "host";
+
+        const response = await getAuthToken(authDetails.user.id, role);
+        setToken(response?.token || response);
+
+        tokenFetchedRef.current = true;
       } catch (error) {
-        console.error("Failed to fetch VideoSDK token, using default:", error);
-        setTokenError(error?.message || "Failed to initialize meeting token");
+        setTokenError(error.message);
         setToken(null);
-        return;
       } finally {
         setIsTokenLoading(false);
       }
     };
 
     fetchToken();
-  }, [authDetails?.user?.id, providerMeetingId]);
+  }, [authDetails?.user?.id, providerMeetingId, isCreator]);
+
+  console.log(providerMeetingId, conference);
 
   return (
     <MeetingContext.Provider
@@ -59,13 +71,14 @@ export const MeetingProvider = ({ children }) => {
         setIsCreator,
         isTokenLoading,
         tokenError,
+        isCall,
+        setIsCall,
       }}
     >
       <SDKMeetingProvider
         key={`${token}-${providerMeetingId || "test"}`}
         config={{
-          meetingId:
-            conference?.meeting_id || providerMeetingId || "test-meeting",
+          meetingId: conference ? conference?.meeting_id : providerMeetingId,
           name: authDetails?.user?.name || "Guest User",
           participantId: authDetails?.user?.id || `guest-${Date.now()}`,
           micEnabled: false,

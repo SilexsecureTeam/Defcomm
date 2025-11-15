@@ -38,7 +38,7 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
     data: contacts,
     isLoading: isContactsLoading,
     isError: isContactsError,
-  } = useFetchContacts;
+  } = useFetchContacts();
 
   // 🟢 Fetch Groups
   const { useFetchGroups } = useGroups();

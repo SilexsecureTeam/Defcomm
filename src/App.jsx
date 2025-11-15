@@ -35,45 +35,43 @@ const App = () => {
       <AuthProvider>
         <NotificationProvider>
           <ChatProvider>
-            <MeetingProvider>
-              <BotProvider>
-                <DashboardContextProvider>
-                  <Router>
-                    <Suspense fallback={<FallBack />}>
-                      <Routes>
-                        <Route path="/login" element={<DefcommLogin />} />
+            <BotProvider>
+              <DashboardContextProvider>
+                <Router>
+                  <Suspense fallback={<FallBack />}>
+                    <Routes>
+                      <Route path="/login" element={<DefcommLogin />} />
+                      <Route
+                        path="/onboarding"
+                        element={<UserVerification />}
+                      />
+                      <Route path="/" element={<DefcommLogin />} />
+                      <Route path="web" element={<DeffViewer />} />
+
+                      {/* Using ProtectedRoute as a Component for dashboard */}
+                      <Route path="/dashboard/*" element={<SecureRoute />}>
                         <Route
-                          path="/onboarding"
-                          element={<UserVerification />}
+                          path="*"
+                          element={
+                            <ProtectedRoute>
+                              <Dashboard />
+                            </ProtectedRoute>
+                          }
                         />
-                        <Route path="/" element={<DefcommLogin />} />
-                        <Route path="web" element={<DeffViewer />} />
+                      </Route>
 
-                        {/* Using ProtectedRoute as a Component for dashboard */}
-                        <Route path="/dashboard/*" element={<SecureRoute />}>
-                          <Route
-                            path="*"
-                            element={
-                              <ProtectedRoute>
-                                <Dashboard />
-                              </ProtectedRoute>
-                            }
-                          />
-                        </Route>
-
-                        {/* Catch-all redirect */}
-                        <Route path="*" element={<Navigate to="/" />} />
-                      </Routes>
-                    </Suspense>
-                  </Router>
-                  <ToastContainer
-                    autoClose={2000}
-                    draggable
-                    className="z-[100000000000] mt-2"
-                  />
-                </DashboardContextProvider>
-              </BotProvider>
-            </MeetingProvider>
+                      {/* Catch-all redirect */}
+                      <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                  </Suspense>
+                </Router>
+                <ToastContainer
+                  autoClose={2000}
+                  draggable
+                  className="z-[100000000000] mt-2"
+                />
+              </DashboardContextProvider>
+            </BotProvider>
           </ChatProvider>
         </NotificationProvider>
       </AuthProvider>

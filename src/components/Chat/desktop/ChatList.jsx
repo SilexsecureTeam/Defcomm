@@ -31,7 +31,7 @@ export default function ChatList() {
     );
   };
 
-  const { data: contacts } = useFetchContacts;
+  const { data: contacts } = useFetchContacts();
 
   const { data: groups } = useFetchGroups();
 
