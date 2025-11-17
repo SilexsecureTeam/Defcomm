@@ -139,7 +139,7 @@ const useAuth = () => {
       const payload = mode === "all" ? {} : { device: authDetails?.device_id };
       await client.post("/auth/logout", payload);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Clear auth state
       updateAuth(null);
 

@@ -3,6 +3,7 @@ import React from "react";
 import { parseHtml } from "../formmaters";
 import { ChatMessage, Participant } from "../types/chat";
 import { JSX } from "react/jsx-runtime";
+import { queryClient } from "../../services/query-client";
 export const MENTION_TOKEN_REGEX = /@\[(.+?)\]\(user:([^)]+)\)/g;
 
 export const resolveTaggedUsers = (
@@ -285,4 +286,21 @@ export default {
   DIRECTION_LOCK_RATIO,
   COLORS,
   MAX_LENGTH,
+};
+
+export const handleOpenChat = async (chatUserId: any) => {
+  // 1. Update local cache
+  queryClient.setQueryData(["chatMessages", chatUserId], (old: any) => {
+    if (!old) return old;
+    return {
+      ...old,
+      pages: old.pages.map((page: { data: any[] }) => ({
+        ...page,
+        data: page.data.map((msg: any) => ({
+          ...msg,
+          is_read: "yes",
+        })),
+      })),
+    };
+  });
 };

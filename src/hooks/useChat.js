@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext } from "react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -13,7 +13,6 @@ const useChat = () => {
   const queryClient = useQueryClient();
 
   const groupId = authDetails?.user?.company_id;
-  const userId = authDetails?.user?.id;
   const token = authDetails?.access_token;
   const client = axiosClient(token);
 
@@ -24,7 +23,8 @@ const useChat = () => {
         const { data } = await client.get("/user/contact");
         return data?.data || [];
       },
-      enabled: !!authDetails, // Fetch only when authenticated
+      enabled: !!authDetails,
+      staleTime: 0,
     });
 
   // Fetch Contacts Manually
@@ -33,10 +33,15 @@ const useChat = () => {
     return data?.data || [];
   };
   // Fetch Contacts Manually
-  const fetchChatHistory = async () => {
-    const { data } = await client.get(`/user/chat/history`);
-    return data?.data || [];
-  };
+  const useFetchLastChats = () =>
+    useQuery({
+      queryKey: ["last-chats"],
+      queryFn: async () => {
+        const { data } = await client.get("/user/chat/lastMessage");
+        return data?.data || [];
+      },
+      enabled: !!authDetails, // Fetch only when authenticated
+    });
 
   // Fetch Group Members Manually
   const fetchGroupMembers = async () => {
@@ -159,22 +164,20 @@ const useChat = () => {
     },
   });
 
-  const useMessageRead = (id) => {
-    return useQuery({
-      queryKey: ["messageRead", id],
-      queryFn: async () => {
-        if (!id) throw new Error("Message id is required");
+  const markMessageAsRead = async (id) => {
+    if (!id) throw new Error("Message id is required");
 
-        const { data } = await client.get(`/user/messages/isread/${id}`);
-        return data?.data || data;
-      },
-      enabled: !!id, // only run when id is available
-    });
+    try {
+      const { data } = await client.get(`/user/messages/isread/${id}`);
+      return data?.data || data;
+    } catch (error) {
+      console.error("Failed to mark message as read:", error);
+      throw error;
+    }
   };
 
   return {
     fetchContacts,
-    fetchChatHistory,
     fetchGroupMembers,
     fetchChatMessages,
     getCallLogs,
@@ -183,7 +186,8 @@ const useChat = () => {
     updateCallLog,
     fetchGroupChatMessages,
     useFetchContacts,
-    useMessageRead,
+    useFetchLastChats,
+    markMessageAsRead,
   };
 };
 

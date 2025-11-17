@@ -89,15 +89,15 @@ const ProfileDropdown = ({ user }) => {
 
             <li className="">
               <button
-                disabled={isLoading?.logoutAll}
+                disabled={isLoading?.logout}
                 onClick={() => logout("all")}
                 className={`w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-red-50 ${
-                  isLoading?.logoutAll
+                  isLoading?.logout
                     ? "opacity-50 cursor-not-allowed"
                     : "text-red-600"
                 }`}
               >
-                {isLoading?.logoutAll ? (
+                {isLoading?.logout ? (
                   <FaSpinner className="animate-spin" size={16} />
                 ) : (
                   <FiLogOut size={16} />

@@ -64,17 +64,8 @@ const DashboardWrapper = ({ children }) => {
 
   const { state, dispatch } = useContext(DashboardContext);
   const { activeChannel } = useContext(CommContext);
-  const { fetchContacts } = useChat();
   const { pathname } = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-
-  const { data: contacts, isLoading } = useQuery({
-    queryKey: ["contacts"],
-    queryFn: fetchContacts,
-    enabled: state?.type === "CHAT",
-    staleTime: 0,
-    refetchOnMount: true,
-  });
 
   // Group Channel
   useGroupChannel({
@@ -115,7 +106,7 @@ const DashboardWrapper = ({ children }) => {
     ) {
       Sidebar = SideBarTwo;
       SidebarItem = SideBarItemTwo;
-      option = contacts || [];
+      option = [];
     }
 
     return {
@@ -123,7 +114,7 @@ const DashboardWrapper = ({ children }) => {
       SidebarItemComponent: SidebarItem,
       optionList: option,
     };
-  }, [pathname, state?.type, contacts]);
+  }, [pathname, state?.type]);
 
   useLayoutEffect(() => {
     const matchedOption = [
@@ -159,11 +150,7 @@ const DashboardWrapper = ({ children }) => {
         contacts={optionList}
         state={state}
       >
-        {isLoading ? (
-          <div className="flex justify-center items-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
-          </div>
-        ) : (
+        {
           <ul className="flex flex-col gap-[10px]">
             {SidebarItemComponent &&
               optionList?.map((currentOption, idx) => (
@@ -176,7 +163,7 @@ const DashboardWrapper = ({ children }) => {
                 />
               ))}
           </ul>
-        )}
+        }
 
         <ul className="flex flex-col gap-[10px]">
           {SidebarItemComponent &&

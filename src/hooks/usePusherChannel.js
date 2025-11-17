@@ -1,26 +1,30 @@
 import { useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
-
 import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
 import receiverTone from "../assets/audio/receiver.mp3";
 import audioController from "../utils/audioController";
 import { queryClient } from "../services/query-client";
-
 import { ChatContext } from "../context/ChatContext";
 import { NotificationContext } from "../context/NotificationContext";
 import { AuthContext } from "../context/AuthContext";
 import useAuth from "./useAuth";
 import { onLogoutToast } from "../utils/notifications/onLogoutToast";
 import { normalizeId } from "../utils/formmaters";
-const usePusherChannel = ({ userId, token, showToast = true }) => {
+
+const usePusherChannel = ({ userId, token }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const { authDetails, setLogoutSignal, updateAuth } = useContext(AuthContext);
-  const { setTypingUsers, setCallMessage, chatVisibility, setFinalCallData } =
-    useContext(ChatContext);
+  const {
+    setTypingUsers,
+    setCallMessage,
+    chatVisibility,
+    setFinalCallData,
+    selectedChatUser,
+  } = useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
 
   useEffect(() => {
@@ -64,39 +68,37 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         ? receiverUserId // I sent it → save under receiver
         : senderUserId; // They sent it → save under sender
 
-      // 🔔 Show toast only if not my message
-      const shouldToast =
-        data?.state !== "not_typing" &&
-        data?.state !== "is_typing" &&
-        data?.state !== "callUpdate" &&
-        data?.state !== "call" &&
-        data?.state !== "logout" &&
-        !isMyChat;
+      // Show toast only if not my message
+      const shouldToast = data?.state === "text" && !isMyChat;
 
-      console.log(newMessage);
-      if (
-        data?.state === "logout" &&
-        data?.device === "all" &&
-        authDetails?.device_id !== data?.device
-      ) {
-        setLogoutSignal(true);
-        // Clear auth state
-        updateAuth(null);
-        // Selectively clear cache (safer than full clear)
-        queryClient.removeQueries();
+      console.log(newMessage, isMyChat, senderUserId);
+      if (data?.state === "logout" && data?.device === "all") {
+        if (authDetails?.device_id !== data?.sender_iden) {
+          setLogoutSignal(true);
+          // Clear auth state
+          updateAuth(null);
+          // Selectively clear cache (safer than full clear)
+          queryClient.removeQueries();
+          setTimeout(() => {
+            // Redirect
+            navigate("/login", {
+              state: { from: null, fromLogout: true },
+              replace: true,
+            });
 
-        setTimeout(() => {
-          // Redirect
+            onLogoutToast();
+          }, 3000); // give user 3s to read the message
+        } else {
+          // Clear auth state
+          updateAuth(null);
           navigate("/login", {
             state: { from: null, fromLogout: true },
             replace: true,
           });
-
-          onLogoutToast();
-        }, 3000); // give user 3s to read the message
+        }
       }
 
-      // 🔔 Handle call messages
+      // Handle call messages
       if (isCall) {
         const meetingId = newMessage?.message?.split("CALL_INVITE:")[1];
         setCallMessage({
@@ -109,11 +111,37 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         });
         audioController.playRingtone(receiverTone, true);
       }
+      const isChatOpen =
+        selectedChatUser?.contact_id_encrypt === cacheKeyUserId;
+
+      if (shouldToast && !isChatOpen) {
+        addNotification(newMessage);
+        onNewNotificationToast({
+          message: newMessage?.message,
+          senderName:
+            newMessage?.sender?.name?.split(" ")[0] ||
+            `User ${newMessage?.data?.user_id}`,
+          onClick: () => {
+            markAsSeen(newMessage?.data?.id);
+            navigate(`/dashboard/user/${newMessage?.data?.user_id}/chat`, {
+              state: newMessage?.sender,
+              isChatVisible: chatVisibility,
+            });
+          },
+          tagMess: newMessage?.data?.tag_mess,
+          tagUser: newMessage?.data?.tag_user,
+        });
+      } else if (isChatOpen) {
+        console.log("Message to mark", newMessage?.data?.id);
+
+        if (newMessage?.data?.id) markAsSeen(newMessage?.data?.id); // Auto mark as seen immediately
+      }
 
       // Cache update always (multi-device sync)
       if (
-        newMessage.state !== "is_typing" &&
-        newMessage.state !== "not_typing"
+        newMessage.state === "call" ||
+        newMessage.state === "text" ||
+        newMessage.state === "callUpdate"
       ) {
         const base =
           newMessage.state === "callUpdate" ? newMessage.mss : newMessage.data;
@@ -121,13 +149,28 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         const messageToStore = {
           ...base,
           id: normalizeId(base),
+          is_my_chat: isMyChat ? "yes" : "no",
         };
-        console.log(messageToStore, cacheKeyUserId);
 
         queryClient.setQueryData(["chatMessages", cacheKeyUserId], (old) => {
           if (!old || !old.pages || old.pages.length === 0) {
-            queryClient.invalidateQueries(["chatMessages", cacheKeyUserId]);
-            return old;
+            return {
+              pages: [
+                {
+                  data: [messageToStore],
+                  chat_meta: {
+                    chat_user_id: newMessage.user_to || newMessage.user_id,
+                    chat_user_id_en: cacheKeyUserId,
+                    current_page: 1,
+                    last_page: 1,
+                    per_page: 10,
+                    total: 1,
+                    urlparams: "?page=",
+                  },
+                },
+              ],
+              pageParams: [],
+            };
           }
 
           const lastPage = old.pages[old.pages.length - 1];
@@ -178,29 +221,12 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
         });
       }
 
-      if (shouldToast) {
-        addNotification(newMessage);
-        onNewNotificationToast({
-          message: newMessage?.message,
-          senderName:
-            newMessage?.sender?.name?.split(" ")[0] ||
-            `User ${newMessage?.data?.user_id}`,
-          onClick: () => {
-            markAsSeen(newMessage?.data?.id);
-            navigate(`/dashboard/user/${newMessage?.data?.user_id}/chat`, {
-              state: {
-                contact_id_encrypt: newMessage?.sender?.id,
-                contact_id: newMessage?.sender?.id,
-                contact_name: newMessage?.sender?.name,
-              },
-              isChatVisible: chatVisibility,
-            });
-          },
-          tagMess: newMessage?.data?.tag_mess,
-          tagUser: newMessage?.data?.tag_user,
+      if (newMessage?.state === "last_message") {
+        queryClient.setQueryData(["last-chats"], (prevChats) => {
+          console.log(prevChats, newMessage?.data);
+          return newMessage?.data;
         });
       }
-
       // Typing indicators
       if (newMessage?.state === "is_typing") {
         setTypingUsers((prev) => {
@@ -219,7 +245,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
       // Handle call updates
       if (newMessage?.state === "callUpdate") {
         setFinalCallData({
-          id: newMessage?.mss?.id_en,
+          id: normalizeId(newMessage),
           duration: newMessage?.call?.call_duration,
           state: newMessage?.call?.call_state,
         });
@@ -229,7 +255,7 @@ const usePusherChannel = ({ userId, token, showToast = true }) => {
       if (newMessage?.call?.call_state === "pick") {
         audioController.stopRingtone();
         setCallMessage((prev) => {
-          if (prev?.user_id === newMessage?.mss?.user_id) {
+          if (prev?.user_id === cacheKeyUserId) {
             return { ...prev, status: "picked" };
           }
           return prev;

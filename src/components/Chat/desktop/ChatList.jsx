@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useMemo } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import logoIcon from "../../../assets/logo-icon.png";
 import { ChatContext } from "../../../context/ChatContext";
@@ -7,17 +7,19 @@ import { useQuery } from "@tanstack/react-query";
 import { maskPhone } from "../../../utils/formmaters";
 import useGroups from "../../../hooks/useGroup";
 import { useLocation, useNavigate } from "react-router-dom";
+import { MdDelete } from "react-icons/md";
 
-export default function ChatList() {
+function ChatList() {
   const { setSelectedChatUser, selectedChatUser, typingUsers } =
     useContext(ChatContext);
   const navigate = useNavigate();
 
-  const { useFetchContacts, fetchChatHistory } = useChat();
-  const { useFetchGroups } = useGroups();
+  const { useFetchContacts, useFetchLastChats } = useChat();
+  const { useFetchGroups, removeContactMutation } = useGroups();
   const [search, setSearch] = useState("");
   const [showUsers, setShowUsers] = useState(true);
   const [showGroups, setShowGroups] = useState(true);
+  const [loadingStates, setLoadingStates] = useState({});
 
   const location = useLocation();
   const chatUserData = location?.state;
@@ -32,42 +34,49 @@ export default function ChatList() {
   };
 
   const { data: contacts } = useFetchContacts();
-
   const { data: groups } = useFetchGroups();
 
   const {
-    data: chatHistory,
+    data: lastChats,
     isLoading: isHistoryLoading,
     isError: isHistoryError,
-  } = useQuery({
-    queryKey: ["chat-history"],
-    queryFn: fetchChatHistory,
-  });
+  } = useFetchLastChats();
+
+  const unreadMap = useMemo(() => {
+    if (!lastChats) return {};
+    const map = {};
+    lastChats.forEach((chat) => {
+      map[chat.chat_user_to_id] = chat.unread; // or chat.unread_count
+    });
+    return map;
+  }, [lastChats]);
 
   const orderedContacts = useMemo(() => {
     if (!contacts) return [];
-    if (!chatHistory) return contacts;
+    if (!lastChats) return contacts;
 
-    const reversedIds = chatHistory
-      .slice()
-      .reverse()
-      .map((c) => c.chat_user_to_id);
-
-    const uniqueHistoryIds = [...new Set(reversedIds)];
+    // backend already ordered: latest FIRST
+    const historyIds = lastChats.map((c) => c.chat_user_to_id);
+    const uniqueHistoryIds = [...new Set(historyIds)];
 
     const inHistory = uniqueHistoryIds
-      .map((id) => contacts.find((c) => c.contact_id === id))
+      .map((id) => contacts.find((c) => c.contact_id_encrypt === id))
       .filter(Boolean);
 
-    const inHistoryIds = new Set(inHistory.map((c) => c.contact_id));
-    const others = contacts.filter((c) => !inHistoryIds.has(c.contact_id));
+    const inHistoryIds = new Set(inHistory.map((c) => c.contact_id_encrypt));
+    const others = contacts.filter(
+      (c) => !inHistoryIds.has(c.contact_id_encrypt)
+    );
 
-    return [...inHistory, ...others];
-  }, [contacts, chatHistory]);
+    return [...inHistory, ...others]; // chat with latest message stays TOP
+  }, [contacts, lastChats]);
 
-  const filteredContacts = orderedContacts?.filter((item) =>
-    item?.contact_name?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Filter by search
+  const filteredContacts = useMemo(() => {
+    return orderedContacts.filter((c) =>
+      c.contact_name?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [orderedContacts, search]);
 
   const filteredGroups = groups?.filter((item) =>
     item?.group_name?.toLowerCase().includes(search.toLowerCase())
@@ -133,10 +142,11 @@ export default function ChatList() {
               <div
                 key={user?.id}
                 onClick={() => navigateToChat(user, "user")}
-                className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 ${
+                className={`cursor-pointer flex items-center gap-[10px] hover:bg-gray-800 ${
                   chatUserData?.contact_id === user?.contact_id && "bg-gray-800"
-                } group items-center p-3 font-medium rounded-md`}
+                } group p-3 font-medium rounded-md relative`}
               >
+                {/* Avatar */}
                 <figure className="relative w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-black font-bold">
                   <img
                     src={
@@ -159,55 +169,44 @@ export default function ChatList() {
                     } w-3 h-3 absolute bottom-[-2%] right-[5%] rounded-full border-[2px] border-white`}
                   ></span>
                 </figure>
-                <div>
-                  <p className="text-sm capitalize">{user?.contact_name}</p>
-                  <small className="text-sm">
+
+                {/* Name + phone */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm capitalize truncate">
+                    {user?.contact_name}
+                  </p>
+                  <small className="text-xs text-gray-400 truncate">
                     {maskPhone(user?.contact_phone)}
                   </small>
+
                   {typingUsers[Number(user?.contact_id)] && (
                     <div className="text-green-400 text-xs">Typing...</div>
                   )}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
 
-        {/* GROUPS */}
-        <div className="sticky top-0 bg-transparent z-10">
-          <button
-            onClick={() => setShowGroups((prev) => !prev)}
-            className="flex items-center justify-between w-full text-sm text-oliveHover mb-2 bg-gray-900/50 backdrop-blur-sm p-2"
-          >
-            <span>Groups</span>
-            {showGroups ? (
-              <ChevronDown size={16} />
-            ) : (
-              <ChevronRight size={16} />
-            )}
-          </button>
-        </div>
-        {showGroups && (
-          <div className="space-y-4">
-            {filteredGroups?.map((group) => (
-              <div
-                key={group?.id}
-                onClick={() => navigateToChat(group, "group")}
-                className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 ${
-                  chatUserData?.id === group?.id &&
-                  chatUserData?.type === "group" &&
-                  "bg-gray-800"
-                } group items-center p-3 font-medium rounded-md`}
-              >
-                <figure className="relative w-12 h-12 bg-[#B49E69] rounded-full flex items-center justify-center text-white font-bold">
-                  {group?.group_name?.slice(0, 2).toUpperCase()}
-                </figure>
-                <div>
-                  <p className="text-sm capitalize">{group?.group_name}</p>
-                  <small className="text-xs text-gray-400">
-                    {group?.members?.length} members
-                  </small>
-                </div>
+                {/* Unread badge */}
+                {unreadMap[user?.contact_id_encrypt] > 0 && (
+                  <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full transition-all duration-300">
+                    {unreadMap[user?.contact_id_encrypt]}
+                  </span>
+                )}
+
+                {/* REMOVE CONTACT BUTTON — PROFESSIONAL HOVER REVEAL */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeContactMutation.mutate(user?.id);
+                  }}
+                  className="
+        opacity-0 group-hover:opacity-100 
+        transition-all duration-300 ease-in-out 
+        transform group-hover:scale-100 scale-90 
+        w-0 group-hover:w-4 overflow-hidden ml-0
+      "
+                  title="Remove contact"
+                >
+                  <MdDelete className="text-gray-400 hover:text-red-500 transition-colors duration-200" />
+                </button>
               </div>
             ))}
           </div>
@@ -216,3 +215,5 @@ export default function ChatList() {
     </div>
   );
 }
+
+export default React.memo(ChatList);

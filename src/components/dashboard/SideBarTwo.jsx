@@ -22,25 +22,31 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
   const isChatPage =
     pathname.startsWith("/dashboard/user/") || pathname.endsWith("/chat");
 
-  // 🟢 Fetch Chat History
-  const { fetchChatHistory, useFetchContacts } = useChat();
+  // Fetch Chat History
+  const { useFetchLastChats, useFetchContacts } = useChat();
   const {
-    data: chatHistory,
+    data: lastChats,
     isLoading: isHistoryLoading,
     isError: isHistoryError,
-  } = useQuery({
-    queryKey: ["chat-history"],
-    queryFn: fetchChatHistory,
-  });
+  } = useFetchLastChats();
 
-  // 🟢 Fetch Contacts
+  const unreadMap = useMemo(() => {
+    if (!lastChats) return {};
+    const map = {};
+    lastChats.forEach((chat) => {
+      map[chat.chat_user_to_id] = chat.unread; // or chat.unread_count
+    });
+    return map;
+  }, [lastChats]);
+
+  // Fetch Contacts
   const {
     data: contacts,
     isLoading: isContactsLoading,
     isError: isContactsError,
   } = useFetchContacts();
 
-  // 🟢 Fetch Groups
+  // Fetch Groups
   const { useFetchGroups } = useGroups();
   const {
     data: groups,
@@ -61,29 +67,28 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // 🟢 Order contacts (recent chats first, no duplicates)
+  // Order contacts (recent chats first, no duplicates)
   const orderedContacts = useMemo(() => {
     if (!contacts) return [];
-    if (!chatHistory) return contacts;
+    if (!lastChats) return contacts;
 
-    const reversedIds = chatHistory
-      .slice()
-      .reverse()
-      .map((c) => c.chat_user_to_id);
-
-    const uniqueHistoryIds = [...new Set(reversedIds)];
+    // backend already ordered: latest FIRST
+    const historyIds = lastChats.map((c) => c.chat_user_to_id);
+    const uniqueHistoryIds = [...new Set(historyIds)];
 
     const inHistory = uniqueHistoryIds
-      .map((id) => contacts.find((c) => c.contact_id === id))
+      .map((id) => contacts.find((c) => c.contact_id_encrypt === id))
       .filter(Boolean);
 
-    const inHistoryIds = new Set(inHistory.map((c) => c.contact_id));
-    const others = contacts.filter((c) => !inHistoryIds.has(c.contact_id));
+    const inHistoryIds = new Set(inHistory.map((c) => c.contact_id_encrypt));
+    const others = contacts.filter(
+      (c) => !inHistoryIds.has(c.contact_id_encrypt)
+    );
 
-    return [...inHistory, ...others];
-  }, [contacts, chatHistory]);
+    return [...inHistory, ...others]; // chat with latest message stays TOP
+  }, [contacts, lastChats]);
 
-  // 🟢 Filter by search
+  // Filter by search
   const filteredContacts = useMemo(() => {
     return orderedContacts.filter((c) =>
       c.contact_name?.toLowerCase().includes(search.toLowerCase())
@@ -96,7 +101,7 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
     );
   }, [groups, search]);
 
-  // 🟢 Auto-expand section if search has results
+  // Auto-expand section if search has results
   useEffect(() => {
     if (search.trim() !== "") {
       if (filteredContacts.length > 0) {
@@ -184,6 +189,7 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
                     key={contact.contact_id}
                     data={contact}
                     setIsOpen={toogleIsOpen}
+                    unread={unreadMap[contact?.contact_id_encrypt] || 0}
                   />
                 ))
               ) : (

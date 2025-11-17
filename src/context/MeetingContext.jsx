@@ -22,8 +22,6 @@ export const MeetingProvider = ({ children }) => {
 
   // Automatically refetch token whenever user or conference changes
   useEffect(() => {
-    console.log(isCreator, conference);
-
     if (!providerMeetingId) return;
 
     const fetchToken = async () => {
@@ -49,9 +47,7 @@ export const MeetingProvider = ({ children }) => {
     };
 
     fetchToken();
-  }, [authDetails?.user?.id, providerMeetingId, isCreator]);
-
-  console.log(providerMeetingId, conference);
+  }, [providerMeetingId, isCreator]);
 
   return (
     <MeetingContext.Provider
@@ -78,7 +74,7 @@ export const MeetingProvider = ({ children }) => {
       <SDKMeetingProvider
         key={`${token}-${providerMeetingId || "test"}`}
         config={{
-          meetingId: conference ? conference?.meeting_id : providerMeetingId,
+          meetingId: providerMeetingId,
           name: authDetails?.user?.name || "Guest User",
           participantId: authDetails?.user?.id || `guest-${Date.now()}`,
           micEnabled: false,

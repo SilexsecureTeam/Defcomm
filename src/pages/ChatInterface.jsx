@@ -22,8 +22,13 @@ const ChatInterface = () => {
   const location = useLocation();
   const chatUserData = location?.state;
 
-  const { setShowCall, setShowSettings, typingUsers, setModalTitle } =
-    useContext(ChatContext);
+  const {
+    setSelectedChatUser,
+    setShowCall,
+    setShowSettings,
+    typingUsers,
+    setModalTitle,
+  } = useContext(ChatContext);
 
   const { getChatMessages } = useChat();
 
@@ -38,6 +43,11 @@ const ChatInterface = () => {
     error,
     isLoading,
   } = getChatMessages(chatUserData?.contact_id_encrypt);
+  useEffect(() => {
+    if (chatUserData) {
+      setSelectedChatUser(chatUserData);
+    }
+  }, [chatUserData]);
 
   const messages = data?.pages.flatMap((page) => page.data) ?? [];
   const chatMeta = data?.pages?.[0]?.chat_meta;
