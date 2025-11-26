@@ -14,12 +14,17 @@ const CallMessagingModal = ({ isOpen, onClose }) => {
 
   const sendMessage = () => {
     if (message.trim()) {
-      publish({
-        id: meId,
-        name: authDetails?.user?.name,
-        text: message,
-        timestamp: new Date().toISOString(),
-      });
+      publish(
+        "CHAT_MESSAGE",
+        { persist: true },
+        {
+          id: meId,
+          name: authDetails?.user?.name,
+          text: message,
+          timestamp: new Date().toISOString(),
+        }
+      );
+
       setMessage("");
     }
   };
@@ -76,8 +81,8 @@ const CallMessagingModal = ({ isOpen, onClose }) => {
                 </p>
               )}
               {messages.map((msg, i) => {
-                const isMe = msg.message.id === meId;
-                const timeAgo = getTimeAgo(new Date(msg.message.timestamp), {
+                const isMe = msg.id === meId;
+                const timeAgo = getTimeAgo(new Date(msg.payload.timestamp), {
                   addSuffix: true,
                 });
 
@@ -91,10 +96,10 @@ const CallMessagingModal = ({ isOpen, onClose }) => {
                     }`}
                   >
                     <div className="mb-1 flex items-center gap-2 text-xs text-gray-500">
-                      <strong>{isMe ? "You" : msg.message.name}</strong>
+                      <strong>{isMe ? "You" : msg?.payload?.name}</strong>
                       <span>{timeAgo}</span>
                     </div>
-                    <div>{msg.message.text}</div>
+                    <div>{msg?.payload?.text}</div>
                   </div>
                 );
               })}
