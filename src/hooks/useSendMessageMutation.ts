@@ -85,11 +85,7 @@ export const useSendMessageMutation = (
 
     onError: (error) => {
       console.error("❌ Message send error:", error);
-      onFailure({
-        message: "Message not sent",
-        error:
-          extractErrorMessage(error) || "Failed to send message. Try again.",
-      });
+      throw Error(extractErrorMessage(error));
     },
   });
 };

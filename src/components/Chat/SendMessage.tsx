@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useMemo } from "react";
+import React, { useState, useContext, useRef, useMemo, useEffect } from "react";
 import { axiosClient } from "../../services/axios-client";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
@@ -15,14 +15,12 @@ import { FaTimes } from "react-icons/fa";
 import { htmlToPlainAndRaw } from "../../utils/chat/messageUtils";
 import ScrollToBottomButton from "./ScrollToBottom";
 import { checkIfAtBottom } from "../../utils/programs";
-import { useEffect } from "react";
 
 function SendMessage({
   messageData,
-  desktop = false,
   scrollRef,
   messagesEndRef,
-}: SendMessageProps) {
+}: Omit<SendMessageProps, "desktop">) {
   const { authDetails } = useContext(AuthContext) as any;
   const {
     file,
@@ -40,7 +38,7 @@ function SendMessage({
           (m) => m?.member_id !== authDetails?.user?.id && m?.member_name
         )) ||
       [],
-    [ctxMembers]
+    [ctxMembers, authDetails?.user?.id]
   );
 
   // contentEditable state
@@ -73,6 +71,7 @@ function SendMessage({
       clearMessageInput();
       setReplyTo(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messageData?.chat_id]);
 
   const clearReply = () => setReplyTo?.(null);
@@ -83,7 +82,6 @@ function SendMessage({
 
     // Prevent duplicate tagging
     if (tagUsers.includes(member.member_id_encrpt)) {
-      // Notify user
       onPrompt({
         title: "Info",
         message: `${member.member_name} is already tagged!`,
@@ -128,7 +126,6 @@ function SendMessage({
     newRange.collapse(true);
     sel.addRange(newRange);
 
-    // Update tag users
     setTagUsers((prev) => [...prev, member.member_id_encrpt]);
 
     setShowMentionMenu(false);
@@ -299,19 +296,14 @@ function SendMessage({
       const r = sel.getRangeAt(0);
       const { startContainer, startOffset } = r;
 
-      // Only act if caret is at startOffset > 0
       if (startContainer.nodeType === 3) {
-        // text node
-        // If caret is at position 0, check previous sibling
         if (startOffset === 0) {
           let prev = startContainer.previousSibling;
 
-          // skip empty text nodes
           while (prev && prev.nodeType === 3 && prev.textContent === "") {
             prev = prev.previousSibling;
           }
 
-          // Only remove if it's a mention chip
           if (prev instanceof HTMLElement && prev.dataset?.mention === "true") {
             e.preventDefault();
             const id = prev.getAttribute("data-user-id") || "";
@@ -321,8 +313,6 @@ function SendMessage({
           }
         }
       }
-
-      // If caret is in root or other nodes, do nothing — allow normal text deletion
     }
 
     // Enter: send message
@@ -370,6 +360,7 @@ function SendMessage({
       tag_users: tagUsers,
       sendMessageMutation,
     } as any);
+
     if (!checkIfAtBottom(scrollRef, 200)) {
       messagesEndRef.current?.scrollIntoView();
     }
@@ -377,37 +368,38 @@ function SendMessage({
 
   return (
     <div
-      className={`${
-        desktop ? "bg-white text-black" : "bg-oliveLight text-white"
-      } sticky bottom-0 w-full flex flex-col p-4`}
+      className="
+        sticky bottom-0 w-full flex flex-col p-4
+        bg-oliveLight text-white
+        lg:bg-white lg:text-black
+      "
     >
+      <ScrollToBottomButton
+        containerRef={scrollRef}
+        messagesEndRef={messagesEndRef}
+      />
       {replyTo && (
         <div
-          className={`mb-3 w-full rounded-lg overflow-hidden border-l-4 border-oliveGreen flex items-stretch ${
-            desktop
-              ? "bg-white/60 text-black shadow-sm"
-              : "bg-oliveDark/60 text-white"
-          }`}
+          className="
+            mb-3 w-full rounded-lg overflow-hidden border-l-4 border-oliveGreen lg:border-slate-500
+            flex items-stretch
+            bg-oliveDark/60 text-white
+            lg:bg-gray-300/60 lg:text-black lg:shadow-sm
+          "
           role="region"
           aria-label="Reply preview"
         >
-          {/* colored accent bar */}
-          <div
-            className={`w-1 ${
-              desktop ? "bg-oliveGreen/70" : "bg-oliveLight/80"
-            }`}
-          />
-
           {/* content */}
           <div className="flex-1 px-3 py-2 flex items-start gap-3 min-w-0">
             {/* small avatar / initials */}
             <div className="flex-shrink-0">
               <div
-                className={`w-8 h-8 rounded-md flex items-center justify-center text-sm font-semibold ${
-                  desktop
-                    ? "bg-gray-100 text-gray-800"
-                    : "bg-oliveDark/80 text-white"
-                }`}
+                className="
+                  w-8 h-8 rounded-md flex items-center justify-center
+                  text-sm font-semibold
+                  bg-oliveDark/80 text-white
+                  lg:bg-gray-100 lg:text-gray-800
+                "
                 aria-hidden="true"
               >
                 {(() => {
@@ -448,10 +440,9 @@ function SendMessage({
               </div>
 
               <div
-                className="text-sm text-gray-500 dark:text-gray-200 truncate mt-0.5"
+                className="text-sm text-gray-200 lg:text-gray-500 truncate mt-0.5"
                 style={{ lineHeight: 1.2 }}
               >
-                {/* show single-line truncated preview, preserves simple HTML/strings */}
                 {replyTo?.message}
               </div>
             </div>
@@ -461,7 +452,12 @@ function SendMessage({
           <div className="flex-shrink-0 pr-2 pl-1 py-2">
             <button
               onClick={clearReply}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:text-red-900 hover:bg-red-500/10 focus:outline-none"
+              className="
+                inline-flex items-center justify-center
+                w-8 h-8 rounded-md
+                text-gray-300 hover:text-red-900 hover:bg-red-500/10
+                lg:text-gray-500
+              "
               aria-label="Cancel reply"
               title="Cancel reply"
             >
@@ -471,11 +467,7 @@ function SendMessage({
         </div>
       )}
 
-      {file && <FileToSendPreview desktop={desktop} />}
-      <ScrollToBottomButton
-        containerRef={scrollRef}
-        messagesEndRef={messagesEndRef}
-      />
+      {file && <FileToSendPreview />}
 
       <InputBox
         insertMentionChip={insertMentionChip}
