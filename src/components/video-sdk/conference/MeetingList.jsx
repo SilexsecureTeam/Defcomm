@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import CountdownTime from "./CountdownTimer";
-import { FaVideo, FaUsers } from "react-icons/fa";
+import { FaVideo, FaUsers, FaShareAlt } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { MdContentCopy, MdCheck, MdLink } from "react-icons/md";
 import { HiClock } from "react-icons/hi";
@@ -9,6 +9,7 @@ import AddUsersToMeeting from "../../dashboard/AddUsersToMeeting";
 import { formatUtcToLocal } from "../../../utils/formmaters";
 import Dropdown from "./Dropdown";
 import { createPortal } from "react-dom";
+import { onSuccess } from "../../../utils/notifications/OnSuccess";
 
 const MeetingList = ({
   meetings = [],
@@ -40,6 +41,45 @@ const MeetingList = ({
     navigator.clipboard.writeText(`${meeting.meeting_link}/${meeting.id}`);
     setCopiedId(meeting.id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleShareMeeting = async (e, meeting) => {
+    e.stopPropagation();
+
+    const meetingId = meeting?.meeting_id || meeting?.id;
+    const shareUrl = `https://meet.defcomm.ng?meetingId=${meetingId}`;
+    const formattedDate = formatUtcToLocal(meeting.startdatetime);
+
+    const shareText = `𝐘𝐨𝐮 𝐚𝐫𝐞 𝐢𝐧𝐯𝐢𝐭𝐞𝐝 𝐭𝐨 𝐣𝐨𝐢𝐧 𝐚 𝐃𝐞𝐟𝐂𝐨𝐦𝐦 𝐦𝐞𝐞𝐭𝐢𝐧𝐠.
+
+𝐒𝐮𝐛𝐣𝐞𝐜𝐭: ${meeting?.title || "Meeting"}
+𝐃𝐚𝐭𝐞 & 𝐓𝐢𝐦𝐞: ${formattedDate}
+𝐌𝐞𝐞𝐭𝐢𝐧𝐠 𝐈𝐃: ${meetingId}
+
+𝐉𝐨𝐢𝐧 𝐌𝐞𝐞𝐭𝐢𝐧𝐠:
+${shareUrl}
+`;
+
+    try {
+      if (navigator.share) {
+        // ✅ Use only text so platforms are forced to include it.
+        await navigator.share({
+          title: meeting?.title || "DefComm Meeting",
+          text: shareText,
+          // no `url` here – it's already inside text
+        });
+      } else {
+        // 🔁 Fallback: copy full invite text
+        await navigator.clipboard.writeText(shareText);
+        onSuccess({
+          message: "Invitation Copied",
+          success: "You can now paste the invite into any app.",
+        });
+      }
+    } catch (err) {
+      // user cancelled or environment doesn't support share properly
+      console.error("Share action cancelled or failed:", err);
+    }
   };
 
   const getMeetingStatus = (startTime) => {
@@ -193,7 +233,13 @@ const MeetingList = ({
                       <MdLink size={16} />
                     )}
                   </button>
-
+                  <button
+                    title="Share with other users"
+                    onClick={(e) => handleShareMeeting(e, meeting)}
+                    className="p-1.5 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white transition-colors"
+                  >
+                    <FaShareAlt size={16} />
+                  </button>
                   {isMyMeeting && (
                     <button
                       ref={(el) => (buttonRefs.current[id] = el)}
