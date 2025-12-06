@@ -70,8 +70,6 @@ const usePusherChannel = ({ userId, token }) => {
 
       // Show toast only if not my message
       const shouldToast = data?.state === "text" && !isMyChat;
-
-      console.log(newMessage, isMyChat, senderUserId);
       if (data?.state === "logout" && data?.device === "all") {
         if (authDetails?.device_id !== data?.sender_iden) {
           setLogoutSignal(true);
@@ -115,6 +113,7 @@ const usePusherChannel = ({ userId, token }) => {
         selectedChatUser?.contact_id_encrypt === cacheKeyUserId;
 
       if (shouldToast && !isChatOpen) {
+        console.log(newMessage);
         addNotification(newMessage);
         onNewNotificationToast({
           message: newMessage?.message,
@@ -222,8 +221,8 @@ const usePusherChannel = ({ userId, token }) => {
       }
 
       if (newMessage?.state === "last_message") {
+        console.log(newMessage);
         queryClient.setQueryData(["last-chats"], (prevChats) => {
-          console.log(prevChats, newMessage?.data);
           return newMessage?.data;
         });
       }

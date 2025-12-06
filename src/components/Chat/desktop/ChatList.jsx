@@ -154,10 +154,10 @@ function ChatList() {
                   className={`cursor-pointer flex items-center gap-[10px] hover:bg-gray-800 ${
                     chatUserData?.contact_id === user?.contact_id &&
                     "bg-gray-800"
-                  } group p-3 font-medium rounded-md relative`}
+                  } group p-3 font-medium relative`}
                 >
                   {/* Avatar */}
-                  <figure className="relative w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-black font-bold overflow-hidden">
+                  <figure className="relative w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-black font-bold">
                     <img
                       src={
                         user?.image
@@ -258,7 +258,7 @@ function ChatList() {
                     chatUserData?.id === group?.id &&
                     chatUserData?.type === "group" &&
                     "bg-gray-800"
-                  } group items-center p-3 font-medium rounded-md`}
+                  } group items-center p-3 font-medium`}
                 >
                   <figure className="relative w-12 h-12 bg-[#B49E69] rounded-full flex items-center justify-center text-white font-bold">
                     {group?.group_name?.slice(0, 2).toUpperCase()}

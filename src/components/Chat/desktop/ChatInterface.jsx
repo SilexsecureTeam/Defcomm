@@ -33,7 +33,7 @@ const ChatInterface = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView();
-  }, [typingUsers[Number(chatUserData?.contact_id)]]);
+  }, [typingUsers[Number(chatUserData?.contact_id)], messages]);
   return (
     <div className="flex-1 relative gap-4 h-full">
       <SEOHelmet title="Secure Chat" />

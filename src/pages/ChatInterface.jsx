@@ -59,6 +59,10 @@ const ChatInterface = () => {
     typing: typingUsers[Number(chatUserData?.contact_id)],
   });
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, [messages]);
+
   const COLORS = {
     headerBg: "#3B3B3B",
     headerText: "#FFFFFF",
