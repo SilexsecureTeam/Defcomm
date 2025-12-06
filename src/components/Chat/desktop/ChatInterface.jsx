@@ -67,7 +67,7 @@ const ChatInterface = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-start space-x-1"
+                  className="flex items-start space-x-1 ml-5 mt-3"
                 >
                   <div className="p-2 rounded-lg bg-white text-black shadow-md flex items-center space-x-1 max-w-40">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
