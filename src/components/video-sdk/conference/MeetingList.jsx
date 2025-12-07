@@ -1,12 +1,16 @@
 import { useState, useRef } from "react";
 import CountdownTime from "./CountdownTimer";
-import { FaVideo, FaUsers, FaShareAlt } from "react-icons/fa";
+import { FaVideo, FaUsers, FaShareAlt, FaCalendarPlus } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { MdContentCopy, MdCheck, MdLink } from "react-icons/md";
+import { MdCheck, MdLink } from "react-icons/md";
 import { HiClock } from "react-icons/hi";
 import Modal from "../../modal/Modal";
 import AddUsersToMeeting from "../../dashboard/AddUsersToMeeting";
-import { formatUtcToLocal } from "../../../utils/formmaters";
+import {
+  formatLocalWallClock,
+  formatUtcToLocal,
+  parseSpaceDatetimeAsUTC,
+} from "../../../utils/formmaters";
 import Dropdown from "./Dropdown";
 import { createPortal } from "react-dom";
 import { onSuccess } from "../../../utils/notifications/OnSuccess";
@@ -80,6 +84,89 @@ ${shareUrl}
       // user cancelled or environment doesn't support share properly
       console.error("Share action cancelled or failed:", err);
     }
+  };
+
+  // Build Google Calendar URL robustly
+  const buildGoogleCalendarUrl = (meeting) => {
+    if (!meeting || !meeting.startdatetime) return null;
+
+    let startInstant = null;
+
+    // 1) If string matches "YYYY-MM-DD HH:MM:SS", parse as UTC (your backend likely stored UTC)
+    if (
+      /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(meeting.startdatetime)
+    ) {
+      startInstant = parseSpaceDatetimeAsUTC(meeting.startdatetime);
+    } else {
+      // 2) Otherwise try Date parsing (handles ISO with Z or offset)
+      const tryDate = new Date(meeting.startdatetime);
+      if (!isNaN(tryDate.getTime())) {
+        startInstant = tryDate;
+      } else {
+        // final fallback: attempt appending Z and parse as UTC
+        const tryZ = new Date(`${meeting.startdatetime}Z`);
+        if (!isNaN(tryZ.getTime())) startInstant = tryZ;
+      }
+    }
+
+    if (!startInstant || isNaN(startInstant.getTime())) return null;
+
+    // If duration missing, default to 60 minutes
+    const durationMins = meeting.duration ? parseInt(meeting.duration, 10) : 60;
+    const endInstant = new Date(startInstant.getTime() + durationMins * 60_000);
+
+    // Convert instants to user's local wall-clock Dates
+    // (creating new Date(startInstant.getTime()) yields a Date object that will show local time components)
+    const startLocal = new Date(startInstant.getTime());
+    const endLocal = new Date(endInstant.getTime());
+
+    const startLocalStr = formatLocalWallClock(startLocal);
+    const endLocalStr = formatLocalWallClock(endLocal);
+    if (!startLocalStr || !endLocalStr) return null;
+
+    // use browser timezone (IANA), fallback to Africa/Lagos if missing
+    const tz =
+      Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Lagos";
+
+    // URLs
+    const joinUrl = `${meeting?.meeting_link || "https://meet.defcomm.ng"}/${
+      meeting?.id || ""
+    }`;
+    const externalJoinUrl = `https://meet.defcomm.ng?meetingId=${
+      meeting?.meeting_id || meeting?.id || ""
+    }`;
+    const title = encodeURIComponent(
+      meeting?.title || meeting?.subject || "DefComm Meeting"
+    );
+
+    const detailsPlain = [
+      `Join via Dashboard:`,
+      `${joinUrl}`,
+      ``,
+      `Join Externally:`,
+      `${externalJoinUrl}`,
+      ``,
+      `Meeting ID: ${meeting?.meeting_id || meeting?.id || ""}`,
+    ].join("\n");
+
+    const details = encodeURIComponent(detailsPlain);
+    const location = encodeURIComponent(externalJoinUrl);
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocalStr}/${endLocalStr}&details=${details}&location=${location}&ctz=${encodeURIComponent(
+      tz
+    )}&sf=true&output=xml`;
+  };
+
+  const handleAddToGoogleCalendar = (e, meeting) => {
+    e.stopPropagation();
+    const url = buildGoogleCalendarUrl(meeting);
+    if (!url) return;
+    window.open(url, "_blank");
+    onSuccess({
+      message: "Opening Google Calendar",
+      success:
+        "A new tab will open where you can save the event to your calendar.",
+    });
   };
 
   const getMeetingStatus = (startTime) => {
@@ -233,6 +320,7 @@ ${shareUrl}
                       <MdLink size={16} />
                     )}
                   </button>
+
                   <button
                     title="Share with other users"
                     onClick={(e) => handleShareMeeting(e, meeting)}
@@ -240,6 +328,16 @@ ${shareUrl}
                   >
                     <FaShareAlt size={16} />
                   </button>
+
+                  {/* Add to Google Calendar Button */}
+                  <button
+                    title="Add to Google Calendar"
+                    onClick={(e) => handleAddToGoogleCalendar(e, meeting)}
+                    className="p-1.5 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white transition-colors"
+                  >
+                    <FaCalendarPlus size={16} />
+                  </button>
+
                   {isMyMeeting && (
                     <button
                       ref={(el) => (buttonRefs.current[id] = el)}
@@ -256,7 +354,7 @@ ${shareUrl}
               </div>
 
               {/* Metadata Row */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-2 items-center justify-between">
                 <div className="flex items-center gap-2">
                   <StatusBadge
                     startTime={meeting.startdatetime}

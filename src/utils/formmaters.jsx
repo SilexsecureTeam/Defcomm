@@ -185,6 +185,27 @@ export function formatDateTimeForInput(datetime) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+// Parse "YYYY-MM-DD HH:MM:SS" as UTC and return a Date (instant)
+export const parseSpaceDatetimeAsUTC = (s) => {
+  // example: "2025-11-17 13:42:00"
+  const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/.exec(s);
+  if (!m) return null;
+  const [, Y, Mo, D, h, mi, sec] = m;
+  return new Date(Date.UTC(+Y, +Mo - 1, +D, +h, +mi, +sec));
+};
+
+// Format a JS Date (in user's local timezone) into YYYYMMDDTHHMMSS (no Z)
+export const formatLocalWallClock = (date) => {
+  if (!(date instanceof Date) || isNaN(date.getTime())) return null;
+  const Y = date.getFullYear();
+  const Mo = String(date.getMonth() + 1).padStart(2, "0");
+  const D = String(date.getDate()).padStart(2, "0");
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  const s = String(date.getSeconds()).padStart(2, "0");
+  return `${Y}${Mo}${D}T${h}${m}${s}`;
+};
+
 export const loadingMessages = [
   "Preparing secure connection...",
   "Generating meeting access token...",

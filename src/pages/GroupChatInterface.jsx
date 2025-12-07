@@ -115,7 +115,7 @@ const GroupChatInterface = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate("/dashboard/group_list")}
-          className="mr-3 p-2 rounded-full hover:bg-gray-700 transition"
+          className="mr-2 md:mr-3 p-2 rounded-full hover:bg-gray-700 transition"
           style={{ color: COLORS.textLight }}
         >
           <IoArrowBack size={22} />
@@ -123,17 +123,17 @@ const GroupChatInterface = () => {
 
         {/* Group Avatar + Name */}
         {mergedGroupInfo && (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg"
+              className="flex-shrink-0 w-10 h-10 text-sm md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold md:text-lg"
               style={{ backgroundColor: COLORS.avatar }}
             >
               {mergedGroupInfo?.group_meta?.name?.charAt(0)}
             </div>
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 md:space-x-2">
                 <h2
-                  className="text-lg font-semibold"
+                  className="text-sm md:text-lg font-semibold line-clamp-1"
                   style={{ color: COLORS.textLight }}
                 >
                   {mergedGroupInfo?.group_meta?.name}
@@ -146,7 +146,7 @@ const GroupChatInterface = () => {
                 )}
               </div>
               <p
-                className="text-sm opacity-70"
+                className="text-xs md:text-sm opacity-70"
                 style={{ color: COLORS.textLight }}
               >
                 {mergedGroupInfo?.data?.length || 0}{" "}
@@ -171,7 +171,7 @@ const GroupChatInterface = () => {
 
         {/* Settings Button */}
         <button
-          className="ml-3"
+          className="ml-2 md:ml-3"
           onClick={() => {
             setShowSettings(true);
           }}
