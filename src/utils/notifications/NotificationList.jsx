@@ -175,7 +175,7 @@ const NotificationList = () => {
                     </span>
                   </div>
 
-                  <p className="text-sm line-clamp-2 text-[#37474f]">
+                  <p className="text-sm line-clamp-2 w-[80%] text-[#37474f]">
                     {maskMessage(n.message)}
                   </p>
                 </motion.li>
