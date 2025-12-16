@@ -55,9 +55,10 @@ const NotificationList = () => {
       } else {
         navigate(`/dashboard/user/${n?.data?.user_id}/chat`, {
           state: {
-            contact_id_encrypt: n?.sender?.id_en,
+            contact_id_encrypt: n?.sender?.id,
             contact_id: n?.sender?.id,
             contact_name: n?.sender?.name,
+            phone: n?.sender?.phone,
           },
         });
       }
@@ -110,7 +111,7 @@ const NotificationList = () => {
       ) : (
         <ul className="space-y-2 max-h-96 overflow-y-auto px-1">
           <AnimatePresence initial={false}>
-            {filteredNotifications.map((n) => {
+            {filteredNotifications.map((n, idx) => {
               const isGroup = n.user_type === "group";
               const borderColor = n.seen
                 ? "#90a4ae"
@@ -122,7 +123,7 @@ const NotificationList = () => {
 
               return (
                 <motion.li
-                  key={n.id}
+                  key={n?.id + "-" + idx}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}

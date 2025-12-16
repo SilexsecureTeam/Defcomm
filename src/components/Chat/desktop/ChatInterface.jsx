@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import SendMessage from "../SendMessage";
 import ChatMessageList from "../ChatMessageList";
+import { useAutoScroll } from "../../../utils/chat/useAutoScroll";
 
 const ChatInterface = () => {
   const { typingUsers } = useContext(ChatContext);
@@ -35,7 +36,7 @@ const ChatInterface = () => {
     messages,
     containerRef: messageRef,
     endRef: messagesEndRef,
-    typing: Boolean(typingUsers[selectedChatUser?.contact_id_encrypt]),
+    typing: Boolean(typingUsers[chatUserData?.contact_id]),
     pauseAutoScroll: isFetchingNextPage,
   });
 

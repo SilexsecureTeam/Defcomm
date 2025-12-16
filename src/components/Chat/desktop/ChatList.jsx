@@ -9,8 +9,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 
 function ChatList() {
-  const { setSelectedChatUser, selectedChatUser, typingUsers } =
-    useContext(ChatContext);
+  const { setSelectedChatUser, typingUsers } = useContext(ChatContext);
 
   const navigate = useNavigate();
   const { useFetchContacts, useFetchLastChats } = useChat();
@@ -152,8 +151,8 @@ function ChatList() {
                   key={user?.id}
                   onClick={() => navigateToChat(user, "user")}
                   className={`cursor-pointer flex items-center gap-[10px] hover:bg-gray-800 ${
-                    chatUserData?.contact_id === user?.contact_id &&
-                    "bg-gray-800"
+                    chatUserData?.contact_id_encrypt ===
+                      user?.contact_id_encrypt && "bg-gray-800"
                   } group p-3 font-medium relative`}
                 >
                   {/* Avatar */}

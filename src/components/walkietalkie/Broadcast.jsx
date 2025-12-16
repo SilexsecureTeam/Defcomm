@@ -137,13 +137,13 @@ const Broadcast = () => {
       )}
       {!isLoading &&
         !isError &&
-        activeChannels.map((item) => {
+        activeChannels.map((item, idx) => {
           const isActive = activeChannel?.frequency === item.frequency;
           const isInvited = item?.userType !== "creator";
 
           return (
             <div
-              key={item.id}
+              key={item.id + "-" + idx}
               onClick={() => handleChannelClick(item)}
               className={`relative mb-4 cursor-pointer bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-medium flex min-h-24 shadow-md overflow-hidden ${
                 isActive ? "ring-2 ring-green-600" : ""

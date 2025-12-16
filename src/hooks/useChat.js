@@ -135,9 +135,8 @@ const useChat = () => {
         return current_page < last_page ? current_page + 1 : undefined;
       },
       enabled: !!authDetails && !!peerId,
-      staleTime: Infinity, // never stale
-      cacheTime: Infinity, // keep cached forever
-      refetchOnMount: false,
+      staleTime: 30 * 1000, // or even 2–5 minutes
+      refetchOnMount: "stale",
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
     });

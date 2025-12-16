@@ -225,10 +225,10 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
                     key={group.group_id}
                     className="cursor-pointer flex gap-3 items-center p-2 rounded-lg hover:bg-gray-800"
                   >
-                    <div className="w-10 h-10 rounded-full bg-oliveGreen flex items-center justify-center font-bold">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-oliveGreen flex items-center justify-center font-bold">
                       {group?.group_name.charAt(0)}
                     </div>
-                    <p>{group?.group_name}</p>
+                    <p className="line-clamp-2">{group?.group_name}</p>
                   </li>
                 ))
               ) : (

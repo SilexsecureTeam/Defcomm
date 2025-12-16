@@ -28,7 +28,6 @@ const ChatInterface = () => {
     setShowSettings,
     typingUsers,
     setModalTitle,
-    selectedChatUser,
   } = useContext(ChatContext);
 
   const { getChatMessages } = useChat();
@@ -44,6 +43,7 @@ const ChatInterface = () => {
     error,
     isLoading,
   } = getChatMessages(chatUserData?.contact_id_encrypt);
+
   useEffect(() => {
     if (chatUserData) {
       setSelectedChatUser(chatUserData);
@@ -57,7 +57,7 @@ const ChatInterface = () => {
     messages,
     containerRef: messageRef,
     endRef: messagesEndRef,
-    typing: Boolean(typingUsers[selectedChatUser?.contact_id_encrypt]),
+    typing: Boolean(typingUsers[chatUserData?.contact_id_encrypt]),
     pauseAutoScroll: isFetchingNextPage,
   });
 
@@ -102,11 +102,11 @@ const ChatInterface = () => {
               >
                 {chatUserData?.contact_name || "Chat"}
               </h2>
-              {typingUsers[Number(chatUserData?.contact_id)] && (
+              {typingUsers[Number(chatUserData?.contact_id_encrypt)] && (
                 <small className="text-green-400 text-xl leading-none">●</small>
               )}
             </div>
-            {typingUsers[Number(chatUserData?.contact_id)] && (
+            {typingUsers[Number(chatUserData?.contact_id_encrypt)] && (
               <div className="text-green-400 text-[10px]">Typing…</div>
             )}
           </div>
@@ -159,7 +159,7 @@ const ChatInterface = () => {
                 messagesContainerRef={messageRef}
               />
 
-              {typingUsers[chatUserData?.contact_id] && (
+              {typingUsers[chatUserData?.contact_id_encrypt] && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

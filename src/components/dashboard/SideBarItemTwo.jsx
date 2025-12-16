@@ -29,7 +29,7 @@ function SideBarItemTwo({ data, setIsOpen, unread }) {
     try {
       const res = await removeContactMutation.mutateAsync(data?.id);
       if (res) {
-        if (chatUserData?.contact_id === data?.contact_id) {
+        if (chatUserData?.contact_id_encrypt === data?.contact_id) {
           setSelectedChatUser(null);
         }
       }
@@ -43,7 +43,8 @@ function SideBarItemTwo({ data, setIsOpen, unread }) {
       key={data?.id}
       onClick={navigateToChat}
       className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 ${
-        chatUserData?.contact_id === data?.contact_id && "bg-gray-800"
+        chatUserData?.contact_id_encrypt === data?.contact_id_encrypt &&
+        "bg-gray-800"
       } group items-center p-3 font-medium relative`}
     >
       <figure className="relative w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-black font-bold">

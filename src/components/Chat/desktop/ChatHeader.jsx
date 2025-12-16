@@ -13,7 +13,7 @@ export default function ChatHeader() {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-700">
       {chatUserData ? (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           <figure className="relative w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-black font-bold">
             <img
               src={
@@ -37,7 +37,7 @@ export default function ChatHeader() {
             ></span>
           </figure>
           <div>
-            <div className="font-semibold capitalize">
+            <div className="font-semibold capitalize line-clamp-1">
               {chatUserData?.contact_name}
             </div>
             {typingUsers[Number(chatUserData?.contact_id)] && (
@@ -49,7 +49,7 @@ export default function ChatHeader() {
         <p className="font-bold text-lg">Chat</p>
       )}
       {chatUserData && (
-        <div className="flex gap-5 text-white *:cursor-pointer">
+        <div className="flex gap-2 text-white *:cursor-pointer">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
