@@ -64,6 +64,9 @@ const NotificationList = () => {
     }
   };
 
+  const maskMessage = (message = "") => {
+  return "*".repeat(message.length);
+};
   return (
     <div
       className="p-4 w-80 md:w-[500px] rounded-xl shadow-md border bg-white"
@@ -175,7 +178,7 @@ const NotificationList = () => {
                   </div>
 
                   <p className="text-sm line-clamp-2 text-[#37474f]">
-                    {n.message}
+                    {maskMessage(n.message)}
                   </p>
                 </motion.li>
               );

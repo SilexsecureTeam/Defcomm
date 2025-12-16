@@ -31,9 +31,14 @@ const ChatInterface = () => {
   const messages = data?.pages.flatMap((page) => page.data) ?? [];
   const chatMeta = data?.pages?.[0]?.chat_meta;
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView();
-  }, [typingUsers[Number(chatUserData?.contact_id)], messages]);
+  useAutoScroll({
+    messages,
+    containerRef: messageRef,
+    endRef: messagesEndRef,
+    typing: Boolean(typingUsers[selectedChatUser?.contact_id_encrypt]),
+    pauseAutoScroll: isFetchingNextPage,
+  });
+
   return (
     <div className="flex-1 relative gap-4 h-full">
       <SEOHelmet title="Secure Chat" />

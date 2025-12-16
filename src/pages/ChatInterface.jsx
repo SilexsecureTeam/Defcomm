@@ -28,6 +28,7 @@ const ChatInterface = () => {
     setShowSettings,
     typingUsers,
     setModalTitle,
+    selectedChatUser,
   } = useContext(ChatContext);
 
   const { getChatMessages } = useChat();
@@ -53,15 +54,12 @@ const ChatInterface = () => {
   const chatMeta = data?.pages?.[0]?.chat_meta;
 
   useAutoScroll({
-    messages, // pass chat messages
+    messages,
     containerRef: messageRef,
     endRef: messagesEndRef,
-    typing: typingUsers[Number(chatUserData?.contact_id)],
+    typing: Boolean(typingUsers[selectedChatUser?.contact_id_encrypt]),
+    pauseAutoScroll: isFetchingNextPage,
   });
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView();
-  }, [messages]);
 
   const COLORS = {
     headerBg: "#3B3B3B",

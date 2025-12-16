@@ -64,6 +64,7 @@ function SendMessage({
     setTagUsers([]);
     clearReply();
     typingSent.current = false;
+    messagesEndRef.current?.scrollIntoView();
   }
 
   useEffect(() => {
