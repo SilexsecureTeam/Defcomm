@@ -216,3 +216,7 @@ export const loadingMessages = [
 export const normalizeId = (obj) => {
   return isNaN(obj?.id) ? obj?.id : obj?.id_en;
 };
+
+export const maskMessage = (message = "") => {
+  return "*".repeat(message.length);
+};

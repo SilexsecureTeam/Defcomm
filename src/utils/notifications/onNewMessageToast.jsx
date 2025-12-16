@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import audioController from "../audioController";
 import notificationSound from "../../assets/audio/bell.mp3";
+import { maskMessage } from "../formmaters";
 
 export const onNewNotificationToast = ({
   groupName,
@@ -15,7 +16,6 @@ export const onNewNotificationToast = ({
   message,
   type = "message", // "message" | "call"
   onClick = () => {},
-  isChatVisible = false,
   tagUser = null,
   tagMess = null,
   myId = null,
@@ -29,12 +29,7 @@ export const onNewNotificationToast = ({
 
   audioController.playRingtone(notificationSound);
 
-  const safeMessage =
-    isChatVisible && !isCall
-      ? "**********"
-      : isCall
-      ? "📞 Incoming Secure Call"
-      : message || "New encrypted message";
+  const safeMessage = maskMessage(message || "");
 
   const toastComponent = (
     <div
@@ -96,7 +91,7 @@ export const onNewNotificationToast = ({
             </span>
           )}
 
-          <span className="text-sm text-gray-200 break-words line-clamp-2">
+          <span className="text-sm text-gray-200 break-words line-clamp-1">
             {safeMessage}
           </span>
         </div>

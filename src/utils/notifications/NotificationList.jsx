@@ -6,6 +6,7 @@ import { FaReply, FaAt } from "react-icons/fa"; // icons for reply + mention
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
+import { maskMessage } from "../formmaters";
 
 // Icon mapping for notification type
 const getIcon = (type) => {
@@ -64,9 +65,6 @@ const NotificationList = () => {
     }
   };
 
-  const maskMessage = (message = "") => {
-  return "*".repeat(message.length);
-};
   return (
     <div
       className="p-4 w-80 md:w-[500px] rounded-xl shadow-md border bg-white"
