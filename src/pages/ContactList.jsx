@@ -30,7 +30,7 @@ const ContactList = () => {
   const { removeContactMutation } = useGroups();
 
   // Fetch Call Logs using React Query
-  const { data: callLogs } = getCallLogs;
+  const { data: callLogs } = getCallLogs();
 
   // Fetch Contacts using React Query
   const {

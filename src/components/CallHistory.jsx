@@ -95,7 +95,7 @@ const CallHistory = ({ contact, logs }) => {
         </p>
       ) : (
         <ul className="space-y-4 max-h-96 overflow-y-auto pr-2">
-          {filteredLogs.map((log, index) => (
+          {filteredLogs?.map((log, index) => (
             <li
               key={index}
               className="flex items-center justify-between bg-gray-50 p-3 py-2 rounded-md border border-gray-200 shadow-sm hover:bg-gray-100 transition"
