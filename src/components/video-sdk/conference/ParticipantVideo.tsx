@@ -89,7 +89,7 @@ const ParticipantVideo = ({
 
   return (
     <motion.div
-      key={key}
+      key={participantId}
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`relative bg-gray-200 rounded overflow-hidden ${

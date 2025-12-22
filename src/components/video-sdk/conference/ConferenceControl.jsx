@@ -25,11 +25,11 @@ const ConferenceControl = ({
   me,
 }) => {
   const { toggleMic, toggleWebcam, presenterId, participants } = useMeeting();
-  const { webcamOn, micOn } = useParticipant(me?.id ?? "", {});
+  const { webcamOn, micOn, displayName } = useParticipant(me?.id ?? "", {});
   const { publish, messages: handMessages } = usePubSub("HAND_RAISE");
   const { messages: chatMessages } = usePubSub("CALL_CHAT");
   const { publish: publishReaction, messages: reactionMessages } =
-    usePubSub("CALL_REACTION");
+    usePubSub("REACTION");
 
   const [handRaised, setHandRaised] = useState(false);
   const [raisedHands, setRaisedHands] = useState([]);
@@ -70,27 +70,13 @@ const ConferenceControl = ({
   };
 
   const sendReaction = (emoji) => {
-    const name = authDetails?.user?.name || "Someone";
-    const reactionId = `${myId}-${emoji}-${Date.now()}`;
-
-    // Publish to others
-    publishReaction({
-      id: myId,
-      emoji,
-      name,
-      reactionId,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Show locally as "You"
-    setActiveReactions((prev) => [
-      ...prev,
-      { id: reactionId, emoji, name: "You" },
-    ]);
-
-    setTimeout(() => {
-      setActiveReactions((prev) => prev.filter((r) => r.id !== reactionId));
-    }, 2500);
+    handleReceiveFlyingEmoji(emoji, "You"); // Show locally
+    publishReaction(
+      "reaction",
+      { persist: false },
+      { emoji, name: displayName }
+    );
+    setShowReactions(false);
   };
 
   useEffect(() => {
@@ -138,22 +124,25 @@ const ConferenceControl = ({
     }
   }, [showChatModal, latestChatMessage]);
 
-  useEffect(() => {
-    if (reactionMessages.length) {
-      const latest = reactionMessages[reactionMessages.length - 1];
-      const { emoji, id, name, reactionId } = latest.message;
+  const handleReceiveFlyingEmoji = (emoji, name) => {
+    const id = Math.random().toString(36).substring(2, 9); // unique key
+    setActiveReactions((prev) => [...prev, { emoji, id, name }]);
+    setTimeout(() => {
+      setActiveReactions((prev) => prev.filter((r) => r.id !== id));
+    }, 2000);
+  };
 
-      // Skip if it's mine (already added locally)
-      if (id === myId) return;
+  usePubSub("REACTION", {
+    onMessageReceived: (msg) => {
+      // msg is the object you just showed
+      // Assuming your sent reaction has { emoji, name } inside payload
+      const { payload, senderName } = msg;
+      const emoji = payload?.emoji;
+      const name = senderName || "Anonymous";
 
-      // Show others' reactions
-      setActiveReactions((prev) => [...prev, { id: reactionId, emoji, name }]);
-
-      setTimeout(() => {
-        setActiveReactions((prev) => prev.filter((r) => r.id !== reactionId));
-      }, 2500);
-    }
-  }, [reactionMessages, myId]);
+      if (name !== displayName) handleReceiveFlyingEmoji(emoji, name);
+    },
+  });
 
   const lastSeenIndex = chatMessages.findIndex(
     (m) => m.id === lastSeenMessageId
