@@ -14,6 +14,7 @@ import {
 import Dropdown from "./Dropdown";
 import { createPortal } from "react-dom";
 import { onSuccess } from "../../../utils/notifications/OnSuccess";
+import ShareMeetingModal from "./ShareMeetingModal";
 
 const MeetingList = ({
   meetings = [],
@@ -27,6 +28,7 @@ const MeetingList = ({
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [shareInviteText, setShareInviteText] = useState(null);
 
   const buttonRefs = useRef({});
 
@@ -54,36 +56,30 @@ const MeetingList = ({
     const shareUrl = `https://meet.defcomm.ng?meetingId=${meetingId}`;
     const formattedDate = formatUtcToLocal(meeting.startdatetime);
 
-    const shareText = `𝐘𝐨𝐮 𝐚𝐫𝐞 𝐢𝐧𝐯𝐢𝐭𝐞𝐝 𝐭𝐨 𝐣𝐨𝐢𝐧 𝐚 𝐃𝐞𝐟𝐂𝐨𝐦𝐦 𝐦𝐞𝐞𝐭𝐢𝐧𝐠.
+    const shareText = `You are invited to join a DefComm meeting.
 
-𝐒𝐮𝐛𝐣𝐞𝐜𝐭: ${meeting?.title || "Meeting"}
-𝐃𝐚𝐭𝐞 & 𝐓𝐢𝐦𝐞: ${formattedDate}
-𝐌𝐞𝐞𝐭𝐢𝐧𝐠 𝐈𝐃: ${meetingId}
+Subject: ${meeting?.title || "Meeting"}
+Date & Time: ${formattedDate}
+Meeting ID: ${meetingId}
 
-𝐉𝐨𝐢𝐧 𝐌𝐞𝐞𝐭𝐢𝐧𝐠:
-${shareUrl}
-`;
+Join Meeting:
+${shareUrl}`;
 
-    try {
-      if (navigator.share) {
-        // ✅ Use only text so platforms are forced to include it.
+    // Mobile → native share
+    if (navigator.share && /Android|iPhone/i.test(navigator.userAgent)) {
+      try {
         await navigator.share({
-          title: meeting?.title || "DefComm Meeting",
+          title: "DefComm Meeting",
           text: shareText,
-          // no `url` here – it's already inside text
         });
-      } else {
-        // 🔁 Fallback: copy full invite text
-        await navigator.clipboard.writeText(shareText);
-        onSuccess({
-          message: "Invitation Copied",
-          success: "You can now paste the invite into any app.",
-        });
+        return;
+      } catch {
+        // fallback below
       }
-    } catch (err) {
-      // user cancelled or environment doesn't support share properly
-      console.error("Share action cancelled or failed:", err);
     }
+
+    // Desktop → custom modal
+    setShareInviteText(shareText);
   };
 
   // Build Google Calendar URL robustly
@@ -400,6 +396,12 @@ ${shareUrl}
         <Modal isOpen={showModal} closeModal={() => setShowModal(false)}>
           <AddUsersToMeeting selectedMeeting={selectedMeeting} />
         </Modal>
+      )}
+      {shareInviteText && (
+        <ShareMeetingModal
+          inviteText={shareInviteText}
+          onClose={() => setShareInviteText(null)}
+        />
       )}
     </div>
   );

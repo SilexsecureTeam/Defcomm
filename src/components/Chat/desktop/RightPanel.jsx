@@ -3,13 +3,22 @@ import { BiChat } from "react-icons/bi";
 import { ChatContext } from "../../../context/ChatContext";
 import { FaChevronRight, FaFilePdf } from "react-icons/fa";
 import { FiPhone } from "react-icons/fi";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function RightPanel() {
-  const { selectedChatUser, messages } = useContext(ChatContext);
+  const { selectedChatUser } = useContext(ChatContext);
+  const queryClient = useQueryClient();
 
-  const files = messages?.data?.filter((msg) => msg?.is_file === "yes");
-  const calls = messages?.data?.filter((msg) => msg?.mss_type === "call");
+  //  Get cached messages directly from React Query
+  const cachedData = queryClient.getQueryData([
+    "chatMessages",
+    selectedChatUser?.contact_id_encrypt,
+  ]);
 
+  const messages = cachedData?.pages?.flatMap((page) => page.data) ?? [];
+
+  const files = messages.filter((msg) => msg?.is_file === "yes");
+  const calls = messages.filter((msg) => msg?.mss_type === "call");
   const media = [...(calls || []), ...(files || [])].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
@@ -181,7 +190,9 @@ export default function RightPanel() {
             files?.length > 0 ? (
               files.map((file, i) => (
                 <a
-                  href={`${import.meta.env.BASE_URL}secure/${file?.message}`}
+                  href={`${import.meta.env.VITE_BASE_URL}secure/${
+                    file?.message
+                  }`}
                   target="_blank"
                   key={file?.id}
                   className="bg-gray-900/60 flex gap-4 items-center text-sm p-2 rounded mb-1"
