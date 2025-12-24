@@ -26,8 +26,14 @@ const ShareMeetingModal = ({ inviteText, onClose }) => {
     {
       label: "Telegram",
       icon: <FaTelegramPlane size={22} />,
-      action: () =>
-        window.open(`https://t.me/share/url?text=${encodedText}`, "_blank"),
+      action: () => {
+        const meetingUrl = encodeURIComponent(inviteText); // your meeting link
+        const text = encodeURIComponent("Join this DefComm meeting!");
+        window.open(
+          `https://t.me/share/url?url=${meetingUrl}&text=${text}`,
+          "_blank"
+        );
+      },
       bg: "bg-blue-600/15",
       text: "text-blue-400",
       ring: "ring-blue-500/30",
