@@ -91,7 +91,7 @@ function ChatList() {
   }, [search, filteredContacts, filteredGroups]);
 
   return (
-    <div className="w-72 h-screen flex flex-col bg-transparent">
+    <div className="w-72 h-full flex flex-col bg-transparent">
       {/* HEADER */}
       <div className="p-4 space-y-4 border-b border-gray-800">
         <h2 className="text-2xl font-semibold">Chat</h2>
@@ -107,12 +107,15 @@ function ChatList() {
         {/* ONLINE AVATARS */}
         <div>
           <h3 className="text-sm text-green-400 mb-2">Online</h3>
-          <div className="flex space-x-2 overflow-x-auto">
+          <div className="flex space-x-2 overflow-x-auto p-1">
             {filteredContacts?.map((contact) => (
               <div
                 key={contact?.id}
-                className="relative cursor-pointer group"
-                onClick={() => navigateToChat(contact)}
+                className={`relative cursor-pointer group ${
+                  chatUserData?.contact_id === contact?.contact_id &&
+                  "ring-2 ring-green-500 rounded-full"
+                }`}
+                onClick={() => navigateToChat(contact, "user")}
               >
                 <div className="w-10 h-10 bg-gray-300 rounded-full text-gray-700 font-medium uppercase flex items-center justify-center text-lg">
                   {contact?.contact_name?.slice(0, 2)}
@@ -151,8 +154,8 @@ function ChatList() {
                   key={user?.id}
                   onClick={() => navigateToChat(user, "user")}
                   className={`cursor-pointer flex items-center gap-[10px] hover:bg-gray-800 ${
-                    chatUserData?.contact_id_encrypt ===
-                      user?.contact_id_encrypt && "bg-gray-800"
+                    chatUserData?.contact_id === user?.contact_id &&
+                    "bg-gray-800"
                   } group p-3 font-medium relative`}
                 >
                   {/* Avatar */}
@@ -220,7 +223,7 @@ function ChatList() {
               ))}
 
               {/* No users state */}
-              {filteredContacts?.length === 0 && (
+              {search?.trim() && filteredContacts.length === 0 && (
                 <p className="text-xs text-gray-500 px-2">
                   No users found for “{search}”.
                 </p>
@@ -237,7 +240,7 @@ function ChatList() {
               onClick={() => setShowGroups((prev) => !prev)}
               className="flex items-center justify-between w-full text-sm text-oliveHover p-2"
             >
-              <span>Groups</span>
+              <span>Groups ({filteredGroups?.length || 0})</span>
               {showGroups ? (
                 <ChevronDown size={16} />
               ) : (
@@ -254,12 +257,10 @@ function ChatList() {
                   key={group?.id}
                   onClick={() => navigateToChat(group, "group")}
                   className={`cursor-pointer flex gap-[10px] hover:bg-gray-800 ${
-                    chatUserData?.id === group?.id &&
-                    chatUserData?.type === "group" &&
-                    "bg-gray-800"
+                    chatUserData?.group_id === group?.group_id && "bg-gray-800"
                   } group items-center p-3 font-medium`}
                 >
-                  <figure className="relative w-12 h-12 bg-[#B49E69] rounded-full flex items-center justify-center text-white font-bold">
+                  <figure className="shrink-0 relative w-12 h-12 bg-[#B49E69] rounded-full flex items-center justify-center text-white font-bold">
                     {group?.group_name?.slice(0, 2).toUpperCase()}
                   </figure>
                   <div>
@@ -272,7 +273,7 @@ function ChatList() {
               ))}
 
               {/* No groups state */}
-              {filteredGroups?.length === 0 && (
+              {search?.trim() && filteredGroups.length === 0 && (
                 <p className="text-xs text-gray-500 px-2">
                   No groups found for “{search}”.
                 </p>

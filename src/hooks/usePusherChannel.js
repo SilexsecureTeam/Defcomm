@@ -1,5 +1,5 @@
 import { useEffect, useRef, useContext } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Pusher from "pusher-js";
 import { onNewNotificationToast } from "../utils/notifications/onNewMessageToast";
 import receiverTone from "../assets/audio/receiver.mp3";
@@ -16,12 +16,15 @@ const usePusherChannel = ({ userId, token }) => {
   const pusherRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const location = useLocation();
-  let chatUserData = location?.state;
 
   const { authDetails, setLogoutSignal, updateAuth } = useContext(AuthContext);
-  const { setTypingUsers, setCallMessage, setFinalCallData } =
-    useContext(ChatContext);
+  const {
+    setTypingUsers,
+    setCallMessage,
+    chatVisibility,
+    setFinalCallData,
+    selectedChatUser,
+  } = useContext(ChatContext);
   const { addNotification, markAsSeen } = useContext(NotificationContext);
 
   useEffect(() => {
@@ -66,7 +69,8 @@ const usePusherChannel = ({ userId, token }) => {
         : senderUserId; // They sent it → save under sender
 
       // Show toast only if not my message
-      const shouldToast = data?.state === "text" && !isMyChat;
+      const shouldToast =
+        (data?.state === "text" || data?.state === "call") && !isMyChat;
       if (data?.state === "logout" && data?.device === "all") {
         if (authDetails?.device_id !== data?.sender_iden) {
           setLogoutSignal(true);
@@ -106,13 +110,11 @@ const usePusherChannel = ({ userId, token }) => {
         });
         audioController.playRingtone(receiverTone, true);
       }
-
       const isChatOpen =
-        !!chatUserData &&
-        !!cacheKeyUserId &&
-        chatUserData.contact_id_encrypt === cacheKeyUserId;
+        selectedChatUser?.contact_id_encrypt === cacheKeyUserId;
 
-      if (shouldToast && !isChatOpen) {
+      if (shouldToast) {
+        //console.log(newMessage, isMyChat, cacheKeyUserId);
         addNotification(newMessage);
         onNewNotificationToast({
           message: newMessage?.message,
@@ -122,19 +124,16 @@ const usePusherChannel = ({ userId, token }) => {
           onClick: () => {
             markAsSeen(newMessage?.data?.id);
             navigate(`/dashboard/user/${newMessage?.data?.user_id}/chat`, {
-              state: {
-                contact_id_encrypt: cacheKeyUserId,
-                contact_id: newMessage?.data?.user_id,
-                contact_name: newMessage?.sender?.name,
-                phone: newMessage?.sender?.phone,
-              },
+              state: newMessage?.sender,
+              isChatVisible: chatVisibility,
             });
           },
+          type: isCall ? "call" : "message",
           tagMess: newMessage?.data?.tag_mess,
           tagUser: newMessage?.data?.tag_user,
         });
-      } else if (isChatOpen && !isMyChat && newMessage?.data?.id) {
-        console.log("message to mark", newMessage?.data?.id);
+      } else if (isChatOpen) {
+        console.log("Message to mark", newMessage?.data?.id);
 
         if (newMessage?.data?.id) markAsSeen(newMessage?.data?.id); // Auto mark as seen immediately
       }
@@ -224,6 +223,7 @@ const usePusherChannel = ({ userId, token }) => {
       }
 
       if (newMessage?.state === "last_message") {
+        console.log(newMessage, isMyChat, cacheKeyUserId);
         queryClient.setQueryData(["last-chats"], (prevChats) => {
           return newMessage?.data;
         });

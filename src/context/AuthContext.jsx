@@ -3,38 +3,67 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const AuthContext = createContext(null);
 
+const STORAGE_KEY = "authUser";
+const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
 export const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
 
   const [logoutSignal, setLogoutSignal] = useState(false);
-  // Read from sessionStorage on mount
+
+  // Read from sessionStorage on mount WITH expiration check
   const [authDetails, setAuthDetails] = useState(() => {
-    const storedUser = sessionStorage.getItem("authUser");
-    return storedUser ? JSON.parse(storedUser) : null;
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+
+    try {
+      const { user, expiresAt } = JSON.parse(stored);
+
+      // Expired → clear silently
+      if (!expiresAt || Date.now() > expiresAt) {
+        sessionStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+
+      return user;
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
   });
 
-  // Query for getting auth details (React Query cache)
+  // React Query cache
   const { data } = useQuery({
     queryKey: ["authUser"],
     queryFn: () => Promise.resolve(authDetails),
     initialData: authDetails,
-    staleTime: 0, // Ensure immediate refetch on changes
+    staleTime: 0,
   });
 
   // Sync query data with auth state
   useEffect(() => {
-    if (data) setAuthDetails(data);
+    if (data !== authDetails) {
+      setAuthDetails(data);
+    }
   }, [data]);
 
-  // Function to update auth state and React Query
+  // Update auth + sessionStorage WITH expiration
   const updateAuth = (newUser) => {
     setAuthDetails(newUser);
+
     if (newUser) {
-      sessionStorage.setItem("authUser", JSON.stringify(newUser));
-      queryClient.setQueryData(["authUser"], newUser); // Update React Query
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          user: newUser,
+          expiresAt: Date.now() + SESSION_DURATION,
+        })
+      );
+
+      queryClient.setQueryData(["authUser"], newUser);
     } else {
-      sessionStorage.removeItem("authUser");
-      queryClient.removeQueries(["authUser"]); // Completely remove query
+      sessionStorage.removeItem(STORAGE_KEY);
+      queryClient.removeQueries({ queryKey: ["authUser"] });
     }
   };
 

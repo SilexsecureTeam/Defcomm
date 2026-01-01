@@ -1,5 +1,5 @@
 import mainLogo from "../../../assets/logo-icon.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BiSolidMessageSquareDetail } from "react-icons/bi";
 import { RiGroup3Line } from "react-icons/ri";
 import { AiOutlineVideoCamera } from "react-icons/ai";
@@ -17,26 +17,32 @@ export default function Sidebar() {
   const { setShowSettings, setShowCall, setCallType, setShowContactModal } =
     useContext(ChatContext);
 
+  const location = useLocation();
+  const chatUserData = location?.state;
   const handleClick = (id) => {
+    // block call if not in a chat
+    if (id === "video" || id === "call") {
+      alert("You can only start a call from an active chat.");
+      return;
+    }
+
     setActive(id);
 
     switch (id) {
-      case "msg":
-        console.log("Messages clicked");
-        // your logic for messages
-        break;
       case "group":
         setShowContactModal(true);
         break;
       case "video":
+        setModalTitle("Place a Call");
         setShowCall(true);
         setCallType("video");
         break;
       case "call":
+        setModalTitle("Place a Call");
         setShowCall(true);
         break;
-      case "calendar":
-        navigate("/dashboard/file-sharing");
+      case "walkie":
+        navigate("/dashboard/comm");
         break;
       case "settings":
         setShowSettings(true);
@@ -49,8 +55,16 @@ export default function Sidebar() {
   const icons = [
     { id: "msg", icon: <BiSolidMessageSquareDetail size={20} /> },
     { id: "group", icon: <RiGroup3Line size={20} /> },
-    { id: "video", icon: <AiOutlineVideoCamera size={20} /> },
-    { id: "call", icon: <IoCallOutline size={20} /> },
+    {
+      id: "video",
+      icon: <AiOutlineVideoCamera size={20} />,
+      disabled: !!chatUserData?.group_id,
+    },
+    {
+      id: "call",
+      icon: <IoCallOutline size={20} />,
+      disabled: !!chatUserData?.group_id,
+    },
     { id: "calendar", icon: <IoCalendarClearOutline size={20} /> },
     { id: "settings", icon: <IoSettingsOutline size={20} /> },
   ];
@@ -61,14 +75,16 @@ export default function Sidebar() {
         <img src={mainLogo} alt="logo" className="w-14" />
       </Link>
       <div className="flex-1 flex flex-col justify-center items-center py-4 space-y-6">
-        {icons.map(({ id, icon }) => (
+        {icons.map(({ id, icon, disabled }) => (
           <p
             key={id}
-            onClick={() => handleClick(id)}
-            className={`p-2 rounded-lg cursor-pointer ${
-              active === id
+            onClick={() => !disabled && handleClick(id)}
+            className={`p-2 rounded-lg cursor-pointer transition-all ${
+              disabled
+                ? "opacity-50 cursor-not-allowed hidden"
+                : active === id
                 ? "bg-white text-olive"
-                : "hover:bg-white hover:text-olive"
+                : "hover:bg-white hover:text-olive text-white"
             }`}
           >
             {icon}
