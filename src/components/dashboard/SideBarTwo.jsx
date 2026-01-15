@@ -9,7 +9,6 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import useChat from "../../hooks/useChat";
-import { useQuery } from "@tanstack/react-query";
 import useGroups from "../../hooks/useGroup";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/ChatContext";

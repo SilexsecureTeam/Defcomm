@@ -3,23 +3,28 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import { AiOutlineLeft, AiOutlineRight, AiOutlineClose } from "react-icons/ai";
 import { FaCheckCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import mainLogo from "../assets/logo-icon.png";
 
 const GroupSlide = ({
   groups,
-  selectedGroup = {},
+  selectedGroup = null,
   setSelectedGroup,
   forceSingleView = false,
 }) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
+  const [hoveredGroupId, setHoveredGroupId] = useState(null);
+
+  const unselectGroup = (e) => {
+    e.stopPropagation(); // prevent select on parent
+    setSelectedGroup(null);
+  };
 
   return (
     <div className="relative w-full mb-5">
-      {/* Swiper Slider */}
       <Swiper
         spaceBetween={15}
         navigation={{ nextEl: ".next-btn", prevEl: ".prev-btn" }}
@@ -47,13 +52,15 @@ const GroupSlide = ({
           return (
             <SwiperSlide
               key={group.group_id}
-              onClick={() => setSelectedGroup(group)}
               className="w-[80%] md:min-w-60 relative"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                onMouseEnter={() => setHoveredGroupId(group.group_id)}
+                onMouseLeave={() => setHoveredGroupId(null)}
+                onClick={() => setSelectedGroup(group)}
                 className={`flex items-center gap-4 p-3 rounded-lg shadow-md my-2 
                   ${
                     isSelected
@@ -62,9 +69,22 @@ const GroupSlide = ({
                   } 
                   cursor-pointer relative min-h-[100px]`}
               >
+                {/* Selected Indicator */}
                 {isSelected && (
                   <FaCheckCircle className="absolute top-2 right-2 text-green-400 text-xl z-10" />
                 )}
+
+                {/* Hover Unselect Button */}
+                {isSelected && hoveredGroupId === group.group_id && (
+                  <button
+                    onClick={unselectGroup}
+                    className="absolute top-2 left-2 z-20 bg-black/60 hover:bg-black text-white rounded-full p-1 transition"
+                    title="Unselect group"
+                  >
+                    <AiOutlineClose size={16} />
+                  </button>
+                )}
+
                 <figure className="flex-shrink-0 w-14 h-14 bg-gray-600 rounded-full overflow-hidden">
                   <img
                     src={group.image || mainLogo}
@@ -72,10 +92,11 @@ const GroupSlide = ({
                     className="w-full h-full object-cover"
                   />
                 </figure>
+
                 <section className="min-w-0 flex-1">
                   <p
                     className="text-lg font-semibold truncate"
-                    title={group?.group_name}
+                    title={group.group_name}
                   >
                     {group.group_name}
                   </p>

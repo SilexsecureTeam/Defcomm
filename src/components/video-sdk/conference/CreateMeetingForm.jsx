@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import AddUsersToMeeting from "../../dashboard/AddUsersToMeeting";
 import { onFailure } from "../../../utils/notifications/OnFailure";
 import {
   extractErrorMessage,
@@ -14,6 +14,7 @@ import GroupSelectorModal from "../../dashboard/GroupSelectorModal";
 import useConference from "../../../hooks/useConference";
 import HeaderBar from "./HeaderBar";
 import Spinner from "../../common/Spinner";
+import Modal from "../../modal/Modal";
 
 const CreateMeetingForm = () => {
   const location = useLocation();
@@ -26,7 +27,9 @@ const CreateMeetingForm = () => {
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [isGeneratingId, setIsGeneratingId] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   const {
     register,
@@ -90,7 +93,7 @@ const CreateMeetingForm = () => {
           ...data,
           meeting_link: "https://cloud.defcomm.ng/dashboard/conference/waiting",
           group_user_id: selectedGroup?.group_id || "",
-          group_user: "group",
+          group_user: selectedGroup ? "group" : "user",
           startdatetime: formatDateTimeForBackend(data.startdatetime),
         };
 
@@ -165,10 +168,21 @@ const CreateMeetingForm = () => {
             <div className="flex items-center gap-2 mb-3">
               <button
                 type="button"
+                disabled={isEditing || selectedUsers.length > 0}
                 onClick={() => setIsGroupModalOpen(true)}
-                className="px-3 py-2 bg-[#5C7C2A] rounded-md hover:bg-[#4e6220] transition-all"
+                className="px-3 py-2 bg-[#5C7C2A] rounded-md hover:bg-[#4e6220] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {selectedGroup?.group_name || "Choose Group"}
+              </button>
+              <button
+                type="button"
+                disabled={isEditing || selectedGroup}
+                onClick={() => setIsUserModalOpen(true)}
+                className="px-3 py-2 bg-[#5C7C2A] rounded-md hover:bg-[#4e6220] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {selectedUsers?.length
+                  ? `${selectedUsers.length} Selected`
+                  : "Select Users"}
               </button>
             </div>
             <input
@@ -242,6 +256,18 @@ const CreateMeetingForm = () => {
         isOpen={isGroupModalOpen}
         onClose={() => setIsGroupModalOpen(false)}
       />
+      {/* User Modal */}
+      <Modal
+        title="Select Users"
+        isOpen={isUserModalOpen}
+        closeModal={() => setIsUserModalOpen(false)}
+      >
+        <AddUsersToMeeting
+          mode="data"
+          onSelectUsers={(users) => setSelectedUsers(users)}
+          onClose={() => setIsUserModalOpen(false)}
+        />
+      </Modal>
     </div>
   );
 };

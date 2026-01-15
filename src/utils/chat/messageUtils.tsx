@@ -1,6 +1,6 @@
 // utils/chat/messageUtils.tsx
 import React from "react";
-import { parseHtml } from "../formmaters";
+import { normalizeId, parseHtml } from "../formmaters";
 import { ChatMessage, Participant } from "../types/chat";
 import { JSX } from "react/jsx-runtime";
 import { queryClient } from "../../services/query-client";
@@ -303,4 +303,26 @@ export const handleOpenChat = async (chatUserId: any) => {
       })),
     };
   });
+};
+
+export const shouldMarkAsRead = (
+  message: any,
+  authDetails: any,
+  selectedChatUser: any
+) => {
+  if (!message?.data?.id) return false;
+
+  const senderId = normalizeId(message.sender);
+  const receiverId = normalizeId(message.receiver);
+
+  // I must be the receiver
+  if (receiverId !== authDetails?.user?.id) return false;
+
+  // Chat must be open
+  if (selectedChatUser?.contact_id_encrypt !== senderId) return false;
+
+  // Optional: tab visibility (recommended)
+  if (document.visibilityState !== "visible") return false;
+
+  return true;
 };

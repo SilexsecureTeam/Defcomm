@@ -11,6 +11,7 @@ import { AuthContext } from "../context/AuthContext";
 import useAuth from "./useAuth";
 import { onLogoutToast } from "../utils/notifications/onLogoutToast";
 import { normalizeId } from "../utils/formmaters";
+import { shouldMarkAsRead } from "../utils/chat/messageUtils";
 
 const usePusherChannel = ({ userId, token }) => {
   const pusherRef = useRef(null);
@@ -68,9 +69,14 @@ const usePusherChannel = ({ userId, token }) => {
         ? receiverUserId // I sent it → save under receiver
         : senderUserId; // They sent it → save under sender
 
+      console.log("New Pusher message:", newMessage);
+
       // Show toast only if not my message
       const shouldToast =
-        (data?.state === "text" || data?.state === "call") && !isMyChat;
+        !isMyChat &&
+        data?.state === "text" &&
+        selectedChatUser?.contact_id_encrypt !== senderUserId;
+
       if (data?.state === "logout" && data?.device === "all") {
         if (authDetails?.device_id !== data?.sender_iden) {
           setLogoutSignal(true);
@@ -132,10 +138,21 @@ const usePusherChannel = ({ userId, token }) => {
           tagMess: newMessage?.data?.tag_mess,
           tagUser: newMessage?.data?.tag_user,
         });
-      } else if (isChatOpen) {
-        console.log("Message to mark", newMessage?.data?.id);
+      }
 
-        if (newMessage?.data?.id) markAsSeen(newMessage?.data?.id); // Auto mark as seen immediately
+      if (
+        newMessage?.state === "text" &&
+        shouldMarkAsRead(newMessage, authDetails, selectedChatUser)
+      ) {
+        console.log("Auto-marking message as seen:", newMessage?.data?.id);
+        markAsSeen(newMessage.data.id);
+        queryClient.setQueryData(["last-chats"], (prev) =>
+          prev?.map((chat) =>
+            chat.chat_user_to_id === senderUserId
+              ? { ...chat, unread: chat.unread > 0 ? chat.unread - 1 : 0 }
+              : chat
+          )
+        );
       }
 
       // Cache update always (multi-device sync)
