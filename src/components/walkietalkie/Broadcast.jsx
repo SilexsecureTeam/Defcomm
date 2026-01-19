@@ -31,6 +31,7 @@ const Broadcast = () => {
     connectingChannelId,
     setConnectingChannelId,
     leaveChannel,
+    setIsOpenComm,
   } = useContext(CommContext);
   const { setIsMinimized } = useContext(DashboardContext);
 
@@ -49,7 +50,9 @@ const Broadcast = () => {
 
   const handleChannelClick = (channel) => {
     if (activeChannel?.frequency === channel.frequency) {
-      setIsMinimized(false);
+      //setIsMinimized(false);
+
+      setIsOpenComm(true);
       return;
     }
 
@@ -60,6 +63,8 @@ const Broadcast = () => {
 
     setConnectingChannelId(channel.channel_id);
     setActiveChannel(channel);
+
+    setIsOpenComm(true);
   };
 
   const handleInviteClick = (e, channel) => {
@@ -195,8 +200,8 @@ const Broadcast = () => {
                         !isCommActive
                           ? "Connecting..."
                           : isCommActive
-                          ? "Connected"
-                          : ""}
+                            ? "Connected"
+                            : ""}
                       </span>
                     )}
                   </div>

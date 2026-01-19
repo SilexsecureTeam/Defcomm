@@ -48,7 +48,7 @@ const useCommChannel = ({ channelId, token }) => {
           ? "You"
           : nextMsg.user_name || nextMsg.display_name || "Anonymous",
       time: formatLocalTime(),
-      transcript: nextMsg.transcript || null,
+      transcript: nextMsg?.record_text || null,
     });
 
     // Start background hiss before voice
@@ -105,7 +105,7 @@ const useCommChannel = ({ channelId, token }) => {
             setIsCommActive(true);
             setConnectingChannelId(null);
           },
-        }
+        },
       );
     });
 
@@ -155,25 +155,25 @@ const useCommChannel = ({ channelId, token }) => {
       if (msg?.record && data.sender?.id !== user?.id) {
         const audioUrl = `/secure/${msg.record}`;
 
-        try {
-          // fetch as blob
-          const res = await fetch(audioUrl);
-          if (!res.ok)
-            throw new Error("Failed to fetch audio for transcription");
-          const blob = await res.blob();
+        // try {
+        //   // fetch as blob
+        //   const res = await fetch(audioUrl);
+        //   if (!res.ok)
+        //     throw new Error("Failed to fetch audio for transcription");
+        //   const blob = await res.blob();
 
-          const transcript = await speechToText.mutateAsync({
-            audio: blob,
-            language: "en-US",
-          });
+        //   const transcript = await speechToText({
+        //     audio: blob,
+        //     language: "en-US",
+        //   });
 
-          // attach transcript to message object
-          msg.transcript = transcript?.text ?? transcript ?? null;
-        } catch (err) {
-          // transcription failed — still queue the audio so user hears it
-          console.warn("Transcription failed, will still queue audio:", err);
-          msg.transcript = null;
-        }
+        //   // attach transcript to message object
+        //   msg.transcript = transcript?.text ?? transcript ?? null;
+        // } catch (err) {
+        //   // transcription failed — still queue the audio so user hears it
+        //   console.warn("Transcription failed, will still queue audio:", err);
+        //   msg.transcript = null;
+        // }
 
         // enqueue (now we have transcript or null)
         queueRef.current.push(msg);

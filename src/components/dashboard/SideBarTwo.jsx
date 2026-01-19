@@ -81,7 +81,7 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
 
     const inHistoryIds = new Set(inHistory.map((c) => c.contact_id_encrypt));
     const others = contacts.filter(
-      (c) => !inHistoryIds.has(c.contact_id_encrypt)
+      (c) => !inHistoryIds.has(c.contact_id_encrypt),
     );
 
     return [...inHistory, ...others]; // chat with latest message stays TOP
@@ -90,13 +90,13 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
   // Filter by search
   const filteredContacts = useMemo(() => {
     return orderedContacts.filter((c) =>
-      c.contact_name?.toLowerCase().includes(search.toLowerCase())
+      c.contact_name?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [orderedContacts, search]);
 
   const filteredGroups = useMemo(() => {
     return groups?.filter((g) =>
-      g.group_name?.toLowerCase().includes(search.toLowerCase())
+      g.group_name?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [groups, search]);
 
@@ -169,7 +169,7 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
         <div>
           <button
             onClick={() => toggleSection("users")}
-            className="flex sticky top-0 justify-between items-center w-full px-2 py-2 bg-oliveDark rounded-md"
+            className="flex sticky top-0 z-50 justify-between items-center w-full px-2 py-2 bg-oliveDark rounded-md"
           >
             <span className="font-semibold">Users</span>
             {openSections.users ? <FaChevronDown /> : <FaChevronRight />}
@@ -202,7 +202,7 @@ function SideBarTwo({ toogleIsOpen, isMenuOpen }) {
         <div className="mt-4">
           <button
             onClick={() => toggleSection("groups")}
-            className="flex sticky top-0 justify-between items-center w-full px-2 py-2 bg-oliveDark rounded-md"
+            className="flex sticky top-0 z-50 justify-between items-center w-full px-2 py-2 bg-oliveDark rounded-md"
           >
             <span className="font-semibold">Groups</span>
             {openSections.groups ? <FaChevronDown /> : <FaChevronRight />}

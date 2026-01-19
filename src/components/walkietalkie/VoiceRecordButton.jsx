@@ -1,84 +1,135 @@
-import { useState, useRef, useEffect, useContext } from "react";
-import { FaMicrophone, FaStop } from "react-icons/fa";
+import { useState, useRef, useEffect, useContext, useCallback } from "react";
+import { FaMicrophone, FaMicrophoneSlash, FaStop } from "react-icons/fa";
 import { MdSend, MdCancel } from "react-icons/md";
 import useComm from "../../hooks/useComm";
 import buttonSound from "../../assets/audio/radio-button.mp3";
 import { CommContext } from "../../context/CommContext";
 
-const playClickSound = () => {
-  const audio = new Audio(buttonSound);
-  audio.play().catch((err) => console.error("Failed to play sound:", err));
+/**
+ * Platform-safe audio click
+ */
+const playClickSoundSafe = () => {
+  try {
+    if (navigator.userActivation?.isActive) {
+      const audio = new Audio(buttonSound);
+      audio.volume = 0.6;
+      audio.play().catch(() => {});
+    }
+  } catch {
+    // Never allow audio to crash WebView
+  }
 };
 
-const VoiceRecordButton = ({ channelId }) => {
+const VoiceRecordButton = ({ channelId, disabled }) => {
   const { voiceMode } = useContext(CommContext);
+  const { broadcastMessage } = useComm();
+
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [duration, setDuration] = useState(0);
 
-  const timerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
-  const recordedChunks = useRef([]);
-  const { broadcastMessage } = useComm();
+  const streamRef = useRef(null);
+  const chunksRef = useRef([]);
+  const timerRef = useRef(null);
+  const isStartingRef = useRef(false);
 
-  useEffect(() => {
-    return () => stopMediaTracks();
+  /**
+   * Cleanup (runs on unmount AND on failure)
+   */
+  const stopMediaTracks = useCallback(() => {
+    try {
+      streamRef.current?.getTracks()?.forEach((t) => t.stop());
+    } catch {}
+    streamRef.current = null;
+    mediaRecorderRef.current = null;
   }, []);
 
-  const stopMediaTracks = () => {
-    if (mediaRecorderRef.current?.stream) {
-      mediaRecorderRef.current.stream
-        .getTracks()
-        .forEach((track) => track.stop());
-    }
-  };
+  useEffect(() => {
+    return () => {
+      clearInterval(timerRef.current);
+      stopMediaTracks();
+    };
+  }, [stopMediaTracks]);
 
+  /**
+   * Start recording (fully guarded)
+   */
   const startRecording = async () => {
-    if (isRecording) return;
+    if (disabled || isRecording || isStartingRef.current) {
+      return;
+    }
+
+    isStartingRef.current = true;
+
     try {
-      playClickSound();
+      playClickSoundSafe();
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      recordedChunks.current = [];
+      streamRef.current = stream;
 
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) recordedChunks.current.push(e.data);
-      };
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      chunksRef.current = [];
 
-      mediaRecorderRef.current.onstop = () => {
-        stopMediaTracks();
-        const blob = new Blob(recordedChunks.current, { type: "audio/webm" });
-        setAudioBlob(blob);
-        setIsRecording(false);
-        clearInterval(timerRef.current);
-
-        if (voiceMode === "hold") {
-          handleSend(blob); // Auto-send
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunksRef.current.push(e.data);
         }
       };
 
-      mediaRecorderRef.current.start();
+      recorder.onstop = () => {
+        clearInterval(timerRef.current);
+        stopMediaTracks();
+
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        setAudioBlob(blob);
+        setIsRecording(false);
+
+        if (voiceMode === "hold") {
+          handleSend(blob);
+        }
+      };
+
+      recorder.start();
       setIsRecording(true);
       setDuration(0);
-      timerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
+
+      timerRef.current = setInterval(() => {
+        setDuration((d) => d + 1);
+      }, 1000);
     } catch (err) {
-      console.error("Microphone access denied:", err);
+      console.error("Microphone access failed:", err);
+      stopMediaTracks();
+    } finally {
+      isStartingRef.current = false;
     }
   };
 
+  /**
+   * Stop recording (safe)
+   */
   const stopRecording = () => {
     if (!isRecording) return;
-    playClickSound();
-    mediaRecorderRef.current?.stop();
+
+    try {
+      playClickSoundSafe();
+      mediaRecorderRef.current?.stop();
+    } catch {
+      stopMediaTracks();
+      setIsRecording(false);
+    }
   };
 
   const cancelRecording = () => {
-    stopRecording();
+    clearInterval(timerRef.current);
+    stopMediaTracks();
+    setIsRecording(false);
     setAudioBlob(null);
     setDuration(0);
   };
 
-  const handleSend = (blobOverride = null) => {
+  const handleSend = async (blobOverride = null) => {
     const blobToSend = blobOverride || audioBlob;
     if (!blobToSend || !channelId) return;
 
@@ -86,12 +137,13 @@ const VoiceRecordButton = ({ channelId }) => {
     formData.append("channel", channelId);
     formData.append("record", blobToSend, "voice.webm");
 
-    broadcastMessage.mutateAsync(formData, {
-      onSuccess: () => {
-        setAudioBlob(null);
-        setDuration(0);
-      },
-    });
+    try {
+      await broadcastMessage.mutateAsync(formData);
+      setAudioBlob(null);
+      setDuration(0);
+    } catch (err) {
+      console.error("Failed to send voice message:", err);
+    }
   };
 
   const formatDuration = (seconds) => {
@@ -102,21 +154,22 @@ const VoiceRecordButton = ({ channelId }) => {
 
   return (
     <div className="flex flex-col items-center gap-2 mt-4">
-      <div className="min-h-10 flex items-center justify-center">
+      <div className="min-h-10">
         {isRecording && (
-          <div className="flex h-10 flex-col items-center text-red-400 animate-pulse">
-            <p className="text-xs font-semibold">Recording...</p>
+          <div className="text-red-400 animate-pulse text-center">
+            <p className="text-xs font-semibold">Recording…</p>
             <p className="text-sm">{formatDuration(duration)}</p>
           </div>
         )}
       </div>
+
       <div className="flex items-center gap-3">
-        {/* TAP TO RECORD */}
+        {/* TAP MODE */}
         {voiceMode === "tap" && !isRecording && !audioBlob && (
           <button
-            className="p-4 rounded-full bg-red-600 hover:bg-red-700 transition"
+            className="p-4 rounded-full bg-red-600"
             onClick={startRecording}
-            aria-label="Start Recording"
+            disabled={disabled}
           >
             <FaMicrophone size={24} />
           </button>
@@ -124,65 +177,41 @@ const VoiceRecordButton = ({ channelId }) => {
 
         {voiceMode === "tap" && isRecording && (
           <button
-            className="p-4 rounded-full bg-yellow-500 hover:bg-yellow-600 transition"
+            className="p-4 rounded-full bg-yellow-500"
             onClick={stopRecording}
-            aria-label="Stop Recording"
           >
             <FaStop size={24} />
           </button>
         )}
 
-        {/* HOLD TO TALK */}
+        {/* HOLD MODE (mouse events only – macOS safe) */}
         {voiceMode === "hold" && (
           <button
-            className={`
-      w-16 h-16 flex items-center justify-center rounded-full shadow-xl
-      transition-all duration-150 ease-in-out
-      ${
-        broadcastMessage.isPending
-          ? "bg-green-500" // Loader state color
-          : isRecording
-          ? "bg-[#e7bd17]" // Recording state
-          : "bg-red-600" // Idle state
-      }
-      hover:bg-opacity-90
-      active:translate-y-1
-    `}
-            onPointerDown={startRecording}
-            onPointerUp={stopRecording}
-            onPointerLeave={stopRecording}
-            disabled={broadcastMessage.isPending}
-            aria-label="Hold to Record"
+            className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onMouseLeave={stopRecording}
+            disabled={disabled || broadcastMessage.isPending}
           >
-            {broadcastMessage.isPending ? (
-              // Loader spinner
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              // Mic icon
-              <FaMicrophone size={24} className="text-white" />
+            <FaMicrophone size={24} className="text-white" />
+            {disabled && (
+              <FaMicrophoneSlash size={16} className="absolute text-gray-200" />
             )}
           </button>
         )}
 
-        {/* SEND / CANCEL (TAP MODE ONLY) */}
         {audioBlob && voiceMode === "tap" && (
           <>
             <button
-              className="p-4 rounded-full bg-green-600 hover:bg-green-700 transition disabled:opacity-50"
+              className="p-4 rounded-full bg-green-600"
               onClick={() => handleSend()}
               disabled={broadcastMessage.isPending}
-              aria-label="Send Recording"
             >
-              {broadcastMessage.isPending ? (
-                <div className="loader border-2 border-white border-t-transparent w-5 h-5 rounded-full animate-spin" />
-              ) : (
-                <MdSend size={24} />
-              )}
+              <MdSend size={24} />
             </button>
             <button
-              className="p-4 rounded-full bg-gray-500 hover:bg-gray-600 transition"
+              className="p-4 rounded-full bg-gray-500"
               onClick={cancelRecording}
-              aria-label="Cancel Recording"
             >
               <MdCancel size={24} />
             </button>
@@ -190,27 +219,19 @@ const VoiceRecordButton = ({ channelId }) => {
         )}
       </div>
 
-      {/* User Instructions */}
-      {/* User Instructions */}
-      <p className="text-xs text-gray-300 text-center min-h-[1.25rem]">
-        {voiceMode === "hold" && (
-          <>
-            {broadcastMessage.isPending
-              ? "Sending..."
-              : isRecording
-              ? "Release to send"
-              : "Hold mic to record"}
-          </>
-        )}
-
-        {voiceMode === "tap" && (
-          <>
-            {!audioBlob &&
-              !isRecording &&
-              "Tap mic to start, tap again to stop"}
-            {isRecording && "Recording... tap to stop"}
-            {audioBlob && "Send or cancel"}
-          </>
+      <p className="text-xs text-center min-h-[1.25rem]">
+        {disabled ? (
+          <span className="text-red-400 font-semibold">
+            Someone else is speaking
+          </span>
+        ) : isRecording ? (
+          <span className="text-gray-300">Release to send</span>
+        ) : audioBlob ? (
+          <span className="text-gray-300">Send or cancel</span>
+        ) : voiceMode === "hold" ? (
+          <span className="text-gray-300">Hold mic to record</span>
+        ) : (
+          <span className="text-gray-300">Tap mic to start</span>
         )}
       </p>
     </div>

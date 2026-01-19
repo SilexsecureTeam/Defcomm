@@ -22,7 +22,7 @@ const CommInterface = ({ modal = false }) => {
   const { getSubscriberActive } = useComm();
   const { data: activeSubscribers, isLoading } = getSubscriberActive(
     activeChannel?.channel_id,
-    { enabled: !!isCommActive }
+    { enabled: !!isCommActive },
   );
 
   const [seconds, setSeconds] = useState(0);
@@ -71,7 +71,7 @@ const CommInterface = ({ modal = false }) => {
   if (connectingChannelId) {
     return (
       <div
-        className={`bg-black text-white min-w-[320px] max-w-[400px] flex flex-col justify-center items-center min-h-96`}
+        className={`bg-black text-white min-w-[400px] max-w-[550px] flex flex-col justify-center items-center min-h-96`}
       >
         <div className="loader border-4 border-oliveLight border-t-transparent rounded-full w-10 h-10 animate-spin"></div>
         <p className="mt-4 text-sm text-gray-300">
@@ -85,8 +85,8 @@ const CommInterface = ({ modal = false }) => {
 
   return (
     <div
-      className={`bg-oliveLight min-h-full ${
-        modal ? "w-80  md:w-96" : " min-w-[320px] max-w-[400px]"
+      className={`relative bg-oliveLight min-h-full ${
+        modal ? "w-80  md:w-96" : " min-w-[400px] max-w-[500px]"
       } py-4 px-4 text-white flex flex-col items-center`}
       style={{
         background: `linear-gradient(to bottom, #36460A 10%, #000000 65%)`,
@@ -163,7 +163,7 @@ const CommInterface = ({ modal = false }) => {
                   bgColor = "bg-green-600";
                 }
                 if (idx === 2) {
-                  position = { bottom: "3px", left: "0" };
+                  position = { top: "36px", left: "5px" };
                   bgColor = "bg-gray-600";
                 }
                 if (idx === 3) {
@@ -203,7 +203,22 @@ const CommInterface = ({ modal = false }) => {
 
       {/* Voice Record */}
       {activeChannel?.channel_id && (
-        <VoiceRecordButton channelId={activeChannel.channel_id} />
+        <VoiceRecordButton
+          channelId={activeChannel.channel_id}
+          disabled={!!currentSpeaker}
+        />
+      )}
+
+      {/* Live Caption Bar (Bottom) */}
+      {currentSpeaker && (
+        <div className="sticky bottom-0 left-0 w-full right-0 px-4 pb-4 pointer-events-none">
+          <div className="mx-auto max-w-[90%] bg-black/70 backdrop-blur-md text-white text-sm rounded-xl px-4 py-2 shadow-lg border border-white/10">
+            <p className="text-[11px] text-lime-400 mb-1">
+              {currentSpeaker.name}
+            </p>
+            <p className="leading-snug">{currentSpeaker?.transcript}</p>
+          </div>
+        </div>
       )}
     </div>
   );
