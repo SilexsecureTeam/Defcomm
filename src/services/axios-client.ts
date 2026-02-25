@@ -4,19 +4,25 @@ export const axiosClient = (
   token: string | null,
   multiMedia: boolean = false,
 ): AxiosInstance => {
+  let headers;
+
   const contentType = multiMedia
     ? "multipart/form-data"
     : "application/json;charset=utf-8";
 
-  const headers = {
-    "Content-Type": contentType,
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
+  if (token) {
+    headers = {
+      "Content-Type": contentType,
+      Authorization: `Bearer ${token}`,
+    };
+  } else {
+    headers = {
+      "Content-Type": contentType,
+    };
+  }
 
   const client = axios.create({
-    // IMPORTANT: Point this to your Vercel /api folder
-    // This hides your real backend URL from the Network Tab
-    baseURL: "/api/proxy",
+    baseURL: import.meta.env.VITE_API_URL,
     headers,
     timeout: 60000,
     withCredentials: false,
